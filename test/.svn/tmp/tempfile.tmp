@@ -1,0 +1,33 @@
+#include <iostream>
+#include "../xyzsystem.h"
+#include "../utility.h"
+#include "../watersfg.h"
+#include <string>
+
+using namespace std;
+
+int main () {
+
+	Atom::Size(VecR (26.0, 52.0, 26.0));
+
+	Atom O (string("O"), VecR (14.8083030, 19.4910686, 0.4792097), VecR (-18.2914491, -28.3479324, 12.6659698));
+	Atom H1 (string("H1"), VecR (15.7142258, 19.5761210, 0.1820535), VecR (23.4668587, 9.1047969, -6.1249463));
+	Atom H2 ("H2", VecR (14.4339709, 20.3638433, 0.3593276), VecR (-0.0285041, 18.5161611, 0.0231609));
+
+	Water wat;
+	wat += &O;
+	wat += &H1;
+	wat += &H2;
+
+	SFGWaterAnalyzer anal;
+
+	cout << FREQFACTOR << endl;
+	//anal.WaterEigenSystem (wat);
+	//double ta[9] = {0.2505,0.0,0.9681,0.0,-1.0,0.0,0.9681,0.0,-0.2505};
+	//MatR a (ta);
+	//double tb[9] = {1.539,0.0,-0.163,0.0,1.656,0.0,-0.163,0.0,7.200};
+	//MatR b (tb);
+
+	//(a*b).Print();
+return 0;
+}

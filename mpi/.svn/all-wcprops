@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 24
+/svn/!svn/ver/55/src/mpi
+END
+mpisys.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/55/src/mpi/mpisys.cpp
+END
+mpisfg-frontend.cc
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/7/src/mpi/mpisfg-frontend.cc
+END
+mpisys.h
+K 25
+svn:wc:ra_dav:version-url
+V 33
+/svn/!svn/ver/55/src/mpi/mpisys.h
+END
+mpitmp.cc
+K 25
+svn:wc:ra_dav:version-url
+V 33
+/svn/!svn/ver/7/src/mpi/mpitmp.cc
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 33
+/svn/!svn/ver/47/src/mpi/Makefile
+END

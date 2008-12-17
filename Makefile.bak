@@ -1,0 +1,86 @@
+CXX		= g++
+CC		= icc
+SRCLIB	 	= /common/work/src
+CINCLUDE	= -I$(SRCLIB)
+CLIBS		= -L$(MKL) -lmkl_lapack -lmkl -lguide -lpthread
+CFLAGS		= -Wall $(CINCLUDE)
+
+analysis: analysis.o xyzsystem.o connectmatrix.o dipoleparm.o h2o.o hno3.o matrixr.o molecule.o atom.o vecr.o wannier.o xyzfile.o
+	$(CXX) $(CFLAGS) atom.o connectmatrix.o dipoleparm.o h2o.o hno3.o matrixr.o molecule.o vecr.o wannier.o xyzfile.o analysis.o xyzsystem.o -o analysis
+
+ambersystem.o: ambersystem.cc ambersystem.h
+	$(CXX) $(CFLAGS) -c ambersystem.cc
+
+analysis.o: analysis.cc
+	$(CXX) $(CFLAGS) -c analysis.cc
+
+atom.o: atom.cc atom.h
+	$(CXX) $(CFLAGS) -c atom.cc
+
+connectmatrix.o: connectmatrix.cc connectmatrix.h
+	$(CXX) $(CFLAGS) -c connectmatrix.cc
+
+crdfile.o: crdfile.cc crdfile.h
+	$(CXX) $(CFLAGS) -c crdfile.cc
+
+density.o: density.cc density.h
+	$(CXX) $(CFLAGS) -c density.cc
+
+dipolefieldtensor.o: dipolefieldtensor.cc dipolefieldtensor.h
+	$(CXX) $(CFLAGS) -c dipolefieldtensor.cc
+
+dipoleparm.o: dipoleparm.cc dipoleparm.h dipoleparm.dat
+	$(CXX) $(CFLAGS) -c dipoleparm.cc
+
+forcefile.o: forcefile.cc forcefile.h
+	$(CXX) $(CFLAGS) -c forcefile.cc
+
+h2o.o: h2o.cc h2o.h
+	$(CXX) $(CFLAGS) -c h2o.cc
+
+hno3.o: hno3.cc hno3.h
+	$(CXX) $(CFLAGS) -c hno3.cc
+
+matrixr.o: matrixr.cc matrixr.h
+	$(CXX) $(CFLAGS) -c matrixr.cc
+
+molecule.o: molecule.cc molecule.h
+	$(CXX) $(CFLAGS) -c molecule.cc
+
+mpisfg-frontend.o: mpisfg-frontend.cc mpisfg-frontend.h
+	$(CXX) $(CFLAGS) -c mpisfg-frontend.cc
+
+mpisys.o: mpisys.cc mpisys.h
+	$(CXX) $(CFLAGS) -c mpisys.cc
+
+mpitmp.o: mpitmp.cc mpitmp.h
+	$(CXX) $(CFLAGS) -c mpitmp.cc
+
+pdbfile.o: pdbfile.cc pdbfile.h
+	$(CXX) $(CFLAGS) -c pdbfile.cc
+
+topfile.o: topfile.cc topfile.h
+	$(CXX) $(CFLAGS) -c topfile.cc
+
+vecr.o: vecr.cc vecr.h
+	$(CXX) $(CFLAGS) -c vecr.cc
+
+wannier.o: wannier.cc wannier.h
+	$(CXX) $(CFLAGS) -c wannier.cc
+
+watersfg.o: watersfg.cc watersfg.h
+	$(CXX) $(CFLAGS) -c watersfg.cc
+
+xyzfile.o: xyzfile.cc xyzfile.h
+	$(CXX) $(CFLAGS) -c xyzfile.cc
+
+xyzsystem.o: xyzsystem.cc xyzsystem.h 
+	$(CXX) $(CFLAGS) -c xyzsystem.cc
+
+clean:
+	rm *.o
+
+cleanall:
+	( make clean )
+	( cd test ; make clean )
+

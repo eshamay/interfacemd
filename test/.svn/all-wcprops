@@ -1,0 +1,209 @@
+K 25
+svn:wc:ra_dav:version-url
+V 25
+/svn/!svn/ver/57/src/test
+END
+morita.h
+K 25
+svn:wc:ra_dav:version-url
+V 34
+/svn/!svn/ver/57/src/test/morita.h
+END
+angledistro.dat
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/56/src/test/angledistro.dat
+END
+freqtest.h
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/7/src/test/freqtest.h
+END
+toptest.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/44/src/test/toptest.cpp
+END
+temp.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 34
+/svn/!svn/ver/60/src/test/temp.cpp
+END
+params.in
+K 25
+svn:wc:ra_dav:version-url
+V 34
+/svn/!svn/ver/7/src/test/params.in
+END
+Qpt.h
+K 25
+svn:wc:ra_dav:version-url
+V 31
+/svn/!svn/ver/43/src/test/Qpt.h
+END
+dipoletcf.h
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/61/src/test/dipoletcf.h
+END
+densitytest.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/47/src/test/densitytest.cpp
+END
+morita.mpi.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/57/src/test/morita.mpi.cpp
+END
+angledistro.h
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/56/src/test/angledistro.h
+END
+mpitest.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/49/src/test/mpitest.cpp
+END
+angletest.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/44/src/test/angletest.cpp
+END
+ambertest.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/44/src/test/ambertest.cpp
+END
+set_unitcell.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/7/src/test/set_unitcell.tcl
+END
+qpt.dat
+K 25
+svn:wc:ra_dav:version-url
+V 32
+/svn/!svn/ver/7/src/test/qpt.dat
+END
+morita.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/57/src/test/morita.cpp
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 34
+/svn/!svn/ver/61/src/test/Makefile
+END
+xyzdipole_analysis.h
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/59/src/test/xyzdipole_analysis.h
+END
+fillbox.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/44/src/test/fillbox.cpp
+END
+mdcrd2pdb.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/44/src/test/mdcrd2pdb.cpp
+END
+tcf.dat
+K 25
+svn:wc:ra_dav:version-url
+V 33
+/svn/!svn/ver/60/src/test/tcf.dat
+END
+matrixtest.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/44/src/test/matrixtest.cpp
+END
+Qpt.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 33
+/svn/!svn/ver/44/src/test/Qpt.cpp
+END
+toptest.h
+K 25
+svn:wc:ra_dav:version-url
+V 34
+/svn/!svn/ver/7/src/test/toptest.h
+END
+dipoletcf.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/63/src/test/dipoletcf.cpp
+END
+angledistro.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/56/src/test/angledistro.cpp
+END
+closest.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/44/src/test/closest.cpp
+END
+input.pdb
+K 25
+svn:wc:ra_dav:version-url
+V 34
+/svn/!svn/ver/7/src/test/input.pdb
+END
+angle.plot
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/7/src/test/angle.plot
+END
+densitytest.h
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/47/src/test/densitytest.h
+END
+xyzdipole_analysis.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/59/src/test/xyzdipole_analysis.cpp
+END
+mpitest.h
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/47/src/test/mpitest.h
+END
+ambertest.h
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/7/src/test/ambertest.h
+END
