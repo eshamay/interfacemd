@@ -69,28 +69,14 @@ void XYZSystem::_ParseMolecules () {
 		// A simple solution is to decide that the molecule with the oxygen closer to the hydrogen is the one that wins out
 		atoms.clear();	// we'll add in all the non-contentious hydrogens here
 
+		Molecule * tmol = (Molecule *)NULL;
 		RUN (Hs) {
 			Atom * H = Hs[i];
+			tmol = H->ParentMolecule();
 			// if the hydrogen hasn't yet been assigned, then there is no contention - add it into the current molecule
-			if (H->ParentMolecule() == (Molecule *)NULL) {
+			if (tmol == (Molecule *)NULL) {
 				atoms.push_back(H);
 			}
-			/*
-			// otherwise, we have to find the distance from the current oxygen to the hydrogen, and the other oxygen to the hydrogen
-			else {
-				Molecule * wat2 = H->ParentMolecule();
-				Atom * O2 = wat2->GetAtom("O");
-				double distance1 = _bondgraph.Distance (H, O);
-				double distance2 = _bondgraph.Distance (H, O2);
-				
-				// if the H is closer to the current oxygen then we remove it from the other molecule, and add it into this one
-				if (distance1 < distance2) {
-					wat2->RemoveAtom (H);
-					atoms.push_back(H);
-				}
-				// otherwise... we just jump over this hydrogen and leave it in the other molecule
-			}
-			*/
 		}
 
 	  	// we may be dealing with a hydroxide ion
@@ -113,15 +99,21 @@ void XYZSystem::_ParseMolecules () {
 			continue; 
 		}
 
-		_mols[molIndex]->MolID (molIndex);
+		Molecule * newmol = _mols[molIndex];
+		newmol->MolID (molIndex);
 			
 
 		// let's set all the atom properties that we can, and add them into the molecule
 		// and we also add in the hydrogens that are covalently bound - note, this can be more than 2 in the case of H3O+
-		atoms.push_back(O);		// lastly, tack in the oxygen!
+		atoms.push_back(O);		// Don't forget to tack in the oxygen!
 		RUN (atoms) {
-			_mols[molIndex]->AddAtom (atoms[i]);
+			newmol->AddAtom (atoms[i]);
 		}
+
+		// now, from before, if one of the hydrogens is shared between two molecules making a contact-ion pair, then we will merge the two molecule to make one, and also update our ever-growing list of molecules to reflect it.
+		if (tmol != (Molecule *)NULL) {
+			tmol->Merge (newmol);		// this will swallow the new molecule into the contact ion pair
+		
 	}
 
 /************************
