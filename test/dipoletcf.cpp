@@ -21,7 +21,7 @@ int main (int *argc, char **argv) {
 	for (int step = 0; step < sys.NumSteps(); step++) {
 
 		stepDipole.Zero();
-int h3o = 0, no3 = 0, hno3 = 0, oh = 0, h2o = 0;
+int h3o = 0, no3 = 0, hno3 = 0, oh = 0, h2o = 0, und = 0;
 
 		Molecule * mol;
 		RUN (sys.Molecules()) {
@@ -36,18 +36,19 @@ if (mol->Name() == "oh")
 	oh++;
 if (mol->Name() == "no3") 
 	no3++;
-if (mol->Name() == "h3o") {
+if (mol->Name() == "h3o")
 	h3o++;
-}
+if (mol->Name() == "undefined")
+	printf ("step %d\n", step);
 
 			mol->CalcDipole();
 			stepDipole += mol->Dipole();
 			/*
 			if (mol->Name() == "hno3" or mol->Name() == "no3") {
 				printf ("% 10.3f\n", mol->Dipole().Magnitude());
-				mol->Print();
 			}
 			*/
+				//mol->Print();
 		}
 
 		if (!step)
@@ -56,8 +57,8 @@ if (mol->Name() == "h3o") {
 		if (step)
 			fprintf (output, "%f\n", stepDipole * firstDipole);
 
-//printf ("(%d) %d %d %d %d %d\n", step, h2o, h3o, hno3, no3, oh);
-		OutputStatus (step);
+//printf ("(%d) %d %d %d %d %d %d\n", step, h2o, h3o, hno3, no3, oh);
+		//OutputStatus (step);
 
 		sys.LoadNext();
 	}

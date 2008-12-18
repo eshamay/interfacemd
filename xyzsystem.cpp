@@ -85,16 +85,16 @@ void XYZSystem::_ParseMolecules () {
 	  	}
 
 	  	// otherwise we have a full molecule
-	  	if (atoms.size() == 2) {
+	  	else if (atoms.size() == 2) {
 			_mols.push_back (new Water ());
 	  	}
 
 		// or even a hydronium!
-		if (atoms.size() == 3) {
+		else if (atoms.size() == 3) {
 			_mols.push_back (new Hydronium ());
 		}
 
-		if (atoms.size() == 0) { 
+		else if (atoms.size() == 0) { 
 			//printf ("found water with %d H's\n", Hcount); 
 			continue; 
 		}
@@ -113,7 +113,10 @@ void XYZSystem::_ParseMolecules () {
 		// now, from before, if one of the hydrogens is shared between two molecules making a contact-ion pair, then we will merge the two molecule to make one, and also update our ever-growing list of molecules to reflect it.
 		if (tmol != (Molecule *)NULL) {
 			tmol->Merge (newmol);		// this will swallow the new molecule into the contact ion pair
-		
+			delete newmol;				// get rid of the newmol
+			vector<Molecule *>::iterator imol = _mols.end() - 1;	// fixes the _mols to get rid of the newmol we just made so it's not double-counted
+			_mols.erase(imol);
+		}
 	}
 
 /************************

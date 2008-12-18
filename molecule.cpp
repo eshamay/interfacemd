@@ -50,12 +50,12 @@ void Molecule::Invert (VecR origin) {
 
 /*
 	NOTE::: This is broken - the center of mass is only calculated when the molecule is first formed, and not updated at each timestep - fix this!
-*/
 // For adding another atom into the molecule
 int Molecule::operator+= (Atom *atom) {
 	this->AddAtom (atom);
 return (_atoms.size());
 }
+*/
 
 // get back the atom pointer to the atom with the given name
 Atom* Molecule::operator[] (const string atomname) const {
