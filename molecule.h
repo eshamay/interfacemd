@@ -85,17 +85,17 @@ public:
 	Atom * operator[] (int index) const { return _atoms[index]; }	// retrieve an atom by array index
 	Atom * operator[] (const string atomname) const;			// retrieve a particular atom using its unique name/ID
 	Atom * GetAtom (const string atomname) const;
-	int operator+= (Atom * newAtom);					// adds an atom into the molecule
+	//int operator+= (Atom * newAtom);					// adds an atom into the molecule
 
 	void AddAtom (Atom * newAtom);					// same as the operator
 	void RemoveAtom (const Atom * atom);
 	void Rename (const string name);
 	
+	Molecule * Merge (Molecule * mol);				// merges two molecules
 	//int operator+= (Molecule& mol);					// Joins two molecules
 
 	// Some stuff to work with wannier centers
-	void operator+= (VecR& wannier) { _wanniers.push_back(wannier); }	// adds a wannier center into the molecule
-	void AddWannier (VecR& wannier) { _wanniers.push_back(wannier); }
+	void AddWannier (VecR& wannier) { _wanniers.push_back(wannier); } // adds a wannier center into the molecule
 	void ClearWanniers () { _wanniers.clear(); }	// clear out the entire list
 
 	void ClearHBonds ();

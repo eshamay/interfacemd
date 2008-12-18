@@ -528,3 +528,15 @@ std::vector<Atom *> Molecule::HBonds () const {
 return (atoms);
 }
 
+// if given a 2nd molecule, this will merge the current and the new molecules into one larger molecule.
+Molecule * Molecule::Merge (Molecule * mol) {
+
+	// the new molecule's name is yet unknown
+	_name = "undefined";
+
+	RUN (mol->Atoms()) {
+		this->AddAtom (mol->Atoms(i));
+	}
+
+return (this);
+}

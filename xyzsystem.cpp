@@ -75,6 +75,7 @@ void XYZSystem::_ParseMolecules () {
 			if (H->ParentMolecule() == (Molecule *)NULL) {
 				atoms.push_back(H);
 			}
+			/*
 			// otherwise, we have to find the distance from the current oxygen to the hydrogen, and the other oxygen to the hydrogen
 			else {
 				Molecule * wat2 = H->ParentMolecule();
@@ -89,6 +90,7 @@ void XYZSystem::_ParseMolecules () {
 				}
 				// otherwise... we just jump over this hydrogen and leave it in the other molecule
 			}
+			*/
 		}
 
 	  	// we may be dealing with a hydroxide ion
