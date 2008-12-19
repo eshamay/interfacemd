@@ -531,6 +531,10 @@ return (atoms);
 // if given a 2nd molecule, this will merge the current and the new molecules into one larger molecule.
 Molecule * Molecule::Merge (Molecule * mol) {
 
+	printf ("merging two molecules:\n");
+	this->Print();
+	printf ("mol 2---\n");
+	mol->Print();
 	// the new molecule's name is yet unknown
 	_name = "undefined";
 
