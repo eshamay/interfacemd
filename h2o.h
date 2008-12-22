@@ -57,7 +57,7 @@ public:
 	MatR EulerMatrix;					// The euler rotation matrix
 	double EulerAngles[3];				// euler angles as defined in "The Raman Effect" Appendix A5 (theta, phi, chi)
 
-	void CalcEulerAngles (const int bond = 1);
+	void CalcEulerAngles ();
 
 	#ifdef WATER_POLARIZ
 	void CalcAlpha ();		// calculate the molecular polarizability tensor (as per morita+hynes 2002 method)

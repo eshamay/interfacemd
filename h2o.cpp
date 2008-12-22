@@ -234,11 +234,11 @@ return DCM;
 }
 
 // this should calculate the Euler Angles to get from the molecular frame to the lab frame
-void Water::CalcEulerAngles (const int bond) {
+void Water::CalcEulerAngles () {
 
 	// First let's set up the direction cosine matrix. The values of the euler angles come from that.
 	// Don't forget to set the molecular axes before using this!
-	this->DCMToLab (bond);
+	this->DCMToLab ();
 
 	// here is the direct calculation of the euler angles from the direction cosine matrix. This method comes from 
 	double z1 = DCM.Index(2,0);
