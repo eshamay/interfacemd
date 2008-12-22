@@ -1,10 +1,20 @@
-#include "../xyzsystem.h"
+#include "../forcefile.h"
 
-#define PRMTOP	"prmtop"
-#define MDCRD	"mdcrd"
-#define FORCE	"mdvel"
+int main () {
 
+	ForceFile frc ("force.dat", 4862);
 
+	for (int i=0; i<5; i++) {
+	frc.LoadNext();
+	}
+	RUN (frc) {
+		printf ("% 13.8f\n", frc[i].Magnitude());
+	}
+
+return 0;
+}
+
+/*
 int main () {
 
 	VecR size (12.0, 12.0, 20.0);
@@ -23,7 +33,7 @@ int main () {
 
 return 0;
 }
-
+*/
 /*
 int main () {
 
