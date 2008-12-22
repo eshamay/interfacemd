@@ -1,48 +1,56 @@
 #include "orderparams.h"
 
-void PrintStatus (int step);
-void PrintOutput (int step, FILE * output);
+// output data to a file
+void OrderParameters::PrintOutput () {
+
+	rewind (output);
+
+	if (!((step*10) % 2500)) {
+		for (unsigned int pos = 0; pos < posbins; pos++) {
+			double position = double(pos) * posres + posmin;
+
+		for (unsigned int s1; s1 < angbins; s1++) {
+			double S1 = double(s1)*angres + angmin;
+
+		for (unsigned int s2n; s2n < angbins; s2n++) {
+			double S2
+		for (unsigned int s2d; s2d < angbins; s2d++) {
+
+		}}}}
+	}
+
+	fflush (output);
+
+return;
+}
+
+// a status output meter
+void OrderParameters::PrintStatus () {
+
+	if (!(timestep % 2500)) 
+		cout << endl << step << ") ";
+	if (!(timestep % 250))  
+		cout << "*";
+	
+	fflush (stdout);
+
+return;
+}
+
 
 int main (int argc, char **argv) {
 
-	// here is our system for analysis
-	AmberSystem sys (PRMTOP, MDCRD, FORCE);
-
-	FILE * output = (FILE *)NULL;
-	output = fopen ("OUTPUTFILE", "w");
-	if (output == (FILE *)NULL) {
-		printf ("couldn't open the output file for reading!\n");
-		exit (1);
-	}
-
-	// here's the number of bins for the position and angle histograms
-	const int posbins = (posmax-posmin)/posres;
-	const int angbins = (angmax-angmin)/angres;
-
-	// setup and initialize the system histogram
-	// The histo looks like histo[y-position][S1][S2 numerator][S2 denominator]
-	int histo[posbins][angbins][angbins][angbins];
-	int number_density[posbins];
-	for (int i=0; i<posbins; i++) {
-		number_density[i] = 0;
-	for (int j=0; j<angbins; j++) {
-	for (int k=0; k<angbins; k++) {
-	for (int l=0; l<angbins; l++) {
-		histo[i][j][k][l] = 0;
-	}}}
-
-
 	// start the analysis - run through each timestep
-	for (unsigned int step = 0; step < TIMESTEPS; step++) {
+	for (timestep = 0; timestep < timesteps; timestep++) {
 		// then look at each molecule
-		for (unsigned int mol = 0; mol < sys.NumMols(); mol++) {
+		for (unsigned int mol = 0; mol < sys->NumMols(); mol++) {
 
 			// find all the waters
-			Water * wat = static_cast<Water *>(sys.Molecules(i));
+			Water * wat = static_cast<Water *>(sys->Molecules(mol));
 			if (wat->Name() != "h2o") continue;
 
 			// take each water and find its position in the slab
-			double pos = wat->GetAtom("O");
+			double pos = wat->GetAtom("O")->Y();
 			if (pos < 15.0) pos += Atom::Size()[axis];
 			int posbin = int ((pos-posmin)/posres);
 
@@ -70,34 +78,15 @@ int main (int argc, char **argv) {
 			++number_density[posbin];
 		}
 
-		sys.LoadNext();
+		sys->LoadNext();
 
-		this->PrintStatus(step);
-		this->PrintOutput (step, output);
-
+		PrintStatus();
+		PrintOutput ();
 	}
+
+	PrintOutput ();
 
 return 0;
 }
 
-// output data to a file
-void PrintOutput (int step, FILE * output) {
-
-	if (!((step*10) % 2500)) {
-
-	}
-
-return;
-}
-
-// a status output meter
-void PrintStatus (int step) {
-
-	if (!(step % 2500)) 
-		cout << endl << _timestep << ") ";
-	if (!(int step % 250))  
-		cout << "*";
-
-return;
-}
 

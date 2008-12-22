@@ -34,8 +34,8 @@ toptest : toptest.o ../topfile.o
 angledistro: angledistro.o $(AMBERFILES)
 	$(CXX) $(CPPFLAGS) angledistro.o $(AMBERFILES) -o angledistro
 
-orderparams: orderparams.o $(ORDERPARAMS)
-	$(CXX) $(CPPFLAGS) orderparams.o $(ORDERPARAMS) -o orderparams
+orderparams:  $(ORDERPARAMS)
+	$(CXX) $(CPPFLAGS) $(ORDERPARAMS) -o orderparams
 
 dipoletcf : $(DIPOLETCF)
 	$(CXX) $(CPPFLAGS) $(DIPOLETCF) -o dipoletcf
