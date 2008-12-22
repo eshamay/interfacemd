@@ -215,9 +215,8 @@ return DCM;
 }
 
 // The molecular axes are defined as per Morita&Hynes (2000) where they set one of the OH bonds (oh1) as the molecular z-axis, and the other bond points in the positive x-axis direction. The result is setting DCM as the direction cosine matrix, that, when operating on a vector in the molecular frame will rotate it into lab-frame coordinates
-MatR const & Water::DCMToLabMorita (const int bond) {
-
-    this->SetMoritaAxes (bond);
+MatR const & Water::DCMToLabMorita () {
+    this->SetMoritaAxes ();
 	
 	this->DCMToLab ();
 
@@ -238,7 +237,7 @@ void Water::CalcEulerAngles (const int bond) {
 
 	// First let's set up the direction cosine matrix. The values of the euler angles come from that.
 	// Don't forget to set the molecular axes before using this!
-	this->DCMToLab (bond);
+	this->DCMToLab ();
 
 	// here is the direct calculation of the euler angles from the direction cosine matrix. This method comes from 
 	double z1 = DCM.Index(2,0);

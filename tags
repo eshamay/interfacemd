@@ -76,7 +76,7 @@ CXX	Makefile	/^CXX			= g++ -g$/;"	m
 CalcDipole	h2o.cpp	/^void Water::CalcDipole () {$/;"	f	class:Water
 CalcDipole	molecule.cpp	/^void Molecule::CalcDipole () {$/;"	f	class:Molecule
 CalcEigenSystem	matrixr.cpp	/^void MatR::CalcEigenSystem () {$/;"	f	class:MatR
-CalcEulerAngles	h2o.cpp	/^double * Water::CalcEulerAngles (const int bond) {$/;"	f	class:Water
+CalcEulerAngles	h2o.cpp	/^void Water::CalcEulerAngles (const int bond) {$/;"	f	class:Water
 CalcNO2Dipole	hno3.cpp	/^bool NitricAcid::CalcNO2Dipole () {$/;"	f	class:NitricAcid
 CenterOfMass	molecule.h	/^	VecR CenterOfMass () const		{ return _centerofmass; }	$/;"	f	class:Molecule
 CenterOfMass	watersystem.h	/^	VecR& 					CenterOfMass ()	{ return _com;				}$/;"	f	class:WaterSystem
@@ -114,8 +114,10 @@ Current	wannier.h	/^	int Current () 	const { return _frame; }$/;"	f	class:Wannie
 Current	watersystem.h	/^	const int Current ()				const { return _atoms.Current(); 	}$/;"	f	class:WaterSystem
 Current	xyzfile.h	/^	int Current () const { return _currentstep; }$/;"	f	class:XYZFile
 Current	xyzsystem.h	/^	int Current ()		const { return _atoms.Current(); }$/;"	f	class:XYZSystem
-DCM	h2o.h	/^	MatR DCM;					\/\/ the direction cosine matrix for rotating the molecule to the lab frame from the M\/H frame of OH1$/;"	m	class:Water
-DCMToLab	h2o.cpp	/^MatR const & Water::DCMToLab (const int bond) {$/;"	f	class:Water
+DCM	h2o.h	/^	MatR DCM;							\/\/ the direction cosine matrix for rotating the molecule to the lab frame$/;"	m	class:Water
+DCMToLab	h2o.cpp	/^MatR const & Water::DCMToLab () {$/;"	f	class:Water
+DCMToLabMorita	h2o.cpp	/^MatR const & Water::DCMToLabMorita () {$/;"	f	class:Water
+DCMToLabOrder	h2o.cpp	/^MatR const & Water::DCMToLabOrder () {$/;"	f	class:Water
 DIPOLEPARM_H_	dipoleparm.h	2;"	d
 DR	rdf.h	7;"	d
 DataPoint	complexdatafile.cpp	/^std::complex<double> ComplexDataFile::DataPoint (const double data) {$/;"	f	class:ComplexDataFile
@@ -157,7 +159,6 @@ FindEulerAngles	backup.h	/^void Water::FindEulerAngles () {$/;"	f	class:Water
 FindFlag	topfile.cpp	/^void TOPFile::FindFlag (string flag) {$/;"	f	class:TOPFile
 FindInterfaces	ambermpisys.h	/^vector<double> MPIMolSystem::FindInterfaces (string atomName, string residue) {$/;"	f	class:MPIMolSystem
 FindInterfaces	interfaces.h	/^vector<double> FindInterfaces (string atomName, string residue) {$/;"	f
-FindOHBonds	h2o.cpp	/^void Water::FindOHBonds () {$/;"	f	class:Water
 FindVertex	bondgraph.cpp	/^Vertex * BondGraph::FindVertex (const Atom * atom) const {$/;"	f	class:BondGraph
 FindWaterCoordination	connectmatrix.cpp	/^coordination ConnectivityMatrix::FindWaterCoordination (const Water& water) const {$/;"	f	class:ConnectivityMatrix
 First	pdbfile.h	/^	int First () { return _initstep; }$/;"	f	class:PDBFile
@@ -430,12 +431,14 @@ Set	vecr.h	/^	void Set (const coord axis, const double val) { _coords(axis) = va
 Set	vecr.h	/^	void Set (double X, double Y, double Z) {$/;"	f	class:VecR
 SetAtoms	h2o.cpp	/^void Hydronium::SetAtoms () {$/;"	f	class:Hydronium
 SetAtoms	h2o.cpp	/^void Hydroxide::SetAtoms () {$/;"	f	class:Hydroxide
+SetAtoms	h2o.cpp	/^void Water::SetAtoms () {$/;"	f	class:Water
 SetAtoms	hno3.cpp	/^void Nitrate::SetAtoms () {$/;"	f	class:Nitrate
 SetAtoms	hno3.cpp	/^void NitricAcid::SetAtoms () {$/;"	f	class:NitricAcid
 SetBondType	bondgraph.cpp	/^void Edge::SetBondType () {$/;"	f	class:Edge
 SetCharge	atom.cpp	/^void Atom::SetCharge () {$/;"	f	class:Atom
 SetMass	atom.cpp	/^void Atom::SetMass () {$/;"	f	class:Atom
 SetMoritaAxes	h2o.cpp	/^void Water::SetMoritaAxes (const int Zbond) {$/;"	f	class:Water
+SetOrderAxes	h2o.cpp	/^void Water::SetOrderAxes () {$/;"	f	class:Water
 Shift	atom.cpp	/^void Atom::Shift (VecR shift) {$/;"	f	class:Atom
 Shift	molecule.cpp	/^void Molecule::Shift (VecR shift) {$/;"	f	class:Molecule
 Size	atom.h	/^	static VecR Size ()	{ return _size; }$/;"	f	class:Atom

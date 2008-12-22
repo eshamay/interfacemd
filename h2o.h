@@ -48,11 +48,12 @@ public:
 	VecR const & Dipole () const { return _dipole; }			// calculates the dipole (from a parameterized source)
 	
 	void SetMoritaAxes (const int bond = 1);		// Determines the molecular-frame axes (a la Morita&Hynes2000) with one bond on the Z-axis, the other in the positive X direction.
+	void SetOrderAxes ();		// sets the molecular axes such that the z-axis is along the C2V axis point from the H's to the O, and the x-axis is in the plane of the molecule
 
-	MatR const & DCMToLab (const int bond = 1);			// get the direction cosine matrix for rotations to the lab frame
-	MatR const & DCMToLabMorita (const int bond = 1);	// get the direction cosine matrix for rotations to the lab frame from the morita-hynes one
-	MatR const & DCMToLabOrder ();						// direction cosine matrix using the bisector as the molecular z-axis
-	MatR DCM;											// the direction cosine matrix for rotating the molecule to the lab frame
+	MatR const & DCMToLab ();			// get the direction cosine matrix for rotations to the lab frame
+	MatR const & DCMToLabMorita ();		// get the direction cosine matrix for rotations to the lab frame from the morita-hynes one
+	MatR const & DCMToLabOrder ();		// direction cosine matrix using the bisector as the molecular z-axis
+	MatR DCM;							// the direction cosine matrix for rotating the molecule to the lab frame
 
 	MatR EulerMatrix;					// The euler rotation matrix
 	double EulerAngles[3];				// euler angles as defined in "The Raman Effect" Appendix A5 (theta, phi, chi)

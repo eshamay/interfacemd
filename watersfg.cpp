@@ -386,7 +386,7 @@ vector< complex<double> >& SFGWaterAnalyzer::Chi (Water& water, int const l, int
 
 	// let's find the rotation matrix for the water with which we're working
 	// this matrix takes us from the frame of the first OH bond into the lab frame
-	MatR DCM = water.DCMToLab(1);
+	MatR DCM = water.DCMToLabMorita();
 
 	// the three components of the rotation matrix that we multiply beta by
 	double Dlp, Dmq, Dnr;
