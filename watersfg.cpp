@@ -30,7 +30,7 @@ void SFGWaterAnalyzer::FreqShift (Water& water) {
 	VecR vForceH1 = water["H1"]->Force();
 	VecR vForceH2 = water["H2"]->Force();
 	
-	water.FindOHBonds();
+	water.SetAtoms();
 	
 /******************************
  * Calculate the forces on the two bonds

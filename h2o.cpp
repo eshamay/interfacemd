@@ -34,34 +34,36 @@ Water::Water (const Molecule& molecule) {
 	++numWaters;
 }
 	
-void Water::FindOHBonds () {
-	// first let's grab pointers to the three atoms and give them reasonable names
-	_h1 = (Atom *)NULL; _h2 = (Atom *)NULL;
+void Water::SetAtoms () {
 
-	RUN (_atoms) {
-		if (_atoms[i]->Name().find("O") != string::npos)
-			_o = _atoms[i];
-
-		if (_atoms[i]->Name().find("H") != string::npos) {
-			if (_h1 == (Atom *)NULL)
-				_h1 = _atoms[i];
-			else
-				_h2 = _atoms[i];
-		}
-	}
+	if (!_set) {
+		// first let's grab pointers to the three atoms and give them reasonable names
+		_h1 = (Atom *)NULL; _h2 = (Atom *)NULL;
 	
-	// we can calculate the two O-H vectors
-	_oh1 = _o->Position().MinVector(_h1->Position(), Atom::Size());
-	_oh2 = _o->Position().MinVector(_h2->Position(), Atom::Size());
+		RUN (_atoms) {
+			if (_atoms[i]->Name().find("O") != string::npos)
+				_o = _atoms[i];
+	
+			if (_atoms[i]->Name().find("H") != string::npos) {
+				if (_h1 == (Atom *)NULL)
+					_h1 = _atoms[i];
+				else
+					_h2 = _atoms[i];
+			}
+		}
+	
+		// we can calculate the two O-H vectors
+		_oh1 = _o->Position().MinVector(_h1->Position(), Atom::Size());
+		_oh2 = _o->Position().MinVector(_h2->Position(), Atom::Size());
 
-	_set = true;
-
+		_set = true;
+	}
 return;
 }
 
 VecR Water::Bisector () {
 
-	if (!_set) this->FindOHBonds();
+	this->SetAtoms();
 
 	VecR bisector = _oh1.Unit() + _oh2.Unit();
 
@@ -71,7 +73,7 @@ return bisector.Unit();
 void Water::CalcDipole () {
 	
 	// this plan goes along the same method of Morita/Hynes (J. Phys. Chem. B, Vol. 106, No. 3, 2002) for calculating the dipole moment. It's based on a parameterization of the water partial charges
-	if (!_set) this->FindOHBonds();
+	this->SetAtoms();
 
 	// first we calculate the displacements of the OH bond lengths and the water angle
 	double dR1 = _oh1.Magnitude() - R_eq;
@@ -111,7 +113,7 @@ return;
  */
 void Water::SetMoritaAxes (const int Zbond) {
 	
-	if (!_set) this->FindOHBonds();
+	this->SetAtoms();
 
 	// try one of the oh bonds as the z-axis
 	if (Zbond == 1) {
@@ -125,6 +127,27 @@ void Water::SetMoritaAxes (const int Zbond) {
 	}
 
 	// the X-axis is just the cross produce of the other two
+	_x = (_y % _z).Unit();
+
+return;
+}
+
+/* Another type of molecular axes (non-morita, useful for molecular symmetry/order parameter stuff) is as follows:
+ * z-axis = the negative of the C2V (bisector) axis
+ * y-axis = perpendicular to the plane of the molecule
+ * x-axis = y % z
+ */
+void Water::SetOrderAxes () {
+	
+	this->SetAtoms ();
+
+	// the z-axis is the negative of the C2V axis - so find the bisector and set the vector pointing towards the O
+	_z = this->Bisector() * (-1.0);
+
+	// the y-axis points perpendicular to the plane of the molecule. This can be found from the cross product of the two OH vectors
+	_y = (_oh1 % _oh2).Unit();
+
+	// and the x-axis is easy
 	_x = (_y % _z).Unit();
 
 return;
@@ -175,12 +198,8 @@ return;
 #endif
 */
 
-// The molecular axes are defined as per Morita&Hynes (2000) where they set one of the OH bonds (oh1) as the molecular z-axis, and the other bond points in the positive x-axis direction. The result is setting DCM as the direction cosine matrix, that, when operating on a vector in the molecular frame will rotate it into lab-frame coordinates
-MatR const & Water::DCMToLab (const int bond) {
-    this->SetMoritaAxes (bond);
-
-    // We already have the three molecule-frame axes,
-
+// returns the direction cosine matrix to the lab frame from the molecular one
+MatR const & Water::DCMToLab () {
     // These are the three lab-frame axes
     VecR X (1,0,0);
     VecR Y (0,1,0);
@@ -195,10 +214,30 @@ MatR const & Water::DCMToLab (const int bond) {
 return DCM;
 }
 
+// The molecular axes are defined as per Morita&Hynes (2000) where they set one of the OH bonds (oh1) as the molecular z-axis, and the other bond points in the positive x-axis direction. The result is setting DCM as the direction cosine matrix, that, when operating on a vector in the molecular frame will rotate it into lab-frame coordinates
+MatR const & Water::DCMToLabMorita (const int bond) {
+
+    this->SetMoritaAxes (bond);
+	
+	this->DCMToLab ();
+
+return DCM;
+}
+
+// the alternative is to use the axes definition based on the molecular z-axis lying on the H2O bisector
+MatR const & Water::DCMToLabOrder () {
+    this->SetOrderAxes ();
+	
+	this->DCMToLab ();
+
+return DCM;
+}
+
 // this should calculate the Euler Angles to get from the molecular frame to the lab frame
-double * Water::CalcEulerAngles (const int bond) {
+void Water::CalcEulerAngles (const int bond) {
 
 	// First let's set up the direction cosine matrix. The values of the euler angles come from that.
+	// Don't forget to set the molecular axes before using this!
 	this->DCMToLab (bond);
 
 	// here is the direct calculation of the euler angles from the direction cosine matrix. This method comes from 
@@ -232,7 +271,7 @@ double * Water::CalcEulerAngles (const int bond) {
 
     EulerMatrix.Set (euler_matrix);
 
-return EulerAngles;
+return;
 }
 	
 int Hydroxide::numHydroxides = 0;
