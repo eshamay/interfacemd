@@ -61,6 +61,8 @@ return;
 
 VecR Water::Bisector () {
 
+	if (!_set) this->FindOHBonds();
+
 	VecR bisector = _oh1.Unit() + _oh2.Unit();
 
 return bisector.Unit();
@@ -69,7 +71,7 @@ return bisector.Unit();
 void Water::CalcDipole () {
 	
 	// this plan goes along the same method of Morita/Hynes (J. Phys. Chem. B, Vol. 106, No. 3, 2002) for calculating the dipole moment. It's based on a parameterization of the water partial charges
-	this->FindOHBonds();
+	if (!_set) this->FindOHBonds();
 
 	// first we calculate the displacements of the OH bond lengths and the water angle
 	double dR1 = _oh1.Magnitude() - R_eq;
@@ -107,9 +109,9 @@ return;
  * 	The Y-axis is normal to the plane of the water molecule
  * 	The X-axis is then normal to the Z and Y axes, where the 2nd OH bond lies in the positive x-direction
  */
-void Water::FindMolecularAxes (const int Zbond) {
+void Water::SetMoritaAxes (const int Zbond) {
 	
-	this->FindOHBonds();
+	if (!_set) this->FindOHBonds();
 
 	// try one of the oh bonds as the z-axis
 	if (Zbond == 1) {
@@ -156,13 +158,13 @@ void Water::CalcAlpha () {
 	alpha_2.Set (1,1, oh2*D5 + D2);
 	alpha_2.Set (2,2, oh2*D6 + oh2*oh2*D7 + D3);
 
-	this->FindMolecularAxes (1);
+	this->SetMoritaAxes (1);
 	
 	VecR frame[3];
 	frame[0] = _x; frame[1] = _y; frame[2] = _z;
 	MatR alpha_1_rot = alpha_1.RotateToFrame (frame);
 
-	this->FindMolecularAxes (2);
+	this->SetMoritaAxes (2);
 	frame[0] = _x; frame[1] = _y; frame[2] = _z;
 	MatR alpha_2_rot = alpha_2.RotateToFrame (frame);
 
@@ -175,7 +177,7 @@ return;
 
 // The molecular axes are defined as per Morita&Hynes (2000) where they set one of the OH bonds (oh1) as the molecular z-axis, and the other bond points in the positive x-axis direction. The result is setting DCM as the direction cosine matrix, that, when operating on a vector in the molecular frame will rotate it into lab-frame coordinates
 MatR const & Water::DCMToLab (const int bond) {
-    this->FindMolecularAxes (bond);
+    this->SetMoritaAxes (bond);
 
     // We already have the three molecule-frame axes,
 
@@ -194,7 +196,7 @@ return DCM;
 }
 
 // this should calculate the Euler Angles to get from the molecular frame to the lab frame
-double * Water::CalcRotationData (const int bond) {
+double * Water::CalcEulerAngles (const int bond) {
 
 	// First let's set up the direction cosine matrix. The values of the euler angles come from that.
 	this->DCMToLab (bond);

@@ -12,10 +12,13 @@ ANG2BOHR	watersfg.h	/^const double ANG2BOHR			=	1.889726125;					\/\/ angstroms 
 ATOM_H_	atom.h	2;"	d
 A_HOO	hno3analysis.h	/^const double A_HOO = 35.0;			\/\/ The angle of the H-O...O above which we don't have an H-bond.$/;"	v
 AddAtom	molecule.cpp	/^void Molecule::AddAtom (Atom * atom) {$/;"	f	class:Molecule
-AddWannier	molecule.h	/^	void AddWannier (VecR& wannier) { _wanniers.push_back(wannier); }$/;"	f	class:Molecule
-Adjacent	bondgraph.cpp	/^Atom * BondGraph::Adjacent (Vertex * v, Edge * e) const {$/;"	f	class:BondGraph
+AddWannier	molecule.h	/^	void AddWannier (VecR& wannier) { _wanniers.push_back(wannier); } \/\/ adds a wannier center into the molecule$/;"	f	class:Molecule
+Adjacent	bondgraph.cpp	/^Atom * BondGraph::Adjacent (const Vertex * v, const Edge * e) const {$/;"	f	class:BondGraph
 AdjacentAtoms	ambersystem.h	/^	vector<Atom *> AdjacentAtoms (Atom * atom) const { return _graph.AdjacentAtoms (atom); }$/;"	f	class:AmberSystem
-AdjacentAtoms	bondgraph.cpp	/^vector<Atom *> BondGraph::AdjacentAtoms (Atom * atom) const {$/;"	f	class:BondGraph
+AdjacentAtoms	bondgraph.cpp	/^std::vector<Atom *> BondGraph::AdjacentAtoms (const Atom * atom, const string name) const {$/;"	f	class:BondGraph
+AdjacentAtoms	bondgraph.cpp	/^vector<Atom *> BondGraph::AdjacentAtoms (const Atom * atom) const {$/;"	f	class:BondGraph
+AdjacentAtoms	xyzsystem.h	/^	std::vector<Atom *> AdjacentAtoms (const Atom * atom) const { return _bondgraph.AdjacentAtoms (atom); }$/;"	f	class:XYZSystem
+AdjacentAtoms	xyzsystem.h	/^	std::vector<Atom *> AdjacentAtoms (const Atom * atom, const string name) const { return _bondgraph.AdjacentAtoms (atom, name); }$/;"	f	class:XYZSystem
 Alpha	h2o.h	/^	MatR const & Alpha () const { return _alpha; }$/;"	f	class:Water
 AlphaDeriv1	watersfg.h	/^	MatR AlphaDeriv1;			\/\/ polarizability deriv matrix for the first OH bond in the frame of the 1st OH bond$/;"	m	class:SFGWaterAnalyzer
 AlphaDeriv2	watersfg.h	/^	MatR AlphaDeriv2;			\/\/ polarizability deriv matrix of the 2nd OH in the frame of the 1st OH (through unitary transformation)$/;"	m	class:SFGWaterAnalyzer
@@ -73,8 +76,8 @@ CXX	Makefile	/^CXX			= g++ -g$/;"	m
 CalcDipole	h2o.cpp	/^void Water::CalcDipole () {$/;"	f	class:Water
 CalcDipole	molecule.cpp	/^void Molecule::CalcDipole () {$/;"	f	class:Molecule
 CalcEigenSystem	matrixr.cpp	/^void MatR::CalcEigenSystem () {$/;"	f	class:MatR
+CalcEulerAngles	h2o.cpp	/^double * Water::CalcEulerAngles (const int bond) {$/;"	f	class:Water
 CalcNO2Dipole	hno3.cpp	/^bool NitricAcid::CalcNO2Dipole () {$/;"	f	class:NitricAcid
-CalcRotationData	h2o.cpp	/^double * Water::CalcRotationData (const int bond) {$/;"	f	class:Water
 CenterOfMass	molecule.h	/^	VecR CenterOfMass () const		{ return _centerofmass; }	$/;"	f	class:Molecule
 CenterOfMass	watersystem.h	/^	VecR& 					CenterOfMass ()	{ return _com;				}$/;"	f	class:WaterSystem
 Charge	atom.h	/^	double Charge () const 	{ return _charge; }$/;"	f	class:Atom
@@ -86,7 +89,6 @@ ClearHBonds	molecule.cpp	/^void Molecule::ClearHBonds () {$/;"	f	class:Molecule
 ClearWanniers	molecule.h	/^	void ClearWanniers () { _wanniers.clear(); }	\/\/ clear out the entire list$/;"	f	class:Molecule
 ClosestAtoms	bondgraph.cpp	/^std::vector<Atom *> BondGraph::ClosestAtoms (const Atom * atom, const string name, const int number) const {$/;"	f	class:BondGraph
 ClosestAtoms	connectmatrix.cpp	/^std::vector<Atom *> ConnectivityMatrix::ClosestAtoms (const int input, const string atomname, const int number) const {$/;"	f	class:ConnectivityMatrix
-ClosestAtoms	xyzsystem.h	/^	std::vector<Atom *> ClosestAtoms (const Atom * atom, const string name, const int number) const { return _bondgraph.ClosestAtoms (atom, name, number); }$/;"	f	class:XYZSystem
 ComplexDataFile	complexdatafile.cpp	/^ComplexDataFile::ComplexDataFile (const char * pathname) {$/;"	f	class:ComplexDataFile
 ComplexDataFile	complexdatafile.h	/^class ComplexDataFile {$/;"	c
 ConnectivityMatrix	connectmatrix.cpp	/^ConnectivityMatrix::ConnectivityMatrix (std::vector<Atom *>& atoms) : _atoms(atoms) { $/;"	f	class:ConnectivityMatrix
@@ -101,6 +103,7 @@ Coords	crdfile.h	/^	const std::vector<VecR>& Coords () const { return _coords; }
 Coords	wannier.h	/^	const std::vector<VecR>& Coords () const { return _coords; }$/;"	f	class:WannierFile
 CouplingConstant	watersfg.cpp	/^double SFGWaterAnalyzer::CouplingConstant (Water& water) const {$/;"	f	class:SFGWaterAnalyzer
 CovalentBonds	bondgraph.cpp	/^std::vector<Atom *> BondGraph::CovalentBonds (const Atom * atom) const {$/;"	f	class:BondGraph
+CovalentBonds	bondgraph.cpp	/^std::vector<Atom *> BondGraph::CovalentBonds (const Atom * atom, const string name) const {$/;"	f	class:BondGraph
 CovalentBonds	connectmatrix.cpp	/^std::vector<Atom *> ConnectivityMatrix::CovalentBonds (const Atom * atom) const {$/;"	f	class:ConnectivityMatrix
 CovalentBonds	xyzsystem.h	/^	vector<Atom *> CovalentBonds (const Atom * atom) { return _bondgraph.CovalentBonds(atom); }$/;"	f	class:XYZSystem
 Current	ambersystem.h	/^	int 	Current ()		const 	{ return _coords.Current(); }$/;"	f	class:AmberSystem
@@ -128,7 +131,8 @@ DipoleFieldTensor	dipolefieldtensor.h	/^class DipoleFieldTensor {$/;"	c
 DipolePotential	watersfg.cpp	/^double SFGWaterAnalyzer::DipolePotential (const VecR& muA, const VecR& muB, const VecR& R) {$/;"	f	class:SFGWaterAnalyzer
 Dipoles	watersystem.h	/^	vector<VecR>& 			Dipoles () 		{ return _dipoles;			}$/;"	f	class:WaterSystem
 Distance	ambersystem.h	/^	double Distance (Atom * atom1, Atom * atom2) const { return _graph.Distance (atom1, atom2); }$/;"	f	class:AmberSystem
-Distance	bondgraph.cpp	/^double BondGraph::Distance (const T atom1, const T atom2) const {$/;"	f	class:BondGraph
+Distance	bondgraph.cpp	/^double BondGraph::Distance (const Atom * atom1, const Atom * atom2) const {$/;"	f	class:BondGraph
+Distance	bondgraph.cpp	/^double BondGraph::Distance (const Vertex * atom1, const Vertex * atom2) const {$/;"	f	class:BondGraph
 Distance	connectmatrix.cpp	/^double ConnectivityMatrix::Distance (const Atom * atom1, const Atom * atom2) const {$/;"	f	class:ConnectivityMatrix
 Distance	xyzsystem.h	/^	double Distance (const Atom * atom1, const Atom * atom2) const { return _bondgraph.Distance (atom1, atom2); }$/;"	f	class:XYZSystem
 END_FREQ	watersfg.h	/^const double END_FREQ			= 3800.0\/FREQFACTOR;$/;"	v
@@ -137,7 +141,7 @@ Edge	bondgraph.h	/^class Edge {$/;"	c
 EigenValues	matrixr.cpp	/^vector< complex<double> > MatR::EigenValues () {$/;"	f	class:MatR
 EigenVectors	matrixr.cpp	/^vector<VecR> MatR::EigenVectors () {$/;"	f	class:MatR
 Element	dipolefieldtensor.h	/^	double const Element (int const row, int const col) const { return _tensor[col*3+row]; }$/;"	f	class:DipoleFieldTensor
-EulerAngles	h2o.h	/^	double EulerAngles[3];			\/\/ euler angles as defined in "The Raman Effect" Appendix A5 (theta, phi, chi)$/;"	m	class:Water
+EulerAngles	h2o.h	/^	double EulerAngles[3];				\/\/ euler angles as defined in "The Raman Effect" Appendix A5 (theta, phi, chi)$/;"	m	class:Water
 EulerAngles	molecule.h	/^	double * EulerAngles () 		{ return _eulerangles; }$/;"	f	class:Molecule
 EulerMatrix	h2o.h	/^	MatR EulerMatrix;					\/\/ The euler rotation matrix$/;"	m	class:Water
 FORCEFILE_H_	forcefile.h	2;"	d
@@ -153,7 +157,6 @@ FindEulerAngles	backup.h	/^void Water::FindEulerAngles () {$/;"	f	class:Water
 FindFlag	topfile.cpp	/^void TOPFile::FindFlag (string flag) {$/;"	f	class:TOPFile
 FindInterfaces	ambermpisys.h	/^vector<double> MPIMolSystem::FindInterfaces (string atomName, string residue) {$/;"	f	class:MPIMolSystem
 FindInterfaces	interfaces.h	/^vector<double> FindInterfaces (string atomName, string residue) {$/;"	f
-FindMolecularAxes	h2o.cpp	/^void Water::FindMolecularAxes (const int Zbond) {$/;"	f	class:Water
 FindOHBonds	h2o.cpp	/^void Water::FindOHBonds () {$/;"	f	class:Water
 FindVertex	bondgraph.cpp	/^Vertex * BondGraph::FindVertex (const Atom * atom) const {$/;"	f	class:BondGraph
 FindWaterCoordination	connectmatrix.cpp	/^coordination ConnectivityMatrix::FindWaterCoordination (const Water& water) const {$/;"	f	class:ConnectivityMatrix
@@ -260,6 +263,7 @@ MatR	matrixr.h	/^	MatR (const boost::numeric::ublas::matrix<double>& mat) : _ele
 MatR	matrixr.h	/^	MatR (double const * const elements) : _elements(boost::numeric::ublas::matrix<double> (3,3)) {$/;"	f	class:MatR
 MatR	matrixr.h	/^class MatR {$/;"	c
 Max	histogram.h	/^	double Max () { return _max; }$/;"	f	class:Histogram
+Merge	molecule.cpp	/^Molecule * Molecule::Merge (Molecule * mol) {$/;"	f	class:Molecule
 Min	histogram.h	/^	double Min () { return _min; }$/;"	f	class:Histogram
 MinDistance	molecule.cpp	/^double Molecule::MinDistance (Molecule& mol) {$/;"	f	class:Molecule
 MinDistance	vecr.cpp	/^double VecR::MinDistance (const VecR& input, const VecR& size) const {$/;"	f	class:VecR
@@ -397,6 +401,7 @@ R_OO	hno3analysis.h	/^const double R_OO = 3.5;			\/\/ These values are the maxim
 R_eq	h2o.h	14;"	d
 Reflect	molecule.cpp	/^void Molecule::Reflect (coord const axis, double const plane) {$/;"	f	class:Molecule
 RemoveAtom	molecule.cpp	/^void Molecule::RemoveAtom (const Atom * atom) {$/;"	f	class:Molecule
+Rename	molecule.cpp	/^void Molecule::Rename (const string name) {$/;"	f	class:Molecule
 Reset	watersfg.h	/^	void Reset () { _set = false; }$/;"	f	class:SFGWaterAnalyzer
 Residue	atom.h	/^	string Residue () const { return _residue; }$/;"	f	class:Atom
 Residue	atom.h	/^	void Residue (string residue) { _residue = residue; }$/;"	f	class:Atom
@@ -420,6 +425,7 @@ Seek	xyzsystem.cpp	/^void XYZSystem::Seek (int step) {$/;"	f	class:XYZSystem
 Set	matrixr.h	/^	void	Set (const MatR& input) $/;"	f	class:MatR
 Set	matrixr.h	/^	void	Set (double * data)$/;"	f	class:MatR
 Set	matrixr.h	/^	void	Set (int const row, int const col, double const val) {	\/\/ Set the element$/;"	f	class:MatR
+Set	molecule.h	/^	bool Set () { _set = true; return (_set); }$/;"	f	class:Molecule
 Set	vecr.h	/^	void Set (const coord axis, const double val) { _coords(axis) = val; }$/;"	f	class:VecR
 Set	vecr.h	/^	void Set (double X, double Y, double Z) {$/;"	f	class:VecR
 SetAtoms	h2o.cpp	/^void Hydronium::SetAtoms () {$/;"	f	class:Hydronium
@@ -429,6 +435,7 @@ SetAtoms	hno3.cpp	/^void NitricAcid::SetAtoms () {$/;"	f	class:NitricAcid
 SetBondType	bondgraph.cpp	/^void Edge::SetBondType () {$/;"	f	class:Edge
 SetCharge	atom.cpp	/^void Atom::SetCharge () {$/;"	f	class:Atom
 SetMass	atom.cpp	/^void Atom::SetMass () {$/;"	f	class:Atom
+SetMoritaAxes	h2o.cpp	/^void Water::SetMoritaAxes (const int Zbond) {$/;"	f	class:Water
 Shift	atom.cpp	/^void Atom::Shift (VecR shift) {$/;"	f	class:Atom
 Shift	molecule.cpp	/^void Molecule::Shift (VecR shift) {$/;"	f	class:Molecule
 Size	atom.h	/^	static VecR Size ()	{ return _size; }$/;"	f	class:Atom
@@ -454,6 +461,7 @@ UNBOUND	watersystem.h	/^enum coordination {UNBOUND, O, OH, OHH, OO, OOH, OOHH, H
 UNCOUPLED_OH_FREQ	watersfg.h	/^const double UNCOUPLED_OH_FREQ	= 3706.5\/FREQFACTOR;			\/\/ the frequency of uncoupled OH bonds in the vapor phase (converted to frequency in atomic units)$/;"	v
 UTILITY_H_	utility.h	2;"	d
 Unit	vecr.cpp	/^VecR VecR::Unit () const {$/;"	f	class:VecR
+Unset	molecule.h	/^	bool Unset () { _set = false; return (_set); }$/;"	f	class:Molecule
 UpdateCenterOfMass	molecule.cpp	/^VecR Molecule::UpdateCenterOfMass () {$/;"	f	class:Molecule
 UpdateConnectivityMatrix	watersystem.h	/^void WaterSystem::UpdateConnectivityMatrix() {$/;"	f	class:WaterSystem
 UpdateGraph	ambersystem.h	/^	void UpdateGraph (vector<Atom *>& int_atoms) { _graph.UpdateGraph(int_atoms); }						\/\/ update the connectivity matrix$/;"	f	class:AmberSystem
@@ -744,14 +752,14 @@ coord	vecr.h	/^enum coord {x=0, y, z};$/;"	g
 coordination	bondgraph.h	/^enum coordination {UNBOUND=0, O, OH, OHH, OO, OOH, OOHH, H, HH, OOOH, OOOHH, OOHHH, OVER, OTHER};$/;"	g
 coordination	connectmatrix.h	/^enum coordination {UNBOUND=0, O, OH, OHH, OO, OOH, OOHH, H, HH, OOOH, OOOHH, OOHHH, OVER, OTHER};$/;"	g
 coordination	watersystem.h	/^enum coordination {UNBOUND, O, OH, OHH, OO, OOH, OOHH, H, HH, OOOHH, OOHHH, OVER};$/;"	g
-covalent	bondgraph.h	/^enum {covalent, hydrogen};$/;"	e	enum:__anon1
+covalent	bondgraph.h	/^enum {covalent, hydrogen, unbonded};$/;"	e	enum:__anon1
 edges	bondgraph.h	/^	std::vector<Edge *>	edges;		\/\/ all the bonds connecting to this atom$/;"	m	class:Vertex
 element	matrixr.h	/^enum element {xx=0, yx, zx, xy, yy, zy, xz, yz, zz};$/;"	g
 eof	ambersystem.h	/^	bool eof () { return _coords.eof(); }$/;"	f	class:AmberSystem
 eof	crdfile.h	/^	bool eof () 	const { return _eof; }$/;"	f	class:CRDFile
 eof	forcefile.h	/^	bool eof () 	{ return _eof; }$/;"	f	class:ForceFile
 eof	wannier.h	/^	bool eof () 	const { return _eof; }		\/\/ have we reached the end of the file?$/;"	f	class:WannierFile
-hydrogen	bondgraph.h	/^enum {covalent, hydrogen};$/;"	e	enum:__anon1
+hydrogen	bondgraph.h	/^enum {covalent, hydrogen, unbonded};$/;"	e	enum:__anon1
 k0	watersfg.h	/^const double k0	=	0.548;		\/\/ atomic units (force\/length) Eh\/ao\/ao$/;"	v
 l	watersfg.h	/^const double l	=	-1.991;		\/\/ atomic units (force\/length^2)	Eh\/ao\/ao\/ao... yikes$/;"	v
 main	complexdatafile.cpp	/^int main (int argc, char **argv) {$/;"	f
@@ -781,8 +789,6 @@ operator *=	vecr.cpp	/^void VecR::operator*= (double input) {$/;"	f	class:VecR
 operator +	matrixr.cpp	/^MatR MatR::operator+ (const MatR& input) const {$/;"	f	class:MatR
 operator +	vecr.cpp	/^VecR VecR::operator+ (const VecR& input) const {$/;"	f	class:VecR
 operator ++	histogram.h	/^	int 	operator++ (int bin) { _histogram[bin]++; }$/;"	f	class:Histogram
-operator +=	molecule.cpp	/^int Molecule::operator+= (Atom *atom) {$/;"	f	class:Molecule
-operator +=	molecule.h	/^	void operator+= (VecR& wannier) { _wanniers.push_back(wannier); }	\/\/ adds a wannier center into the molecule$/;"	f	class:Molecule
 operator +=	vecr.cpp	/^void VecR::operator+= (const VecR& input) {$/;"	f	class:VecR
 operator -	atom.cpp	/^double Atom::operator- (const Atom& input) const {$/;"	f	class:Atom
 operator -	vecr.cpp	/^VecR VecR::operator- (const VecR& input) const {$/;"	f	class:VecR
@@ -821,6 +827,7 @@ size	watersystem.h	/^	int 		 	size ()				const { return _atoms.size();		}$/;"	f	
 size	xyzfile.h	/^	int size () const { return _atoms.size(); }$/;"	f	class:XYZFile
 size	xyzsystem.h	/^	int size ()	const { return _atoms.size(); }$/;"	f	class:XYZSystem
 trajectory	wateranalyzer.h	/^typedef vector<double> trajectory;$/;"	t
+unbonded	bondgraph.h	/^enum {covalent, hydrogen, unbonded};$/;"	e	enum:__anon1
 x	vecr.h	/^enum coord {x=0, y, z};$/;"	e	enum:coord
 xx	matrixr.h	/^enum element {xx=0, yx, zx, xy, yy, zy, xz, yz, zz};$/;"	e	enum:element
 xy	matrixr.h	/^enum element {xx=0, yx, zx, xy, yy, zy, xz, yz, zz};$/;"	e	enum:element

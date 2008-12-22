@@ -43,6 +43,9 @@ public:
 	void Name (string name) { _name = name; }	// set the molecule's name
 	void MolID (int ID) { _ID = ID; }
 	
+	bool Set () { _set = true; return (_set); }
+	bool Unset () { _set = false; return (_set); }
+
 	// Controls
 	void Shift (VecR shift);				// Shift the origin of the entire molecule
 	void clear ();							// Erases the molecule data 

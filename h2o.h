@@ -47,15 +47,15 @@ public:
 	void CalcDipole ();
 	VecR const & Dipole () const { return _dipole; }			// calculates the dipole (from a parameterized source)
 	
-	void FindMolecularAxes (const int bond = 1);		// Determines the molecular-frame axes (a la Morita&Hynes2000) with one bond on the Z-axis, the other in the positive X direction.
+	void SetMoritaAxes (const int bond = 1);		// Determines the molecular-frame axes (a la Morita&Hynes2000) with one bond on the Z-axis, the other in the positive X direction.
 
 	MatR const & DCMToLab(const int bond = 1);			// get the direction cosine matrix for rotations to the lab frame from the morita-hynes one
 	MatR DCM;					// the direction cosine matrix for rotating the molecule to the lab frame from the M/H frame of OH1
 
 	MatR EulerMatrix;					// The euler rotation matrix
-	double EulerAngles[3];			// euler angles as defined in "The Raman Effect" Appendix A5 (theta, phi, chi)
+	double EulerAngles[3];				// euler angles as defined in "The Raman Effect" Appendix A5 (theta, phi, chi)
 
-	double * CalcRotationData (const int bond = 1);
+	double * CalcEulerAngles (const int bond = 1);
 
 	#ifdef WATER_POLARIZ
 	void CalcAlpha ();		// calculate the molecular polarizability tensor (as per morita+hynes 2002 method)
