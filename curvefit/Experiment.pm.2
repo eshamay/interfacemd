@@ -1,0 +1,1338 @@
+#!/usr/bin/perl -w -I /Users/rb/experiment/lib
+
+# A library of calls handy for use in our experiments.
+# Exports several function calls into the caller namespace.
+
+# NOTE: This library forks(), and sometimes expects to receive SIGCHLD.  It
+# traps that signal on initialization.  If you wish to take it over, be
+# sure to call the reap() routine within this library with the PID and
+# return value of every process that may be related to this library (best
+# to err on the side of passing ALL processes) in order for it to function
+# properly.  reap() is NOT exported by default.
+
+# NOTE: The above mentioned property has a strange side effect: system()
+# returns failure, because it does not catch the child dying (reports error
+# "no child processes" or something like that).  To counter this, use
+# run_com(), queue_com(), and wait_com() in this module (or just don't care
+# about that particular error) (also available with *_silent versions).
+
+
+BEGIN {
+package Experiment;
+
+use strict;
+use warnings;
+use Socket;
+use Fcntl;
+use POSIX;
+use Time::HiRes;
+use Carp;
+use Exporter;
+# This includes the import method of Exporter as part of this package
+# (actually, includes all of Exporter as part of this), so that it gets
+# called when you use this package (and exports the stuff listed in
+# @EXPORT and so on).
+our @ISA=qw(Exporter);
+use Fork_System;
+
+
+# GLOBALS #############################
+
+
+# The list of parameters to record with each run.
+our @parameters=();
+# Name of parameters file.
+our $PARAMETERS='PARAMETERS';
+
+
+# Each key is the name of a box, and the value, if defined, is the string
+# that the box was last programmed with.
+our %programs=();
+# The most recently programmed boxes:
+our @programmed_boxes=();
+
+
+# When you initialize a run (see init_run()), a directory is made, we chdir
+# into it (recording the dir we were in in here), save parameters, etc.
+# When we end a run (see end_run()), this is undefined, so I can tell when
+# we are in a run or not.
+our $basedir=undef;
+# Also, the current run number.
+our $run_num=-1;
+
+
+# The port to connect to on boxes.
+my $box_port=24;
+# The UDP port for the UDP ping, and message to send (as well as the
+# expected response).
+my $box_udp_port=11235;
+my $box_udp_msg="Go to blackout!";
+my $box_udp_rsp="Goin' dark.";
+# The TCP and UDP protocols:
+my $tcp_protocol=getprotobyname('tcp') || croak("Could not get TCP protocol ($!).\n");
+my $udp_protocol=getprotobyname('udp') || croak("Could not get UDP protocol ($!).\n");
+# A timeout for waiting for requests.
+my $sock_timeout=5;
+
+
+# A socket to connect to the camera server, and the name of the socket to
+# use.
+my $cam_sock=undef;
+my $cam_socket='/tmp/camserver';
+
+
+# This hash contains connections to imgserver programs, for displaying
+# images.  The keys are the names of the windows (also included is a
+# default name).  The values are command structures for the Fork_System.
+my %img_comm=();
+my $default_img_name="Experiment Picture";
+# Name of program:
+my $img_prog='imgserver';
+# The task queue for the imgservers.  Allow for many imgservers.
+my $img_fork=Fork_System->new_fork();
+$img_fork->verbosity(0);
+$img_fork->max(10);
+
+
+# The ping program.
+my $ping_prog='/sbin/ping';
+# A fork system for the ping program.
+my $ping_fork=Fork_System->new_fork();
+$ping_fork->verbosity(0);
+$ping_fork->max(10);
+# The pwd program.
+my $pwd_prog='/bin/pwd';
+
+
+# The fork structure for the user-run commands.
+my $user_fork=Fork_System->new_fork();
+$user_fork->verbosity(0);
+$user_fork->max(5);
+
+
+# REAP ROUTINE ########################
+# If you take over SIGCHLD, you need to call this with the PID and return
+# value of every child that may have been spawned by this routine (it
+# ignores things that do not belong to it).
+
+sub reap($$){
+	my($PID,$ret)=@_;
+	# Ignore errors.
+	$img_fork->reap($PID,$ret);
+	$ping_fork->reap($PID,$ret);
+	$user_fork->reap($PID,$ret);
+}
+
+
+# Trap SIGCHLD -- just call my reap() routine.
+$SIG{'CHLD'}=sub{
+	my $p;while(($p=waitpid(-1,WNOHANG))>0){reap($p,$?);}
+};
+
+
+
+# INTERNAL ROUTINES ###################
+
+
+# Attempts to open a socket to a given (host,port) combination (TCP).
+# Prints error messages.
+# Returns the socket on success, and undef on failure.
+sub open_socket($$){
+	my($host,$port)=@_;
+	my($sock,$iaddr,$paddr,$proto,$timestruct);
+
+	# Some checks.
+	if(!$host){carp("open_socket(): bad hostname.\n");return undef;}
+	if(!$port){carp("open_socket(): bad port.\n");return undef;}
+	if($port=~/\D/){
+		if(!($port=getservbyname($port,"tcp"))){
+			carp("open_socket(): unable to get port number ($!).\n");
+			return undef;
+		}
+	}
+
+	# Get some important stuff.
+	if(!($iaddr=inet_aton($host))){
+		carp("open_socket(): unable to create address ($!).\n");
+		return undef;
+	}
+	if(!($paddr=sockaddr_in($port,$iaddr))){
+		carp("open_socket(): unable to create socket address ($!).\n");
+		return undef;
+	}
+
+	# Make the socket and connection.
+	if(!socket($sock,,PF_INET,SOCK_STREAM,$tcp_protocol)){
+		carp("open_socket(): unable to create socket ($!).\n");
+		return undef;
+	}
+	{
+		my($sec,$microsec);
+		$sec=POSIX::floor($sock_timeout);$microsec=($sock_timeout-$sec)*1000000;
+		$timestruct=pack('LL',$sec,$microsec);
+	}
+	if(!setsockopt($sock,SOL_SOCKET,SO_SNDTIMEO,$timestruct) ||
+	   !setsockopt($sock,SOL_SOCKET,SO_RCVTIMEO,$timestruct)){
+		carp("open_socket(): unable to set socket timeouts ($!).\n");
+		return undef;
+	}
+	# The timeouts above don't seem to apply to connect, so do it this way:
+	{
+		my $flag;
+		if(!($flag=fcntl($sock,F_GETFL,0))){
+			carp("open_socket(): unable to fetch socket flags ($!).\n");
+			return undef;
+		}
+		if(!fcntl($sock,F_SETFL,$flag | O_NONBLOCK)){
+			carp("open_socket(): unable to set socket flags ($!).\n");
+			return undef;
+		}
+		if(!connect($sock,$paddr) && ($! != EINPROGRESS)){
+			carp("open_socket(): unable to connect socket ($!).\n");
+			return undef;
+		} 
+		if(!fcntl($sock,F_SETFL,$flag)){
+			carp("open_socket(): unable to set socket flags ($!).\n");
+			return undef;
+		}
+	}
+	# The connect call was done in non-blocking mode, so now, wait the
+	# appropriate amount.
+	{
+		my $end_time=Time::HiRes::time()+$sock_timeout;
+		my($bits,$time);
+		while(($time=Time::HiRes::time())<$end_time){
+			$bits='';vec($bits,fileno($sock),1)=1;
+			select(undef,$bits,undef,$end_time-$time);
+			if(vec($bits,fileno($sock),1)){last;}
+		}
+		if($time>=$end_time){
+			carp("open_socket(): timed out waiting for connection.\n");
+			return undef;
+		}
+	}
+	# Done.  Make it binary and autoflushing, and then return.
+	my $oldFH=select($sock);$|=1;select($oldFH);
+	binmode($sock);return $sock;
+}
+
+
+# Basically just a macro to convert an address to a host and port string.
+# This is used as a key to the hash of what hosts to ping as well as for
+# printing, so it needs to be unique and have everything it needs in it.
+# This is used as a hash key, because the actual address structure for a
+# response may not be identical to the one for what was sent.
+# Returns undef for error, and a string for success.
+sub addr($){
+	my($paddr)=@_;
+	if(!defined($paddr)){return undef;}
+	my($port,$iaddr)=sockaddr_in($paddr);
+	if(!defined($port) || !defined($iaddr)){return undef;}
+	my $host=inet_ntoa($iaddr);if(!defined($host)){return undef;}
+	return "$host:$port";
+}
+
+
+# Given a file handle, reads everything it can up until there is no more to
+# read -- data is discarded.  Returns true normally, and 0 if the handle
+# appears to be closed.
+sub dump_handle($){
+	my($hand)=@_;
+	my($bits,$data);
+	for(;;){
+		$bits='';vec($bits,fileno($hand),1)=1;
+		select($bits,undef,undef,0);
+		if(!(vec($bits,fileno($hand),1))){return 1;}
+		sysread($hand,$data,65536);
+		if(!length($data)){return 0;}
+	}
+}
+
+
+# Given a hash ref, this treats each key as a host name, and sends a UDP
+# ping to each one.  It then waits for responses, until it has waited for a
+# specified time, at which point it returns.  The return value is undef for
+# error, and a hash ref for success (the keys of the hash are the hosts
+# that responded, and the values are false for bad responses and true for
+# valid responses).  Complains in the event of an error.
+sub udp_ping($){
+	my($ref)=@_;
+	my($box,$addr,$sock,%rsp,%ret);
+	# Checks:
+	if(ref($ref) ne 'HASH'){
+		carp("udp_ping(): bad argument.\n");
+		return undef;
+	}
+	# Make socket:
+	if(!socket($sock,PF_INET,SOCK_DGRAM,$udp_protocol)){
+		carp("udp_ping(): error creating socket ($!).\n");
+		return undef;
+	}
+	binmode($sock);
+	# Ping:
+	foreach $box (keys(%{$ref})){
+		my($size,$s);
+		# Make an address:
+		$addr=inet_aton($box);if(!defined($addr)){
+			carp("udp_ping(): unable to make an address for $box.\n");
+			return undef;
+		}
+		$addr=sockaddr_in($box_udp_port,$addr);if(!defined($addr)){
+			carp("udp_ping(): unable to make socket address for $box.\n");
+			return undef;
+		}
+		$rsp{addr($addr)}={'box'=>$box};
+		# Send the ping:
+		for($size=0;;){
+			$s=send($sock,substr($box_udp_msg,$size),0,$addr);
+			if(!defined($s)){
+				carp("udp_ping(): error sending ping to box $box ($!).\n");
+				return undef;
+			}
+			$size+=$s;if($size>=length($box_udp_msg)){last;}
+		}
+	}
+	# Wait for responses.
+	%ret=();
+	my($end_time,$time);$end_time=Time::HiRes::time()+$sock_timeout;
+	# As long as there are non-responders ...
+	while(scalar(keys(%rsp)) && ($time=Time::HiRes::time())<$end_time){
+		my($bits,$data,$done);
+		$bits='';vec($bits,fileno($sock),1)=1;
+		select($bits,undef,undef,$end_time-$time);
+		if(vec($bits,fileno($sock),1)){
+			# A response!
+			# recv() is a little nicer than sysread() for UDP, because you get
+			# the address, too.
+			$addr=recv($sock,$data,length($box_udp_rsp),0);
+			if(!defined($addr)){
+				carp("udp_ping(): error reading socket ($!).\n");
+				return undef;
+			}else{
+				$addr=addr($addr);
+				# Add the response to the stuff we've gotten, and check to see if
+				# it is valid.
+				if(defined($rsp{$addr})){
+					if(!defined($rsp{$addr}{'rsp'})){$rsp{$addr}{'rsp'}=$data;}
+					else{$rsp{$addr}{'rsp'}.=$data;}
+					if($rsp{$addr}{'rsp'} eq $box_udp_rsp){
+						# Mark a valid response and remove from our wait list.
+						$ret{$rsp{$addr}{'box'}}=1;delete($rsp{$addr});
+					}elsif(length($rsp{$addr}{'rsp'}) >= length($box_udp_rsp)){
+						# This response isn't going to be right -- mark it as wrong,
+						# and remove it from our wait list.
+						$ret{$rsp{$addr}{'box'}}=0;delete($rsp{$addr});
+					}
+				}
+			}
+		# End of if(received response){...}
+		}
+	# End of loop waiting for reponses.
+	}
+	# Mark the rest of the bad-responders.
+	foreach $addr (keys(%rsp)){
+		if(defined($rsp{$addr}{'rsp'})){
+			$ret{$rsp{$addr}{'box'}}=0;
+		}
+	}
+	return \%ret;
+}
+
+
+# Given a list of events (described below -- these had better be sorted by
+# time), this forms a hash.  The keys are all the digital boxes referenced
+# (by name), and the values are hash references, of which the important
+# keys are 'data', which contain the string with which the box should be
+# programmed.  A more complete description of the hash is in the comments
+# preceding the program_boxes() routine (the box_data data type).
+# Returns the hash reference if successful, and undef for error.  
+# Warns about various likely-to-be-problems.
+sub digital_box_data(@){
+	my @ev_list=@_;
+	my($event,$box,$delay,$bit,$b);
+	my %digital_box_data=();
+	foreach $event (@ev_list){
+		# Have the time in the proper units for this type of box.
+		# Although the two boards are 180 degrees out of phase, each gets
+		# updated every 4 microseconds (they run off a 10MHz clock, divided
+		# down by 10, which in turns runs a flip-flop, and then it alternates
+		# between the two boards, for a requency of 10MHz/40 = 250kHz).
+		# FIXME -- handle different times for different boards inside the box?
+		my $dig_time=POSIX::floor($event->{'time'}/0.004+0.5);
+		foreach $box (keys(%{$event->{'digital'}})){
+			if(!defined($digital_box_data{$box})){
+				$digital_box_data{$box}={
+					'type'=>'digital',
+					'data'=>'',
+					'time'=>$dig_time,
+					'state'=>0x00000000,
+					'new_hi'=>0x00000000,
+					'new_lo'=>0x00000000,
+				};
+			}
+			# If the current time is after the current update for the box, add
+			# the data and update the time (but don't add the data for negative
+			# time -- that's just setting the initial condition).
+			# FIXME -- update only if state has changed?  or not, so you can have
+			#   delays longer than max time?
+			if($dig_time>$digital_box_data{$box}{'time'}){
+				# A delay of 0 means the update will be on the next cycle, so we
+				# are off by one (hence the "-1").
+				# Also, make sure that, as far as programming goes, time actually
+				# starts at 0, not whatever negative event last set the state.
+				# We won't be making a real change until $dig_time is past zero,
+				# not just at 0.
+				if($dig_time>0 && $digital_box_data{$box}{'time'}<0){
+					$digital_box_data{$box}{'time'}=0;
+				}
+				$delay=$dig_time-$digital_box_data{$box}{'time'}-1;
+				if($delay>4000000000){
+					carp("digital_box_data(): obscenely large delay ($delay) at time ",$event->{'time'},"for box $box.\n");
+					return undef;
+				}
+				$digital_box_data{$box}{'state'}|=( $digital_box_data{$box}{'new_hi'});
+				$digital_box_data{$box}{'state'}&=(~$digital_box_data{$box}{'new_lo'});
+				# Don't actually write a change until the first time you should
+				# change it -- AFTER time 0.
+				if($dig_time>0){
+					$digital_box_data{$box}{'data'}.=
+						pack("VV",($delay,$digital_box_data{$box}{'state'}));
+				}
+				$digital_box_data{$box}{'new_hi'}=0x00000000;
+				$digital_box_data{$box}{'new_lo'}=0x00000000;
+				$digital_box_data{$box}{'time'}=$dig_time;
+			}
+			# Handle the event.
+			foreach $bit (@{$event->{'digital'}{$box}{'hi'}}){
+				$b=(1<<$bit);
+				if($digital_box_data{$box}{'new_lo'} & $b){
+					carp("digital_box_data(): attempting to set bit $bit both hi and lo at time ",$event->{'time'}," on box $box.\n");
+				}elsif($digital_box_data{$box}{'new_hi'} & $b){
+					carp("digital_box_data(): trying multiple times to set bit $bit hi at time ",$event->{'time'}," on box $box.\n");
+				}else{$digital_box_data{$box}{'new_hi'} |= $b;}
+			}
+			foreach $bit (@{$event->{'digital'}{$box}{'lo'}}){
+				$b=(1<<$bit);
+				if($digital_box_data{$box}{'new_hi'} & $b){
+					carp("digital_box_data(): attempting to set bit $bit both hi and lo at time ",$event->{'time'}," on box $box.\n");
+				}elsif($digital_box_data{$box}{'new_lo'} & $b){
+					carp("digital_box_data(): trying multiple times to set bit $bit lo at time ",$event->{'time'}," on box $box.\n");
+				}else{$digital_box_data{$box}{'new_lo'} |= $b;}
+			}
+		# End of digital box programming loop for a given event.
+		}
+	# End of event loop.
+	}
+	# Write whatever else needs to be written, to set the final state, and
+	# clean up extra stuff that will not be used again.
+	foreach $box (keys(%digital_box_data)){
+		if($digital_box_data{$box}{'new_hi'} ||
+		   $digital_box_data{$box}{'new_lo'}){
+			$digital_box_data{$box}{'state'}|=( $digital_box_data{$box}{'new_hi'});
+			$digital_box_data{$box}{'state'}&=(~$digital_box_data{$box}{'new_lo'});
+			$digital_box_data{$box}{'data'}.=
+				pack("VV",(0,$digital_box_data{$box}{'state'}));
+			$digital_box_data{$box}{'new_hi'}=0x00000000;
+			$digital_box_data{$box}{'new_lo'}=0x00000000;
+		}
+		delete($digital_box_data{$box}{'time'});
+		delete($digital_box_data{$box}{'state'});
+		delete($digital_box_data{$box}{'new_hi'});
+		delete($digital_box_data{$box}{'new_lo'});
+	}
+	return \%digital_box_data;
+}
+
+
+# Given a box_data structure (one particular box), this interprets the data
+# that was sent, and responds to any requests.  The second argument is the
+# most recently read stuff from the box.  The third argument is the box
+# name, for more useful error messages (this prints error messages).
+# Returns undef for error, negative if box said it was full, 0 if things
+# are still going, and postive if we have finished sending data and the
+# connection may be closed.
+sub respond_to_box($$$){
+	my($box_data,$data,$box)=@_;
+	# Append data to req:
+	if(!defined($box_data->{'req'})){$box_data->{'req'}=$data;}
+	else{$box_data->{'req'}.=$data;}
+	# Now, handle based on box type:
+	if($box_data->{'type'} eq 'digital'){
+		# Only respond to a completed request (ends with '\n').
+		if($box_data->{'req'}=~/\n$/){
+			my $total=0;
+			my $req;
+			foreach $req (split(/\n+/,$box_data->{'req'})){
+				if(!($req=~/^\d+$/)){
+					carp("respond_to_box(): bad request from box $box.\n");
+					next;
+				}
+				# A request of 0 means it is full.
+				if($req==0){return -1;}
+				$total+=$req;
+			}
+			if($total>length($box_data->{'data'})){
+				$total=length($box_data->{'data'});
+			}
+			# $total now has the number of bytes we should send, so send it.
+			# For writing to a network, writing should be limited by network
+			# speed and stuff, so there's no reason not to let this block.
+			# Make a quick check that the socket seems open.
+			if(!defined(fileno($box_data->{'sock'}))){
+				carp("respond_to_box(): socket for box $box does not appear to be open.\n");
+				return undef;
+			}
+			while(my $s=syswrite($box_data->{'sock'},substr($box_data->{'data'},0,$total))){
+				if(!defined($s)){
+					carp("respond_to_box(): problem sending data to box $box ($!).\n");
+					return undef;
+				}
+				# Move the written portion from data to sent.
+				$box_data->{'sent'}.=substr($box_data->{'data'},0,$s);
+				$box_data->{'data'}=substr($box_data->{'data'},$s);$total-=$s;
+				if($total==0){last;}
+			}
+			if($total>0){
+				# Problem sending the data -- it didn't all get sent.
+				carp("respond_to_box(): problem sending data to box $box.\n");
+				return undef;
+			}
+			# We have used this request.
+			$box_data->{'req'}='';
+			# We are done here -- signal if we are done completely
+			if(length($box_data->{'data'})==0){return 1;}
+		}
+		# We are done for now, but not done sending data.
+		return 0;
+	}else{
+		carp("respond_to_box(): unknown box type ".$box_data->{'type'}." for box $box.\n");
+		return undef;
+	}
+}
+
+
+# PARAMETER MANIPULATION ##############
+
+
+# Declare a scalar to be a parameter (and defines it) which will be
+# recorded with each run.  Just give an array of names (strings), and this
+# will add the package names if not given, so they can be referenced later.
+# Note that for this to work, the variable must be declared with "our"
+# instead of "my".
+# Note that duplication is allowed.
+sub declare_parameter(@){
+	my $pkg=caller();
+	foreach my $n (@_){
+		if($n=~/::/){push(@parameters,$n);}
+		else{push(@parameters,"$pkg\::$n");}
+	}
+}
+
+
+# Dump parameters (and date) to stdout, or to a file if a name is given.
+# Returns true for success, and undef for error.
+sub dump_parameters(;$){
+	my($file)=@_;
+	my($P,$n);
+	# Open the write handle.
+	if(!defined($file)){
+		if(!open($P,'>&STDOUT')){
+			carp("dump_parameters(): unable to duplicate stdout ($!).\n");
+			return undef;
+		}
+	}else{
+		if(!open($P,'>',$file)){
+			carp("dump_parameters(): unable to create parameters file ($!).\n");
+			return undef;
+		}
+	}
+	# Record date.
+	my $date=localtime();
+	if(!(print $P ("# $date\n"))){
+		carp("dump_parameters(): error writing date ($!).\n");
+		close($P);return undef;
+	}
+	foreach my $name (@parameters){
+		my $n;
+		local $,;
+		# Strip package name.
+		($n)=($name=~/(?:::)*([^:]*)$/);
+		no strict 'refs';
+		if(!(print $P ("${n}=",${$name},"\n"))){
+			carp("dump_parameters(): error writing parameters ($!).\n");
+			close($P);return undef;
+		}
+	}
+	if(!close($P)){
+		carp("dump_parameters(): error closing parameters handle ($!).\n");
+		return undef;
+	}
+	return 1;
+}
+
+
+# Given a filename in a format similar to that given by dump_parameters(),
+# this loads those parameters in (and declares them).
+# Returns true for success, and undef for error.
+sub load_parameters($){
+	my($name)=@_;
+	my $pkg=caller();
+	my $fd;if(!open($fd,"<",$name)){
+		carp("load_parameters(): error opening file $name ($!).\n");
+		return undef;
+	}
+	foreach my $line (<$fd>){
+		chomp($line);
+		my($var,$value)=($line=~/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.*)$/);
+		if(!defined($var) || !defined($value)){next;}
+		# Declare the parameter.
+		# Don't call the subroutine because that would mess up the value of
+		# caller().
+		if($var=~/::/){push(@parameters,$var);}
+		else{push(@parameters,"$pkg\::$var");}
+		# Set the parameter.
+		no strict 'refs';
+		${"$pkg\::$var"}=$value;
+	}
+	close($fd);return 1;
+}
+
+
+# ACTION/EVENT MANIPULATION ###########
+# An action refers to something you can tell a digital or analog box to do.
+
+# For a digital box, it is a set of bits that get set hi, and another set
+# of bits that get set low.
+
+# Analog boxes are not yet implemented.
+
+# An event is a set of actions grouped together (possibly different boxes),
+# along with a time of when to do it.
+
+# Creates (or adds to an existing one if you supply one as the last
+# argument) a digital action -- that is, a list of bits (array ref) to set
+# high and a list of bits (array ref) to set low, for a given named box.
+# The arrays are copied in this routine, so modifying the passed arrays
+# later won't affect these.
+# The first argument is the name of the box.
+# The second argument is an array reference of bits to set high (0, 1, 2,
+#   etc.).
+# The third argument is an array reference of bits to set low.
+# The fourth argument, if given, is a digital action to which this should
+#   be concatenated.  If not supplied, a new digital action is created.
+# The idea is that most actions will only affect one box, but you can build
+# up multi-box actions with just a few calls to this, passing the same
+# action to each call after the first.
+# Returns the reference to the hash (undef for error).
+# Will warn you if you have bad arguments.
+sub digital_action($$$;$){
+	my($box,$hi_ref,$lo_ref,$dig_ref)=@_;
+	my($bit);
+	# Sanity checks and initialization.
+	if(!defined($dig_ref)){$dig_ref={};}
+	elsif(ref($dig_ref) ne "Digital_Action"){
+		carp("digital_action() can only add to a digital action.\n");
+		return undef;
+	}
+	if(ref($hi_ref) ne "ARRAY" || ref($lo_ref) ne "ARRAY"){
+		carp("digital_action() needs array references.\n");return undef;
+	}
+	if(ref($box) ne ""){
+		carp("digital_action() needs to be given a name.\n");return undef;
+	}
+	if(!defined($dig_ref->{$box})){$dig_ref->{$box}={'hi'=>[],'lo'=>[]};}
+	# Add the hi bits, with lots of sanity checks.
+	foreach $bit (@{$hi_ref}){
+		if($bit!=int($bit)){
+			carp("digital_action() needs integer bit values (not $bit).\n");next;
+		}
+		if($bit<0 || $bit>31){
+			carp("digital_action() takes bits from 0 to 31, not $bit.\n");next;
+		}
+		if(grep(/^$bit$/,@{$dig_ref->{$box}{'hi'}})){
+			carp("digital_action(): tried to reset a hi bit hi ($bit).\n");next;
+		}
+		if(grep(/^$bit$/,@{$dig_ref->{$box}{'lo'}})){
+			carp("digital_action(): ignoring setting bit $bit lo (already set lo).\n");
+			next;
+		}
+		push(@{$dig_ref->{$box}{'hi'}},$bit);
+	}
+	# Add the lo bits, with lots of sanity checks.
+	foreach $bit (@{$lo_ref}){
+		if($bit!=int($bit)){
+			carp("digital_action() needs integer bit values (not $bit).\n");next;
+		}
+		if($bit<0 || $bit>31){
+			carp("digital_action() takes bits from 0 to 31, not $bit.\n");next;
+		}
+		if(grep(/^$bit$/,@{$dig_ref->{$box}{'lo'}})){
+			carp("digital_action(): tried to reset a lo bit lo ($bit).\n");next;
+		}
+		if(grep(/^$bit$/,@{$dig_ref->{$box}{'hi'}})){
+			carp("digital_action(): ignoring setting bit $bit lo (already set hi).\n");
+			next;
+		}
+		push(@{$dig_ref->{$box}{'lo'}},$bit);
+	}
+	# Bless and return.
+	bless($dig_ref,"Digital_Action");
+}
+
+
+# Creates an event.  Give it a time and then a list of actions, and it
+# returns the event hash reference (undef for error).  The time is in
+# milliseconds.
+# If you really want, you can have empty events (just a time).
+sub event($;@){
+	my $time=shift;
+	# Make an event.
+	my $event={'time'=>$time,'digital'=>{}};
+	bless($event->{'digital'},'Digital_Action');
+	# Add the actions to the event.
+	foreach my $action (@_){
+		if(ref($action) eq "Digital_Action"){
+			# Re-use the digital_action() routine for clarity, even if this is a
+			# bit slow.  For each box in $action, add it to the event's digital
+			# action.
+			foreach my $box (keys(%{$action})){
+				digital_action($box,$action->{$box}{'hi'},$action->{$box}{'lo'},
+				               $event->{'digital'});
+			}
+		}else{
+			carp("event(): ignoring unrecognized action.\n");
+		}
+	}
+	# Bless and return.
+	bless($event,"Event");
+}
+
+
+# An explanation is in order of the subroutine below.  It uses a lot of
+# complicated hashes, which I'll document here:
+# Digital_Action (blessed as "Digital_Action"):
+# The keys are names of boxes.  The values are hash references.  The hashes
+# they reference contain two keys (referring to bits for that particular
+# box):
+#   'hi'   => a list reference of the bits to set high for this action.
+#   'lo'   => a list reference of the bits to set lo for this action.
+#   
+# Event:
+#   'time'    => the time, in milliseconds past when the run starts, that
+#                the actions are to occur.
+#   'digital' => a combined Digital_Action of all the Digital_Actions
+#                making up this event.
+#
+# Finally, for programming the various boxes, it is convenient to make one
+# more data type, this one internal to the following subroutines and some
+# of the things it calls.  It isn't officially named, but I'll call it
+# box_data.  The keys are each names of boxes, and the values are hash
+# references.  Each internal hash may contain the following keys:
+#   'type' => type of box ('digital', etc.)
+#   'data' => data to send to the box (not yet sent).
+#   'sent' => data already sent to the box.
+#   'sock' => a socket for connecting to the box.
+#   'req'  => for storing responses from the box until they tally up to a
+#             full request.
+#   others specific to the type of box.
+
+# Given a list of events, this figures out which boxes need to be
+# programmed, computes the program data for them, and, if it is different
+# than the last thing this routine programmed them with, reprograms them.
+# Attempts to write the stuff it programmed to a filename that's the box
+# addresss appended with ".prog".
+# By default, all boxes are assumed to start in some sort of "off" states.
+# To force starting in some other position, you are allowed to give events
+# happening at negative times.  The initial state at time 0, when the boxes
+# start, will then be the sum total of these previous events.
+# It then sends the UDP ping to every box.
+# Returns true if everything was successful (or close enough), and undef if
+# there was a bad enough error.
+sub program_boxes(@){
+	my($box,$event);
+
+	# Sort the events by time, with some sanity checking:
+	my @ev_list=();
+	foreach $event (@_){
+		if(ref($event) ne "Event"){
+			carp("program_boxes(): skipping something that does not appear to be an event.\n");
+			next;
+		}
+		push(@ev_list,$event);
+	}
+	@ev_list=sort { $a->{'time'} <=> $b->{'time'} } @ev_list;
+
+	# Make the programs, sorted by box (do it type-by-type).
+	# %box_data is of the box_data type of structure talked about comments
+	# above this routine.
+	my %box_data=();
+	{
+		my $digital_box_data=digital_box_data(@ev_list);
+		if(!defined($digital_box_data)){
+			carp("program_boxes(): error handling digital box data.\n");
+			return undef;
+		}
+		# Concatenate into %box_data, checking for duplicate names.
+		foreach $box (keys(%{$digital_box_data})){
+			if(defined($box_data{$box})){
+				carp("program_boxes(): box $box seems to have multiple types.\n");
+				return undef;
+			}
+			$box_data{$box}=$digital_box_data->{$box};
+		}
+	}
+
+	# Connect to each box that has not been programmed with the most recent
+	# data.
+	foreach $box (keys(%box_data)){
+		if(defined($programs{$box}) &&
+		   $programs{$box} eq $box_data{$box}{'data'}){
+			next;
+		}
+		# Save the programs I intend to write.
+		if(!open(LOG,">","$box.prog")){
+			carp("program_boxes(): error opening log for box $box.\n");
+		}else{
+			binmode(LOG);
+			if(!print LOG ($box_data{$box}{'data'})){
+				carp("program_boxes(): error writing log for box $box.\n");
+			}
+			if(!close(LOG)){
+				carp("program_boxes(): error closing log for box $box.\n");
+			}
+		}
+		# When the connections are opened, that clears the memory of the box,
+		# so delete the appropriate value of %programs (we will set it again
+		# when we have successfully written stuff -- that will happen unless I
+		# encounter an error, in which case I'd rather assume I didn't know
+		# what was in the box, which is why I leave the value deleted).
+		$box_data{$box}{'sock'}=open_socket($box,$box_port);
+		if(!defined($box_data{$box}{'sock'})){
+			carp("program_boxes(): error connecting to $box.\n");
+			return undef;
+		}
+		delete($programs{$box});
+	}
+	# Send data as it is requested.
+	for(;;){
+		my $data='';
+		my $alive;
+		# Form a select list and select.  A timeout is bad.  If there are no
+		# sockets left, we are done.
+		my $vec='';
+		$alive=0;foreach $box (keys(%box_data)){
+			if(!defined($box_data{$box}{'sock'})){next;}
+			vec($vec,fileno($box_data{$box}{'sock'}),1)=1;
+			++$alive;
+		}
+		if(!$alive){last;}
+		select($vec,undef,undef,$sock_timeout);
+		# Read everything that wants reading and handle requests from boxes
+		# (closing sockets when done on either end -- warn if the other end
+		# closed first).
+		$alive=0;foreach $box (keys(%box_data)){
+			# Skip boxes that are done, or not ready to read.
+			if(!defined($box_data{$box}{'sock'}) ||
+			   !vec($vec,fileno($box_data{$box}{'sock'}),1)){next;}
+			++$alive;
+			sysread($box_data{$box}{'sock'},$data,65536);
+			if(length($data)==0){
+				#	This seems to be a sign that the connection was closed.
+				carp("program_boxes(): the connection to box $box was unexpectedly closed.\n");
+				close($box_data{$box}{'sock'});
+				delete($box_data{$box}{'sock'});
+			}
+			my $ret=respond_to_box($box_data{$box},$data,$box);
+			if(!defined($ret)){
+				carp("program_boxes(): error responding to box $box.\n");
+				foreach $box (keys(%box_data)){
+					if(defined($box_data{$box}{'sock'})){
+						close($box_data{$box}{'sock'});
+						delete($box_data{$box}{'sock'});
+					}
+				}
+				return undef;
+			}elsif($ret<0){
+				carp("program_boxes(): box $box filled up.\n");
+				close($box_data{$box}{'sock'});
+				delete($box_data{$box}{'sock'});
+			}elsif($ret>0){
+				# Successfully done.
+				close($box_data{$box}{'sock'});
+				delete($box_data{$box}{'sock'});
+			}
+			# Otherwise, we are still going with this box.
+		# End of reading any available data from boxes.
+		}
+		if(!$alive){
+			my $strg="program_boxes(): timed out waiting for:\n";
+			foreach $box (keys(%box_data)){
+				# Skip boxes that are done, or not ready to read.
+				if(!defined($box_data{$box}{'sock'})){next;}
+				close($box_data{$box}{'sock'});
+				delete($box_data{$box}{'sock'});
+				$strg.="$box\n";
+			}
+			carp($strg);return undef;
+		}
+	# End of sending data to boxes.
+	}
+
+	# Save the programs that were sent.
+	foreach $box (keys(%box_data)){
+		$programs{$box}=$box_data{$box}->{'sent'};
+	}
+
+	# Send the UDP pings.
+	{
+		my $udp_rsp=udp_ping(\%box_data);
+		my $err=undef;
+		if(!defined($udp_rsp)){
+			carp("program_boxes(): unable to send UDP ping.\n");
+			return undef;
+		}
+		foreach $box (keys(%box_data)){
+			if(!defined($udp_rsp->{$box})){
+				$err.="program_boxes(): box $box did not respond to UDP ping.\n";
+			}elsif(!$udp_rsp->{$box}){
+				$err.="program_boxes(): box $box gave a bad response to UDP ping\n";
+			}
+		}
+		if(defined($err)){
+			carp($err);return undef;
+		}
+	}
+
+	# We are finally done.  Store which boxes were programmed, and return.
+	@programmed_boxes=keys(%box_data);
+	return 1;
+}
+
+
+# Sends one ping to each of the boards that was most recently programmed,
+# and waits for a response.  The optional argument overrides the default
+# period to wait (in seconds).
+# Returns true for success, and undef for some error (like a timeout).
+sub wait_for_boxes(;$){
+	my($wait)=@_;if(!defined($wait)){$wait=$sock_timeout;}
+	my(%box,$box);
+	my $msg='';
+	# Ping all the boxes -- need to use actual ping program because that's
+	# SUID.
+	my $timeout=POSIX::ceil($wait);
+	foreach $box (@programmed_boxes){
+		my $command={
+			'command'=>[$ping_prog,'-c','1','-t',$timeout,$box],
+			'indirect'=>$ping_prog,
+			'retval'=>0,
+		};
+		if(!($ping_fork->queue($command))){
+			$msg.="  $ping_fork->{'error'}\n";
+			last;
+		}
+		$box{$box}=$command;
+	}
+	# Now, they've all been pinged.  Wait a bit, and check for return values.
+	# Need to wait a bit longer than timeout so that ping can return.
+	# Do that by sleeping for $timeout first, and then keep sleeping that
+	# interval until processes stop finishing (sleep should stop when the
+	# first child dies, so this doesn't wait overly long).
+	sleep($timeout);
+	{
+		my @status=$ping_fork->status();
+		my $left=$status[0]+$status[1];
+		my $time=Time::HiRes::time();
+		while($left>0){
+			sleep($timeout);
+			@status=$ping_fork->status();
+			if($left!=$status[0]+$status[1]){
+				$left=$status[0]+$status[1];
+				$time=Time::HiRes::time();
+			}
+			if(Time::HiRes::time()-$time>$timeout){last;}
+		}
+	}
+	# Check what's left.
+	foreach $box (@programmed_boxes){
+		if($box{$box}{'retval'}<0){
+			# It didn't return -- shouldn't happen -- it shouldn't take this
+			# long:
+			$msg.="  process for $box did not quit.\n";
+		}elsif($box{$box}{'retval'}!=0){
+			# Returned with an error.
+			$msg.="  $box did not respond (ping returned $box{$box}{'retval'}).\n";
+		}
+		# Do nothing for a successful return (0).
+	}
+	# Kill anything that is left -- they are just ping programs, so do a hard
+	# kill.
+	$ping_fork->killall(9);
+	if($msg eq ''){return 1;}
+	carp("wait_for_boxes(): errors occurred:\n$msg");return undef;
+}
+
+
+# CAMERA SERVER ROUTINES ##############
+
+
+# Connects to my camera server.
+# Returns undef for error, true for success.
+sub cam_open(){
+	if(defined($cam_sock)){
+		carp("cam_open(): we seem to be connected already.\n");
+		return undef;
+	}
+	if(!socket($cam_sock,AF_UNIX,SOCK_STREAM,0)){
+		carp("cam_open(): unable to create socket ($!).\n");
+		$cam_sock=undef;return undef;
+	}
+	if(!connect($cam_sock,sockaddr_un($cam_socket))){
+		carp("cam_open(): unable to connect to socket ($!).\n");
+		close($cam_sock);$cam_sock=undef;return undef;
+	}
+	{my $oldfh=select($cam_sock);binmode($cam_sock);$|=1;select($oldfh);}
+	return 1;
+}
+
+
+# Sends a string to my camera server (appends the '\n' for you).
+# In the event of an error, returns undef and the camera socket will be
+# closed.  Returns true for success.
+sub cam_command($){
+	my($com)=@_;
+	if(!defined($cam_sock)){
+		carp("cam_command(): camera socket does not seem to be opened.\n");
+		return undef;
+	}
+	dump_handle($cam_sock);
+	if(!defined(syswrite($cam_sock,"$com\n"))){
+		carp("cam_command(): error sending to socket.  Closing socket.\n");
+		close($cam_sock);$cam_sock=undef;return undef;
+	}
+	return 1;
+}
+
+
+# Sends the takepic command to the camera -- requires only the filename.
+# Prepends the current directory if the name doesn't start with a '/'.
+# Returns true for success, negative for error (waits a bit for a response
+# from the camera that it is waiting).
+sub cam_takepic($){
+	my($path)=@_;
+	if(!defined($cam_sock)){
+		carp("cam_takepic(): camera socket does not seem to be opened.\n");
+		return undef;
+	}
+	dump_handle($cam_sock);
+	if(!($path=~/^\//)){
+		my $pwd=`$pwd_prog`;chomp($pwd);
+		$path="${pwd}/${path}";
+	}
+	if(!cam_command("takepic $path")){
+		carp("cam_takepic(): error sending picture command.\n");
+		return undef;
+	}
+	# Wait for a response, but don't wait too long.
+	my $end_time=Time::HiRes::time()+$sock_timeout;
+	my($bits,$data,$total);$total='';
+	while((my $time=Time::HiRes::time())<$end_time){
+		$bits='';vec($bits,fileno($cam_sock),1)=1;
+		select($bits,undef,undef,$end_time-$time);
+		if(vec($bits,fileno($cam_sock),1)){
+			sysread($cam_sock,$data,65536);
+			$total.=$data;my(@rsp)=split(/\n+/,$total);
+			# Here's the response I wanted:
+			if(grep(/^Taking picture/,@rsp)){return 1;}
+			# Only keep the last line:
+			$total=~s/^.*\n//os;
+		}
+	}
+	carp("cam_takepic(): timed out waiting for picture response.\n");
+	return undef;
+}
+
+
+# Waits for the camera server to respond again (may time out).  If you
+# always use this sometime before calling another cam_* command after using
+# cam_takepic(), you should never get out of sync with the camera server.
+# The optional argument overrides the default timeout (in seconds).
+sub cam_wait(;$){
+	my($wait)=@_;if(!defined($wait)){$wait=$sock_timeout;}
+	if(!defined($cam_sock)){
+		carp("cam_wait(): camera socket does not seem to be opened.\n");
+		return undef;
+	}
+	dump_handle($cam_sock);
+	# Use the hello command for this.
+	if(!cam_command("hello")){
+		carp("cam_wait(): error sending command.\n");
+		return undef;
+	}
+	# Wait for a response, but don't wait too long.
+	my $end_time=Time::HiRes::time()+$wait;
+	my($bits,$data,$total);$total='';
+	while((my $time=Time::HiRes::time())<$end_time){
+		$bits='';vec($bits,fileno($cam_sock),1)=1;
+		select($bits,undef,undef,$end_time-$time);
+		if(vec($bits,fileno($cam_sock),1)){
+			sysread($cam_sock,$data,65536);
+			$total.=$data;my(@rsp)=split(/\n+/,$total);
+			# Here's the response I wanted:
+			if(grep(/^Hello/,@rsp)){return 1;}
+			# Only keep the last line:
+			$total=~s/^.*\n//os;
+		}
+	}
+	carp("cam_wait(): timed out waiting for picture response.\n");
+	return undef;
+}
+
+
+# Disconnects from my camera server.
+# Returns true.
+sub cam_close(){
+	if(defined($cam_sock)){close($cam_sock);}
+	$cam_sock=undef;return 1;
+}
+
+
+# DISPLAY ROUTINES ####################
+
+
+# Displays an image using the image server.
+# The only required argument is the filename to display (if you make it
+# undef, this will try to start a server and set it up with whatever
+# size and position you give).
+# The optional argument is a hash that sets various options (all have
+# defaults or aren't used if not given).  Keys are:
+#   false => true or false, depending on whether you want false colors.
+#   pos   => 2-element array reference, with x-y position of window.
+#   size  => 2-element array reference, with widht-height of window
+#            (negative values should match image size).
+#   name  => Name of window (so you can have multiple windows).
+# This works by running the image server in the background with the
+# Fork_System library.
+# Returns true for success (or so it thinks) and undef for an error
+# (probably not worth quitting over, though -- just warn).
+sub display($;%){
+	my($path,%options)=@_;
+	# Make an absolute path, if warranted.
+	if(defined($path) && !($path=~/^\//)){
+		my $pwd=`$pwd_prog`;chomp($pwd);
+		$path="${pwd}/${path}";
+	}
+	# Set defaults.
+	if(!defined($options{'false'})){$options{'false'}=0;}
+	my $name;
+	if(!defined($options{'name'})){$name=$default_img_name;}
+	else{$name=$options{'name'};}
+	# If the program does not seem to be open, or seems to have died, run a
+	# new program.
+	if(!defined($img_comm{$name}) || $img_comm{$name}{'retval'}>=0){
+		if(defined($img_comm{$name}{'stdin'})){close($img_comm{$name}{'stdin'});}
+		if(defined($img_comm{$name}{'stdout'})){close($img_comm{$name}{'stdout'});}
+		my $command={
+			'command'=>[$img_prog,$name],
+			'indirect'=>$img_prog,
+			'retval'=>0,
+			'stdin'=>'',
+			'stdout'=>'',
+			# Ignore stderr.
+		};
+		if(!($img_fork->queue($command))){
+			carp("display(): error: $img_fork->{'error'}.\n");
+			return undef;
+		}
+		$img_comm{$name}=$command;
+	}
+	# Now, send the commands.
+	if(!dump_handle($img_comm{$name}{'stdout'})){
+		carp("display(): unable to read from pipe.\n");
+		close($img_comm{$name}{'stdin'});
+		close($img_comm{$name}{'stdout'});
+		delete($img_comm{$name});
+		return undef;
+	}
+	my $command='';
+	if(defined($path)){
+		if(defined($options{'false'}) && $options{'false'}){
+			$command="false $path\n";
+		}else{$command="display $path\n";}
+	}
+	if(ref($options{'pos'}) eq 'ARRAY' && scalar(@{$options{'pos'}})==2){
+		$command.="move $options{'pos'}[0] $options{'pos'}[1]\n";
+	}
+	if(ref($options{'size'}) eq 'ARRAY' && scalar(@{$options{'size'}})==2){
+		$command.="resize $options{'size'}[0] $options{'size'}[1]\n";
+	}
+	# Don't bother selecting on the write -- if the pipe is closed, the write
+	# will fail (but do block the SIGPIPE). 
+	# Also, don't bother waiting for the response -- let it display on its
+	# own while we go on.
+	local $SIG{'PIPE'}='IGNORE';
+	if(!syswrite($img_comm{$name}{'stdin'},$command)){
+		carp("display(): error sending command to image server ($!).\n");
+		close($img_comm{$name}{'stdin'});
+		close($img_comm{$name}{'stdout'});
+		delete($img_comm{$name});
+		return undef;
+	}
+	dump_handle($img_comm{$name}{'stdout'});
+	return 1;
+}
+
+
+# COMMAND ROUTINES ####################
+# These are meant to take the place of the system call.
+
+
+# This runs a command in the background (given the command and the
+# arguments).  The stdout and stderr are left alone.
+# Returns true for success, and undef for error.
+sub queue_com(@){
+	my $command={
+		'command'=>\@_,
+		'pid'=>0,
+		'retval'=>0,
+		'stdout'=>undef,
+		'stderr'=>undef,
+	};
+	if(!defined($user_fork->queue($command))){
+		carp("queue_com(): error queuing process: $user_fork->{'error'}.\n");
+		return undef;
+	}
+	return 1;
+}
+# Same as above, but stdout and stderr are piped to /dev/null.
+# Returns true for success, and undef for error.
+sub queue_com_silent(@){
+	my $command={
+		'command'=>\@_,
+		'pid'=>0,
+		'retval'=>0,
+	};
+	if(!defined($user_fork->queue($command))){
+		carp("queue_com_silent(): error queuing process: $user_fork->{'error'}.\n");
+		return undef;
+	}
+	return 1;
+}
+
+
+# Waits for alll the commands to finish.
+# Returns true for success, and undef for error.
+sub wait_com(){
+	while($user_fork->running()){sleep($sock_timeout);}
+	return 1;
+}
+
+
+# Runs the given command (just like queue_com()), but waits for completion,
+# and returns what the command returned.  This is intended to be like a
+# system() call.
+sub run_com(@){
+	my $command={
+		'command'=>\@_,
+		'pid'=>0,
+		'retval'=>0,
+		'stdout'=>undef,
+		'stderr'=>undef,
+	};
+	if(!defined($user_fork->queue($command))){
+		carp("run_com(): error queuing process: $user_fork->{'error'}.\n");
+		return undef;
+	}
+	while($command->{'retval'}<0){sleep($sock_timeout);}
+	return $command->{'retval'};
+}
+# Same as above, but sends stdout and stderr to /dev/null.
+sub run_com_silent(@){
+	my $command={
+		'command'=>\@_,
+		'pid'=>0,
+		'retval'=>0,
+	};
+	if(!defined($user_fork->queue($command))){
+		carp("run_com_silent(): error queuing process: $user_fork->{'error'}.\n");
+		return undef;
+	}
+	while($command->{'retval'}<0){sleep($sock_timeout);}
+	return $command->{'retval'};
+}
+
+
+# RUN ROUTINES ########################
+
+
+# Initializes a run by making a directory just for the run, chdir into it,
+# and recording all the parameters into the PARAMETERS file in it.
+# The optional argument lets you pick a directory name to make.
+# If you have a second argument, that will be the filename to write the
+# parameters to.
+# Returns true for success, undef for error.
+sub init_run(;$$){
+	my($name,$param)=@_;
+	if(!defined($param)){$param=$PARAMETERS;}
+	if(defined($basedir)){
+		carp("init_run(): already in a run.\n");
+		return undef;
+	}
+	my $run=$run_num+1;
+	# Make the dir, and chdir.
+	if(!defined($name)){$name="run.".sprintf('%04u',$run);}
+	if(!mkdir($name)){
+		carp("init_run(): unable to create $name ($!).\n");
+		return undef;
+	}
+	my $dir=`$pwd_prog`;chomp($dir);if(!defined($dir)){
+		carp("init_run(): unable to get current directory.\n");
+		return undef;
+	}
+	if(!chdir($name)){
+		carp("init_run(): unable to chdir to $name ($!).\n");
+		return undef;
+	}
+	# Record date and parameters.
+	if(!dump_parameters($param)){
+		carp("init_run(): unable to write parameters file ($!).\n");
+		chdir($dir);return undef;
+	}
+	# Success.
+	$basedir=$dir;$run_num=$run;return 1;
+}
+
+
+# Ends a run by moving out of the run directory.
+# Returns true for success, undef for error.
+sub end_run(){
+	if(!defined($basedir)){
+		carp("end_run(): no run currently initialized.\n");
+		return undef;
+	}
+	if(!chdir($basedir)){
+		carp("end_run(): unable to chdir ($!).\n");
+		return undef;
+	}
+	$basedir=undef;
+	return 1;
+}
+
+
+# EXPORT STUFF ########################
+
+
+# If you export only subroutines, it is faster to leave off the '&' on each
+# one (from the Exporter documentation).  If no type is given, the '&' is
+# assumed.
+our @EXPORT=qw(declare_parameter dump_parameters load_parameters
+               digital_action event
+               program_boxes wait_for_boxes
+               cam_open cam_command cam_takepic cam_wait cam_close
+               display
+               queue_com queue_com_silent wait_com run_com run_com_silent
+               init_run end_run);
+our @EXPORT_OK=qw(reap);
+
+
+}
+1;

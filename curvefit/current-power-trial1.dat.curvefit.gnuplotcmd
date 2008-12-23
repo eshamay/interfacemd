@@ -1,0 +1,22 @@
+# Fit equation:
+# m*x+b
+#
+# Initial guess:
+# m=0.7;b=0
+#
+# Fit results:
+# m =  +- 
+# b =  +- 
+#
+# Call fit as:
+# curvefit current-power-trial1.dat 'm*x+b' 'm=0.7;b=0'
+#
+    set title ''
+    set xla ''
+    set yla ''
+    set term png 
+		set output 'current-power-trial1.dat.curvefit.png'
+    plot 'current-power-trial1.dat' w p pt 7, ()*x+() title 'fit'
+    set term pdf fname 'Times-Roman'
+    set output 'current-power-trial1.dat.curvefit.pdf'
+    replot

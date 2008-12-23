@@ -1,0 +1,445 @@
+#!/usr/bin/perl
+
+use Getopt::Long;
+use Experiment;
+
+my $gnuplot = '/usr/bin/gnuplot';
+my $octave = '/usr/bin/octave';
+
+
+$Pgname = `basename $0`; chop $Pgname;
+sub usage {
+   print <<"END";
+usage: $Pgname <datafile> <equation> <initparams>
+       [-t <title>] [-x <xlabel>] [-y <ylabel>] [-n name] [-l] [-p] [-i]
+       [-q] [-r <parameter name>] [-e <parameter name>]
+
+       Invokes octave to do a nonlinear curve fit to data in file
+       <datafile>.  Also generates plots of data with curve fit
+       using gnuplot, output in files in both png and ps formats
+       (in files <datafile>.curvefit.png and <datafile>.curvefit.ps,
+       respectively).  A gnuplot script that makes the same plot
+       and regenerates the plot files is saved to 
+       <datafile>.curvefit.gnuplotcmd.  Note that for all these filenames,
+       any '.txt' suffix is removed from <datafile>.  You know,
+       to keep things tidy.  Nice and tidy.
+
+
+       Arguments are as follows.
+
+       <datafile> -- name of file with data to fit.  Data should be
+                     two-column text, parsable by octave.  If the data
+                     file is three columns of text, the third column
+                     should be uncertainties (standard deviations) for the
+                     data-point ordinates, and will be used for a weighted
+                     fit.
+
+       <equation> -- fitting equation, to be parsed by octave; use 'x'
+                     to refer to the independent variable, and any parameters
+                     you deem necessary.  Remember to treat x as an array,
+                     so use array operations like x.^2.
+
+       <initparams> -- initial guesses for parameter values, in the form
+                     'a1=1;a2=5.8;a3=1.2'.
+
+       -t <title> -- optional argument to set plot title; also invoked as
+                     '--title=<title>'
+
+       -x <xlabel> -- optional argument to set x-axis label for plot; also
+                     '--xlabel=<xlabel>'
+
+       -y <ylabel> -- optional argument to set y-axis label for plot; also
+                     '--ylabel=<ylabel>'
+
+       -n <name> -- optional argument to specify window name, for
+                     display command in "Experiment.pm".  This way
+                     successive curve fits will show up in the same 
+                     window.  Default value is 'curve_fit'.
+
+       -l -- (also --lines) forces data to be plotted using lines
+                     instead of points (default is points)
+
+       -p -- (also --points) forces data to be plotted using lines
+                     *and* points
+
+       -i -- (also --initial) skips the fit and makes a plot of the data
+                     with the initial guess for the fitting function.
+                     Handy if you're having problems with the fit failing.
+
+       -q -- (also --quiet) quiet mode: don't pop up the plot
+
+       -r <parameter name> -- instead of reporting all parameter values
+                     to standard output, just report the numerical
+                     value of the fitting parameter <parameter name>.
+                     Handy when invoking from a scripted loop.
+                     also '--report=<parameter name>'
+
+       -e <parameter name> -- same as -r, but report fit error instead
+                     also '--error=<parameter name>'
+
+
+    Example: fit a Gaussian to data in file 'datfile':
+       $Pgname datfile 'A*exp(-(x-x0).^2/(2*s^2))' 'A=0.8;s=10;x0=90'
+
+    11/16/06 DAS
+    rev. 11/17/06 DAS
+
+END
+   exit;
+}
+
+&Getopt::Long::Configure('bundling');
+my $title=''; my $xlabel=''; my $ylabel=''; 
+my $defaultname='curve_fit'; my $name=$defaultname;
+
+&usage unless
+&Getopt::Long::GetOptions(
+             'title|t=s'             => \$title,
+             'xlabel|x=s'            => \$xlabel,
+             'ylabel|y=s'            => \$ylabel,
+             'name|n=s'              => \$name,
+             'lines|l'               => \$linesflag,
+             'points|p'              => \$pointsflag,
+             'initial|i'             => \$initialflag,
+             'quiet|q'               => \$quietflag,
+             'report|r=s'            => \$report,
+             'error|e=s'             => \$error
+     );
+
+&usage unless ( $#ARGV == 2 );
+
+($file, $equation, $initparams) = @ARGV;
+die("Error ($Pgname): file '$file' does not exist.\n") unless -f $file;
+
+### open bidirectional communication to octave
+pipe($tmp_read,$talk);
+pipe($listen,$tmp_write);
+my $pid=fork();if(!defined($pid)){
+  die "Error ($Pgname): unable to fork ($!).\n";
+}if(!$pid){
+  my $olderr;
+  open(STDIN,'<&',$tmp_read);
+  open(STDOUT,'>&',$tmp_write);
+  open($olderr,'>&STDERR');
+        open(STDERR,'>&',$tmp_write);
+  if(!(system($octave) == 0)){
+    close($tmp_read);
+    print $olderr "Error ($Pgname): problem in octave ($!).\n";
+    exit 128;
+  }
+  exit 0;
+}
+close($tmp_read); close($tmp_write);
+my $tmp=select($talk); $|=1; select($tmp);   #set autoflushing
+my $tmp=select($listen); $|=1; select($tmp); #set autoflushing
+
+### load data in octave
+print $talk <<"END";
+  fitdata = load $file;
+  x = fitdata(:,1);
+  y = fitdata(:,2);
+  sigma = ones(size(x));
+  sz = size(fitdata);
+  if ( sz(2) == 3 ), sigma = fitdata(:,3); end
+END
+
+### load curve fitting routine, so we don't have to worry about
+### whether or not it's in the path (routine at end of file)
+&LoadMarqLev;
+
+### set up parameters by putting names into an array
+$initparams =~ s/,/;/g; # tolerate commas
+$paramlist = $initparams;
+$paramlist =~ s/=.*?;/;/g;
+$paramlist =~ s/=.*?$//g;
+@params = split(/;/, $paramlist);
+
+### set up fitting function in octave (see file 'testml.m' for layout)
+print $talk "function yout = fitfnc(x, params)\n";
+$ctr=0;
+foreach $param (@params) {
+  $ctr++;
+  print $talk "  $param = params($ctr);\n";
+}
+print $talk "  yout = $equation;\n";
+print $talk "end % function\n";
+
+### set up vector of initial parameter values
+$initparamcmd = $initparams;
+$initparamcmd =~ s/;.*?=/;/g;
+$initparamcmd =~ s/^.*?=//g;
+$initparamcmd = "initparams = [$initparamcmd];";
+print $talk "$initparamcmd;\n";
+
+### do fit!
+if ( $initialflag ) {
+  print $talk "params = initparams; errors = 0*params;\n";
+} else {
+  print $talk "[params, errors] = MarqLevlocal('fitfnc',initparams,x,y,sigma);\n";
+}
+print $talk 'printf("fit completed.\n")' . ";\n";
+print $talk <<"END";
+  printf("params");
+  for j = 1:length(params),
+    printf(":%f",params(j));
+  end %for j
+  printf("\\n");
+  printf("errors");
+  for j = 1:length(errors),
+    printf(":%f",errors(j));
+  end %for j
+  printf("\\n");
+END
+print $talk "exit\n";
+
+### get results
+while(<$listen>) {
+  $line = $_;
+  if ($line =~ /warning/) { print STDERR "Warning ($Pgname): fit failed.\n"; }
+  if ($line =~ /params:/) {
+    chomp $line;
+    $line =~ s/params://;
+    @fitparams = split(/:/, $line);
+  }
+  if ($line =~ /errors:/) {
+    chomp $line;
+    $line =~ s/errors://;
+    @fiterrors = split(/:/, $line);
+  }
+}
+
+### report fit results to STDOUT
+if ( $report ) {
+  for ($j=0; $j<=$#params; $j++) {
+    if ( $params[$j] eq $report ) { print "$fitparams[$j]\n"; }
+  }
+} elsif ( $error ) {
+  for ($j=0; $j<=$#params; $j++) {
+    if ( $params[$j] eq $error ) { print "$fiterrors[$j]\n"; }
+  }
+} else {
+  for ($j=0; $j<=$#params; $j++) {
+    print "$params[$j] = $fitparams[$j] +- $fiterrors[$j]\n";
+  }
+}
+
+### patch up fit equation for plotting in gnuplot
+$plotequation = $equation;
+for ($j=0; $j<=$#params; $j++) {
+  $plotequation =~ s/$params[$j]/($fitparams[$j])/g;
+}
+$plotequation =~ s/\.\^/^/g;
+$plotequation =~ s/\.\*/*/g;
+$plotequation =~ s|\./|/|g;
+$plotequation =~ s/\^/**/g;
+
+### plot fit results to gnuplot
+
+my $filestem = $file; $filestem =~ s/\.txt$//;
+
+$points = 'p pt 7';
+if ( $linesflag ) { $points = 'l'; }
+if ( $pointsflag ) { $points = 'linespoints pt 7'; }
+
+# removed the followinf line from 'set term png'
+# font '/Library/Fonts/Georgia' 10
+
+my $gnuplotcmd = <<"END";
+    set title '$title'
+    set xla '$xlabel'
+    set yla '$ylabel'
+#    set term png 
+#		set output '$filestem.curvefit.output.png'
+    set term png
+    set output '$filestem.curvefit.png'
+    plot '$file' w $points, $plotequation title 'fit'
+#    replot
+END
+
+### archive the gnuplot commands in case of later use
+my $gnuplotcmdfilename = "$filestem.curvefit.gnuplotcmd";
+die "Error ($Pgname): can't open gnuplot command file for output!" unless
+  open ( gnuplotcmdfile, ">$gnuplotcmdfilename" );
+  print gnuplotcmdfile "\# Fit equation:\n";
+  print gnuplotcmdfile "\# $equation\n";
+  print gnuplotcmdfile "\#\n";
+  print gnuplotcmdfile "\# Initial guess:\n";
+  print gnuplotcmdfile "\# $initparams\n";
+  print gnuplotcmdfile "\#\n";
+  print gnuplotcmdfile "\# Fit results:\n";
+  for ($j=0; $j<=$#params; $j++) {
+    print gnuplotcmdfile "\# $params[$j] = $fitparams[$j] +- $fiterrors[$j]\n";
+  }
+  print gnuplotcmdfile "\#\n";
+  print gnuplotcmdfile "\# Call fit as:\n";
+  print gnuplotcmdfile "\# $Pgname $file '$equation' '$initparams'\n";
+  print gnuplotcmdfile "\#\n";
+  print gnuplotcmdfile $gnuplotcmd;
+close gnuplotcmdfile;
+
+### generate the plots
+system("$gnuplot","$gnuplotcmdfilename");
+
+### display png file using display server
+if ( !$quietflag ) {
+  if ( $name eq $defaultname ) {
+    display("$filestem.curvefit.png",name=>"$name",size=>[-1,-1],false=>0);
+  } else {
+    display("$filestem.curvefit.png",name=>"$name",false=>0);
+  }
+}
+
+
+sub LoadMarqLev {
+
+print $talk <<'END'
+
+function [params, errors] = MarqLevlocal(fitfcn, initparams, xdata, ydata, sigma)
+
+% MarqLev  uses Marquardt-Levenberg routine to fit an arbitrary function
+%   to a given set of data.
+%
+%   [params, errors] = MarqLev(fitfcn, initparams, xdata, ydata, sigma)
+%
+%   performs the fit, where
+%
+%    params -- is a column vector of best fit parameters
+%    errors -- is a column vector of the estimated errors associated with
+%                 each parameter (expressed as a fraction of the parameter
+%                 value)
+%    fitfcn -- is a string containing the name of the function, which has
+%                 format  fitfcn(xdata, params)
+%    initparams -- is a column vector specifying the initial guesses for
+%                 the parameter values
+%    xdata -- is a column vector with the data x values
+%    ydata -- is a column vector with the data y values
+%    sigma -- (optional) is a column vector with the standard deviations
+%                 for the y data values
+%
+% Final chi squared statistic is returned in the global variable
+%   gChiSquared.
+%
+% Based on discussion in "Data Reduction and Error Analysis for the 
+%    Physical Sciences" by Philip R. Bevington.
+ 
+global gChiSquared
+
+if nargin == 4 
+  sigma = ones(length(ydata), 1);
+end
+
+s = size(ydata);
+if s(1) == 1
+  ydata = ydata.';
+end
+s = size(xdata);
+if s(1) == 1
+  xdata = xdata.';
+end
+s = size(initparams);
+if s(1) == 1
+  initparams = initparams.';
+end
+s = size(sigma);
+if s(1) == 1 
+  sigma = sigma.';
+end
+
+
+lambda = 0.001;
+stopflag = 0;
+params = initparams;
+iterations = 0;
+recalculateflag = 1;
+maxiterations = 100;
+
+% calculate chi squared at initial parameters
+ycalc = feval(fitfcn, xdata, params);
+chisquared = ((ydata - ycalc).^2).' * (1./(sigma.^2))
+    
+     
+for i=1:length(params)
+  expandedsigmasquared(:, i) = sigma.^2;
+end
+
+% main iteration loop
+
+while (stopflag < 2)
+
+  %  calculate partial derivatives
+  
+  if (recalculateflag == 1)
+    for i=1:length(params)
+      delta = zeros(length(params), 1);
+      delta(i) = max([.0001, abs(.01*params(i))]);
+      derivs(:, i) = (feval(fitfcn, xdata, params + delta) - ...
+         feval(fitfcn, xdata, params - delta))/2/sum(delta);
+    end
+  
+  %  calculate alpha matrix
+    alpha = (derivs./expandedsigmasquared).'*derivs;
+  end
+  alphaprime = alpha + lambda * diag(diag(alpha));
+  
+  % calculate beta vector
+  
+  beta = derivs.' * ((ydata - feval(fitfcn, xdata, params))./(sigma.^2));
+
+  % calculate change to params
+  
+  newparams = params + alphaprime\beta
+  
+  % calculate new chi squared
+  
+  newchisquared = ((ydata - feval(fitfcn, xdata, newparams)).^2).' * ...
+     (1./(sigma.^2));
+  
+  % check for improvement
+  
+  deltachisquared = newchisquared - chisquared;
+  if (deltachisquared > 0) | (isnan(newchisquared))
+    lambda = lambda * 10;
+    recalculateflag = 0;
+  else
+    lambda = lambda/10;
+    recalculateflag = 1;
+    iterations = iterations + 1;
+    if (deltachisquared > -.01) & (-deltachisquared < .001*chisquared)
+      stopflag = stopflag + 1;
+    else
+      stopflag = 0;
+    end
+    
+    if (iterations > maxiterations)
+      stopflag = 3;
+    end
+    
+    chisquared = newchisquared;
+    params = newparams;
+  end
+  
+  iterations, params, newchisquared
+  
+end
+
+
+% Calculate covariance matrix and then errors
+
+  for i=1:length(params)
+    delta = zeros(length(params), 1);
+    delta(i) = max([.01, abs(.01*params(i))]);
+    derivs(:, i) = (feval(fitfcn, xdata, params + delta) - ...
+      feval(fitfcn, xdata, params - delta))/2/sum(delta);
+  end
+    
+  alpha = (derivs./expandedsigmasquared).'*derivs;
+  covariance = inv(alpha);
+  errors = sqrt(diag(covariance))./params;
+ 
+  gChiSquared = newchisquared;
+
+end %function
+
+END
+
+}
