@@ -1,0 +1,1 @@
+curvefit gausswave.txt 'A*exp(-(x-x0).^2/(2*s^2))' 'A=0.8;s=10;x0=90'

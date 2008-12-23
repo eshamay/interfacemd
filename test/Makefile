@@ -10,6 +10,7 @@ QPT = $(XYZSYSTEM) ../hno3analysis.o Qpt.o
 MDCRD2PDB = $(AMBERFILES) ../pdbfile.o mdcrd2pdb.o
 FILLBOX = $(AMBERFILES) ../pdbfile.o ../boxfiller.o
 MPIFILES	=	$(AMBERFILES) ../mpi/mpisys.o mpitest.o
+ORDERPARAMS = $(AMBERFILES) orderparams.o
 TEMPFILES	= temp.cpp $(AMBERFILES)
 
 ambertest : ambertest.o $(AMBERFILES)
@@ -32,6 +33,9 @@ toptest : toptest.o ../topfile.o
 
 angledistro: angledistro.o $(AMBERFILES)
 	$(CXX) $(CPPFLAGS) angledistro.o $(AMBERFILES) -o angledistro
+
+orderparams:  $(ORDERPARAMS)
+	$(CXX) $(CPPFLAGS) $(ORDERPARAMS) -o orderparams
 
 dipoletcf : $(DIPOLETCF)
 	$(CXX) $(CPPFLAGS) $(DIPOLETCF) -o dipoletcf

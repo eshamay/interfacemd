@@ -49,7 +49,6 @@ void AmberSystem::_ParseAtomVectors () {
 	RUN (_atoms) {
 		_atoms[i]->Position ( _coords[i] );
 		if (_forces.Loaded()) _atoms[i]->Force ( _forces[i] );
-		_atoms[i]->ParentMolecule()->Unset();
 	}
 	
 return;
@@ -110,6 +109,8 @@ void AmberSystem::LoadNext () {
 	_coords.LoadNext ();							// load up coordinate information from the file
 	if (_forces.Loaded()) _forces.LoadNext ();		// also load the force information while we're at it
 	this->_ParseAtomVectors ();
+	RUN (_atoms)
+		_atoms[i]->ParentMolecule()->Unset ();
 	
 return;
 }
