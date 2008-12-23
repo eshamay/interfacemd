@@ -199,17 +199,27 @@ return;
 */
 
 // returns the direction cosine matrix to the lab frame from the molecular one
-MatR const & Water::DCMToLab () {
+MatR const & Water::DCMToLab (const coord axis) {
     // These are the three lab-frame axes
-    VecR X (1,0,0);
-    VecR Y (0,1,0);
-    VecR Z (0,0,1);
+	VecR X, Y, Z;
+
+	if (axis == z) {
+    	X.Set (1.,0.,0.);
+    	Y.Set (0.,1.,0.);
+    	Z.Set (0.,0.,1.);
+	}
+
+	// but if the system is funky and we want to use different lab-frame coords, perhaps treating the Y-axis as the primary axis, then this will work
+	// This is just changing the 'primary' axis used to define the 'tilt' angle when calculating Euler angles
+	if (axis == y) {
+    	X.Set (0.,0.,1.);
+    	Y.Set (1.,0.,0.);
+    	Z.Set (0.,1.,0.);
+	}
 
     // Here we'll create the lab-frame rotation matrix to rotate molecular properties into the lab-frame
     double rotation_data[9] = {_x<X, _x<Y, _x<Z, _y<X, _y<Y, _y<Z, _z<X, _z<Y, _z<Z};
     DCM.Set (rotation_data);
-
-	// while we're at it, let's quickly compute the Euler angles
 
 return DCM;
 }
@@ -234,20 +244,28 @@ return DCM;
 }
 
 // this should calculate the Euler Angles to get from the molecular frame to the lab frame
-void Water::CalcEulerAngles () {
+void Water::CalcEulerAngles (const coord axis) {
 
 	// First let's set up the direction cosine matrix. The values of the euler angles come from that.
 	// Don't forget to set the molecular axes before using this!
-	this->DCMToLab ();
+	this->DCMToLab (axis);
 
 	// here is the direct calculation of the euler angles from the direction cosine matrix. This method comes from 
 	double z1 = DCM.Index(2,0);
 	double z2 = DCM.Index(2,1);
 	double z3 = DCM.Index(2,2);
+	double x2 = DCM.Index(0,2);
+	double y2 = DCM.Index(1,2);
 
+	/* If all three axes in the molecular (xyz) and lab (XYZ) frames are aligned, then the euler rotations work by rotating about the body-fixed 
+	 * axes as follows based on the ZXZ convention:
+	 * First a rotation of alpha about the z-axis
+	 * Second a rotation of beta about the x-axis. This is also known as the "tilt" angle because it is the angle between the z and Z axes.
+	 * Lastly a rotation of gamma about the body-fixed z-axis. This is the "twist" angle.
+	 */
+	double alpha = atan2(x2,-y2);
 	double beta = atan2(sqrt(z1*z1+z2*z2), z3);
-	double alpha = atan2(DCM.Index(0,2),-DCM.Index(1,2));
-	double gamma = atan2(DCM.Index(2,0),DCM.Index(2,1));
+	double gamma = atan2(z1,z2);
 
 	//printf ("% 10.4f% 10.4f% 10.4f\n", theta, phi, chi);
 
@@ -256,7 +274,7 @@ void Water::CalcEulerAngles () {
 	EulerAngles[1] = beta;
 	EulerAngles[2] = gamma;
 
-	// and now set up the euler rotation matrix
+	// and now set up the euler rotation matrix according to the ZXZ convention for euler rotations
     double euler_matrix[9] = {
 		cos(alpha)*cos(gamma) - sin(alpha)*cos(beta)*sin(gamma),
 		sin(alpha)*cos(gamma) + cos(alpha)*cos(beta)*sin(gamma),

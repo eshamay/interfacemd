@@ -5,18 +5,19 @@ void OrderParameters::PrintOutput () {
 
 	rewind (output);
 
-	if (!((step*10) % 2500)) {
+	if (!((timestep*10) % 2500)) {
 		for (unsigned int pos = 0; pos < posbins; pos++) {
+
 			double position = double(pos) * posres + posmin;
+			double N = (double)number_density[pos];
+			if (N == 0) continue;
 
-		for (unsigned int s1; s1 < angbins; s1++) {
-			double S1 = double(s1)*angres + angmin;
-
-		for (unsigned int s2n; s2n < angbins; s2n++) {
-			double S2
-		for (unsigned int s2d; s2d < angbins; s2d++) {
-
-		}}}}
+			fprintf (output, "% 10.3f% 10.3f% 10.3f\n", 
+				position,
+				0.5 * S1[pos]/N,
+				S2_num[pos] / S2_den[pos]
+			);
+		}
 	}
 
 	fflush (output);
@@ -28,7 +29,7 @@ return;
 void OrderParameters::PrintStatus () {
 
 	if (!(timestep % 2500)) 
-		cout << endl << step << ") ";
+		cout << endl << timestep << ") ";
 	if (!(timestep % 250))  
 		cout << "*";
 	
@@ -40,53 +41,57 @@ return;
 
 int main (int argc, char **argv) {
 
+	OrderParameters par;
+
 	// start the analysis - run through each timestep
-	for (timestep = 0; timestep < timesteps; timestep++) {
+	for (par.timestep = 0; par.timestep < par.timesteps; par.timestep++) {
 		// then look at each molecule
-		for (unsigned int mol = 0; mol < sys->NumMols(); mol++) {
+		for (unsigned int mol = 0; mol < par.sys->NumMols(); mol++) {
 
 			// find all the waters
-			Water * wat = static_cast<Water *>(sys->Molecules(mol));
+			Water * wat = static_cast<Water *>(par.sys->Molecules(mol));
 			if (wat->Name() != "h2o") continue;
 
 			// take each water and find its position in the slab
 			double pos = wat->GetAtom("O")->Y();
-			if (pos < 15.0) pos += Atom::Size()[axis];
-			int posbin = int ((pos-posmin)/posres);
+			if (pos < 15.0) pos += Atom::Size()[par.axis];
+			int posbin = int ((pos-par.posmin)/par.posres);
 
 			// The two order parameters are calculated from the Euler angles, so let's find those
 			// first set the molecular axes up
 			wat->SetOrderAxes ();
 			// then find the Euler angles for the tilt and twist of the molecule
-			wat->CalcEulerAngles ();
+			wat->CalcEulerAngles (par.axis);
 			double tilt = wat->EulerAngles[1];
 			double twist = wat->EulerAngles[2];
 
 			// calculate the S1 term
-			double S1 = 3.0 * cos(tilt) * cos(tilt) - 1.0;
+			double S1_value = 3.0 * cos(tilt) * cos(tilt) - 1.0;
 
 			// and the S2 numerator and denominator
-			double S2_num = sin(tilt) * cos(2.0 * twist);
-			double S2_den = sin(tilt);
+			double S2_num_value = sin(tilt) * cos(2.0 * twist);
+			double S2_den_value = sin(tilt);
 
+/*
 			// and now bin all those values for the histogram
 			int S1_bin = int ((S1-posmin)/posres);
 			int S2_num_bin = int ((S2_num-angmin)/angres);
 			int S2_den_bin = int ((S2_den-angmin)/angres);
+*/
 
-			++histo[posbin][S1_bin][S2_num_bin][S2_den_bin];
-			++number_density[posbin];
+			par.S1[posbin] += S1_value;
+			par.S2_num[posbin] += S2_num_value;
+			par.S2_den[posbin] += S2_den_value;
+			++par.number_density[posbin];
 		}
 
-		sys->LoadNext();
+		par.sys->LoadNext();
 
-		PrintStatus();
-		PrintOutput ();
+		par.PrintStatus ();
+		par.PrintOutput ();
 	}
 
-	PrintOutput ();
+	par.PrintOutput ();
 
 return 0;
 }
-
-

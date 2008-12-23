@@ -12,12 +12,15 @@ class OrderParameters {
 
 public:
 
+	OrderParameters ();
+
 	AmberSystem * sys;
 
 	FILE * output;
 
-	vector< vector< vector< vector<int> > > > histo;
-
+	vector<double> S1;
+	vector<double> S2_num;
+	vector<double> S2_den;
 	vector<int> number_density;
 
 	coord axis;
@@ -30,13 +33,15 @@ public:
 	double	posmin;
 	double	posmax;
 	double	posres;
+	int		posbins;
 
 	double	angmax;
 	double	angmin;
 	double	angres;
+	int		angbins;
 
-	void PrintOutput (int step, FILE * output, int ****histo, int *numden);
-	void PrintStatus (int step);
+	void PrintOutput ();
+	void PrintStatus ();
 };
 
 OrderParameters::OrderParameters () {
@@ -54,29 +59,25 @@ OrderParameters::OrderParameters () {
 	axis = y;
 	
 	output_freq	=	10;					// how often the output file will be written (# of timesteps/10)
-	timesteps	=	20000;				// # of timesteps to process through
-	output =	"orderparams.dat";		// name of the output file for the final spectra
+	timesteps	=	200000;				// # of timesteps to process through
 	
 	// position boundaries and bin width
 	posmin	= -0.5;
 	posmax	= 100.0;
-	posres	= 1.0;
-	const int posbins = (posmax-posmin)/posres;
+	posres	= 0.5;
+	posbins = (posmax-posmin)/posres;
 	
 	angmax	 = 1.0;
 	angmin	 = -1.0;
 	angres	 = 0.05;
-	const int angbins = (angmax-angmin)/angres;
+	angbins = (angmax-angmin)/angres;
 	
 	// setup and initialize the system histogram
 	// The histo looks like histo[y-position][S1][S2 numerator][S2 denominator]
-	vector<int> a (angbins, 0);
-	vector< vector<int> > b (angbins, a);
-	vector< vector< vector<int> > > c (angbins, b);
-	vector< vector< vector< vector<int> > > > d (posbins, c);
-	histo = d;
-
-	number_density.resize(posbins);
+	S1.clear(); S1.resize (posbins, 0.0);
+	S2_num.clear(); S2_num.resize (posbins, 0.0);
+	S2_den.clear(); S2_den.resize (posbins, 0.0);
+	number_density.clear(); number_density.resize(posbins, 0);
 
 return;
 }
