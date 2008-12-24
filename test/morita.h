@@ -22,8 +22,8 @@
 
 
 // set the interface correctly - different simulation = different location!!
-#define INTERFACE_LOW		70.0			// the location of the interface (the top one, only, for now)
-#define INTERFACE_HIGH		85.0
+#define INTERFACE_LOW		68.0			// the location of the interface (the top one, only, for now)
+#define INTERFACE_HIGH		90.0
 #define PBC_FLIP			15.0			// used for funcy periodic boundaries
 
 const coord axis = y;
@@ -41,7 +41,7 @@ void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_ato
 #else
 void OutputHeader ();
 void OutputStatus (int const count);
-void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys);
+void FindInterfacialAtoms (vector<Water *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys);
 #endif
 
 void OutputData (FILE * fp, vector< complex<double> >& chi);

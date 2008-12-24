@@ -27,13 +27,13 @@ int main (int argc, char **argv) {
 	Water * water;	// our prototypical water molecule
 
 	// Sets up the axes for the system
-	const int P = 1;		// perpendicular to the interface
+	const int P = 2;		// perpendicular to the interface
 	const int S1 = 0;		// the two that are parallel to the surface
-	const int S2 = 2;
+	const int S2 = 1;
 
 
 	// just so we don't have to always iterate over the entire system, we're only going to look at interfacial molecules - the ones were interested in.
-	std::vector<Molecule *> int_mols;
+	std::vector<Water *> int_mols;
 	// and these are the atoms of those molecules
 	std::vector<Atom *> int_atoms;
 	
@@ -54,16 +54,12 @@ int main (int argc, char **argv) {
 
 		for (int mol = 0; mol < int_mols.size(); mol++) {
 			
-			// we're only looking at waters for SFG analysis right now
-			if (int_mols[mol]->Name() != "h2o") continue;
-
-			// first thing we do is grab a water molecule to work with
-			water = static_cast<Water *>(int_mols[mol]);
+			water = int_mols[mol];
 
 			sfg.Reset();		// reset the calculator for a new molecule
 			MolChi.clear();
 
-			// and then calculate the chi spectrum for the molecule
+			// and then calculate the chi spectrum for the molecule SPS
 			MolChi = sfg.Chi (*water, S1, P, S1);
 
 			// when starting a new timestep...
@@ -161,7 +157,7 @@ void OutputData (FILE * fp, vector< complex<double> >& chi) {
 return;
 }
 
-void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys) {
+void FindInterfacialAtoms (vector<Water *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys) {
 	
 	int_mols.clear();
 	int_atoms.clear();
@@ -170,16 +166,24 @@ void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_ato
 
 	// go through the system
 	RUN (sys.Molecules()) {
+		// grab each molecule
 		pmol = sys.Molecules(i);
-		double position = pmol->Atoms(0)->Position()[axis];
+
+		// we're only looking at waters for SFG analysis right now
+		if (pmol->Name() != "h2o") continue;
+
+		// first thing we do is grab a water molecule to work with
+		Water * water = static_cast<Water *>(pmol);
+
+		double position = water->Atoms(0)->Position()[axis];
 		// and find molecules that sit within the interface.
 		if (position < PBC_FLIP) position += Atom::Size()[axis];		// adjust for funky boundaries
 		// these values have to be adjusted for each system
-		if (position < INTERFACE_LOW || position > INTERFACE_HIGH) continue;				// set the interface cutoffs
+		if (position < INTERFACE_LOW or position > INTERFACE_HIGH) continue;				// set the interface cutoffs
 		
-		int_mols.push_back (pmol);
-		RUN2(pmol->Atoms()) {
-			int_atoms.push_back (pmol->Atoms(j));
+		int_mols.push_back (water);
+		RUN2(water->Atoms()) {
+			int_atoms.push_back (water->Atoms(j));
 		}
 	}
 
