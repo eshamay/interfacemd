@@ -47,7 +47,7 @@ int main (int argc, char **argv) {
 		firstmol = true;		// every timestep we will have to go through all the molecules again
 
 		// first let's find all the molecules in the interface
-		FindInterfacialAtoms (int_mols, int_atoms, sys);
+		FindInterfacialWaters (int_mols, int_atoms, sys);
 
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
 		sys.UpdateGraph (int_atoms);
@@ -157,7 +157,7 @@ void OutputData (FILE * fp, vector< complex<double> >& chi) {
 return;
 }
 
-void FindInterfacialAtoms (vector<Water *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys) {
+void FindInterfacialWaters (vector<Water *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys) {
 	
 	int_mols.clear();
 	int_atoms.clear();
