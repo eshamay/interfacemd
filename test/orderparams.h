@@ -8,6 +8,9 @@
 #define MDCRD	"mdcrd"
 #define FORCE	""
 
+#define INT_LOW		29.771
+#define	INT_HIGH	74.2
+
 class OrderParameters {
 
 public:
@@ -34,6 +37,8 @@ public:
 	double	posmax;
 	double	posres;
 	int		posbins;
+
+	double  int_low, int_high, middle;
 
 	double	angmax;
 	double	angmin;
@@ -62,10 +67,14 @@ OrderParameters::OrderParameters () {
 	timesteps	=	200000;				// # of timesteps to process through
 	
 	// position boundaries and bin width
-	posmin	= -0.5;
-	posmax	= 100.0;
+	posmin	= -25.0;
+	posmax	= 25.0;
 	posres	= 0.5;
 	posbins = (posmax-posmin)/posres;
+
+	int_low = INT_LOW;
+	int_high = INT_HIGH;
+	middle = (int_low + int_high)/2.0;
 	
 	angmax	 = 1.0;
 	angmin	 = -1.0;

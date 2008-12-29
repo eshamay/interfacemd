@@ -55,7 +55,12 @@ int main (int argc, char **argv) {
 			// take each water and find its position in the slab
 			double pos = wat->GetAtom("O")->Y();
 			if (pos < 15.0) pos += Atom::Size()[par.axis];
-			int posbin = int ((pos-par.posmin)/par.posres);
+
+			// we're going to do averaging of the two interfaces.
+			// First we find if the water is in the upper or lower interface and find its position relative to the gibbs dividing surface
+			double distance = (pos > middle) ? pos - int_high : int_low - pos;
+
+			int posbin = int ((distance-par.posmin)/par.posres);
 
 			// The two order parameters are calculated from the Euler angles, so let's find those
 			// first set the molecular axes up
