@@ -1,5 +1,64 @@
 #include "orderparams.h"
 
+OrderParameters::OrderParameters (int argc, char **argv) {
+	
+	// here is our system for analysis
+	sys = new AmberSystem (PRMTOP, MDCRD, FORCE);
+
+	printf ("Running an order parameter analysis with the following options:\n");
+
+	string output_name = "orderparams.dat";
+	output = (FILE *)NULL;
+	output = fopen (output_name.c_str(), "w");
+	if (output == (FILE *)NULL) {
+		printf ("couldn't open the output file for reading!\n");
+		exit (1);
+	}
+
+	printf ("\noutput file = %s\n", output_name.c_str());
+
+	axis = y;
+	
+	output_freq	=	10;					// how often the output file will be written (# of timesteps/10)
+	timesteps	=	200000;				// # of timesteps to process through
+	
+	printf ("timesteps = %d\n", timesteps);
+
+	// position boundaries and bin width
+	posmin	= -25.0;
+	posmax	= 25.0;
+	posres	= 0.5;
+	posbins = (posmax-posmin)/posres;
+
+	printf ("Position analysis will range from % 8.3f to % 8.3f angstroms of the gibbs dividing surface, in % 8.3f increments\n", posmin, posmax, posres);
+
+	if (argc < 3) {
+		printf ("Rerun with the two interface locations:\norderparams <int_low> <int_high>\n");
+		exit(1);
+	}
+	int_low = atof(argv[1]);
+	int_high = atof(argv[2]);
+	middle = (int_low + int_high)/2.0;
+
+	printf ("Low interface : % 8.3f\nHigh interface : % 8.3f\n", int_low, int_high);
+	
+	angmax	 = 1.0;
+	angmin	 = -1.0;
+	angres	 = 0.01;
+	angbins = (angmax-angmin)/angres;
+	
+	printf ("Angle cosines will be measured in increments of % 8.3f\n\n", angres);
+
+	// setup and initialize the system histogram
+	// The histo looks like histo[y-position][S1][S2 numerator][S2 denominator]
+	S1.clear(); S1.resize (posbins, 0.0);
+	S2_num.clear(); S2_num.resize (posbins, 0.0);
+	S2_den.clear(); S2_den.resize (posbins, 0.0);
+	number_density.clear(); number_density.resize(posbins, 0);
+
+return;
+}
+	
 // output data to a file
 void OrderParameters::PrintOutput () {
 
@@ -41,7 +100,7 @@ return;
 
 int main (int argc, char **argv) {
 
-	OrderParameters par;
+	OrderParameters par (argc, argv);
 
 	// start the analysis - run through each timestep
 	for (par.timestep = 0; par.timestep < par.timesteps; par.timestep++) {
@@ -55,7 +114,12 @@ int main (int argc, char **argv) {
 			// take each water and find its position in the slab
 			double pos = wat->GetAtom("O")->Y();
 			if (pos < 15.0) pos += Atom::Size()[par.axis];
-			int posbin = int ((pos-par.posmin)/par.posres);
+
+			// we're going to do averaging of the two interfaces.
+			// First we find if the water is in the upper or lower interface and find its position relative to the gibbs dividing surface
+			double distance = (pos > par.middle) ? pos - par.int_high : par.int_low - pos;
+
+			int posbin = int ((distance-par.posmin)/par.posres);
 
 			// The two order parameters are calculated from the Euler angles, so let's find those
 			// first set the molecular axes up
