@@ -59,7 +59,7 @@ mpitest: $(MPIFILES)
 	mpiCC $(CPPFLAGS) $(MPILIBS) -o mpitest $(MPIFILES)
 
 cleantest :
-	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest
+	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams
 
 #densitytest.o: densitytest.cpp densitytest.h
 #toptest.o: toptest.cpp toptest.h
