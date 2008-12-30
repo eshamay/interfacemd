@@ -24,7 +24,7 @@ private:
 	FILE *  _output;
 	AmberSystem	_sys;
 
-	int 	_steps;		// number of timesteps
+	int 	_step, _steps;		// number of timesteps
 	int 	_size;		// size of the histogram
 	double 	_start;		// starting position for the histogram
 	double 	_end;		// ending position
