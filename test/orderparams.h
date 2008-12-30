@@ -8,9 +8,6 @@
 #define MDCRD	"mdcrd"
 #define FORCE	""
 
-#define INT_HIGH	74.2
-#define INT_LOW		29.771
-
 class OrderParameters {
 
 public:
