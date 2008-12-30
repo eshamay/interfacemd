@@ -225,10 +225,10 @@ return DCM;
 }
 
 // The molecular axes are defined as per Morita&Hynes (2000) where they set one of the OH bonds (oh1) as the molecular z-axis, and the other bond points in the positive x-axis direction. The result is setting DCM as the direction cosine matrix, that, when operating on a vector in the molecular frame will rotate it into lab-frame coordinates
-MatR const & Water::DCMToLabMorita () {
+MatR const & Water::DCMToLabMorita (const coord axis) {
     this->SetMoritaAxes ();
 	
-	this->DCMToLab ();
+	this->DCMToLab (axis);
 
 return DCM;
 }

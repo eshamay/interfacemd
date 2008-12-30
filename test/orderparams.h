@@ -35,7 +35,7 @@ public:
 	double	posres;
 	int		posbins;
 
-	double  int_low, int_high, middle;
+	double int_low, int_high, middle;		// the positions of the low, high, and middle interfaces
 
 	double	angmax;
 	double	angmin;

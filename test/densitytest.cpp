@@ -7,6 +7,7 @@ DensityAnalyzer::DensityAnalyzer (char * argv[], int const argc, int const numSt
 	// this will be our output data file
 	_output = fopen ("density.dat", "w");
 
+	_step		= 0;
 	_steps 		= numSteps;
 	_start 		= start;
 	_end 		= end;
@@ -43,8 +44,17 @@ void DensityAnalyzer::_PrintToFile () {
 	for (int i=0; i < _size; i++) {
 		fprintf (_output, "% 10.4f", double(i)*_binsize+_start);		// the bin's position value
 
+		// the output value of the number density will be converted to the actual density in g/mL.
+		// the volume of a slice of the slab
+		double volume = Atom::Size()[x] * Atom::Size()[y] * Atom::Size()[z] / Atom::Size()[_axis];
+		volume *= _binsize;
+
 		for (unsigned int atom = 0; atom < _atomNames.size(); atom++) {
-			fprintf (_output, "% 10d", _density[atom][i]);			// for each atom printout the histogram value at that position
+			// The density is thus transformed. 
+			// The value of 29.93355 comes from a combo of avogadro's number, the atomic weight of water, and the conversion to mL.
+			double density = _density[atom][i] / volume / (double)_step * 29.93355;
+
+			fprintf (_output, "% 13.7f", density);			// for each atom printout the histogram value at that position
 		}
 
 		fprintf (_output, "\n");
@@ -82,7 +92,7 @@ vector<int> DensityAnalyzer::AtomDensity (string const atomname) {
 		// grab the position info of the atom
 		VecR r = patom->Position();
 		double position = r[_axis];
-		if (position < 15.0) position += Atom::Size()[_axis];
+		if (position < 17.0) position += Atom::Size()[_axis];
 
 		// and bin it into the density histogram
 		int bin = (int)((position - _start)/_binsize);
@@ -104,7 +114,7 @@ void DensityAnalyzer::SystemDensities () {
 
 
 	// now let's run through the timestesp
-	for (int step=0; step < _steps; step++) {
+	for (_step=0; _step < _steps; _step++) {
 		
 		// for each atom that we're testing we'll add the histogram data into the final data-set
 		for (unsigned int atom=0; atom < _atomNames.size(); atom++) {
@@ -118,8 +128,8 @@ void DensityAnalyzer::SystemDensities () {
 		// and set up the system for the next timestep
 		_sys.LoadNext();
 
-		this->_PrintStatus (step);
-		if (!(step % (OUTPUT_FREQ * 25)))
+		this->_PrintStatus (_step);
+		if (!(_step % (OUTPUT_FREQ * 25)))
 			this->_PrintToFile ();
 
 	}

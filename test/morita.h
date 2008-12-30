@@ -22,8 +22,8 @@
 
 
 // set the interface correctly - different simulation = different location!!
-#define INTERFACE_LOW		70.0			// the location of the interface (the top one, only, for now)
-#define INTERFACE_HIGH		85.0
+#define INTERFACE_LOW		68.0			// the location of the interface (the top one, only, for now)
+#define INTERFACE_HIGH		90.0
 #define PBC_FLIP			15.0			// used for funcy periodic boundaries
 
 const coord axis = y;
@@ -37,11 +37,11 @@ const coord axis = y;
 void OutputHeader (MPIMolSystem& sys);
 void OutputStatus (int const count, MPIMolSystem& sys);
 void MPI_PackageChi (std::vector< std::complex<double> >& TimestepChi, std::vector< std::complex<double> >& TotalChi, MPIMolSystem& sys);
-void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_atoms, MPIMolSystem& sys);
+void FindInterfacialWaters (vector<Molecule *>& int_mols, vector<Atom *>& int_atoms, MPIMolSystem& sys);
 #else
 void OutputHeader ();
 void OutputStatus (int const count);
-void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys);
+void FindInterfacialWaters (vector<Water *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys);
 #endif
 
 void OutputData (FILE * fp, vector< complex<double> >& chi);
