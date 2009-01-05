@@ -5,7 +5,12 @@
 DensityAnalyzer::DensityAnalyzer (char * argv[], int const argc, int const numSteps, double const start, double const end, double const binsize, coord const axis) : _sys(AmberSystem(PRMTOP, MDCRD, FORCE)) {
 
 	// this will be our output data file
+	_output = (FILE *)NULL;
 	_output = fopen ("density.dat", "w");
+	if (_output == (FILE *)NULL) {
+		printf ("couldn't open the output file density.dat. Now Exiting\n");
+		exit (1);
+	}
 
 	_step		= 0;
 	_steps 		= numSteps;
@@ -14,8 +19,18 @@ DensityAnalyzer::DensityAnalyzer (char * argv[], int const argc, int const numSt
 	_binsize 	= binsize;
 	_axis		= axis;
 
+	printf ("Performing a DENSITY analysis of the system\n");
+	printf ("Position bounds are set at: % 8.3f to % 8.3f in % 8.3f increments\n", _start, _end, _binsize);
+
 	// first we figure out how many bins there are on each axis
-	_size = int ((_end - _start)/_binsize) + 1;
+	_posbins = int ((_end - _start)/_binsize) + 1;
+
+	// the location of the two interfaces
+	int_low = INT_LOW;
+	int_high = INT_HIGH;
+	middle = (int_low + int_high)/2.0;
+
+	printf ("Interfaces are set at % 8.3f and % 8.3f\n", int_low, int_high);
 	
 	// from the command line, grab all the atom name that we'll be working with
 	for (int i = 1; i < argc; i++) {
@@ -23,7 +38,7 @@ DensityAnalyzer::DensityAnalyzer (char * argv[], int const argc, int const numSt
 	}
 
 	// now we set up the histogram(s) such that we may bin the positions of each atom
-	_density.resize(_atomNames.size(), vector<int> (_size, 0));
+	_density.resize(_atomNames.size(), vector<int> (_posbins, 0));
 	
 return;
 }
@@ -41,7 +56,7 @@ void DensityAnalyzer::_PrintToFile () {
 	// starting from the beginning of the file (i.e. overwrite it)
 	rewind (_output);
 
-	for (int i=0; i < _size; i++) {
+	for (int i=0; i < _posbins; i++) {
 		fprintf (_output, "% 10.4f", double(i)*_binsize+_start);		// the bin's position value
 
 		// the output value of the number density will be converted to the actual density in g/mL.
@@ -49,10 +64,14 @@ void DensityAnalyzer::_PrintToFile () {
 		double volume = Atom::Size()[x] * Atom::Size()[y] * Atom::Size()[z] / Atom::Size()[_axis];
 		volume *= _binsize;
 
-		for (unsigned int atom = 0; atom < _atomNames.size(); atom++) {
+		RUN2 (_atomNames) {
 			// The density is thus transformed. 
-			// The value of 29.93355 comes from a combo of avogadro's number, the atomic weight of water, and the conversion to mL.
-			double density = _density[atom][i] / volume / (double)_step * 29.93355;
+			// The value of 1.6611293 comes from a combo of avogadro's number and the conversion to mL from angstroms^3.
+			// To get the density in g/mL, just divide this value by the molecular/atomic weight of the species.
+			double density = double(_density[j][i]) / volume / ((double)_step+1.0) * 1.6611293;
+			#ifdef AVG
+			density /= 2.0;		// if we're averaging 2 interfaces, then these values need to be halved
+			#endif
 
 			fprintf (_output, "% 13.7f", density);			// for each atom printout the histogram value at that position
 		}
@@ -79,7 +98,7 @@ return;
 
 vector<int> DensityAnalyzer::AtomDensity (string const atomname) {
 
-	vector<int> density (_size, 0);
+	vector<int> density (_posbins, 0);
 	
 	// and now run through the actual calculations to find number densities
 	RUN (_sys) {
@@ -94,12 +113,18 @@ vector<int> DensityAnalyzer::AtomDensity (string const atomname) {
 		double position = r[_axis];
 		if (position < 17.0) position += Atom::Size()[_axis];
 
+		// here the bin will be selected based on the distance to a given interface. Negative distances are inside the water phase, positive are in the CCl4
+		double distance = (position > middle) ? position - int_high : int_low - position;
+		
 		// and bin it into the density histogram
+		#ifdef AVG
+		int bin = (int)((distance - _start)/_binsize);
+		#else
 		int bin = (int)((position - _start)/_binsize);
+		#endif
 
 		density[bin]++;
 	}
-
 return (density);
 }
 
@@ -117,17 +142,18 @@ void DensityAnalyzer::SystemDensities () {
 	for (_step=0; _step < _steps; _step++) {
 		
 		// for each atom that we're testing we'll add the histogram data into the final data-set
-		for (unsigned int atom=0; atom < _atomNames.size(); atom++) {
-			vector<int> atomDensity = this->AtomDensity (_atomNames[atom]);
+		RUN2 (_atomNames) {
+			vector<int> atomDensity = this->AtomDensity (_atomNames[j]);
 
 			// once we have the data for each atom for each timestep, let's add it into the running total
-			for (int i=0; i < _size; i++) 
-				_density[atom][i] += atomDensity[i];
+			for (int i=0; i < _posbins; i++) {
+				_density[j][i] += atomDensity[i];
+			}
+
 		}
 			
 		// and set up the system for the next timestep
 		_sys.LoadNext();
-
 		this->_PrintStatus (_step);
 		if (!(_step % (OUTPUT_FREQ * 25)))
 			this->_PrintToFile ();

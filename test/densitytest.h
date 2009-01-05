@@ -6,16 +6,29 @@
 
 using namespace std;
 
+#define AVG
+
 #define PRMTOP	"prmtop"
 #define MDCRD	"mdcrd"
 #define FORCE	""
 
 #define TIMESTEPS		200000
 #define OUTPUT_FREQ		100
+#define AXIS			y
+
+#define BINSIZE			0.1
+
+#ifdef AVG
+#define START			-30.0
+#define END				30.0
+
+#else
 #define START			-5.0
 #define END				100.0
-#define BINSIZE			0.1
-#define AXIS			y
+#endif
+
+#define INT_HIGH	72.283
+#define INT_LOW		28.186
 
 class DensityAnalyzer {
 
@@ -25,11 +38,13 @@ private:
 	AmberSystem	_sys;
 
 	int 	_step, _steps;		// number of timesteps
-	int 	_size;		// size of the histogram
+	int 	_posbins;		// size of the histogram
 	double 	_start;		// starting position for the histogram
 	double 	_end;		// ending position
 	double 	_binsize;	// size of the bins of the histrogram
 	coord 	_axis;		// axis we're going to monitor
+
+	double int_high, int_low, middle;
 
 	vector< vector<int> > _density;
 	vector<string> _atomNames;
