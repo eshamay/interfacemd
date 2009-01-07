@@ -6,7 +6,7 @@
 
 using namespace std;
 
-#define AVG
+//#define AVG
 
 #define PRMTOP	"prmtop"
 #define MDCRD	"mdcrd"

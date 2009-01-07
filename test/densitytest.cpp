@@ -6,11 +6,19 @@ DensityAnalyzer::DensityAnalyzer (char * argv[], int const argc, int const numSt
 
 	// this will be our output data file
 	_output = (FILE *)NULL;
-	_output = fopen ("density.dat", "w");
+	string outputfile;
+	#ifdef AVG
+	outputfile = "density.avg.dat";
+	#else
+	outputfile = "density.dat";
+	#endif
+	_output = fopen (outputfile.c_str(), "w");
 	if (_output == (FILE *)NULL) {
 		printf ("couldn't open the output file density.dat. Now Exiting\n");
 		exit (1);
 	}
+	printf ("Performing a DENSITY analysis of the system\n");
+	printf ("Data will be output to the file: %s\n", outputfile.c_str());
 
 	_step		= 0;
 	_steps 		= numSteps;
@@ -19,9 +27,6 @@ DensityAnalyzer::DensityAnalyzer (char * argv[], int const argc, int const numSt
 	_binsize 	= binsize;
 	_axis		= axis;
 
-	printf ("Performing a DENSITY analysis of the system\n");
-	printf ("Position bounds are set at: % 8.3f to % 8.3f in % 8.3f increments\n", _start, _end, _binsize);
-
 	// first we figure out how many bins there are on each axis
 	_posbins = int ((_end - _start)/_binsize) + 1;
 
@@ -29,8 +34,14 @@ DensityAnalyzer::DensityAnalyzer (char * argv[], int const argc, int const numSt
 	int_low = INT_LOW;
 	int_high = INT_HIGH;
 	middle = (int_low + int_high)/2.0;
+	#ifdef AVG
+	printf ("Averaging the two interfaces for the final output\n");
+	printf ("Interfaces are set at % 8.3f and % 8.3f **double-check this**\n", int_low, int_high);
+	#else
+	printf ("Not averaging the two interfaces - output will show total system\n");
+	#endif
+	printf ("Position bounds are set at: % 8.3f to % 8.3f in % 8.3f increments\n", _start, _end, _binsize);
 
-	printf ("Interfaces are set at % 8.3f and % 8.3f\n", int_low, int_high);
 	
 	// from the command line, grab all the atom name that we'll be working with
 	for (int i = 1; i < argc; i++) {
