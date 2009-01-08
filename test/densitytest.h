@@ -7,25 +7,28 @@
 using namespace std;
 
 //#define AVG
+//#define DEBUG
 
 #define PRMTOP	"prmtop"
 #define MDCRD	"mdcrd"
 #define FORCE	""
 
-#define TIMESTEPS		200000
+#define TIMESTEPS		54300
 #define OUTPUT_FREQ		100
 #define AXIS			y
 
 #define BINSIZE			0.1
 
 #ifdef AVG
-#define START			-30.0
-#define END				30.0
+	#define START			-40.0
+	#define END				40.0
 
 #else
-#define START			-5.0
-#define END				100.0
+	#define START			-5.0
+	#define END				150.0
 #endif
+
+#define PBCFLIP			30.0
 
 #define INT_HIGH	72.283
 #define INT_LOW		28.186
@@ -57,6 +60,7 @@ public:
 	DensityAnalyzer (char * argv[], int const numAtoms, int const numSteps, double const start, double const end, double const binsize, coord axis);
 	vector<int> AtomDensity (string const atomname);
 	void SystemDensities ();
+	void Debug (string msg) const;
 
 };
 

@@ -7,15 +7,21 @@ using namespace std;
 #ifndef RUN
 
 #define RUN(list)   \
-   	for (int i = 0; i < (int)list.size(); i++)
+   	for (unsigned int i = 0; i < list.size(); i++)
 
 #endif
 
 #ifndef RUN2
 
 #define RUN2(list)  \
-   	for (int j = 0; j < (int)list.size(); j++)
+   	for (unsigned int j = 0; j < list.size(); j++)
 
 #endif
+
+#define PRINTV(vector)	\
+	printf ("vector size = % 5d\n", vector.size());
+
+#define PRINTV2(vector)	\
+	printf ("vector size = % 5d x % 5d\n", vector.size(), vector[0].size());
 
 #endif

@@ -3,61 +3,17 @@
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.7	//
-AMAX	angledistro.h	22;"	d
-AMBERFILES	Makefile	/^AMBERFILES	= ..\/vecr.o ..\/atom.o ..\/ambersystem.o ..\/crdfile.o ..\/dipoleparm.o ..\/forcefile.o ..\/h2o.o ..\/hno3.o ..\/molecule.o ..\/topfile.o ..\/bondgraph.o ..\/matrixr.o$/;"	m
-AMBERTEST_H_	ambertest.h	2;"	d
-AMIN	angledistro.h	23;"	d
-ANGLEDISTRO_H_	angledistro.h	2;"	d
-ARES	angledistro.h	24;"	d
-AXIS	angledistro.h	14;"	d
-AXIS	densitytest.h	18;"	d
+!_TAG_PROGRAM_VERSION	5.5.4	//
 AngleDistro	angledistro.cpp	/^AngleDistro::AngleDistro () : _sys(AmberSystem (PRMTOP, MDCRD, FORCE)){$/;"	f	class:AngleDistro
-AngleDistro	angledistro.h	/^class AngleDistro {$/;"	c
 AtomDensity	densitytest.cpp	/^vector<int> DensityAnalyzer::AtomDensity (string const atomname) {$/;"	f	class:DensityAnalyzer
-BINSIZE	densitytest.h	17;"	d
 CollectChi	morita.cpp	/^void CollectChi (std::vector< std::complex<double> >& Chi_step, std::vector< std::complex<double> >& Chi_total) {$/;"	f
 CollectChi	morita.mpi.cpp	/^void CollectChi (std::vector< std::complex<double> >& Chi_step, std::vector< std::complex<double> >& Chi_total) {$/;"	f
-DENSITYFILES	Makefile	/^DENSITYFILES = $(AMBERFILES) densitytest.o $/;"	m
-DIPOLETCF	Makefile	/^DIPOLETCF = $(XYZSYSTEM) dipoletcf.o$/;"	m
 DensityAnalyzer	densitytest.cpp	/^DensityAnalyzer::DensityAnalyzer (char * argv[], int const argc, int const numSteps, double const start, double const end, double const binsize, coord const axis) : _sys(AmberSystem(PRMTOP, MDCRD, FORCE)) {$/;"	f	class:DensityAnalyzer
-DensityAnalyzer	densitytest.h	/^class DensityAnalyzer {$/;"	c
-END	densitytest.h	16;"	d
-FILLBOX	Makefile	/^FILLBOX = $(AMBERFILES) ..\/pdbfile.o ..\/boxfiller.o$/;"	m
-FORCE	ambertest.h	13;"	d
-FORCE	angledistro.h	12;"	d
-FORCE	densitytest.h	11;"	d
-FORCE	freqtest.h	12;"	d
-FORCE	morita.h	21;"	d
-FORCE	mpitest.h	5;"	d
-FORCE	temp.cpp	5;"	d	file:
-FREQTEST_H_	freqtest.h	2;"	d
-FindInterfacialAtoms	morita.cpp	/^void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys) {$/;"	f
 FindInterfacialAtoms	morita.mpi.cpp	/^void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_atoms, MPIMolSystem& sys) {$/;"	f
-INTERFACE	mpitest.h	10;"	d
-INTERFACE_HIGH	morita.h	26;"	d
-INTERFACE_LOW	morita.h	25;"	d
-MDCRD	ambertest.h	12;"	d
-MDCRD	angledistro.h	11;"	d
-MDCRD	densitytest.h	10;"	d
-MDCRD	freqtest.h	11;"	d
-MDCRD	morita.h	20;"	d
-MDCRD	mpitest.h	4;"	d
-MDCRD	temp.cpp	4;"	d	file:
-MDCRD2PDB	Makefile	/^MDCRD2PDB = $(AMBERFILES) ..\/pdbfile.o mdcrd2pdb.o$/;"	m
-MORITAFILES	Makefile	/^MORITAFILES	= morita.o $(AMBERFILES) ..\/watersfg.o$/;"	m
-MORITA_H_	morita.h	2;"	d
-MPIFILES	Makefile	/^MPIFILES	=	$(AMBERFILES) ..\/mpi\/mpisys.o mpitest.o$/;"	m
-MPIMORITAFILES	Makefile	/^MPIMORITAFILES	= $(MORITAFILES) ..\/mpi\/mpisys.o$/;"	m
+FindInterfacialWaters	morita.cpp	/^void FindInterfacialWaters (vector<Water *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys) {$/;"	f
 MPI_PackageChi	morita.mpi.cpp	/^void MPI_PackageChi (std::vector< std::complex<double> >& TimestepChi, std::vector< std::complex<double> >& TotalChi, MPIMolSystem& sys) {$/;"	f
 MPI_SYS	morita.mpi.cpp	1;"	d	file:
-OUTPUTFILE	morita.h	33;"	d
-OUTPUT_FILE	angledistro.h	16;"	d
-OUTPUT_FREQ	densitytest.h	14;"	d
-OUTPUT_FREQ	dipoletcf.h	42;"	d
-OUTPUT_FREQ	morita.h	30;"	d
-OUTPUT_FREQ	mpitest.h	13;"	d
-OUTPUT_FREQ	xyzdipole_analysis.h	57;"	d
+OrderParameters	orderparams.cpp	/^OrderParameters::OrderParameters (int argc, char **argv) {$/;"	f	class:OrderParameters
 OutputData	morita.cpp	/^void OutputData (FILE * fp, vector< complex<double> >& chi) {$/;"	f
 OutputData	morita.mpi.cpp	/^void OutputData (FILE * fp, vector< complex<double> >& chi) {$/;"	f
 OutputHeader	morita.cpp	/^void OutputHeader () {$/;"	f
@@ -65,68 +21,16 @@ OutputHeader	morita.mpi.cpp	/^void OutputHeader (MPIMolSystem& sys) {$/;"	f
 OutputStatus	dipoletcf.cpp	/^void OutputStatus (int step) {$/;"	f
 OutputStatus	morita.cpp	/^void OutputStatus (int const count) {$/;"	f
 OutputStatus	morita.mpi.cpp	/^void OutputStatus (int const count, MPIMolSystem& sys) {$/;"	f
-PBC_FLIP	morita.h	27;"	d
-POLARIZATION	morita.h	32;"	d
-PRMTOP	ambertest.h	11;"	d
-PRMTOP	angledistro.h	10;"	d
-PRMTOP	densitytest.h	9;"	d
-PRMTOP	freqtest.h	10;"	d
-PRMTOP	morita.h	19;"	d
-PRMTOP	mpitest.h	3;"	d
-PRMTOP	temp.cpp	3;"	d	file:
-PRMTOP	toptest.h	11;"	d
-QPT	Makefile	/^QPT = $(XYZSYSTEM) ..\/hno3analysis.o Qpt.o$/;"	m
-QPT_H_	Qpt.h	2;"	d
-START	densitytest.h	15;"	d
+PrintOutput	orderparams.cpp	/^void OrderParameters::PrintOutput () {$/;"	f	class:OrderParameters
+PrintStatus	orderparams.cpp	/^void OrderParameters::PrintStatus () {$/;"	f	class:OrderParameters
 SystemDensities	densitytest.cpp	/^void DensityAnalyzer::SystemDensities () {$/;"	f	class:DensityAnalyzer
-TCF_RUN	xyzdipole_analysis.h	20;"	d
-TEMPFILES	Makefile	/^TEMPFILES	= temp.cpp $(XYZSYSTEM)$/;"	m
-TIMESTEPS	densitytest.h	13;"	d
-TIMESTEPS	morita.h	31;"	d
-TIMESTEPS	mpitest.h	14;"	d
-TOPTEST_H_	toptest.h	2;"	d
 WaterHistogram	angledistro.cpp	/^std::vector< std::vector<int> >& AngleDistro::WaterHistogram (int const timesteps) {$/;"	f	class:AngleDistro
-XYZSYSTEM	Makefile	/^XYZSYSTEM = ..\/xyzsystem.o ..\/xyzfile.o ..\/atom.o ..\/h2o.o ..\/hno3.o ..\/molecule.o ..\/vecr.o ..\/wannier.o ..\/bondgraph.o ..\/matrixr.o$/;"	m
-ZMAX	angledistro.h	18;"	d
-ZMIN	angledistro.h	19;"	d
-ZRES	angledistro.h	20;"	d
 _ClearHisto	angledistro.cpp	/^void AngleDistro::_ClearHisto () {$/;"	f	class:AngleDistro
-_DENSITYTEST_H_	densitytest.h	2;"	d
 _PrintOutput	angledistro.cpp	/^void AngleDistro::_PrintOutput () const {$/;"	f	class:AngleDistro
 _PrintStatus	angledistro.cpp	/^void AngleDistro::_PrintStatus () const {$/;"	f	class:AngleDistro
 _PrintStatus	densitytest.cpp	/^void DensityAnalyzer::_PrintStatus (int const step) {$/;"	f	class:DensityAnalyzer
 _PrintToFile	densitytest.cpp	/^void DensityAnalyzer::_PrintToFile () {$/;"	f	class:DensityAnalyzer
 _WaterStepHistogram	angledistro.cpp	/^std::vector< std::vector<int> > AngleDistro::_WaterStepHistogram () {$/;"	f	class:AngleDistro
-_XYZDIPOLE_ANALYSIS_H_	dipoletcf.h	2;"	d
-_XYZDIPOLE_ANALYSIS_H_	xyzdipole_analysis.h	2;"	d
-_anglebins	angledistro.h	/^	int _anglebins;$/;"	m	class:AngleDistro
-_anglemax	angledistro.h	/^	double _anglemin, _anglemax, _angleres;$/;"	m	class:AngleDistro
-_anglemin	angledistro.h	/^	double _anglemin, _anglemax, _angleres;$/;"	m	class:AngleDistro
-_angleres	angledistro.h	/^	double _anglemin, _anglemax, _angleres;$/;"	m	class:AngleDistro
-_atomNames	densitytest.h	/^	vector<string> _atomNames;$/;"	m	class:DensityAnalyzer
-_axis	angledistro.h	/^	coord _axis;$/;"	m	class:AngleDistro
-_axis	densitytest.h	/^	coord 	_axis;		\/\/ axis we're going to monitor$/;"	m	class:DensityAnalyzer
-_binsize	densitytest.h	/^	double 	_binsize;	\/\/ size of the bins of the histrogram$/;"	m	class:DensityAnalyzer
-_density	densitytest.h	/^	vector< vector<int> > _density;$/;"	m	class:DensityAnalyzer
-_end	densitytest.h	/^	double 	_end;		\/\/ ending position$/;"	m	class:DensityAnalyzer
-_histo	angledistro.h	/^	vector< vector<int> > _histo;$/;"	m	class:AngleDistro
-_output	angledistro.h	/^	FILE * _output;$/;"	m	class:AngleDistro
-_output	densitytest.h	/^	FILE *  _output;$/;"	m	class:DensityAnalyzer
-_size	densitytest.h	/^	int 	_size;		\/\/ size of the histogram$/;"	m	class:DensityAnalyzer
-_start	densitytest.h	/^	double 	_start;		\/\/ starting position for the histogram$/;"	m	class:DensityAnalyzer
-_steps	densitytest.h	/^	int 	_steps;		\/\/ number of timesteps$/;"	m	class:DensityAnalyzer
-_sys	angledistro.h	/^	AmberSystem _sys;$/;"	m	class:AngleDistro
-_sys	densitytest.h	/^	AmberSystem	_sys;$/;"	m	class:DensityAnalyzer
-_timestep	angledistro.h	/^	int _timestep;$/;"	m	class:AngleDistro
-_zbins	angledistro.h	/^	int _zbins;$/;"	m	class:AngleDistro
-_zmax	angledistro.h	/^	double _zmin, _zmax, _zres;$/;"	m	class:AngleDistro
-_zmin	angledistro.h	/^	double _zmin, _zmax, _zres;$/;"	m	class:AngleDistro
-_zres	angledistro.h	/^	double _zmin, _zmax, _zres;$/;"	m	class:AngleDistro
-axis	morita.h	/^const coord axis = y;$/;"	v
-axis	mpitest.h	/^const coord axis = y;$/;"	v
-filename	Qpt.h	15;"	d
-filename	dipoletcf.h	39;"	d
-filename	xyzdipole_analysis.h	54;"	d
 main	Qpt.cpp	/^int main () {$/;"	f
 main	ambertest.cpp	/^int main (int argc, char *argv) {$/;"	f
 main	angledistro.cpp	/^int main () {$/;"	f
@@ -140,41 +44,10 @@ main	mdcrd2pdb.cpp	/^int main (int argc, char **argv) {$/;"	f
 main	morita.cpp	/^int main (int argc, char **argv) {$/;"	f
 main	morita.mpi.cpp	/^int main (int argc, char **argv) {$/;"	f
 main	mpitest.cpp	/^int main (int argc, char **argv) {$/;"	f
+main	orderparams.cpp	/^int main (int argc, char **argv) {$/;"	f
 main	temp.cpp	/^int main () {$/;"	f
 main	toptest.cpp	/^int main (int argc, char *argv) {$/;"	f
 main	wanniertest.cpp	/^int main () {$/;"	f
 main	xyzdipole_analysis.cpp	/^int main (int *argc, char **argv) {$/;"	f
-numSteps	Qpt.h	18;"	d
-outputfilename	dipoletcf.h	/^	const string outputfilename	 = "tcf.dat";$/;"	v
-outputfilename	xyzdipole_analysis.h	/^	const string outputfilename	 = "power.dat";$/;"	v
-outputfilename	xyzdipole_analysis.h	/^	const string outputfilename	 = "tcf.dat";$/;"	v
-outputfilename	xyzdipole_analysis.h	/^	const string outputfilename	 = "test.dat";$/;"	v
 pdb	closest.cpp	6;"	d	file:
-set_unitcell	set_unitcell.tcl	/^proc set_unitcell {a b c {molid top} {alpha 90.0} {beta 90.0} {gamma 90.0}} {$/;"	p
-slab35	dipoletcf.h	16;"	d
-slab35	xyzdipole_analysis.h	16;"	d
-wannierfile	Qpt.h	22;"	d
-wannierfile	dipoletcf.h	40;"	d
-wannierfile	xyzdipole_analysis.h	55;"	d
-xSize	Qpt.h	11;"	d
-xSize	dipoletcf.h	/^	const double xSize	= 12.0;$/;"	v
-xSize	dipoletcf.h	/^	const double xSize	= 12.4138;$/;"	v
-xSize	dipoletcf.h	/^	const double xSize	= 13.4724;$/;"	v
-xSize	xyzdipole_analysis.h	/^	const double xSize	= 12.0;$/;"	v
-xSize	xyzdipole_analysis.h	/^	const double xSize	= 12.4138;$/;"	v
-xSize	xyzdipole_analysis.h	/^	const double xSize	= 13.4724;$/;"	v
-ySize	Qpt.h	12;"	d
-ySize	dipoletcf.h	/^	const double ySize	= 12.0;$/;"	v
-ySize	dipoletcf.h	/^	const double ySize	= 12.4138;$/;"	v
-ySize	dipoletcf.h	/^	const double ySize	= 15.5566;$/;"	v
-ySize	xyzdipole_analysis.h	/^	const double ySize	= 12.0;$/;"	v
-ySize	xyzdipole_analysis.h	/^	const double ySize	= 12.4138;$/;"	v
-ySize	xyzdipole_analysis.h	/^	const double ySize	= 15.5566;$/;"	v
-zSize	Qpt.h	13;"	d
-zSize	dipoletcf.h	/^	const double zSize	= 12.4138;$/;"	v
-zSize	dipoletcf.h	/^	const double zSize	= 20.0;$/;"	v
-zSize	dipoletcf.h	/^	const double zSize	= 30.0000;$/;"	v
-zSize	xyzdipole_analysis.h	/^	const double zSize	= 12.4138;$/;"	v
-zSize	xyzdipole_analysis.h	/^	const double zSize	= 20.0;$/;"	v
-zSize	xyzdipole_analysis.h	/^	const double zSize	= 30.0000;$/;"	v
 ~AngleDistro	angledistro.cpp	/^AngleDistro::~AngleDistro () {$/;"	f	class:AngleDistro
