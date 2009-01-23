@@ -6,14 +6,14 @@
 
 using namespace std;
 
-//#define AVG
+#define AVG
 //#define DEBUG
 
 #define PRMTOP	"prmtop"
 #define MDCRD	"mdcrd"
 #define FORCE	""
 
-#define TIMESTEPS		54300
+#define TIMESTEPS		200000
 #define OUTPUT_FREQ		100
 #define AXIS			y
 
@@ -25,13 +25,13 @@ using namespace std;
 
 #else
 	#define START			-5.0
-	#define END				150.0
+	#define END				100.0
 #endif
 
-#define PBCFLIP			30.0
+#define PBCFLIP			15.0
 
-#define INT_HIGH	72.283
-#define INT_LOW		28.186
+#define INT_HIGH	82.479
+#define INT_LOW		35.005
 
 class DensityAnalyzer {
 

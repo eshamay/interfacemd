@@ -25,8 +25,8 @@ OrderParameters::OrderParameters (int argc, char **argv) {
 	printf ("timesteps = %d\n", timesteps);
 
 	// position boundaries and bin width
-	posmin	= -25.0;
-	posmax	= 25.0;
+	posmin	= -40.0;
+	posmax	= 40.0;
 	posres	= 0.5;
 	posbins = (posmax-posmin)/posres;
 

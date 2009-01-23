@@ -151,6 +151,7 @@ this->Debug ("DensityAnalyzer::AtomDensity\n");
 
 		#ifdef AVG
 		// here the bin will be selected based on the distance to a given interface. Negative distances are inside the water phase, positive are in the CCl4
+		if (position < START or position > END) continue;		// only bin stuff within the bounds that have been set up
 		double distance = (position > middle) ? position - int_high : int_low - position;
 		int bin = (int)((distance - _start)/_binsize);
 		#else
