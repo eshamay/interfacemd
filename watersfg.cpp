@@ -49,11 +49,11 @@ void SFGWaterAnalyzer::FreqShift (Water& water) {
  * Calculate frequency shifts due to forces compressing or stretching bonds
  ******************************/
 	/* now perform the direct application of the equation Eq.10c */
-	// note: the frequency shift is given as an angular frequency (omega) in the equation. So let's also convert to frequency by a factor of 2*pi
+	// note: the frequency shift is given as an angular frequency (omega) in the equation. Do we need a conversion to freuency here?
 	_OH1FreqShift = (PREFACTOR * ForceOH1)/2.0/M_PI;		// now in frequency in atomic units
 	_OH2FreqShift = (PREFACTOR * ForceOH2)/2.0/M_PI;
 
-	//printf ("% 10.3f\t% 10.3f\n", _OH1FreqShift*FREQFACTOR, _OH2FreqShift*FREQFACTOR); 
+	//printf ("% 10.3f\t% 10.3f\n", _OH1FreqShift*AU2WAVENUMBER, _OH2FreqShift*AU2WAVENUMBER); 
 
 
 #ifdef	DIPOLE_DIPOLE		// only if adding in the dipole-dipole correction term (which should be pretty small)
@@ -171,16 +171,15 @@ void SFGWaterAnalyzer::FreqShift (Water& water) {
 
 #endif
 
-	//printf ("% 10.3f\t% 10.3f\n", dipolePotential[0]*FREQFACTOR, dipolePotential[1]*FREQFACTOR); 
+	//printf ("% 10.3f\t% 10.3f\n", dipolePotential[0]*AU2WAVENUMBER, dipolePotential[1]*AU2WAVENUMBER); 
 /*********************************************
  * Final calculation of the OH bond frequency
  *********************************************/
 	// The two bond frequency values are now shifted from the gas phase vibrational value. (in cm-1)
-	// we have to convert here the uncoupled frequency from wavenumbers to frequency in a.u.
 	_w1 = UNCOUPLED_OH_FREQ + _OH1FreqShift;
 	_w2 = UNCOUPLED_OH_FREQ + _OH2FreqShift;
 
-	//printf ("% 10.5f\t% 10.5f\n", _w1*FREQFACTOR, _w2*FREQFACTOR);
+	//printf ("% 10.5f\t% 10.5f\n", _w1*AU2WAVENUMBER, _w2*AU2WAVENUMBER);
 return;
 }
 
@@ -202,9 +201,15 @@ void SFGWaterAnalyzer::WaterEigenSystem (Water& water) {
 	/* We solve this with the quadratic equation: (-b +/- sqrt(b^2-4ac)) / 2a... first grab the values of a, b, and c... 
 		i.e. a = 1, b = -(w1+w2), c = (w1*w2 - V12^2) */
 
-	double V12 = this->CouplingConstant (water);
-	//double V12 = COUPLING_CONST;
+	//double V12 = this->CouplingConstant (water);
+	double V12 = COUPLING_CONST;
 
+/* As per Dave's code in inter.f: */
+	double wt = sqrt(_w1*_w1 + _w2*_w2 - 2.0*_w1*_w2 + 4.0*V12*V12);
+	_ws = 0.5*(_w1+_w2 - wt);
+	_wa = 0.5*(_w1+_w2 + wt);
+
+/*
 	double b = -_w1 - _w2;		// atomic units
 	double c = (_w1 * _w2) - V12*V12;
 	// The discriminant b^2 - 4*a*c
@@ -212,8 +217,8 @@ void SFGWaterAnalyzer::WaterEigenSystem (Water& water) {
 
 	// if D > 0 - two real roots - i.e. normal mode frequencies!
 	if (D >= 0.0) {
-		_ws = (-b + sqrt(D)) / 2.0;		// we'll call the first one the symmetric frequency	(units = cm-1)
-		_wa = (-b - sqrt(D)) / 2.0;		// and the second the anti-symmetric
+		_ws = (-b - sqrt(D)) / 2.0;		// we'll call the first one the symmetric frequency	(units = cm-1)
+		_wa = (-b + sqrt(D)) / 2.0;		// and the second the anti-symmetric
 	}
 	// D < 0 means there are two complex roots - something that isn't physical (to me, right now)
 	else if (D < 0.0) printf ("Complex eigenfrequencies calculated for the OH bonds. This doesn't seem right!\n");
@@ -230,17 +235,28 @@ void SFGWaterAnalyzer::WaterEigenSystem (Water& water) {
 		_ws = _wa;
 		_wa = temp;
 	}
+*/
 
 /* continuing the solution of Eq. 8 - let's calculate the coefficients C1 and C2. We begin with 2 values of the eigenfrequencies. Thus we will have two sets of equations, and two values of C1 and C2 (one for symmetric, and one for antisymmetric). Both are kept and used in the calculation and averaged over later on.
    Solving the eigenvector equation results in a value for the ratio of C1/C2. If we first assume that C1 = 1.0, then we can get values of C2.
 */
 
 // C1/C2 = -V12/(w1-w) AND C1/C2 = -(w2-w)/V12 - both methods should be the same!
+/*
 	_C2s = 1.0;
 	_C2a = 1.0;
 	_C1s = -V12/(_w1-_ws);
 	_C1a = -V12/(_w1-_wa);
+*/
 
+/* Now again, as per Dave's: */
+	_C1s = V12/(sqrt(V12*V12 + (_ws-_w1)*(_ws-_w1)));
+	_C1a = V12/(sqrt(V12*V12 + (_wa-_w1)*(_wa-_w1)));
+
+	_C2s = (_ws-_w1)/(sqrt(V12*V12 + (_ws-_w1)*(_ws-_w1)));
+	_C2a = (_wa-_w1)/(sqrt(V12*V12 + (_wa-_w1)*(_wa-_w1)));
+
+/*
 // before leaving, let's normalize the eigen vectors {C1x,C2x} to a magnitude of 1.0
 	double norm = sqrt(_C1s*_C1s + 1.0);
 	_C1s /= norm; _C2s /= norm;
@@ -248,6 +264,7 @@ void SFGWaterAnalyzer::WaterEigenSystem (Water& water) {
 	norm = sqrt(_C1a*_C1a + 1.0);
 	_C1a /= norm; _C2a /= norm;
 
+*/
 	_set = true;
 	return;
 }
@@ -272,10 +289,10 @@ void SFGWaterAnalyzer::PolarizabilityAndDipoleDerivs (Water& water, int const p,
 // It seems like applying the scaling factor before or after rotation doesn't change much. It's just scaling, not changing direction, and so the constant multiplier gets carried throughout.
 // Also: Aren't these scaling factors supposed to be unitless? There shouldn't be any reason to convert back and forth from cm-1 or a.u. after calculating the factor as given in the M/H 2000 paper, equation (14)
 // here we need the frequency shift given as wavenumbers (cm-1).
-	//scale1 = (1.0 - 9.5138e-3 * _OH1FreqShift * FREQFACTOR)/FREQFACTOR;
-	//scale2 = (1.0 - 9.5138e-3 * _OH2FreqShift * FREQFACTOR)/FREQFACTOR;
-	scale1 = (1.0 - 9.5138e-3 * _OH1FreqShift * FREQFACTOR);
-	scale2 = (1.0 - 9.5138e-3 * _OH2FreqShift * FREQFACTOR);
+	//scale1 = (1.0 - 9.5138e-3 * _OH1FreqShift * AU2WAVENUMBER)/AU2WAVENUMBER;
+	//scale2 = (1.0 - 9.5138e-3 * _OH2FreqShift * AU2WAVENUMBER)/AU2WAVENUMBER;
+	scale1 = (1.0 - 9.5138e-3 * _OH1FreqShift * AU2WAVENUMBER);
+	scale2 = (1.0 - 9.5138e-3 * _OH2FreqShift * AU2WAVENUMBER);
 
 /*	the old way of doing things */
 	_AlphaDerivS = _C1s * AlphaDeriv1.Index(p,q) + _C2s * AlphaDeriv2.Index(p,q); 

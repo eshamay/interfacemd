@@ -22,8 +22,8 @@
 
 
 // set the interface correctly - different simulation = different location!!
-#define INTERFACE_LOW		68.0			// the location of the interface (the top one, only, for now)
-#define INTERFACE_HIGH		90.0
+#define INTERFACE_LOW		55.0			// the location of the interface (the top one, only, for now)
+#define INTERFACE_HIGH		63.0
 #define PBC_FLIP			15.0			// used for funcy periodic boundaries
 
 const coord axis = y;
@@ -44,7 +44,7 @@ void OutputStatus (int const count);
 void FindInterfacialWaters (vector<Water *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys);
 #endif
 
-void OutputData (FILE * fp, vector< complex<double> >& chi);
+void OutputData (FILE * fp, vector< complex<double> >& chi, unsigned int factor);
 
 void CollectChi (std::vector< std::complex<double> >& MolChi, std::vector< std::complex<double> >& TotalChi);
 

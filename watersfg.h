@@ -39,10 +39,10 @@ const double AMBER2ATOMIC		=	1.0/HARTREE2KCALPMOL/ANG2BOHR;	// convert amber for
 const double PREFACTOR	=	sqrt(k0/M)*(l/(2.0*k0*k0));		// the prefactor to multiply the bond force for freq shift (in atomic units) (eq 10c)
 const double HZ2WAVENUMBER	=	3.335641e-11;				// convert from Hz to wavenumbers (cm-1)  (this is 1/c)
 const double HZ2AU			=	2.418884324306202e-17;			// convert Hz to atomic units of frequency
-const double FREQFACTOR		=	HZ2WAVENUMBER/HZ2AU;			// convert from frequencies in atomic units to cm-1 (note: **not angular frequencies!** For that we need to fix the factor of 2*Pi)
+const double AU2WAVENUMBER		=	HZ2WAVENUMBER/HZ2AU;			// convert from frequencies in atomic units to cm-1 (note: **not angular frequencies!** For that we need to fix the factor of 2*Pi)
 
-const double UNCOUPLED_OH_FREQ	= 3706.5/FREQFACTOR;			// the frequency of uncoupled OH bonds in the vapor phase (converted to frequency in atomic units)
-const double COUPLING_CONST		= 49.5/FREQFACTOR;				// Coupling const taken from the energy gap of the sym + antisym stretches (V12 in atomic units)
+const double UNCOUPLED_OH_FREQ	= 3706.5/AU2WAVENUMBER;			// the frequency of uncoupled OH bonds in the vapor phase (converted to frequency in atomic units)
+const double COUPLING_CONST		= 49.5/AU2WAVENUMBER;				// Coupling const taken from the energy gap of the sym + antisym stretches (V12 in atomic units)
 
 // Value of the magnitude of the dipole moment derivative (square root of the sum of the squares)
 const double MU_DERIV_MAGNITUDE = sqrt(-0.058*-0.058 + 0.157*0.157);
@@ -52,13 +52,13 @@ const double OH_COM_LENGTH = MHYD*OH_LENGTH/(MHYD+MOXY);	// distance to the cent
 const double MU_DERIV_LENGTH = MU_DERIV_MAGNITUDE * OH_COM_LENGTH;		// length of the differential dipole moment element used in calculating the dipole-dipole interaction energy (in atomic units)
 
 /* Gamma, a "damping parameter" shows up as an arbitrary constant in the lorentzian part of the beta-spectrum. This number is tweaked to calibrate the spectra. DSW used a value of 2.0 and called it good after trying several values. */
-const double GAMMA				= 2.0/FREQFACTOR;				// the "damping parameter" first shown in Eq. 3 scaled down to some value (between 2 and 22 cm-1 as Dave put it)
+const double GAMMA				= 2.0/AU2WAVENUMBER;				// the "damping parameter" first shown in Eq. 3 scaled down to some value (between 2 and 22 cm-1 as Dave put it)
 const double GAMMA_SQ			= GAMMA*GAMMA;				// ...squared
 
 // frequency limits for calculating the spectra (given in cm-1)
-const double START_FREQ			= 2800.0/FREQFACTOR;
-const double END_FREQ			= 3800.0/FREQFACTOR;
-const double FREQ_STEP			= 1.0/FREQFACTOR;		// step size when calculating the spectra
+const double START_FREQ			= 2800.0/AU2WAVENUMBER;
+const double END_FREQ			= 3800.0/AU2WAVENUMBER;
+const double FREQ_STEP			= 1.0/AU2WAVENUMBER;		// step size when calculating the spectra
 const double NUM_STEP			= (END_FREQ-START_FREQ)/FREQ_STEP;
 
 class SFGWaterAnalyzer {

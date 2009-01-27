@@ -40,6 +40,7 @@ int main (int argc, char **argv) {
 	bool firsttimestep = true;	// first time through (first timestep)
 	bool firstmol;			// first molecule processed
 
+	unsigned int numMolsProcessed = 0;
 	// okay, now let's start iterating over timesteps
 	for (int step=0; step < TIMESTEPS; step++) {
 
@@ -51,6 +52,8 @@ int main (int argc, char **argv) {
 
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
 		sys.UpdateGraph (int_atoms);
+
+		numMolsProcessed += int_mols.size();
 
 		for (int mol = 0; mol < int_mols.size(); mol++) {
 			
@@ -93,14 +96,14 @@ int main (int argc, char **argv) {
 
 		// and once in a while, also output the data to a file for reading
 		if (!(step % (OUTPUT_FREQ * 10))) {
-			OutputData (output, TotalChi);		// output the data to the data file
+			OutputData (output, TotalChi, step * numMolsProcessed);		// output the data to the data file
 		}
 
 		sys.LoadNext();
 	}
 
 	// final output of the data to the file
-	OutputData (output, TotalChi);
+	OutputData (output, TotalChi, TIMESTEPS * numMolsProcessed);
 
 	fclose(output);
 
@@ -143,13 +146,14 @@ return;
 }
 
 // output data to the file
-void OutputData (FILE * fp, vector< complex<double> >& chi) {
+void OutputData (FILE * fp, vector< complex<double> >& chi, unsigned int factor) {
 
 	rewind (fp);
 
 	RUN (chi) {
-		double freq = (double(i)*FREQ_STEP+START_FREQ)*FREQFACTOR;
-		fprintf (fp, "% 12.8e\t% 12.8e\n", freq, abs(chi[i])*abs(chi[i]));
+		double freq = (double(i)*FREQ_STEP+START_FREQ)*AU2WAVENUMBER;
+		double mag = abs(chi[i])*abs(chi[i]) / (double)factor;
+		fprintf (fp, "% 12.8e\t% 12.8e\n", freq, mag);
 	}
 
 	fflush (fp);
