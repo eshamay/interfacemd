@@ -1,7 +1,20 @@
-#include "../forcefile.h"
+//#include "../forcefile.h"
+#include <iostream>
+#include <string>
+#include <map>
 
+using namespace std;
 int main () {
 
+	map<int, string> names;
+	names[1] = "one";
+	names[2] = "two";
+	names[3] = "three";
+	names[4] = "four";
+	names[5] = "five";
+
+	printf ("1 = %s, 2 = %s, 3 = %s\n", names[1].c_str(), names[2].c_str(), names[3].c_str());
+/*
 	ForceFile frc ("force.dat", 4862);
 
 	for (int i=0; i<5; i++) {
@@ -10,6 +23,7 @@ int main () {
 	RUN (frc) {
 		printf ("% 13.8f\n", frc[i].Magnitude());
 	}
+	*/
 
 return 0;
 }

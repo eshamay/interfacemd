@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "utility.h"
 #include "atom.h"
+#include "h2o.h"
 
 
 const double OHBONDLENGTH = 1.3;
@@ -13,15 +14,6 @@ const double HBONDANGLE	= 0.866025;		// cos(theta) has to be less than this valu
 const double NOBONDLENGTH = 2.0;
 const double NHBONDLENGTH = 1.3;		// uhmm... check this?
 
-//For naming the bond-types, let's initialize an array with readable coordination names;
-const string COORD_NAMES[14] = {"Unbound", "O", "OH", "OHH", "OO", "OOH", "OOHH", "H", "HH", "OOOH", "OOOHH", "OOHHH", "OVER", "OTHER"};
-	
-// Encoding of the different coordination types
-enum coordination {UNBOUND=0, O, OH, OHH, OO, OOH, OOHH, H, HH, OOOH, OOOHH, OOHHH, OVER, OTHER};
-
-// A non-member function for getting a nice string representation of a coordination
-const string CoordName (coordination coord);
-	
 // bond types
 enum {covalent, hydrogen, unbonded};
 
@@ -95,6 +87,9 @@ public:
 	std::vector<Atom *> CovalentBonds (const Atom * atom) const;
 	std::vector<Atom *> CovalentBonds (const Atom * atom, const string name) const;
 	std::vector<Atom *> HydrogenBonds (const Atom * atom) const;
+
+	// A routine to return the bonding coordination of a given water molecule. It will also set the coordination type in the water itself
+	coordination FindWaterCoordination (Water * wat) const;
 
 	double Distance (const Atom * atom1, const Atom * atom2) const;
 	double Distance (const Vertex * atom1, const Vertex * atom2) const;

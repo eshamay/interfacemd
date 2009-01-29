@@ -2,6 +2,7 @@
 #define H2O_H_
 
 #include "molecule.h"
+#include <map>
 
 #ifdef H2O_DIPOLE_PARM
 #include "dipoleparm.h"
@@ -10,12 +11,33 @@
 #include "matrixr.h"
 #include "utility.h"
 
-
 #define R_eq	0.9575		// equilibrium OH bond length
 #define Theta_eq	104.51	// equilibrium H-O-H angle
 #define qO_eq	-0.6750		// equilibrium partial charges of the oxygen
 #define qH_eq	 0.3285		// 		and the hydrogens
 
+/* Encoding of the different coordination types
+ * The numbering is based on each O having a value of 1, and each H haveing a value of 10 (i.e. add 1 for every O, and 10 for every H...). So a water in a state of OOHH bonding would have a coordination of 22, and a coordination of 13 would be OOOH, 12 = OOH, 11 = OH, 10 = H, etc.
+ */
+typedef enum {
+	UNBOUND=0, 
+	O=1, 
+	OO=2, 
+	OOO=3, 
+	H=10, 
+	OH=11, 
+	OOH=12,
+	OOOH=13,
+	HH=20,
+	OHH=21,
+	OOHH=22,
+	OOOHH=23,
+	HHH=30,
+	OHHH=31,
+	OOHHH=32,
+	OOOHHH=33
+} coordination;
+// And hopefully that covers all the bonding coordination types :)
 
 // A water class to add a few functions for dealing with water molecules specifically.
 class Water: public Molecule {
@@ -29,9 +51,11 @@ protected:
 	MatR _alpha;					// polarizability of the molecule
 	#endif
 
-#ifdef H2O_DIPOLE_PARM
+	coordination _coord;				// the bonding coordation of the water
+
+	#ifdef H2O_DIPOLE_PARM
 	static WaterDipoleParms _dipparms;		// The water dipole parameter file
-#endif
+	#endif
 
 public:
 	Water ();	// a default constructor
@@ -39,6 +63,8 @@ public:
 	Water (const Molecule& molecule);	// copy constructor for casting from a molecule
 
 	static int numWaters;			// total number of waters in the system
+	static map<coordination, string> CoordinationNames;		// a map for printing out names of the different types of coordinations
+
 	// Functions for analysis
 	void SetAtoms ();
 	VecR Bisector ();		// calculates the bisector (unit vector) of the water
@@ -60,6 +86,10 @@ public:
 
 	void CalcEulerAngles (const coord axis = z);
 
+	// dealing with the bonding coordination of a water molecule - how is it hydrogen-bonded?
+	void Coordination (const coordination coord) { _coord = coord; }
+	coordination Coordination () const { return _coord; }
+
 	#ifdef WATER_POLARIZ
 	void CalcAlpha ();		// calculate the molecular polarizability tensor (as per morita+hynes 2002 method)
 	MatR const & Alpha () const { return _alpha; }
@@ -70,6 +100,7 @@ public:
 	double Angle () const { return acos(_oh1 < _oh2) * 180.0/M_PI; }
 	
 };
+
 
 /******************************
  * Hydroxide (H3O+)

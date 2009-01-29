@@ -9,7 +9,7 @@ AmberSystem::AmberSystem (string prmtop, string mdcrd, string mdvel = "")
 
 	// because some really useful functionality comes out of the Atom class if the Atom::Size() is set, we'll do that here
 	Atom::Size (_coords.Dims());
-
+	
 	// Then we have to form proper atoms. First setup the vector to hold them all.
 	_atoms.resize(_topfile.NumAtoms()); // = vector<Atom> (_topfile.NumAtoms(), Atom());
 	// and then actually create these bad mamma jammas

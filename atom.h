@@ -25,7 +25,7 @@ class Atom {
 	VecR _force;			// the external force on the atom at any given point in time
 
 	std::vector<Atom *>	_HBonds;	// a list of all the atoms to which this atom is hydrogen-bound
-	static VecR _size;		// system size
+	static VecR _size;				// system size
 
 public:
 	// constructors

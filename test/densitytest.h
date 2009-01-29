@@ -6,14 +6,14 @@
 
 using namespace std;
 
-#define AVG
+//#define AVG
 //#define DEBUG
 
 #define PRMTOP	"prmtop"
 #define MDCRD	"mdcrd"
 #define FORCE	""
 
-#define TIMESTEPS		200000
+#define TIMESTEPS		31800
 #define OUTPUT_FREQ		100
 #define AXIS			y
 

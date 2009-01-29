@@ -1,10 +1,6 @@
 #include "bondgraph.h"
 
 
-const string CoordName (coordination coord) { 
-	return COORD_NAMES[coord]; 
-}
-
 void Edge::SetBondType () {
 	
 	bondtype = unbonded;
@@ -112,12 +108,13 @@ void BondGraph::UpdateGraph (vector<Atom *>& atoms) {
 			v1 = _vertices[i];
 			v2 = _vertices[j];
 
-			// we don't, right now, have molecules where the same atom type is bonded (or H-bonded) to itself
+			// we don't, right now, have molecules where the same atom type is bonded (or H-bonded) to itself (i.e. a C-C bond, etc.)
 			if (v1->name == v2->name) continue;
 
 			// calculate the bondlength between the two atoms
 			bondlength = *v1->atom - *v2->atom;
 			
+			// The only bonds we're interested in are H-bonds and covalent bonds. Since covalent bonds are smaller than H-bonds, we don't need to check those.
 			if (bondlength < HBONDLENGTH) {
 				_edges.push_back (new Edge (v1, v2, bondlength));
 			}
@@ -332,4 +329,30 @@ std::vector<Atom *> BondGraph::ClosestAtoms (const Atom * atom, const string nam
 	}
 
 return (closest);
+}
+
+coordination BondGraph::FindWaterCoordination (Water * wat) const {
+
+	coordination coord;
+	int Os = 0, Hs=0;
+
+	// firstly we need to find all the vertices that are H-bonded to this given molecule. Thus we need to find all the atoms of the molecule.
+	std::vector<Atom *> atoms = wat->Atoms();
+	// now we'll check each of the atoms for H-bonding to other atoms in the system, and then count the number of bonds on the Hs and the O.
+	RUN (atoms) {
+		std::vector<Atom *> hbonds;
+		hbonds = this->HydrogenBonds (atoms[i]);
+
+		if (atoms[i]->Name().find("O") != string::npos) {
+			Os += hbonds.size();
+		}
+		else if (atoms[i]->Name().find("H") != string::npos) {
+			Hs += hbonds.size();
+		}
+	}
+
+	coord = coordination(Os + 10*Hs);
+	wat->Coordination (coord);
+
+return coord;
 }

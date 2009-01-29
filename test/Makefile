@@ -12,6 +12,7 @@ FILLBOX = $(AMBERFILES) ../pdbfile.o ../boxfiller.o
 MPIFILES	=	$(AMBERFILES) ../mpi/mpisys.o mpitest.o
 ORDERPARAMS = $(AMBERFILES) orderparams.o
 TEMPFILES	= temp.cpp $(AMBERFILES)
+COORDINATION	= $(AMBERFILES) coordination.o
 
 ambertest : ambertest.o $(AMBERFILES)
 	$(CXX) $(CPPFLAGS) ambertest.o $(AMBERFILES) -o ambertest
@@ -57,6 +58,9 @@ temp: $(TEMPFILES)
 
 mpitest: $(MPIFILES)
 	mpiCC $(CPPFLAGS) $(MPILIBS) -o mpitest $(MPIFILES)
+
+coordination: $(COORDINATION)
+	$(CXX) $(CPPFLAGS) $(COORDINATION) -o coordination
 
 cleantest :
 	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams
