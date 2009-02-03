@@ -1,30 +1,92 @@
-//#include "../forcefile.h"
+//#include "../ambersystem.h"
+#include "../vecr.h"
+#include <boost/config.hpp>
 #include <iostream>
-#include <string>
-#include <map>
+#include <boost/graph/adjacency_list.hpp>
 
-using namespace std;
+using namespace boost;
+
+class A {
+public:
+	double vec[3];
+
+	A (const double x, const double y, const double z) {
+		vec[0] = x;
+		vec[1] = y;
+		vec[2] = z;
+	}
+
+	A () {
+		for (int i = 0; i < 3; i++) 
+			vec[i] = 0.0;
+	}
+};
+
+class V {
+public:
+	VecR * vec;
+	std::string name;
+};
+
+class E {
+public:
+	double length;
+	std::string type;
+
+};
+	
+	typedef boost::adjacency_list<
+		boost::listS, boost::listS, boost::undirectedS, 
+		V, E> G;
+		
+	typedef G::vertex_descriptor vd;
+	typedef G::edge_descriptor ed;
+	typedef G::vertex_iterator v_it;
+	typedef G::edge_iterator e_it;
+
 int main () {
 
-	map<int, string> names;
-	names[1] = "one";
-	names[2] = "two";
-	names[3] = "three";
-	names[4] = "four";
-	names[5] = "five";
+//	AmberSystem sys ("prmtop", "mdcrd", "mdvel");
+	std::vector<VecR *> vA;
+	vA.push_back (new VecR (1.0, 2.0, 3.0));
+	vA.push_back (new VecR (2.0, 3.0, 4.5));
+	vA.push_back (new VecR (1.5, 2.5, 6.0));
 
-	printf ("1 = %s, 2 = %s, 3 = %s\n", names[1].c_str(), names[2].c_str(), names[3].c_str());
-/*
-	ForceFile frc ("force.dat", 4862);
+	G g (vA.size());
 
-	for (int i=0; i<5; i++) {
-	frc.LoadNext();
+	// add all the vertices
+	vd v1;
+	v_it vi, vj, vi_end;
+	
+	int i = 0;
+	for (tie(vi, vi_end) = vertices(g); vi != vi_end; vi++) {
+		g[*vi].vec = vA[i];
+		i++;
 	}
-	RUN (frc) {
-		printf ("% 13.8f\n", frc[i].Magnitude());
-	}
-	*/
 
+	cout << num_vertices(g) << " vertices in the graph" << endl;
+
+	ed e;
+	bool connect;
+	// go through the vertex pairs to find their distances
+	for (tie(vi, vi_end) = vertices(g); vi != vi_end; vi++) {
+		for (vj = vi; vj != vi_end; vj++) {
+			if (vj == vi) continue;
+
+			VecR v = *g[*vi].vec - *g[*vj].vec;
+
+			double distance = v.Magnitude();
+			tie(e, connect) = add_edge(*vi, *vj, g);
+			g[e].length = distance;
+		}
+	}
+
+	e_it ei, ei_end;
+	for (tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
+		cout << g[*ei].length << endl;
+	}
+
+	
 return 0;
 }
 
@@ -140,7 +202,7 @@ int main () {
 
 /*
 #include <iostream>
-#include <boost/graph/adjacency_list.hpp>
+#include <boost/G/adjacency_list.hpp>
 
 #include "../ambersystem.h"
 #include "../utility.h"
@@ -162,33 +224,33 @@ int main () {
 
 	AmberSystem sys (PRMTOP, MDCRD, FORCE);
 
-	// vertex and edge properties
+	// vd and edge properties
 	typedef property<edge_weight_t, int> bond_length;		// bond length
 	typedef property<edge_weight2_t, int, bond_length> bond_type;		// this is for bond type 
 	typedef property<vertex_index2_t, int> atom_id;		// atom ID
 	typedef property<vertex_name_t, string> atom_id;		// atom ID
 
-	// forming the graph
+	// forming the G
 	typedef adjacency_list<vecS, vecS, undirectedS,
   		atom_id, bond_type> Graph;
 	Graph g;
 
 	// property objects
-	property_map<Graph, vertex_index2_t>::type
+	property_map<Graph, vd_index2_t>::type
   		AtomID = get(vertex_index2, g);
-	property_map<Graph, vertex_name_t>::type
+	property_map<Graph, vd_name_t>::type
   		AtomName = get(vertex_name, g);
 	property_map<Graph, edge_weight_t>::type
   		BondLength = get(edge_weight, g);
 	property_map<Graph, edge_weight2_t>::type
   		BondType = get(edge_weight2, g);
 
-	typedef graph_traits<Graph>::vertex_descriptor vertex;
-	typedef graph_traits<Graph>::edge_descriptor edge;
-	typedef graph_traits<Graph>::vertex_iterator vertex_iter;
-	typedef graph_traits<Graph>::edge_iterator edge_iter;
-	typedef graph_traits<Graph>::adjacency_iterator adj_iter;
-	std::pair<vertex_iter, vertex_iter> vp;
+	typedef G_traits<Graph>::vertex_descriptor vd;
+	typedef G_traits<Graph>::edge_descriptor edge;
+	typedef G_traits<Graph>::vertex_iterator v_iter;
+	typedef G_traits<Graph>::edge_iterator edge_iter;
+	typedef G_traits<Graph>::adjacency_iterator adj_iter;
+	std::pair<vertex_iter, v_iter> vp;
 
 	vertex atom;
 	vertex_iter atom1, atom2, atoms_end;

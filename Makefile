@@ -1,11 +1,11 @@
 SRCLIB	 	= $(HOME)/work/src
 MPILIBS		= $(MPI)/lib/libmpi.so $(MPI)/lib/libmpi_cxx.so 
-CINCLUDE	= -I$(SRCLIB) -I$(BOOST) -I$(MPI)/include
+CINCLUDE	= -I$(SRCLIB) -I$(BOOST) 
 CLIBS		= -L$(MKL) -lmkl_lapack -lmkl -lguide -lpthread
 CPPFLAGS	= $(CINCLUDE)
 #CXX			= mpiCC -g
 CXX			= g++ -g
-MPICXX		= mpiCC -g
+MPICXX		= mpiCC -g -I$(MPI)/include
 
 ANALYSISFILES	=	analysis.o xyzsystem.o connectmatrix.o dipoleparm.o h2o.o hno3.o matrixr.o molecule.o atom.o vecr.o wannier.o xyzfile.o
 

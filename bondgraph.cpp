@@ -189,8 +189,9 @@ return (e->bondlength);
 void BondGraph::ClearGraph () {
 		
 	// first remove all the old bonds
-	RUN(_edges) {
-		delete (_edges[i]);
+	vector<Edge *>::iterator ei;
+	for (ei = _edges.begin(); ei != _edges.end(); ei++) {
+		delete (*ei);
 	}
 	_edges.clear();
 	
