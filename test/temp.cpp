@@ -26,6 +26,15 @@ class V {
 public:
 	VecR * vec;
 	std::string name;
+
+	bool operator== (VecR * v) {
+		bool b;
+		if (vec->X() == v->X()) 
+			b = true;
+		else
+			b = false;
+		return b;
+	}
 };
 
 class E {
@@ -70,8 +79,14 @@ int main () {
 	bool connect;
 	// go through the vertex pairs to find their distances
 	for (tie(vi, vi_end) = vertices(g); vi != vi_end; vi++) {
+		
 		for (vj = vi; vj != vi_end; vj++) {
 			if (vj == vi) continue;
+
+			g[*vi].vec->Print();
+			g[*vj].vec->Print();
+			if (g[*vi] == g[*vj])
+				cout << "same" << endl;
 
 			VecR v = *g[*vi].vec - *g[*vj].vec;
 
@@ -85,11 +100,9 @@ int main () {
 	for (tie(ei, ei_end) = edges(g); ei != ei_end; ei++) {
 		cout << g[*ei].length << endl;
 	}
-
 	
 return 0;
 }
-
 /*
 int main () {
 
@@ -113,7 +126,7 @@ return 0;
 /*
 int main () {
 
-	AmberSystem sys (PRMTOP, MDCRD, FORCE);
+	AmberSystem sys ("prmtop", "mdcrd", "mdvel");
 
 	vector<Atom *> int_atoms;;
 	vector<Molecule *> int_mols;
@@ -123,9 +136,6 @@ int main () {
 	sys.LoadNext();
 	RUN (sys.Molecules()) {
 		pmol = sys.Molecules(i);
-		double position = pmol->Atoms(0)->Y();
-		if (position < 15.0) position += Atom::Size()[y];
-		if (position < 70 || position > 85.0) continue;
 		
 		RUN2(pmol->Atoms()) {
 			int_atoms.push_back (pmol->Atoms(j));
@@ -134,6 +144,7 @@ int main () {
 	}
 
 	sys.UpdateGraph(int_atoms);
+
 	for (int i = 300; i < 310; i++) {
 		printf ("(%d) atom = ", int_atoms[i]->NumHBonds()); int_atoms[i]->Print();
 		

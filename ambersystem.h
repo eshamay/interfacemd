@@ -61,9 +61,9 @@ public:
 	Atom * operator[] (int index) { return _atoms[index]; }
 
 	void UpdateGraph (vector<Atom *>& int_atoms) { _graph.UpdateGraph(int_atoms); }						// update the connectivity matrix/bond graph
-	double Distance (Atom * atom1, Atom * atom2) const { return _graph.Distance (atom1, atom2); }
-	vector<Atom *> AdjacentAtoms (Atom * atom) const { return _graph.AdjacentAtoms (atom); }
-	coordination WaterCoordination (Water * wat) const { return _graph.FindWaterCoordination (wat); }
+	//double Distance (Atom * atom1, Atom * atom2) const { return _graph.Distance (atom1, atom2); }
+	//vector<Atom *> AdjacentAtoms (Atom * atom) const { return _graph.AdjacentAtoms (atom); }
+	//coordination WaterCoordination (Water * wat) const { return _graph.FindWaterCoordination (wat); }
 	
 	// get the number of H-bonds the atom is involved in
 	//int HBonds (const int index) const { return _matrix->HBonds(_atoms[index]); }	

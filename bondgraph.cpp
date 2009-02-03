@@ -1,6 +1,8 @@
 #include "bondgraph.h"
 
+using namespace boost;
 
+/*
 void Edge::SetBondType () {
 	
 	bondtype = unbonded;
@@ -70,43 +72,57 @@ Edge::~Edge () {
 
 return;
 }
+*/
 
 // default
 BondGraph::BondGraph () {
-
+	_graph.clear();
 return;
 }
 
 // the constructor will set the size of the graph (i.e. number of vertices) based on the number of atoms given for analysis
 BondGraph::BondGraph (std::vector<Atom *>& atoms) {
-
-	// first let's add in all the atoms to the graph
-	RUN (atoms) {
-		_vertices.push_back (new Vertex (atoms[i]));
-	}
-	
-	// now we'll run through the system and establish all the edges
 	this->UpdateGraph (atoms);
 }
 
 // runs through all the atoms and determines the new set of edges
 void BondGraph::UpdateGraph (vector<Atom *>& atoms) {
 
-	this->ClearGraph ();
+	_graph.clear();
+
+	// first let's add in all the atoms to the graph
+	PATOM_IT pai, pai_end = atoms.end();
+	VD vd;
+	for (pai = atoms.begin(); pai != pai_end; pai++) {
+		vd = add_vertex(g);
+		g[vd].atom = *pai;
+	}
 
 	// first let's add in all the atoms to the graph, and also clear out their HBonding info
 	RUN (atoms) {
-		_vertices.push_back (new Vertex (atoms[i]));
 		atoms[i]->ClearHBonds();
 	}
 
 	// now run through all atom combos and get their bondlengths
 	double bondlength;
-	Vertex *v1, *v2;
-	for (int i = 0; i < _vertices.size()-1; i++) {
-		for (int j = i+1; j < _vertices.size(); j++) {
-			v1 = _vertices[i];
-			v2 = _vertices[j];
+	V_IT vi, vj, vend;
+	ED e;
+	bool connect;
+	for (tie(vi, vend) = vertices(g); vi != vend; vi++) {
+		for (vj = vi; vj != vend; vj++) {
+			if (vj == vi) continue;
+
+			double distance = *_graph[*vi].atom - *_graph[*vj].atom;
+
+			// check that the distance is at least an H-bond
+			if (distance > HBONDLENGTH) continue;
+
+			// add in the bond between two atoms
+			tie(e, connect) = add_edge(*vi, *vj, _graph);
+			_graph[e].bondlength = distance;
+
+			// check out the bond to see what type of bond it is
+			_graph[e].bond = BondType (*vi, *vj, e);
 
 			// we don't, right now, have molecules where the same atom type is bonded (or H-bonded) to itself (i.e. a C-C bond, etc.)
 			if (v1->name == v2->name) continue;
@@ -124,6 +140,49 @@ void BondGraph::UpdateGraph (vector<Atom *>& atoms) {
 return;
 }
 
+bondtype BondGraph::BondType (const VD v1, const VD v2, const ED e) const {
+
+	bondtype bond;
+
+	// Let's check OH type of bonds	
+	if ( (_graph[v1].atom->Name().find("H") != string::npos and _graph[v2].atom->Name().find("O") != string::npos)
+		or (_graph[v2]->Name().find("H") != string::npos and _graph[v1]->name.find("O") != string::npos) ) {
+
+		if (bondlength < OHBONDLENGTH) 
+			bondtype = covalent;
+
+		// An H-bond is formed!
+		if (bondlength < HBONDLENGTH && bondlength > OHBONDLENGTH) {
+			bondtype = hydrogen;
+			// the atoms also need to know about this so update both of them
+			_v1->atom->FormHBond (_v2->atom);
+			_v2->atom->FormHBond (_v1->atom);
+		}
+	}
+
+
+	// now check for NO bonds
+	if ( (_v1->name.find("N") != string::npos && _v2->name.find("O") != string::npos)
+		|| (_v2->name.find("N") != string::npos && _v1->name.find("O") != string::npos) ) {
+
+		if (bondlength < NOBONDLENGTH) 
+			bondtype = covalent;
+	}
+
+	// bonding between N and H
+	if ( (_v1->name.find("N") != string::npos && _v2->name.find("H") != string::npos)
+		|| (_v2->name.find("N") != string::npos && _v1->name.find("H") != string::npos) ) {
+	
+		if (bondlength < NHBONDLENGTH) 
+			bondtype = covalent;
+	}
+
+
+
+return;
+}
+
+/*
 Vertex * BondGraph::FindVertex (const Atom * atom) const {
 
 	// we have to find the edges associated with atom1, and see which one is connected to atom2
@@ -357,3 +416,4 @@ coordination BondGraph::FindWaterCoordination (Water * wat) const {
 
 return coord;
 }
+*/

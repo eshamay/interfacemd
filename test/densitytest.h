@@ -13,7 +13,7 @@ using namespace std;
 #define MDCRD	"mdcrd"
 #define FORCE	""
 
-#define TIMESTEPS		31800
+#define TIMESTEPS		200000
 #define OUTPUT_FREQ		100
 #define AXIS			y
 
