@@ -11,7 +11,7 @@ MDCRD2PDB = $(AMBERFILES) ../pdbfile.o mdcrd2pdb.o
 FILLBOX = $(AMBERFILES) ../pdbfile.o ../boxfiller.o
 MPIFILES	=	$(AMBERFILES) ../mpi/mpisys.o mpitest.o
 ORDERPARAMS = $(AMBERFILES) orderparams.o
-TEMPFILES	= temp.cpp ../vecr.o
+TEMPFILES	= temp.cpp $(AMBERFILES)
 COORDINATION	= $(AMBERFILES) coordination.o
 
 ambertest : ambertest.o $(AMBERFILES)

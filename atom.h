@@ -94,4 +94,7 @@ public:
 	void Print () const;
 };
 
+typedef std::vector<Atom>::iterator ATOM_IT;
+typedef std::vector<Atom *>::iterator PATOM_IT;
+
 #endif

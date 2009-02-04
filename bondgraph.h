@@ -16,8 +16,21 @@ const double HBONDANGLE	= 0.866025;		// cos(theta) has to be less than this valu
 const double NOBONDLENGTH = 2.0;
 const double NHBONDLENGTH = 1.3;		// uhmm... check this?
 
+/* Encoding of the different coordination types
+ * The numbering is based on each O having a value of 1, and each H haveing a value of 10 (i.e. add 1 for every O, and 10 for every H...). So a water in a state of OOHH bonding would have a coordination of 22, and a coordination of 13 would be OOOH, 12 = OOH, 11 = OH, 10 = H, etc.
+ */
+typedef enum {
+	UNBOUND=0, O=1, OO=2, OOO=3, 			// no H
+	H=10, OH=11, OOH=12, OOOH=13,			// 1 H
+	HH=20, OHH=21, OOHH=22, OOOHH=23,		// 2 Hs
+	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33	// 3 Hs
+} coordination;
+// And hopefully that covers all the bonding coordination types :)
+
+typedef std::map<coordination, string> coord_map;
+
 // bond types
-typedef enum {oh, no, nh, hbond, unbonded} bondtype;
+typedef enum {ohbond, nobond, nhbond, hbond, unbonded} bondtype;
 
 /********** EDGE ************/
 class EdgeDescriptor {
@@ -28,17 +41,16 @@ public:
 
 
 /********** VERTEX ************/
-// note that once vertices are added, they should remain static (i.e. we don't lose or add atoms to the system)
 class VertexDescriptor {
 public:
 	Atom * atom;
 
-	bool operator== (std::string name) {
+	bool Name (std::string name) const {
 		bool b;
 		if (atom->Name().find(name) != std::string::npos)
-			b = false;
-		else
 			b = true;
+		else
+			b = false;
 		return b;
 	}
 };
@@ -52,11 +64,15 @@ typedef G::vertex_descriptor VD;
 typedef G::edge_descriptor ED;
 typedef G::vertex_iterator V_IT;
 typedef G::edge_iterator E_IT;
+typedef G::adjacency_iterator ADJ_IT;
+typedef G::out_edge_iterator OUT_E_IT;
 
 /********** BONDGRAPH ************/
 class BondGraph {
 private:
 	G	_graph;		// the bondgraph object for all the data we'll need
+
+	coord_map _coord_names;
 
 public:
 
@@ -66,9 +82,14 @@ public:
 	void UpdateGraph (std::vector<Atom *>& int_atoms);
 	void ClearGraph () { _graph.clear(); }
 
-/*
-	Vertex * FindVertex (const Atom * atom) const;
+	bondtype BondType (const VD v1, const VD v2, const ED e) const;
 
+	V_IT FindVertex (const Atom * atom) const;
+
+	std::vector<Atom *> AdjacentAtoms (const Atom * atom) const;	// finds all connected atoms (regardless of bondtype)
+	std::vector<Atom *> AdjacentAtoms (const Atom * atom, const bondtype bond) const;
+
+/*
 	Edge * FindEdge (const Atom * atom1, const Atom * atom2) const;
 	Edge * FindEdge (const Vertex * v1, const Vertex * v2) const;
 
@@ -83,7 +104,6 @@ public:
 	double Distance (const Vertex * atom1, const Vertex * atom2) const;
 
 	Atom * Adjacent (const Vertex * v, const Edge * e) const;
-	std::vector<Atom *> AdjacentAtoms (const Atom * atom) const;
 	std::vector<Atom *> AdjacentAtoms (const Atom * atom, const string name) const;
 	std::vector<Atom *> ClosestAtoms (const Atom * atom, const string name, const int number) const;
 */

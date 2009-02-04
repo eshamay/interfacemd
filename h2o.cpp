@@ -1,6 +1,5 @@
 #include "h2o.h"
 
-map<coordination, string> Water::CoordinationNames;
 
 int Water::numWaters = 0;
 
@@ -14,28 +13,6 @@ Water::Water () {
 	_name = "h2o";
 	_set = false;
 	++numWaters;
-
-	static bool coord_init = false;
-	if (!coord_init) {
-		CoordinationNames[UNBOUND] = "UNBOUND";
-		CoordinationNames[O] = "O";
-		CoordinationNames[OO] = "OO";
-		CoordinationNames[OOO] = "OOO";
-		CoordinationNames[H] = "H";
-		CoordinationNames[OH] = "OH";
-		CoordinationNames[OOH] = "OOH";
-		CoordinationNames[OOOH] = "OOOH";
-		CoordinationNames[HH] = "HH";
-		CoordinationNames[OHH] = "OHH";
-		CoordinationNames[OOHH] = "OOHH";
-		CoordinationNames[OOOHH] = "OOOHH";
-		CoordinationNames[HHH] = "HHH";
-		CoordinationNames[OHHH] = "OHHH";
-		CoordinationNames[OOHHH] = "OOHHH";
-		CoordinationNames[OOOHHH] = "OOOHHH";
-
-		coord_init = true;
-	}
 }
 
 Water::~Water () {

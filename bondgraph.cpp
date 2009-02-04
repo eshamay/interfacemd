@@ -77,6 +77,24 @@ return;
 // default
 BondGraph::BondGraph () {
 	_graph.clear();
+
+	_coord_map[UNBOUND] = "UNBOUND";
+	_coord_map[O] = "O";
+	_coord_map[OO] = "OO";
+	_coord_map[OOO] = "OOO";
+	_coord_map[H] = "H";
+	_coord_map[OH] = "OH";
+	_coord_map[OOH] = "OOH";
+	_coord_map[OOOH] = "OOOH";
+	_coord_map[HH] = "HH";
+	_coord_map[OHH] = "OHH";
+	_coord_map[OOHH] = "OOHH";
+	_coord_map[OOOHH] = "OOOHH";
+	_coord_map[HHH] = "HHH";
+	_coord_map[OHHH] = "OHHH";
+	_coord_map[OOHHH] = "OOHHH";
+	_coord_map[OOOHHH] = "OOOHHH";
+
 return;
 }
 
@@ -94,8 +112,8 @@ void BondGraph::UpdateGraph (vector<Atom *>& atoms) {
 	PATOM_IT pai, pai_end = atoms.end();
 	VD vd;
 	for (pai = atoms.begin(); pai != pai_end; pai++) {
-		vd = add_vertex(g);
-		g[vd].atom = *pai;
+		vd = add_vertex(_graph);
+		_graph[vd].atom = *pai;
 	}
 
 	// first let's add in all the atoms to the graph, and also clear out their HBonding info
@@ -108,7 +126,7 @@ void BondGraph::UpdateGraph (vector<Atom *>& atoms) {
 	V_IT vi, vj, vend;
 	ED e;
 	bool connect;
-	for (tie(vi, vend) = vertices(g); vi != vend; vi++) {
+	for (tie(vi, vend) = vertices(_graph); vi != vend; vi++) {
 		for (vj = vi; vj != vend; vj++) {
 			if (vj == vi) continue;
 
@@ -122,18 +140,12 @@ void BondGraph::UpdateGraph (vector<Atom *>& atoms) {
 			_graph[e].bondlength = distance;
 
 			// check out the bond to see what type of bond it is
-			_graph[e].bond = BondType (*vi, *vj, e);
+			_graph[e].bond = this->BondType (*vi, *vj, e);
 
 			// we don't, right now, have molecules where the same atom type is bonded (or H-bonded) to itself (i.e. a C-C bond, etc.)
-			if (v1->name == v2->name) continue;
+			//if (v1->name == v2->name) continue;
 
-			// calculate the bondlength between the two atoms
-			bondlength = *v1->atom - *v2->atom;
-			
 			// The only bonds we're interested in are H-bonds and covalent bonds. Since covalent bonds are smaller than H-bonds, we don't need to check those.
-			if (bondlength < HBONDLENGTH) {
-				_edges.push_back (new Edge (v1, v2, bondlength));
-			}
 		}
 	}
 
@@ -143,59 +155,99 @@ return;
 bondtype BondGraph::BondType (const VD v1, const VD v2, const ED e) const {
 
 	bondtype bond;
+	double bondlength = _graph[e].bondlength;
 
 	// Let's check OH type of bonds	
-	if ( (_graph[v1].atom->Name().find("H") != string::npos and _graph[v2].atom->Name().find("O") != string::npos)
-		or (_graph[v2]->Name().find("H") != string::npos and _graph[v1]->name.find("O") != string::npos) ) {
+	if ( (_graph[v1].Name("H") and _graph[v2].Name("O"))
+		or (_graph[v2].Name("H") and _graph[v1].Name("O")) ) {
 
 		if (bondlength < OHBONDLENGTH) 
-			bondtype = covalent;
+			bond = ohbond;
 
 		// An H-bond is formed!
-		if (bondlength < HBONDLENGTH && bondlength > OHBONDLENGTH) {
-			bondtype = hydrogen;
-			// the atoms also need to know about this so update both of them
-			_v1->atom->FormHBond (_v2->atom);
-			_v2->atom->FormHBond (_v1->atom);
+		if (bondlength < HBONDLENGTH and bondlength > OHBONDLENGTH) {
+			bond = hbond;
 		}
 	}
 
-
 	// now check for NO bonds
-	if ( (_v1->name.find("N") != string::npos && _v2->name.find("O") != string::npos)
-		|| (_v2->name.find("N") != string::npos && _v1->name.find("O") != string::npos) ) {
+	if ( (_graph[v1].Name("N") and _graph[v2].Name("O"))
+		or (_graph[v2].Name("N") and _graph[v1].Name("O")) ) {
 
 		if (bondlength < NOBONDLENGTH) 
-			bondtype = covalent;
+			bond = nobond;
 	}
 
 	// bonding between N and H
-	if ( (_v1->name.find("N") != string::npos && _v2->name.find("H") != string::npos)
-		|| (_v2->name.find("N") != string::npos && _v1->name.find("H") != string::npos) ) {
+	if ( (_graph[v1].Name("N") and _graph[v2].Name("O"))
+		or (_graph[v2].Name("N") and _graph[v1].Name("O")) ) {
 	
 		if (bondlength < NHBONDLENGTH) 
-			bondtype = covalent;
+			bond = nhbond;
 	}
 
-
-
-return;
+return bond;
 }
 
-/*
-Vertex * BondGraph::FindVertex (const Atom * atom) const {
+V_IT BondGraph::FindVertex (const Atom * atom) const {
 
 	// we have to find the edges associated with atom1, and see which one is connected to atom2
-	Vertex * v;
-	RUN (_vertices) {
-		if (_vertices[i]->atom == atom) {
-			v = _vertices[i];
+	V_IT vi, vend;
+	for (tie(vi, vend) = vertices(_graph); vi != vend; vi++) {
+		if (_graph[*vi].atom == atom)
 			break;
-		}
 	}
 
-return (v);
+	if (vi == vend) {
+		printf ("BondGraph::FindVertex () - searched for an atom in the graph that was never found. Something is wrong.\nPerhaps the list of atoms used to update the graph is not inclusive enough?\n");
+		exit (1);
+	}
+
+return (vi);
 }
+
+// finds the atoms bonded (by edges) to the target atom
+std::vector<Atom *> BondGraph::AdjacentAtoms (const Atom * atom) const {
+
+	std::vector<Atom *> atoms;
+	// first - find the atom in the graph
+	V_IT v1 = this->FindVertex (atom);
+
+	// then we ask the graph for all the adjacent atoms and grab them
+	ADJ_IT adj, adj_end;
+	for (tie(adj, adj_end) = adjacent_vertices(*v1, _graph); adj != adj_end; adj++) {
+		Atom * atom = _graph[*adj].atom;
+		atoms.push_back(atom);
+	}
+
+return (atoms);
+}
+
+std::vector<Atom *> BondGraph::AdjacentAtoms (const Atom * atom, const bondtype bond) const {
+
+	std::vector<Atom *> atoms;
+
+	// first - find the atom in the graph
+	V_IT v1 = this->FindVertex (atom);
+	VD v2;
+
+	// then we ask the graph for all the bonds of the atom to analyze them to see if they match the requested bondtype
+	OUT_E_IT ei, e_end;
+	for (tie(ei, e_end) = out_edges(*v1, _graph); ei != e_end; ei++) {
+
+		// check that the bond type is the one we want
+		if (_graph[*ei].bond != bond) continue;
+		
+		v2 = target (*ei, _graph);
+		atoms.push_back (_graph[v2].atom);
+	}
+
+return (atoms);
+}
+
+
+
+/*
 
 Edge * BondGraph::FindEdge (const Atom * atom1, const Atom * atom2) const {
 	
@@ -271,22 +323,6 @@ Atom * BondGraph::Adjacent (const Vertex * v, const Edge * e) const {
 	v2 = (e->_v1 == v) ? v2 = e->_v2 : v2 = e->_v1;
 
 return (v2->atom);
-}
-
-// finds the atoms bonded (by edges) to the target atom
-vector<Atom *> BondGraph::AdjacentAtoms (const Atom * atom) const {
-
-	vector<Atom *> atoms;
-	Vertex * v1, * v2;
-	Edge * e;
-
-	v1 = this->FindVertex (atom);
-	RUN (v1->edges) {
-		e = v1->edges[i];
-		atoms.push_back (this->Adjacent(v1, e));
-	}
-		
-return (atoms);
 }
 
 // finds adjacent (connected by an edge) atoms in the system with a given name

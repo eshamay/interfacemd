@@ -1,5 +1,5 @@
 //#include "../ambersystem.h"
-#include "../vecr.h"
+/*
 #include <boost/config.hpp>
 #include <iostream>
 #include <boost/graph/adjacency_list.hpp>
@@ -52,10 +52,11 @@ public:
 	typedef G::edge_descriptor ed;
 	typedef G::vertex_iterator v_it;
 	typedef G::edge_iterator e_it;
-
+*/
+/*
 int main () {
 
-//	AmberSystem sys ("prmtop", "mdcrd", "mdvel");
+	AmberSystem sys ("prmtop", "mdcrd", "mdvel");
 	std::vector<VecR *> vA;
 	vA.push_back (new VecR (1.0, 2.0, 3.0));
 	vA.push_back (new VecR (2.0, 3.0, 4.5));
@@ -103,6 +104,7 @@ int main () {
 	
 return 0;
 }
+*/
 /*
 int main () {
 
@@ -211,93 +213,46 @@ int main () {
 }
 */
 
-/*
-#include <iostream>
-#include <boost/G/adjacency_list.hpp>
-
 #include "../ambersystem.h"
-#include "../utility.h"
 
 #define PRMTOP	"prmtop"
 #define MDCRD	"mdcrd"
 #define FORCE	"mdvel"
 	
-using namespace boost;
-	
-	enum {covalent, hydrogen, none};
-
-	struct atom {
-		int ID;
-	};
-
-
 int main () {
 
 	AmberSystem sys (PRMTOP, MDCRD, FORCE);
-
-	// vd and edge properties
-	typedef property<edge_weight_t, int> bond_length;		// bond length
-	typedef property<edge_weight2_t, int, bond_length> bond_type;		// this is for bond type 
-	typedef property<vertex_index2_t, int> atom_id;		// atom ID
-	typedef property<vertex_name_t, string> atom_id;		// atom ID
-
-	// forming the G
-	typedef adjacency_list<vecS, vecS, undirectedS,
-  		atom_id, bond_type> Graph;
-	Graph g;
-
-	// property objects
-	property_map<Graph, vd_index2_t>::type
-  		AtomID = get(vertex_index2, g);
-	property_map<Graph, vd_name_t>::type
-  		AtomName = get(vertex_name, g);
-	property_map<Graph, edge_weight_t>::type
-  		BondLength = get(edge_weight, g);
-	property_map<Graph, edge_weight2_t>::type
-  		BondType = get(edge_weight2, g);
-
-	typedef G_traits<Graph>::vertex_descriptor vd;
-	typedef G_traits<Graph>::edge_descriptor edge;
-	typedef G_traits<Graph>::vertex_iterator v_iter;
-	typedef G_traits<Graph>::edge_iterator edge_iter;
-	typedef G_traits<Graph>::adjacency_iterator adj_iter;
-	std::pair<vertex_iter, v_iter> vp;
-
-	vertex atom;
-	vertex_iter atom1, atom2, atoms_end;
-	edge_iter ei, ei_end;
-	edge bond;
-	adj_iter ai, ai_end;
 	
-	RUN (sys) {
-		atom = add_vertex(g);
-		AtomID[atom] = sys[i]->ID();
-		AtomName[atom] = sys[i]->Name();
-	}
+	std::vector<Atom *> atoms;
+	std::vector<Molecule *> mols;
 
-	for (tie(atom1, atoms_end) = vertices(g); *atom1 != 20; ++atom1) {
-		for (atom2 = atom1+1; atom2 != atoms_end; ++atom2) {
-			double distance = *sys[AtomID[*atom1]] - *sys[AtomID[*atom2]];
-
-			if (distance > 5.0) continue;
-
-			bond = add_edge(*atom1, *atom2, g).first;	
-			BondLength[bond] = distance;
+	Molecule * mol;
+	RUN (sys.Molecules()) {
+		mol = sys.Molecules(i);
+		if (mol->Name() != "h2o") continue;
+	
+		RUN2 (mol->Atoms()) {
+			atoms.push_back (mol->Atoms(j));
 		}
 	}
 
-	for (tie(atom1, atoms_end) = vertices(g); *atom1 != 20; ++atom1) {
-		std::cout << "atom " << AtomID[*atom1] << endl << "[";
+	sys.bondgraph.UpdateGraph (atoms);
 
-		for (tie(ai, ai_end) = adjacent_vertices(*atom1, g); ai != ai_end; ++ai) {
-			std::cout << AtomID[*ai] << "  ";
+	RUN2 (atoms) {
+		Atom * atom = atoms[j];
+		printf ("\n");
+		printf ("%s (%d)\n", atom->Name().c_str(), atom->ID());
+
+		std::vector<Atom *> neighbors = sys.bondgraph.AdjacentAtoms (atom, ohbond);
+		RUN (neighbors) {
+			printf ("|\n -> %s (%d)\n", neighbors[i]->Name().c_str(), neighbors[i]->ID());
 		}
-		std::cout << "]" << std::endl;
-	
+
+		neighbors = sys.bondgraph.AdjacentAtoms (atom, hbond);
+		RUN (neighbors) {
+			printf ("|\n -----> %s (%d)\n", neighbors[i]->Name().c_str(), neighbors[i]->ID());
+		}	
 	}
-
-
 
 return 0;
 }
-*/

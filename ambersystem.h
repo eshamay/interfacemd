@@ -23,7 +23,6 @@ private:
 	std::vector<Atom *> _atoms;			// A listing of all the atoms in the system with information parsed from the topfile and crdfile
 	std::vector<Molecule *> _mols;		// The molecules within a system - defined by the residues in the topology files
 
-	BondGraph	_graph;					// our adjacency graph for calculating connections in the system
 
 	void _ParseAtomInformation ();
 	void _ParseAtomVectors ();
@@ -34,6 +33,8 @@ public:
 	AmberSystem (string prmtop, string mdcrd, string mdvel);
 	~AmberSystem ();
 	
+	BondGraph	bondgraph;					// our adjacency graph for calculating connections in the system
+
 	// Controller & Calculation methods
 	void LoadNext ();	 					// Update the system to the next timestep 
 	void LoadFirst ();
@@ -59,16 +60,6 @@ public:
 
 	// operators
 	Atom * operator[] (int index) { return _atoms[index]; }
-
-	void UpdateGraph (vector<Atom *>& int_atoms) { _graph.UpdateGraph(int_atoms); }						// update the connectivity matrix/bond graph
-	//double Distance (Atom * atom1, Atom * atom2) const { return _graph.Distance (atom1, atom2); }
-	//vector<Atom *> AdjacentAtoms (Atom * atom) const { return _graph.AdjacentAtoms (atom); }
-	//coordination WaterCoordination (Water * wat) const { return _graph.FindWaterCoordination (wat); }
-	
-	// get the number of H-bonds the atom is involved in
-	//int HBonds (const int index) const { return _matrix->HBonds(_atoms[index]); }	
-
-	//coordination WaterCoord (const Water& water) const { return _matrix->FindWaterCoordination(water); }
 
 };
 

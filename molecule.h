@@ -127,4 +127,7 @@ public:
 
 };
 
+typedef std::vector<Molecule *>::iterator PMOL_IT;
+typedef std::vector<Molecule>::iterator MOL_IT;
+
 #endif
