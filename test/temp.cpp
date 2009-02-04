@@ -224,7 +224,7 @@ int main () {
 	AmberSystem sys (PRMTOP, MDCRD, FORCE);
 	
 	std::vector<Atom *> atoms;
-	std::vector<Molecule *> mols;
+	std::vector<Water *> mols;
 
 	Molecule * mol;
 	RUN (sys.Molecules()) {
@@ -234,10 +234,21 @@ int main () {
 		RUN2 (mol->Atoms()) {
 			atoms.push_back (mol->Atoms(j));
 		}
+		mols.push_back (static_cast<Water *>(mol));
 	}
 
 	sys.bondgraph.UpdateGraph (atoms);
 
+	RUN (mols) {
+		coordination coord = sys.bondgraph.WaterCoordination (mols[i]);
+		string name = sys.bondgraph.CoordName (coord);
+		if (name == "") {
+			mols[i]->Print();
+		}
+		printf ("%s\n", name.c_str());
+	}
+
+/*
 	RUN2 (atoms) {
 		Atom * atom = atoms[j];
 		printf ("\n");
@@ -253,6 +264,7 @@ int main () {
 			printf ("|\n -----> %s (%d)\n", neighbors[i]->Name().c_str(), neighbors[i]->ID());
 		}	
 	}
+*/
 
 return 0;
 }

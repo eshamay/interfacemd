@@ -28,8 +28,6 @@ protected:
 	MatR _alpha;					// polarizability of the molecule
 	#endif
 
-	coordination _coord;				// the bonding coordation of the water
-
 	#ifdef H2O_DIPOLE_PARM
 	static WaterDipoleParms _dipparms;		// The water dipole parameter file
 	#endif
@@ -40,7 +38,6 @@ public:
 	Water (const Molecule& molecule);	// copy constructor for casting from a molecule
 
 	static int numWaters;			// total number of waters in the system
-	static map<coordination, string> CoordinationNames;		// a map for printing out names of the different types of coordinations
 
 	// Functions for analysis
 	void SetAtoms ();
@@ -62,10 +59,6 @@ public:
 	double EulerAngles[3];				// euler angles as defined in "The Raman Effect" Appendix A5 (theta, phi, chi)
 
 	void CalcEulerAngles (const coord axis = z);
-
-	// dealing with the bonding coordination of a water molecule - how is it hydrogen-bonded?
-	void Coordination (const coordination coord) { _coord = coord; }
-	coordination Coordination () const { return _coord; }
 
 	#ifdef WATER_POLARIZ
 	void CalcAlpha ();		// calculate the molecular polarizability tensor (as per morita+hynes 2002 method)

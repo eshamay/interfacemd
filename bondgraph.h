@@ -10,7 +10,7 @@
 #include "h2o.h"
 
 
-const double OHBONDLENGTH = 1.3;
+const double OHBONDLENGTH = 1.0;
 const double HBONDLENGTH  = 2.46;
 const double HBONDANGLE	= 0.866025;		// cos(theta) has to be less than this value to be considered an H-bond
 const double NOBONDLENGTH = 2.0;
@@ -45,6 +45,7 @@ class VertexDescriptor {
 public:
 	Atom * atom;
 
+	// this can be useful to let us know if a given atom has the name we are looking for
 	bool Name (std::string name) const {
 		bool b;
 		if (atom->Name().find(name) != std::string::npos)
@@ -66,6 +67,7 @@ typedef G::vertex_iterator V_IT;
 typedef G::edge_iterator E_IT;
 typedef G::adjacency_iterator ADJ_IT;
 typedef G::out_edge_iterator OUT_E_IT;
+
 
 /********** BONDGRAPH ************/
 class BondGraph {
@@ -89,6 +91,15 @@ public:
 	std::vector<Atom *> AdjacentAtoms (const Atom * atom) const;	// finds all connected atoms (regardless of bondtype)
 	std::vector<Atom *> AdjacentAtoms (const Atom * atom, const bondtype bond) const;
 
+	int NumBonds (const Atom * atom, const bondtype bond) const {
+		return (this->AdjacentAtoms (atom, bond).size());
+	}
+	
+	coordination WaterCoordination (const Water * wat) const;
+	
+	string CoordName (const coordination coord) {
+		return _coord_names[coord];
+	}
 /*
 	Edge * FindEdge (const Atom * atom1, const Atom * atom2) const;
 	Edge * FindEdge (const Vertex * v1, const Vertex * v2) const;

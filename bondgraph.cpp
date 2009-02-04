@@ -2,98 +2,26 @@
 
 using namespace boost;
 
-/*
-void Edge::SetBondType () {
-	
-	bondtype = unbonded;
-
-	// Let's check OH type of bonds	
-	if ( (_v1->name.find("H") != string::npos && _v2->name.find("O") != string::npos)
-		|| (_v2->name.find("H") != string::npos && _v1->name.find("O") != string::npos) ) {
-
-		if (bondlength < OHBONDLENGTH) 
-			bondtype = covalent;
-
-		// An H-bond is formed!
-		if (bondlength < HBONDLENGTH && bondlength > OHBONDLENGTH) {
-			bondtype = hydrogen;
-			// the atoms also need to know about this so update both of them
-			_v1->atom->FormHBond (_v2->atom);
-			_v2->atom->FormHBond (_v1->atom);
-		}
-	}
-
-
-	// now check for NO bonds
-	if ( (_v1->name.find("N") != string::npos && _v2->name.find("O") != string::npos)
-		|| (_v2->name.find("N") != string::npos && _v1->name.find("O") != string::npos) ) {
-
-		if (bondlength < NOBONDLENGTH) 
-			bondtype = covalent;
-	}
-
-	// bonding between N and H
-	if ( (_v1->name.find("N") != string::npos && _v2->name.find("H") != string::npos)
-		|| (_v2->name.find("N") != string::npos && _v1->name.find("H") != string::npos) ) {
-	
-		if (bondlength < NHBONDLENGTH) 
-			bondtype = covalent;
-	}
-
-
-
-return;
-}
-
-// when removing an edge from the system, we also have to update the lists of the two vertices
-Edge::~Edge () {
-	
-	Edge * edge = this;
-	vector<Edge *>::iterator ei;
-
-	// here we remove the this edge from the list of edges on both the vertex atoms
-	ei = _v1->edges.begin();
-	while (ei != _v1->edges.end()) {
-		if (*ei == edge) {
-			_v1->edges.erase(ei);
-			break;
-		}
-		ei++;
-	}
-
-	ei = _v2->edges.begin();
-	while (ei != _v2->edges.end()) {
-		if (*ei == edge) {
-			_v2->edges.erase(ei);
-			break;
-		}
-		ei++;
-	}
-
-return;
-}
-*/
-
 // default
 BondGraph::BondGraph () {
 	_graph.clear();
 
-	_coord_map[UNBOUND] = "UNBOUND";
-	_coord_map[O] = "O";
-	_coord_map[OO] = "OO";
-	_coord_map[OOO] = "OOO";
-	_coord_map[H] = "H";
-	_coord_map[OH] = "OH";
-	_coord_map[OOH] = "OOH";
-	_coord_map[OOOH] = "OOOH";
-	_coord_map[HH] = "HH";
-	_coord_map[OHH] = "OHH";
-	_coord_map[OOHH] = "OOHH";
-	_coord_map[OOOHH] = "OOOHH";
-	_coord_map[HHH] = "HHH";
-	_coord_map[OHHH] = "OHHH";
-	_coord_map[OOHHH] = "OOHHH";
-	_coord_map[OOOHHH] = "OOOHHH";
+	_coord_names[UNBOUND] = "UNBOUND";
+	_coord_names[O] = "O";
+	_coord_names[OO] = "OO";
+	_coord_names[OOO] = "OOO";
+	_coord_names[H] = "H";
+	_coord_names[OH] = "OH";
+	_coord_names[OOH] = "OOH";
+	_coord_names[OOOH] = "OOOH";
+	_coord_names[HH] = "HH";
+	_coord_names[OHH] = "OHH";
+	_coord_names[OOHH] = "OOHH";
+	_coord_names[OOOHH] = "OOOHH";
+	_coord_names[HHH] = "HHH";
+	_coord_names[OHHH] = "OHHH";
+	_coord_names[OOHHH] = "OOHHH";
+	_coord_names[OOOHHH] = "OOOHHH";
 
 return;
 }
@@ -126,9 +54,12 @@ void BondGraph::UpdateGraph (vector<Atom *>& atoms) {
 	V_IT vi, vj, vend;
 	ED e;
 	bool connect;
+	// this little for-loop bit runs through all atom-pair combinations once and find the bond-types between them
 	for (tie(vi, vend) = vertices(_graph); vi != vend; vi++) {
 		for (vj = vi; vj != vend; vj++) {
 			if (vj == vi) continue;
+
+			if (*_graph[*vi].atom->Name() == *_graph[*vj].atom->Name()) continue;
 
 			double distance = *_graph[*vi].atom - *_graph[*vj].atom;
 
@@ -142,10 +73,6 @@ void BondGraph::UpdateGraph (vector<Atom *>& atoms) {
 			// check out the bond to see what type of bond it is
 			_graph[e].bond = this->BondType (*vi, *vj, e);
 
-			// we don't, right now, have molecules where the same atom type is bonded (or H-bonded) to itself (i.e. a C-C bond, etc.)
-			//if (v1->name == v2->name) continue;
-
-			// The only bonds we're interested in are H-bonds and covalent bonds. Since covalent bonds are smaller than H-bonds, we don't need to check those.
 		}
 	}
 
@@ -170,6 +97,7 @@ bondtype BondGraph::BondType (const VD v1, const VD v2, const ED e) const {
 		}
 	}
 
+/*
 	// now check for NO bonds
 	if ( (_graph[v1].Name("N") and _graph[v2].Name("O"))
 		or (_graph[v2].Name("N") and _graph[v1].Name("O")) ) {
@@ -185,6 +113,7 @@ bondtype BondGraph::BondType (const VD v1, const VD v2, const ED e) const {
 		if (bondlength < NHBONDLENGTH) 
 			bond = nhbond;
 	}
+*/
 
 return bond;
 }
@@ -245,7 +174,29 @@ std::vector<Atom *> BondGraph::AdjacentAtoms (const Atom * atom, const bondtype 
 return (atoms);
 }
 
+coordination BondGraph::WaterCoordination (const Water * wat) const {
 
+	if (wat->Name() != "h2o") {
+		printf ("BondGraph::WaterCoordinaiton - The molecule given is named %s, not \"h2o\". Is this right?\n", wat->Name().c_str());
+		exit (1);
+	}
+
+	int coord = 0;
+
+	// grab all the atoms in the water and run through them to find out the number of bonds they have
+	std::vector<Atom *> atoms = wat->Atoms();
+	RUN (atoms) {
+		Atom * atom = atoms[i];
+		// for the hydrogens add 10 for each h-bond
+		if (atom->Name().find("H") != string::npos)
+			coord += 10 * NumBonds(atom, hbond);
+		// for oxygen add 1 for each h-bond
+		else if (atom->Name().find("O") != string::npos)
+			coord += NumBonds(atom, hbond);
+	}
+
+return (coordination(coord));
+}
 
 /*
 
