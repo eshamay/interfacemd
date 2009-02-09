@@ -5,7 +5,7 @@ CLIBS		= -L$(MKL) -lmkl_lapack -lmkl -lguide -lpthread
 CPPFLAGS	= $(CINCLUDE)
 #CXX			= mpiCC -g
 CXX			= g++ -g
-MPICXX		= mpiCC -g -I$(MPI)/include
+MPICXX		= mpiCC -g -O0 -I$(MPI)/include
 
 ANALYSISFILES	=	analysis.o xyzsystem.o connectmatrix.o dipoleparm.o h2o.o hno3.o matrixr.o molecule.o atom.o vecr.o wannier.o xyzfile.o
 
@@ -20,7 +20,7 @@ cleanall:
 	( cd test ; make cleantest )
 	( cd mpi ; make clean )
 
-%.o: %.cpp
+%.o: %.cpp %.h
 	$(CXX) $(CPPFLAGS) -c -o $@ $<
 
 #molecule.o: molecule.cpp molecule.h

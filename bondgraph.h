@@ -4,11 +4,11 @@
 #include <boost/config.hpp>
 #include <iostream>
 #include <boost/graph/adjacency_list.hpp>
+#include <exception>
 
 #include "utility.h"
 #include "atom.h"
 #include "h2o.h"
-
 
 const double OHBONDLENGTH = 1.0;
 const double HBONDLENGTH  = 2.46;
@@ -16,14 +16,16 @@ const double HBONDANGLE	= 0.866025;		// cos(theta) has to be less than this valu
 const double NOBONDLENGTH = 2.0;
 const double NHBONDLENGTH = 1.3;		// uhmm... check this?
 
+
 /* Encoding of the different coordination types
  * The numbering is based on each O having a value of 1, and each H haveing a value of 10 (i.e. add 1 for every O, and 10 for every H...). So a water in a state of OOHH bonding would have a coordination of 22, and a coordination of 13 would be OOOH, 12 = OOH, 11 = OH, 10 = H, etc.
  */
 typedef enum {
-	UNBOUND=0, O=1, OO=2, OOO=3, 			// no H
-	H=10, OH=11, OOH=12, OOOH=13,			// 1 H
-	HH=20, OHH=21, OOHH=22, OOOHH=23,		// 2 Hs
-	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33	// 3 Hs
+	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			// no H
+	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			// 1 H
+	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		// 2 Hs
+	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	// 3 Hs
+	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44
 } coordination;
 // And hopefully that covers all the bonding coordination types :)
 
@@ -35,14 +37,39 @@ typedef enum {ohbond, nobond, nhbond, hbond, unbonded} bondtype;
 /********** EDGE ************/
 class EdgeDescriptor {
 public:
+
+	EdgeDescriptor ();
+	~EdgeDescriptor ();
+
 	double	bondlength;	// bond length
 	bondtype bond;	 	// bond type (covalent, hydrogen-bond, or unbonded)
+
+	static int num_edges;
+	int id;
 };
+
+int EdgeDescriptor::num_edges = 0;
+
+EdgeDescriptor::EdgeDescriptor () {
+	EdgeDescriptor::num_edges++;
+	id = EdgeDescriptor::num_edges;
+return;
+}
+
+EdgeDescriptor::~EdgeDescriptor () {
+	EdgeDescriptor::num_edges--;
+return;
+}
+
 
 
 /********** VERTEX ************/
 class VertexDescriptor {
 public:
+
+	VertexDescriptor ();
+	~VertexDescriptor ();
+
 	Atom * atom;
 
 	// this can be useful to let us know if a given atom has the name we are looking for
@@ -54,9 +81,26 @@ public:
 			b = false;
 		return b;
 	}
+
+	static int num_vertices;
+	int id;
 };
 
+int VertexDescriptor::num_vertices = 0;
+
+VertexDescriptor::VertexDescriptor () {
+	VertexDescriptor::num_vertices++;
+	id = VertexDescriptor::num_vertices;
+return;
+}
+
+VertexDescriptor::~VertexDescriptor () {
+	VertexDescriptor::num_vertices--;
+return;
+}
 	
+
+
 typedef boost::adjacency_list<
 	boost::listS, boost::listS, boost::undirectedS, 
 	VertexDescriptor, EdgeDescriptor> G;
@@ -79,20 +123,20 @@ private:
 public:
 
 	BondGraph ();
-	BondGraph (std::vector<Atom *>& atoms);
+	BondGraph (VPATOM& atoms);
 
-	void UpdateGraph (std::vector<Atom *>& int_atoms);
-	void ClearGraph () { _graph.clear(); }
+	void UpdateGraph (VPATOM& int_atoms);
+	void ClearGraph ();
 
-	bondtype BondType (const VD v1, const VD v2, const ED e) const;
+	bondtype BondType (Atom * a1, Atom * a2, double bondlength) const;
 
 	V_IT FindVertex (const Atom * atom) const;
 
-	std::vector<Atom *> AdjacentAtoms (const Atom * atom) const;	// finds all connected atoms (regardless of bondtype)
-	std::vector<Atom *> AdjacentAtoms (const Atom * atom, const bondtype bond) const;
+	VPATOM AdjacentAtoms (const Atom * atom) const;	// finds all connected atoms (regardless of bondtype)
+	VPATOM AdjacentAtoms (const Atom * atom, const bondtype bond) const;
 
 	int NumBonds (const Atom * atom, const bondtype bond) const {
-		return (this->AdjacentAtoms (atom, bond).size());
+		return (AdjacentAtoms (atom, bond).size());
 	}
 	
 	coordination WaterCoordination (const Water * wat) const;
@@ -100,6 +144,8 @@ public:
 	string CoordName (const coordination coord) {
 		return _coord_names[coord];
 	}
+
+	coord_map& CoordNameMap () { return _coord_names; }
 /*
 	Edge * FindEdge (const Atom * atom1, const Atom * atom2) const;
 	Edge * FindEdge (const Vertex * v1, const Vertex * v2) const;

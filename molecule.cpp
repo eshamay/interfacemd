@@ -58,7 +58,7 @@ return (_atoms.size());
 */
 
 // get back the atom pointer to the atom with the given name
-Atom* Molecule::operator[] (const string atomname) const {
+Atom * Molecule::operator[] (const string atomname) const {
 	
 	Atom *patom = (Atom *)NULL;
 	RUN (_atoms) {
@@ -503,6 +503,7 @@ void Molecule::_FindEulerAngles () {
 return;
 }
 
+/*
 void Molecule::ClearHBonds () {
 	RUN (_atoms) {
 		_atoms[i]->ClearHBonds();
@@ -527,6 +528,7 @@ std::vector<Atom *> Molecule::HBonds () const {
 
 return (atoms);
 }
+*/
 
 // if given a 2nd molecule, this will merge the current and the new molecules into one larger molecule.
 Molecule * Molecule::Merge (Molecule * mol) {

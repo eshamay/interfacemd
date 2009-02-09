@@ -33,11 +33,27 @@ CoordinationTest::CoordinationTest () {
 	timesteps	=	TIMESTEPS;				// # of timesteps to process through
 	
 	printf ("Total timesteps = %d\n", timesteps);
+	
+	// here initialize all the histograms to get ready for binning the positions
+	// to do this, we have to get all the different coordination types possible. Those come from the coordination type map in the bondgraph
+	
+	name_map = sys->bondgraph.CoordNameMap();
+
+	coord_map::iterator coord_it, coord_end;
+	vcoords.clear();
+	for (coord_it = name_map.begin(); coord_it != name_map.end(); coord_it++) {
+
+		coordination coord = coord_it->first;
+		string name = coord_it->second;
+		
+		histo[coord].resize(posbins, 0);
+		vcoords.push_back(coord);
+	}
 
 return;
 }
 
-void CoordinationTest::FindInterfacialWaters (std::vector<Water *>& int_mols, std::vector<Atom *>& int_atoms, AmberSystem * sys) {
+void CoordinationTest::FindInterfacialWaters (VPWATER& int_mols, VPATOM& int_atoms) {
 	
 	int_mols.clear();
 	int_atoms.clear();
@@ -70,7 +86,7 @@ void CoordinationTest::FindInterfacialWaters (std::vector<Water *>& int_mols, st
 return;
 }
 
-void CoordinationTest::FindWaters (std::vector<Water *>& int_mols, std::vector<Atom *>& int_atoms, AmberSystem * sys) {
+void CoordinationTest::FindWaters (VPWATER& int_mols, VPATOM& int_atoms) {
 	
 	int_mols.clear();
 	int_atoms.clear();
@@ -100,80 +116,99 @@ void CoordinationTest::FindWaters (std::vector<Water *>& int_mols, std::vector<A
 return;
 }
 
+void CoordinationTest::OutputData (const int step) {
+
+	if (!(step % (OUTPUT_FREQ * 10))) {
+
+		rewind (output);
+
+		// now that all the histograms have been compiled... let's output them to a file somehow
+		// first, output a header
+		fprintf (output, "position\t");
+		RUN (vcoords) 
+			fprintf (output, "%s\t", name_map[vcoords[i]].c_str());
+		fprintf (output, "\n");
+	
+		// and now print all the data out
+		for (int i = 0; i < posbins; i++) {
+			
+			double pos = double(i) * posres + posmin;
+	
+			fprintf (output, "% 8.3f", pos);
+
+			RUN2 (vcoords) {
+				coordination c = vcoords[j];
+				int val = histo[c][i];
+				fprintf (output, "% 8d", val);
+			}
+
+			fprintf (output, "\n");
+		}
+	}
+
+return;
+}
+
+void CoordinationTest::OutputStatus (const int step) const {
+	
+	if (!(step % (OUTPUT_FREQ * 10)))
+		printf ("\n%10d/%d)  ", step, TIMESTEPS);
+
+	if (!(step % OUTPUT_FREQ)) 
+		printf ("*");
+
+	fflush (stdout);
+
+return;
+}
+
+
+
+
+
 int main (int argc, char **argv) {
 
 	CoordinationTest coords;
 
-	// set up a holder for all the different coordination types to bin them according to location in the slab - i.e. we'll make a density histogram for the different coordination types
-	// The map to shove the data into the right coordination's histogram
-	std::map<coordination, std::vector<int> > histograms;
-	
-	std::map<coordination, string>::iterator it;
-	std::map<coordination, string> * mymap = &(Water::CoordinationNames);
-
-	// here initialize all the histograms to get ready for binning the positions
-	for (it = (*mymap).begin(); it != (*mymap).end(); it++) {
-		
-		coordination coord = it->first;
-		string name = it->second;
-		
-		histograms[coord].resize(coords.posbins, 0);
-	}
-
-	std::vector<Water *> waters;
-	std::vector<Atom *> atoms;
+	VPWATER waters;
+	VPATOM atoms;
 	for (int step = 0; step < coords.timesteps; step++) {
 
 		// we'll go through and pick out all the waters in the system at the interface
 		//coords.FindInterfacialWaters (waters, atoms, coords.sys);
-		coords.FindWaters (waters, atoms, coords.sys);
+		coords.FindWaters (waters, atoms);
 
 		// to find the coordination of the atoms we have to update the bond graph
-		coords.sys->UpdateGraph(atoms);
+		coords.sys->bondgraph.UpdateGraph(atoms);
 
 		// now, for each water, we find its coordination
+		Water * wat;
 		RUN (waters) {
-			coordination coord = waters[i]->Coordination();
+			wat = waters[i];
+			coordination coord = coords.sys->bondgraph.WaterCoordination (wat);
+
+			// the highest coordination that we'll look at...
+			if (coord > OOHHH) continue;
 
 			// calculate its position in the slab, and find the histogram bin for it
-			Atom * oxy = waters[i]->GetAtom ("O");
-			VecR position = oxy->Position();
-			double r = position[coords.axis];
-			if (r < PBCFLIP) r += Atom::Size()[coords.axis];
-			int bin = (int)((r - coords.posmin)/coords.posres);
+			Atom * oxy = wat->GetAtom ("O");
+			VecR r = oxy->Position();
+			double position = r[coords.axis];
+			if (position < PBCFLIP) position += Atom::Size()[coords.axis];
+			int bin = (int)((position - coords.posmin)/coords.posres);
 
 			// then, update the respective histogram for that coordination
-			histograms[coord][bin]++;
+			coords.histo[coord][bin]++;
 		}
 
 		coords.sys->LoadNext();
+
+		coords.OutputStatus (step);
+		coords.OutputData (step);
 	}
 
+	coords.OutputData (0);
 
-	// now that all the histograms have been compiled... let's output them to a file somehow
-	vector<coordination> vc;
-	vc.push_back (OH);
-	vc.push_back (H);
-	vc.push_back (OO);
-	vc.push_back (O);
-	vc.push_back (HH);
-	vc.push_back (OHH);
-
-	for (int i = 0; i < coords.posbins; i++) {
-		
-		double pos = double(i) * coords.posres + coords.posmin;
-
-		printf ("% 8.3f", pos);
-
-		RUN2 (vc) {
-			coordination c = coordination(vc[j]);
-			vector<int> h = histograms[c];
-			double val = double(h[i]);
-			printf ("% 8d", int(val/coords.timesteps));
-		}
-
-		printf ("\n");
-	}
 
 return 0;
 }

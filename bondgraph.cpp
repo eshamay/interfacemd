@@ -27,26 +27,62 @@ return;
 }
 
 // the constructor will set the size of the graph (i.e. number of vertices) based on the number of atoms given for analysis
-BondGraph::BondGraph (std::vector<Atom *>& atoms) {
-	this->UpdateGraph (atoms);
+BondGraph::BondGraph (VPATOM& atoms) {
+	UpdateGraph (atoms);
+}
+
+void BondGraph::ClearGraph () {
+
+	// collect all the edges and vertices for removal
+	std::vector<ED> edgeList;
+	std::vector<VD> vertexList;
+
+	E_IT ei, eend;
+	for( tie (ei, eend) = edges(_graph); ei != eend; ei++) {
+		edgeList.push_back (*ei);
+	}
+
+	V_IT vi, vend;
+	for (tie(vi, vend) = vertices(_graph); vi != vend; vi++) {
+		vertexList.push_back (*vi);
+	}
+
+	ED e1, e2;
+	for (int i = 0; i < edgeList.size() - 1 and edgeList.size(); i++) {
+		e1 = edgeList[i];
+		
+		for (int j = i + 1; j < edgeList.size(); j++) {
+			e2 = edgeList[j];
+
+			if (_graph[e1].id == _graph[e2].id) {
+				cout << _graph[e1].id << " and " << _graph[e2].id << endl;
+				exit(1);
+			}
+		}
+	}
+
+	// clear them out from the graph
+	RUN (edgeList) 
+		remove_edge (edgeList[i], _graph);
+
+
+	RUN (vertexList)
+		remove_vertex (vertexList[i], _graph);
+	
+return;
 }
 
 // runs through all the atoms and determines the new set of edges
-void BondGraph::UpdateGraph (vector<Atom *>& atoms) {
+void BondGraph::UpdateGraph (VPATOM& atoms) {
 
-	_graph.clear();
+//	_graph.clear();
+	ClearGraph();
 
 	// first let's add in all the atoms to the graph
-	PATOM_IT pai, pai_end = atoms.end();
 	VD vd;
-	for (pai = atoms.begin(); pai != pai_end; pai++) {
-		vd = add_vertex(_graph);
-		_graph[vd].atom = *pai;
-	}
-
-	// first let's add in all the atoms to the graph, and also clear out their HBonding info
 	RUN (atoms) {
-		atoms[i]->ClearHBonds();
+		vd = add_vertex(_graph);
+		_graph[vd].atom = atoms[i];
 	}
 
 	// now run through all atom combos and get their bondlengths
@@ -58,43 +94,58 @@ void BondGraph::UpdateGraph (vector<Atom *>& atoms) {
 	for (tie(vi, vend) = vertices(_graph); vi != vend; vi++) {
 		for (vj = vi; vj != vend; vj++) {
 			if (vj == vi) continue;
+			
+			Atom * a1 = _graph[*vi].atom;
+			Atom * a2 = _graph[*vj].atom;
+			if (a1 == (Atom *)NULL or a2 == (Atom *)NULL or a1 == a2) {
+				printf ("BondGraph::UpdateGraph - feeding in bad atoms!\n");
+				exit (1);
+			}
 
-			if (*_graph[*vi].atom->Name() == *_graph[*vj].atom->Name()) continue;
+			if (a1->Name() == a2->Name()) continue;
 
-			double distance = *_graph[*vi].atom - *_graph[*vj].atom;
+			double distance = *a1 - *a2;
 
 			// check that the distance is at least an H-bond
 			if (distance > HBONDLENGTH) continue;
 
 			// add in the bond between two atoms
+			cout << EdgeDescriptor::num_edges << endl;
 			tie(e, connect) = add_edge(*vi, *vj, _graph);
+			cout << EdgeDescriptor::num_edges << endl;
+			
 			_graph[e].bondlength = distance;
 
-			// check out the bond to see what type of bond it is
-			_graph[e].bond = this->BondType (*vi, *vj, e);
-
+			// check out the distance to see what type of bond it is
+			_graph[e].bond = BondType (a1, a2, distance);
 		}
 	}
 
 return;
 }
 
-bondtype BondGraph::BondType (const VD v1, const VD v2, const ED e) const {
+bondtype BondGraph::BondType (Atom * a1, Atom * a2, double bondlength) const {
 
-	bondtype bond;
-	double bondlength = _graph[e].bondlength;
+	bondtype bond = unbonded;
 
-	// Let's check OH type of bonds	
-	if ( (_graph[v1].Name("H") and _graph[v2].Name("O"))
-		or (_graph[v2].Name("H") and _graph[v1].Name("O")) ) {
+	if (a1 == (Atom *)NULL or a2 == (Atom *)NULL) {
+		printf ("BondGraph::BondType - feeding in bad atoms!\n");
+		exit (1);
+	}
 
+	// Let's check for bonding between Os and Hs
+	//if ( (_graph[v1].Name("H") and _graph[v2].Name("O"))
+		//or (_graph[v2].Name("H") and _graph[v1].Name("O")) ) {
+	if ( (a1->Name().find("H") != string::npos and a2->Name().find("O") != string::npos)
+		or (a1->Name().find("O") != string::npos and a2->Name().find("H") != string::npos) ) {
+
+		// one type of bond is the O-H covalent
 		if (bondlength < OHBONDLENGTH) 
 			bond = ohbond;
 
-		// An H-bond is formed!
-		if (bondlength < HBONDLENGTH and bondlength > OHBONDLENGTH) {
+		// Or an H-bond is formed!
+		if (bondlength < HBONDLENGTH and bondlength > OHBONDLENGTH)
 			bond = hbond;
-		}
 	}
 
 /*
@@ -128,7 +179,8 @@ V_IT BondGraph::FindVertex (const Atom * atom) const {
 	}
 
 	if (vi == vend) {
-		printf ("BondGraph::FindVertex () - searched for an atom in the graph that was never found. Something is wrong.\nPerhaps the list of atoms used to update the graph is not inclusive enough?\n");
+		printf ("BondGraph::FindVertex () - searched for an atom in the graph that was never found. Something is wrong.\nPerhaps the list of atoms used to update the graph is not inclusive enough?\nThe atom is:\n");
+		atom->Print();
 		exit (1);
 	}
 
@@ -136,11 +188,11 @@ return (vi);
 }
 
 // finds the atoms bonded (by edges) to the target atom
-std::vector<Atom *> BondGraph::AdjacentAtoms (const Atom * atom) const {
+VPATOM BondGraph::AdjacentAtoms (const Atom * atom) const {
 
-	std::vector<Atom *> atoms;
+	VPATOM atoms;
 	// first - find the atom in the graph
-	V_IT v1 = this->FindVertex (atom);
+	V_IT v1 = FindVertex (atom);
 
 	// then we ask the graph for all the adjacent atoms and grab them
 	ADJ_IT adj, adj_end;
@@ -152,12 +204,12 @@ std::vector<Atom *> BondGraph::AdjacentAtoms (const Atom * atom) const {
 return (atoms);
 }
 
-std::vector<Atom *> BondGraph::AdjacentAtoms (const Atom * atom, const bondtype bond) const {
+VPATOM BondGraph::AdjacentAtoms (const Atom * atom, const bondtype bond) const {
 
-	std::vector<Atom *> atoms;
+	VPATOM atoms;
 
 	// first - find the atom in the graph
-	V_IT v1 = this->FindVertex (atom);
+	V_IT v1 = FindVertex (atom);
 	VD v2;
 
 	// then we ask the graph for all the bonds of the atom to analyze them to see if they match the requested bondtype
@@ -168,6 +220,9 @@ std::vector<Atom *> BondGraph::AdjacentAtoms (const Atom * atom, const bondtype 
 		if (_graph[*ei].bond != bond) continue;
 		
 		v2 = target (*ei, _graph);
+
+		if (v2 == *v1) cout << "something wrong with the graph" << endl;
+
 		atoms.push_back (_graph[v2].atom);
 	}
 
@@ -184,7 +239,7 @@ coordination BondGraph::WaterCoordination (const Water * wat) const {
 	int coord = 0;
 
 	// grab all the atoms in the water and run through them to find out the number of bonds they have
-	std::vector<Atom *> atoms = wat->Atoms();
+	VPATOM atoms = wat->Atoms();
 	RUN (atoms) {
 		Atom * atom = atoms[i];
 		// for the hydrogens add 10 for each h-bond

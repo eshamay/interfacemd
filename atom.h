@@ -24,7 +24,6 @@ class Atom {
 	VecR _position;			// Particle position
 	VecR _force;			// the external force on the atom at any given point in time
 
-	std::vector<Atom *>	_HBonds;	// a list of all the atoms to which this atom is hydrogen-bound
 	static VecR _size;				// system size
 
 public:
@@ -54,10 +53,6 @@ public:
 	void SetCharge ();
 	void Residue (string residue) { _residue = residue; }
 
-	void ClearHBonds ();
-	void FormHBond (Atom * atom);
-	int  NumHBonds () const { return _HBonds.size(); }
-
 	void X (double val) { _position.X(val); }			// for setting the atom's position
 	void Y (double val) { _position.Y(val); }
 	void Z (double val) { _position.Z(val); }
@@ -76,13 +71,10 @@ public:
 	int ID () const 		{ return _ID; }
 	string Residue () const { return _residue; }
 
-	// this is set only when using a connectivity matrix!
-	std::vector<Atom *>& HBonds () { return _HBonds; }	// get a listing of all the atoms to which this one is H-bound
-
-	VecR Position () const	{ return _position; }
+	const VecR& Position () const	{ return _position; }
 	//std::vector<double>& DPosition () { return _position.Coords(); }	// for returning the double array instead of the vector object
 
-	VecR Force () const		{ return _force; }
+	const VecR& Force () const		{ return _force; }
 	//double * DForce () 		{ return _force.Coords(); }
 
 	double X () const 		{ return _position[x]; }
@@ -96,5 +88,7 @@ public:
 
 typedef std::vector<Atom>::iterator ATOM_IT;
 typedef std::vector<Atom *>::iterator PATOM_IT;
+typedef std::vector<Atom *> VPATOM;
+typedef std::vector<Atom> VATOM;
 
 #endif

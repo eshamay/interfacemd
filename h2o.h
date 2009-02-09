@@ -71,6 +71,10 @@ public:
 	
 };
 
+typedef std::vector<Water *> VPWATER;
+typedef std::vector<Water> VWATER;
+
+
 
 /******************************
  * Hydroxide (H3O+)

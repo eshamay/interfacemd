@@ -14,7 +14,6 @@ Atom::Atom () {
 
 	_position = VecR();
 	_force = VecR();
-	_HBonds.clear();
 }
 
 Atom::Atom (string name, VecR position, VecR force) {
@@ -122,13 +121,3 @@ void Atom::SetCharge () {
 return;
 }
 
-// empty the listing of atoms to which the atom H-bound
-void Atom::ClearHBonds () {
-	_HBonds.clear();
-return;
-}
-
-void Atom::FormHBond (Atom * atom) {
-	_HBonds.push_back (atom);
-return;
-}

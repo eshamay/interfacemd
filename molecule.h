@@ -14,7 +14,7 @@ using namespace std;
 class Molecule {
 	
 protected:
-	std::vector<Atom *>	_atoms;				// the list of the atoms in the molecule
+	VPATOM _atoms;				// the list of the atoms in the molecule
 	std::vector<VecR>	_wanniers;			// the wannier centers in the molecule
 	VecR			_dipole;			// the molecular dipole
 	VecR			_x, _y, _z;			// molecular frame axes
@@ -57,7 +57,7 @@ public:
 
 	// Output Functions
 	VecR CenterOfMass () const		{ return _centerofmass; }	
-	std::vector<Atom *> Atoms () const	{ return _atoms; }			// returns the molecule's atom list
+	VPATOM Atoms () const			{ return _atoms; }			// returns the molecule's atom list
 	Atom * Atoms (int index) 		{ return _atoms[index]; }
 	const std::vector<VecR>& Wanniers ()		const { return _wanniers; }
 	double Mass () const 			{ return _mass; }					// Returns the molecular mass
@@ -101,10 +101,10 @@ public:
 	void AddWannier (VecR& wannier) { _wanniers.push_back(wannier); } // adds a wannier center into the molecule
 	void ClearWanniers () { _wanniers.clear(); }	// clear out the entire list
 
-	void ClearHBonds ();
+	//void ClearHBonds ();
 	// return all the Hbonds that this molecule is involved in
-	std::vector<Atom *> HBonds () const;
-	int NumHBonds () const { return this->HBonds().size(); }
+	//std::vector<Atom *> HBonds () const;
+	//int NumHBonds () const { return this->HBonds().size(); }
 
 	// some functions to manipulate the molecule's position/orientation (symmetry operations)
 	void Reflect (coord const axis, double const plane = 0.0);
@@ -129,5 +129,8 @@ public:
 
 typedef std::vector<Molecule *>::iterator PMOL_IT;
 typedef std::vector<Molecule>::iterator MOL_IT;
+typedef std::vector<Molecule *> VPMOL;
+typedef std::vector<Molecule> VMOL;
+
 
 #endif
