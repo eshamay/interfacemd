@@ -38,16 +38,20 @@ typedef enum {ohbond, nobond, nhbond, hbond, unbonded} bondtype;
 class EdgeDescriptor {
 public:
 
+/*
 	EdgeDescriptor ();
 	~EdgeDescriptor ();
+
+	static int num_edges;
+*/
 
 	double	bondlength;	// bond length
 	bondtype bond;	 	// bond type (covalent, hydrogen-bond, or unbonded)
 
-	static int num_edges;
 	int id;
 };
 
+/*
 int EdgeDescriptor::num_edges = 0;
 
 EdgeDescriptor::EdgeDescriptor () {
@@ -60,16 +64,19 @@ EdgeDescriptor::~EdgeDescriptor () {
 	EdgeDescriptor::num_edges--;
 return;
 }
-
+*/
 
 
 /********** VERTEX ************/
 class VertexDescriptor {
 public:
 
+/*
 	VertexDescriptor ();
 	~VertexDescriptor ();
 
+	static int num_vertices;
+*/
 	Atom * atom;
 
 	// this can be useful to let us know if a given atom has the name we are looking for
@@ -82,10 +89,10 @@ public:
 		return b;
 	}
 
-	static int num_vertices;
 	int id;
 };
 
+/*
 int VertexDescriptor::num_vertices = 0;
 
 VertexDescriptor::VertexDescriptor () {
@@ -98,7 +105,7 @@ VertexDescriptor::~VertexDescriptor () {
 	VertexDescriptor::num_vertices--;
 return;
 }
-	
+*/	
 
 
 typedef boost::adjacency_list<

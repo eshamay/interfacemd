@@ -54,10 +54,14 @@ void BondGraph::ClearGraph () {
 		for (int j = i + 1; j < edgeList.size(); j++) {
 			e2 = edgeList[j];
 
+			if (e1 == e2) continue;
+
+/*
 			if (_graph[e1].id == _graph[e2].id) {
 				cout << _graph[e1].id << " and " << _graph[e2].id << endl;
 				exit(1);
 			}
+*/
 		}
 	}
 
@@ -98,7 +102,7 @@ void BondGraph::UpdateGraph (VPATOM& atoms) {
 			Atom * a1 = _graph[*vi].atom;
 			Atom * a2 = _graph[*vj].atom;
 			if (a1 == (Atom *)NULL or a2 == (Atom *)NULL or a1 == a2) {
-				printf ("BondGraph::UpdateGraph - feeding in bad atoms!\n");
+				cout << "BondGraph::UpdateGraph - feeding in bad atoms!\n" << endl;
 				exit (1);
 			}
 
@@ -110,9 +114,9 @@ void BondGraph::UpdateGraph (VPATOM& atoms) {
 			if (distance > HBONDLENGTH) continue;
 
 			// add in the bond between two atoms
-			cout << EdgeDescriptor::num_edges << endl;
+//			cout << EdgeDescriptor::num_edges << endl;
 			tie(e, connect) = add_edge(*vi, *vj, _graph);
-			cout << EdgeDescriptor::num_edges << endl;
+//			cout << EdgeDescriptor::num_edges << endl;
 			
 			_graph[e].bondlength = distance;
 
@@ -129,7 +133,7 @@ bondtype BondGraph::BondType (Atom * a1, Atom * a2, double bondlength) const {
 	bondtype bond = unbonded;
 
 	if (a1 == (Atom *)NULL or a2 == (Atom *)NULL) {
-		printf ("BondGraph::BondType - feeding in bad atoms!\n");
+		cout << "BondGraph::BondType - feeding in bad atoms!\n" << endl;
 		exit (1);
 	}
 
@@ -172,19 +176,25 @@ return bond;
 V_IT BondGraph::FindVertex (const Atom * atom) const {
 
 	// we have to find the edges associated with atom1, and see which one is connected to atom2
-	V_IT vi, vend;
+	V_IT vi, vj, vend;
+	vj = (V_IT)NULL;
 	for (tie(vi, vend) = vertices(_graph); vi != vend; vi++) {
-		if (_graph[*vi].atom == atom)
-			break;
+
+		Atom * ap = _graph[*vi].atom;
+
+		if (ap == atom)
+			vj = vi;
 	}
 
-	if (vi == vend) {
-		printf ("BondGraph::FindVertex () - searched for an atom in the graph that was never found. Something is wrong.\nPerhaps the list of atoms used to update the graph is not inclusive enough?\nThe atom is:\n");
+/*
+	if (vj == (V_IT)NULL) {
+		cout << "\nBondGraph::FindVertex () - searched for an atom in the graph that was never found. Something is wrong.\nPerhaps the list of atoms used to update the graph is not inclusive enough?\nThe atom is:\n" << endl;
 		atom->Print();
 		exit (1);
 	}
+*/
 
-return (vi);
+return (vj);
 }
 
 // finds the atoms bonded (by edges) to the target atom
@@ -207,23 +217,33 @@ return (atoms);
 VPATOM BondGraph::AdjacentAtoms (const Atom * atom, const bondtype bond) const {
 
 	VPATOM atoms;
+	if (atom->ID() == 2490) {
+		printf ("doing 2490\n");
+	}
 
 	// first - find the atom in the graph
 	V_IT v1 = FindVertex (atom);
-	VD v2;
+	if (v1 == (V_IT)NULL) {
+		cout << "\nBondGraph::AdjacentAtoms - couldn't grab the atom (below) from the list given" << endl;
+		atom->Print();
+		printf ("Vertices in the system = %d\n", num_vertices(_graph)); fflush(stdout);
+		exit(1);
+	}
 
 	// then we ask the graph for all the bonds of the atom to analyze them to see if they match the requested bondtype
-	OUT_E_IT ei, e_end;
-	for (tie(ei, e_end) = out_edges(*v1, _graph); ei != e_end; ei++) {
+	ED ed; bool connect;
+	ADJ_IT adj, adj_end;
+	for (tie(adj, adj_end) = adjacent_vertices(*v1, _graph); adj != adj_end; adj++) {
 
 		// check that the bond type is the one we want
-		if (_graph[*ei].bond != bond) continue;
+		tie(ed, connect) = edge (*v1, *adj, _graph);
+		if (_graph[ed].bond != bond) continue;
 		
-		v2 = target (*ei, _graph);
+//		v2 = target(*adj, _graph);
 
-		if (v2 == *v1) cout << "something wrong with the graph" << endl;
+//		if (v2 == *v1) cout << "something wrong with the graph" << endl;
 
-		atoms.push_back (_graph[v2].atom);
+		atoms.push_back (_graph[*adj].atom);
 	}
 
 return (atoms);
@@ -232,7 +252,7 @@ return (atoms);
 coordination BondGraph::WaterCoordination (const Water * wat) const {
 
 	if (wat->Name() != "h2o") {
-		printf ("BondGraph::WaterCoordinaiton - The molecule given is named %s, not \"h2o\". Is this right?\n", wat->Name().c_str());
+		cout << "BondGraph::WaterCoordinaiton - The molecule given is named " << wat->Name() << " not \"h2o\". Is this right?" << endl;
 		exit (1);
 	}
 
