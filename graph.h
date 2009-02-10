@@ -35,7 +35,7 @@ public:
 
 	void AddEdge (Edge * e);
 
-	void RemoveEdge ();
+	void RemoveEdge (Edge * e);
 	void RemoveEdges ();
 
 	Node * Adjacent (const Edge const * e) const;
