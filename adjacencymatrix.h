@@ -2,32 +2,9 @@
 #define CONNECTMATRIX_H_
 
 #include "utility.h"
+#include "bond.h"
 #include "atom.h"
 #include "h2o.h"
-
-const double OHBONDLENGTH = 1.0;
-const double HBONDLENGTH  = 2.46;
-const double HBONDANGLE	= 0.866025;		// cos(theta) has to be less than this value to be considered an H-bond
-const double NOBONDLENGTH = 2.0;
-const double NHBONDLENGTH = 1.3;		// uhmm... check this?
-
-
-/* Encoding of the different coordination types
- * The numbering is based on each O having a value of 1, and each H haveing a value of 10 (i.e. add 1 for every O, and 10 for every H...). So a water in a state of OOHH bonding would have a coordination of 22, and a coordination of 13 would be OOOH, 12 = OOH, 11 = OH, 10 = H, etc.
- */
-typedef enum {
-	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			// no H
-	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			// 1 H
-	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		// 2 Hs
-	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	// 3 Hs
-	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44
-} coordination;
-// And hopefully that covers all the bonding coordination types :)
-
-typedef std::map<coordination, string> coord_map;
-
-// bond types
-typedef enum {ohbond, nobond, nhbond, hbond, unbonded} bondtype;
 
 /* The idea of a connectivity matrix is the same as mapping the connections between different members of a system. In this case, we're dealing with atoms in a system, and the connections are defined by the distances between the atoms. We're going to employ a few tricks here in order to make data retrieval a bit more succinct, and also to store more information into one matrix.
 
@@ -40,34 +17,38 @@ As for the diagonal elements - instead of writing a routine that will count the 
 This leaves the bottom-diagonal free to store more information. If two atoms are covalently bound, then the bottom diagonal element will mark this with a 1.0. 
 */
 
+typedef std::vector< std::vector< Bond * > > Bond_matrix;
+typedef std::vector<Bond *> Bond_ptr_vec;
+
 class AdjacencyMatrix {
 
 private:
-	double **	_matrix;		// the actual data structure for storing connection data
-	Atom **		_atoms;			// the atoms in the system
+	Bond_matrix		_matrix;		// the actual data structure for storing connection data
+	Atom_ptr_vec	_atoms;		// the atoms in the system
+	int 			_size;
 
 public: 
 
 	// constructor builds the matrix based on number of atoms to analyze
+	AdjacencyMatrix ();
 	AdjacencyMatrix (const Atom_ptr_vec& atoms);
+	~AdjacencyMatrix ();
 
+	void BuildMatrix ();
+	void ClearMatrix ();
+	void UpdateMatrix (const Atom_ptr_vec& atoms);
+
+	void SetBond (int x, int y, const double length) const;
+
+	int ID (Atom * ap) const;
+
+	Bond_ptr_vec Bonds (Atom * ap) const;
+	int NumBonds (Atom * ap) const;
+	int NumHBonds (Atom * ap) const;
+
+	coordination WaterCoordination (const Water * wat) const;
 
 /*
-	// forms a covalent bond (bottom-triangle of the matrix) between two atoms
-	void _FormCovalentBond (const Atom * atom1, const Atom * atom2);
-
-	// let's us update the H-bond information (diagonal elements) from abroad
-	void _FormHBond (Atom * atom1, Atom * atom2);
-
-	// runs through bonding criteria of different atom pairs
-	void _FindBonds (Atom * atom1, Atom * atom2);
-
-public:
-	// constructor
-	AdjacencyMatrix (std::vector<Atom *>& atoms);
-
-	void UpdateMatrix ();
-
 	// returns the number of H-bonds that an atom is involved in (i.e. the diagonal element)
 	int HBonds (const Atom * atom) const { 
 		return (int)(_matrix[atom->ID()][atom->ID()]); 

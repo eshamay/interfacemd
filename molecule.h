@@ -14,7 +14,7 @@ using namespace std;
 class Molecule {
 	
 protected:
-	VPATOM _atoms;				// the list of the atoms in the molecule
+	Atom_ptr_vec 		_atoms;				// the list of the atoms in the molecule
 	std::vector<VecR>	_wanniers;			// the wannier centers in the molecule
 	VecR			_dipole;			// the molecular dipole
 	VecR			_x, _y, _z;			// molecular frame axes
@@ -57,8 +57,8 @@ public:
 
 	// Output Functions
 	VecR CenterOfMass () const		{ return _centerofmass; }	
-	VPATOM Atoms () const			{ return _atoms; }			// returns the molecule's atom list
-	Atom * Atoms (int index) 		{ return _atoms[index]; }
+	Atom_ptr_vec Atoms () const			{ return _atoms; }			// returns the molecule's atom list
+	Atom * Atoms (int index) const		{ return _atoms[index]; }
 	const std::vector<VecR>& Wanniers ()		const { return _wanniers; }
 	double Mass () const 			{ return _mass; }					// Returns the molecular mass
 	int size () const				{ return _atoms.size(); }

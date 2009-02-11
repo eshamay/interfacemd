@@ -11,7 +11,6 @@
 #include "molecule.h"
 #include "h2o.h"
 #include "hno3.h"
-#include "bondgraph.h"
 	
 class AmberSystem {
 
@@ -33,8 +32,6 @@ public:
 	AmberSystem (string prmtop, string mdcrd, string mdvel);
 	~AmberSystem ();
 	
-	BondGraph	bondgraph;					// our adjacency graph for calculating connections in the system
-
 	// Controller & Calculation methods
 	void LoadNext ();	 					// Update the system to the next timestep 
 	void LoadFirst ();

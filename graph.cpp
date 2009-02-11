@@ -132,90 +132,10 @@ Node_ptr_list Graph::AdjacentNodes (const Node const * u) const {
 return (nodes);
 }
 
-/******* EDGES **********/
+// find the node connected to a given node by a particular edge
+Node * Graph::Adjacent (const Node const * u, const Edge const * e) const {
 
-int Edge::num_edges = 0;
+	Node * v = (e->u == u) ? e->v : e->u;
 
-Edge::Edge () {
-
-	++Edge::num_edges;
-	u = (Node *)NULL;
-	v = (Node *)NULL;
-
-return;
+return (v);
 }
-
-Edge::Edge (Node * i, Node * j) {
-
-	++Edge::num_edges;
-	u = i;
-	v = j;
-
-return;
-}
-
-Edge::~Edge () {
-	
-	--Edge::num_edges;
-
-return;
-}
-
-/******** NODES *********/
-int Node::num_nodes = 0;
-
-// create a new unconnected node
-Node::Node () {
-	
-	++Node::num_nodes;
-	edges.clear();
-
-return;
-}
-
-Node::~Node () {
-	--Node::num_nodes;
-
-	RemoveEdges ();
-
-return;
-}
-
-// find the node connected to this one given a particular edge
-Node * Node::Adjacent (const Edge const * e) const {
-
-	Node * u = (e->u == this) ? e->v : e->u;
-
-return (u);
-}
-
-void Node::AddEdge (Edge * e) {
-	edges.push_back (e);
-}
-
-// remove a single edge from a node
-void Node::RemoveEdge (Edge * e) {
-	
-	Edge_it ei;
-	
-	for (ei = edges.begin(); ei != edges.end(); ei++) {
-		
-		// find the matching edge in the list
-		if (*ei != e) continue;
-
-		// and then remove that edge from the list
-		edges.erase(ei);
-		break;
-	}
-
-return;
-}
-
-// clears out all the edges from a node
-void Node::RemoveEdges () {
-
-	edges.clear();
-
-return;
-}
-

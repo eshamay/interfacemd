@@ -1,6 +1,6 @@
 include ../Makefile
 
-AMBERFILES	= ../vecr.o ../atom.o ../ambersystem.o ../crdfile.o ../dipoleparm.o ../forcefile.o ../h2o.o ../hno3.o ../molecule.o ../topfile.o ../bondgraph.o ../matrixr.o
+AMBERFILES	= ../vecr.o ../atom.o ../ambersystem.o ../crdfile.o ../dipoleparm.o ../forcefile.o ../h2o.o ../hno3.o ../molecule.o ../topfile.o ../matrixr.o
 MORITAFILES	= morita.o $(AMBERFILES) ../watersfg.o
 MPIMORITAFILES	= $(MORITAFILES) ../mpi/mpisys.o
 DENSITYFILES = $(AMBERFILES) densitytest.o 
@@ -12,7 +12,7 @@ FILLBOX = $(AMBERFILES) ../pdbfile.o ../boxfiller.o
 MPIFILES	=	$(AMBERFILES) ../mpi/mpisys.o mpitest.o
 ORDERPARAMS = $(AMBERFILES) orderparams.o
 TEMPFILES	= temp.cpp $(AMBERFILES)
-COORDINATION	= $(AMBERFILES) coordination.o
+COORDINATION	= $(AMBERFILES) ../adjacencymatrix.o ../bond.o coordination.o
 
 ambertest : ambertest.o $(AMBERFILES)
 	$(CXX) $(CPPFLAGS) ambertest.o $(AMBERFILES) -o ambertest

@@ -37,7 +37,23 @@ CoordinationTest::CoordinationTest () {
 	// here initialize all the histograms to get ready for binning the positions
 	// to do this, we have to get all the different coordination types possible. Those come from the coordination type map in the bondgraph
 	
-	name_map = sys->bondgraph.CoordNameMap();
+ 	name_map[UNBOUND] = "UNBOUND";
+ 	name_map[O] = "O";
+ 	name_map[OO] = "OO";
+ 	name_map[OOO] = "OOO";
+ 	name_map[H] = "H";
+ 	name_map[OH] = "OH";
+ 	name_map[OOH] = "OOH";
+ 	name_map[OOOH] = "OOOH";
+ 	name_map[HH] = "HH";
+ 	name_map[OHH] = "OHH";
+ 	name_map[OOHH] = "OOHH";
+ 	name_map[OOOHH] = "OOOHH";
+ 	name_map[HHH] = "HHH";
+ 	name_map[OHHH] = "OHHH";
+ 	name_map[OOHHH] = "OOHHH";
+ 	name_map[OOOHHH] = "OOOHHH";
+ 
 
 	coord_map::iterator coord_it, coord_end;
 	vcoords.clear();
@@ -53,7 +69,7 @@ CoordinationTest::CoordinationTest () {
 return;
 }
 
-void CoordinationTest::FindInterfacialWaters (VPWATER& int_mols, VPATOM& int_atoms) {
+void CoordinationTest::FindInterfacialWaters (VPWATER& int_mols, Atom_ptr_vec& int_atoms) {
 	
 	int_mols.clear();
 	int_atoms.clear();
@@ -86,7 +102,7 @@ void CoordinationTest::FindInterfacialWaters (VPWATER& int_mols, VPATOM& int_ato
 return;
 }
 
-void CoordinationTest::FindWaters (VPWATER& int_mols, VPATOM& int_atoms) {
+void CoordinationTest::FindWaters (VPWATER& int_mols, Atom_ptr_vec& int_atoms) {
 	
 	int_mols.clear();
 	int_atoms.clear();
@@ -125,8 +141,10 @@ void CoordinationTest::OutputData (const int step) {
 		// now that all the histograms have been compiled... let's output them to a file somehow
 		// first, output a header
 		fprintf (output, "position\t");
-		RUN (vcoords) 
+		RUN (vcoords) {
+			//if (vcoords[i] > HIGH_COORD) continue;
 			fprintf (output, "%s\t", name_map[vcoords[i]].c_str());
+		}
 		fprintf (output, "\n");
 	
 		// and now print all the data out
@@ -138,6 +156,7 @@ void CoordinationTest::OutputData (const int step) {
 
 			RUN2 (vcoords) {
 				coordination c = vcoords[j];
+				//if (vcoords[i] > HIGH_COORD) continue;
 				int val = histo[c][i];
 				fprintf (output, "% 8d", val);
 			}
@@ -171,7 +190,7 @@ int main (int argc, char **argv) {
 	CoordinationTest coords;
 
 	VPWATER waters;
-	VPATOM atoms;
+	Atom_ptr_vec atoms;
 	for (int step = 0; step < coords.timesteps; step++) {
 
 		// we'll go through and pick out all the waters in the system at the interface
@@ -179,16 +198,17 @@ int main (int argc, char **argv) {
 		coords.FindWaters (waters, atoms);
 
 		// to find the coordination of the atoms we have to update the bond graph
-		coords.sys->bondgraph.UpdateGraph(atoms);
+		coords.matrix.UpdateMatrix(atoms);
 
 		// now, for each water, we find its coordination
 		Water * wat;
 		RUN (waters) {
 			wat = waters[i];
-			coordination coord = coords.sys->bondgraph.WaterCoordination (wat);
+			coordination coord = coords.matrix.WaterCoordination (wat);
+//			printf ("%s\n", coords.name_map[coord].c_str());
 
 			// the highest coordination that we'll look at...
-			if (coord > OOHHH) continue;
+			//if (coord > HIGH_COORD) continue;
 
 			// calculate its position in the slab, and find the histogram bin for it
 			Atom * oxy = wat->GetAtom ("O");

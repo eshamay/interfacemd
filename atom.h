@@ -86,9 +86,9 @@ public:
 	void Print () const;
 };
 
-typedef std::vector<Atom>::iterator ATOM_IT;
-typedef std::vector<Atom *>::iterator PATOM_IT;
-typedef std::vector<Atom *> VPATOM;
-typedef std::vector<Atom> VATOM;
+typedef std::vector<Atom>::iterator Atom_it;
+typedef std::vector<Atom *>::iterator Atom_ptr_it;
+typedef std::vector<Atom *> Atom_ptr_vec;
+typedef std::vector<Atom> Atom_vec;;
 
 #endif

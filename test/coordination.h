@@ -3,6 +3,7 @@
 
 #include "../utility.h"
 #include "../ambersystem.h"
+#include "../adjacencymatrix.h"
 
 #define PRMTOP	"prmtop"
 #define MDCRD	"mdcrd"
@@ -10,7 +11,7 @@
 
 #define AXIS	y
 
-#define TIMESTEPS	1000
+#define TIMESTEPS	1
 
 #define POSMIN	-5.0
 #define POSMAX	150.0
@@ -19,6 +20,8 @@
 #define INTERFACE_LOW	28.0
 #define INTERFACE_HIGH	35.0
 #define PBCFLIP	15.0
+
+#define HIGH_COORD	OOHH
 
 #define OUTPUT	"coord.dat"
 #define OUTPUT_FREQ	25
@@ -33,6 +36,7 @@ public:
 	CoordinationTest ();
 
 	AmberSystem * sys;
+	AdjacencyMatrix		matrix;
 
 	FILE * output;
 
@@ -59,8 +63,8 @@ public:
 
 	void OutputStatus (const int step) const;
 	void OutputData (const int step);
-	void FindWaters (VPWATER& int_mols, VPATOM& int_atoms);
-	void FindInterfacialWaters (VPWATER& int_mols, VPATOM& int_atoms);
+	void FindWaters (VPWATER& int_mols, Atom_ptr_vec& int_atoms);
+	void FindInterfacialWaters (VPWATER& int_mols, Atom_ptr_vec& int_atoms);
 };
 
 

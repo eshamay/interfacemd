@@ -1,14 +1,10 @@
 #ifndef BONDGRAPH_H_
 #define BONDGRAPH_H_
 
-#include <boost/config.hpp>
-#include <iostream>
-#include <boost/graph/adjacency_list.hpp>
-#include <exception>
-
 #include "utility.h"
 #include "atom.h"
 #include "h2o.h"
+#include "graph.h"
 
 const double OHBONDLENGTH = 1.0;
 const double HBONDLENGTH  = 2.46;
@@ -34,113 +30,44 @@ typedef std::map<coordination, string> coord_map;
 // bond types
 typedef enum {ohbond, nobond, nhbond, hbond, unbonded} bondtype;
 
-/********** EDGE ************/
-class EdgeDescriptor {
+/********** atom-node ************/
+class AtomNode : public Node {
 public:
 
-/*
-	EdgeDescriptor ();
-	~EdgeDescriptor ();
-
-	static int num_edges;
-*/
-
-	double	bondlength;	// bond length
-	bondtype bond;	 	// bond type (covalent, hydrogen-bond, or unbonded)
-
-	int id;
-};
-
-/*
-int EdgeDescriptor::num_edges = 0;
-
-EdgeDescriptor::EdgeDescriptor () {
-	EdgeDescriptor::num_edges++;
-	id = EdgeDescriptor::num_edges;
-return;
-}
-
-EdgeDescriptor::~EdgeDescriptor () {
-	EdgeDescriptor::num_edges--;
-return;
-}
-*/
-
-
-/********** VERTEX ************/
-class VertexDescriptor {
-public:
-
-/*
-	VertexDescriptor ();
-	~VertexDescriptor ();
-
-	static int num_vertices;
-*/
+	Bond_ptr_list	edges;
 	Atom * atom;
 
-	// this can be useful to let us know if a given atom has the name we are looking for
-	bool Name (std::string name) const {
-		bool b;
-		if (atom->Name().find(name) != std::string::npos)
-			b = true;
-		else
-			b = false;
-		return b;
-	}
-
-	int id;
 };
 
-/*
-int VertexDescriptor::num_vertices = 0;
-
-VertexDescriptor::VertexDescriptor () {
-	VertexDescriptor::num_vertices++;
-	id = VertexDescriptor::num_vertices;
-return;
-}
-
-VertexDescriptor::~VertexDescriptor () {
-	VertexDescriptor::num_vertices--;
-return;
-}
-*/	
-
-
-typedef boost::adjacency_list<
-	boost::listS, boost::listS, boost::undirectedS, 
-	VertexDescriptor, EdgeDescriptor> G;
-		
-typedef G::vertex_descriptor VD;
-typedef G::edge_descriptor ED;
-typedef G::vertex_iterator V_IT;
-typedef G::edge_iterator E_IT;
-typedef G::adjacency_iterator ADJ_IT;
-typedef G::out_edge_iterator OUT_E_IT;
-
+typedef std::list<AtomNode *> AtomNode_ptr_list;
+typedef std::list<AtomNode *> AtomNode_it;
 
 /********** BONDGRAPH ************/
-class BondGraph {
-private:
-	G	_graph;		// the bondgraph object for all the data we'll need
+class BondGraph : public Graph {
 
-	coord_map _coord_names;
+protected:
+	AtomNode_ptr_list	_nodes;
+	Bond_ptr_list		_edges;
 
 public:
+	
+	coord_map _coord_names;
 
-	BondGraph ();
-	BondGraph (VPATOM& atoms);
+	BondGraph (Atom_ptr_vec& atoms);
 
-	void UpdateGraph (VPATOM& int_atoms);
-	void ClearGraph ();
+	void UpdateGraph (Atom_ptr_vec& atoms);
+
+	Bond * AddBond (const AtomNode * u, const AtomNode * v, double length);
+
+
+
 
 	bondtype BondType (Atom * a1, Atom * a2, double bondlength) const;
 
 	V_IT FindVertex (const Atom * atom) const;
 
-	VPATOM AdjacentAtoms (const Atom * atom) const;	// finds all connected atoms (regardless of bondtype)
-	VPATOM AdjacentAtoms (const Atom * atom, const bondtype bond) const;
+	Atom_ptr_vec AdjacentAtoms (const Atom * atom) const;	// finds all connected atoms (regardless of bondtype)
+	Atom_ptr_vec AdjacentAtoms (const Atom * atom, const bondtype bond) const;
 
 	int NumBonds (const Atom * atom, const bondtype bond) const {
 		return (AdjacentAtoms (atom, bond).size());
