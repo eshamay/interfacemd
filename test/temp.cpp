@@ -1,58 +1,3 @@
-//#include "../ambersystem.h"
-/*
-#include <boost/config.hpp>
-#include <iostream>
-#include <boost/graph/adjacency_list.hpp>
-
-using namespace boost;
-
-class A {
-public:
-	double vec[3];
-
-	A (const double x, const double y, const double z) {
-		vec[0] = x;
-		vec[1] = y;
-		vec[2] = z;
-	}
-
-	A () {
-		for (int i = 0; i < 3; i++) 
-			vec[i] = 0.0;
-	}
-};
-
-class V {
-public:
-	VecR * vec;
-	std::string name;
-
-	bool operator== (VecR * v) {
-		bool b;
-		if (vec->X() == v->X()) 
-			b = true;
-		else
-			b = false;
-		return b;
-	}
-};
-
-class E {
-public:
-	double length;
-	std::string type;
-
-};
-	
-	typedef boost::adjacency_list<
-		boost::listS, boost::listS, boost::undirectedS, 
-		V, E> G;
-		
-	typedef G::vertex_descriptor vd;
-	typedef G::edge_descriptor ed;
-	typedef G::vertex_iterator v_it;
-	typedef G::edge_iterator e_it;
-*/
 /*
 int main () {
 
@@ -160,28 +105,30 @@ int main () {
 return 0;
 }
 */
-/*
+
+#include "../matrixr.h"
+#include "../vecr.h"
+
 int main () {
 
+ 	double da [9] = {7,9,2,8,2,4,7,1,8};
+ 	double db [9] = {4,3,1,9,4,7,6,4,4};
+	MatR ma (da);
+	MatR mb (db);
 
- 	double alpha_mat [9] = {1.539, 0.0, -0.163, 0.0, 1.656, 0.0, -0.163, 0.0, 7.200};
-	MatR alpha (alpha_mat);
 
-	VecR mu (-0.058, 0.0, 0.157);
+	VecR v (8,4,1);
 
- 	//double DCM_mat [9] = {0.2505, 0.0, 0.9681, 0.0, -1.0, 0.0, 0.9681, 0.0, -0.2505};
- 	double DCM_mat [9] = {0.3333, 0.0, 0.9428, 0.0, -1.0, 0.0, 0.9428, 0.0, -0.3333};
-	MatR DCM (DCM_mat);
+	cout << v*v;
 
-	AmberSystem sys (PRMTOP, MDCRD, FORCE);
-	//for (int i = 0; i < 1000; i++)
-		//sys.LoadNext();
+	cout << endl;
 
-	MatR rot;
-	VecR oh1;
-	VecR oh2;
-	VecR Z (0,0,1.0);
+	(ma*mb).Print();
 
+return 0;
+}
+
+/*
 	RUN (sys.Molecules()) {
 		if (sys.Molecules(i)->Name() != "h2o") continue;
 		Water * wat = static_cast<Water *>(sys.Molecules(i));
@@ -212,7 +159,7 @@ int main () {
 	return 0;
 }
 */
-
+/*
 #include "../ambersystem.h"
 
 #define PRMTOP	"prmtop"
@@ -247,7 +194,7 @@ int main () {
 		}
 		printf ("%s\n", name.c_str());
 	}
-
+*/
 /*
 	RUN2 (atoms) {
 		Atom * atom = atoms[j];
@@ -264,7 +211,7 @@ int main () {
 			printf ("|\n -----> %s (%d)\n", neighbors[i]->Name().c_str(), neighbors[i]->ID());
 		}	
 	}
-*/
-
 return 0;
 }
+*/
+

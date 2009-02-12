@@ -205,7 +205,6 @@ int main (int argc, char **argv) {
 		RUN (waters) {
 			wat = waters[i];
 			coordination coord = coords.matrix.WaterCoordination (wat);
-//			printf ("%s\n", coords.name_map[coord].c_str());
 
 			// the highest coordination that we'll look at...
 			//if (coord > HIGH_COORD) continue;

@@ -1,63 +1,86 @@
 #include "matrixr.h"
 
 MatR MatR::operator+ (const MatR& input) const {
-	return MatR (_elements + input._elements);
+	MatR m (_elements);
+	for (unsigned int i = 0; i < 9; i++)
+		m._elements[i] += input[i];
+	return (m);
 }
 
 VecR MatR::operator* (const VecR& input) const {		// Vector rotation/matrix-vector inner product
+	VecR v;
 
-	boost::numeric::ublas::vector<double> vec (3);
-
-	for (int i = 0; i < 3; i++) {
-		vec(i) = input[i];
-	}
-
-return VecR (prod(_elements, vec));
-}
-/*
-	double a,b,c;
-
-	VecR output;
-
-	for (int i=0; i<3; i++) {
-		double val = 0.0;
-		for (int j=0; j<3; j++) {
-			val += this->Index(i,j) * input[j];
+	for (unsigned int i = 0; i < 3; i++) {
+		for (unsigned int j = 0; j < 3; j++) {
+			v._coords[i] += this->Index(i,j)*input[j];
 		}
-		output.Set (coord(i), val);
 	}
-	//a = _elements[0]*input[x] + _elements[3]*input[y] + _elements[6]*input[z];
-	//b = _elements[1]*input[x] + _elements[4]*input[y] + _elements[7]*input[z];
-	//c = _elements[2]*input[x] + _elements[5]*input[y] + _elements[8]*input[z];
+	return (v);
 }
-*/
 
 MatR MatR::operator* (const MatR& input) const {		// Matrix rotation/multiplication
-/*
-	MatR out;
+	MatR m;
+	m.Zero();
 
-	double val = 0.0;
-	//double const * elements = input.Elements();
-
+	double val;
 	for (int i = 0; i < 3; i++) {
-		for (int k = 0; k < 3; k++) {
-	
+		for (int j = 0; j < 3; j++) {
+
 			val = 0.0;
-
-			for (int j=0; j<3; j++)
-				val += this->Index(i,j) * input.Index(j,k);
-
-			out.Set (i, k, val);
+			for (int k = 0; k < 3; k++) {
+				val += this->Index(i,k) * input.Index(k,j);
+			}
+			m.Set(i,j,val);
 		}
 	}
-*/
-return (MatR (prod(_elements, input._elements)));
+
+return (m);
+}
+
+double	MatR::operator[] (element const index) const {	// Return the coordinate
+	if (index < 0 || index > 8) {
+		std::cout << "Trying to access illegal index in MatrixR::operator[] (int const index)\nFix This\nMatrix:" << std::endl;
+		this->Print();
+		exit(1);
+	}
+	return _elements[index];
+}	
+
+double	MatR::operator[] (int const index) const {	// Return the coordinate
+	if (index > 8) {
+		std::cout << "Trying to access illegal index in MatrixR::operator[] (int const index)\nFix This\nMatrix:" << std::endl;
+		this->Print();
+		exit(1);
+	}
+	return _elements[index];
+}
+
+double	MatR::Index (int const row, int const col) const {	// Return the element
+	if (row > 2 || col > 2) {
+		std::cout << "Trying to access illegal index in MatrixR::Index (int const row, int const col)\nFix This\nMatrix:" << std::endl;
+		this->Print();
+		exit(1);
+	}
+	return (_elements[row+3*col]);
+}
+
+void	MatR::Set (int const row, int const col, double const val) {	// Set the element
+
+	if (row > 2 || row < 0 || col > 2 || col < 0) {
+		std::cout << "Trying to access illegal index in MatrixR::Set (int const row, int const col, double const val)\nFix This\nMatrix:" << std::endl;
+		this->Print();
+		exit(1);
+	}
+
+	_elements[row+3*col] = val;
+
+	return;
 }
 
 void MatR::Print () const {
 	for (int row=0; row < 3; row++) {
 		for (int col=0; col<3; col++) 
-			printf ("% 8.4f\t", _elements(row, col));
+			printf ("% 8.4f\t", this->Index(row, col));
 		printf("\n");
 	}
 }
@@ -111,15 +134,13 @@ vector< complex<double> > MatR::EigenValues () {
 #endif
 
 MatR MatR::Transpose () const {
-/*
-	MatR out;
+	MatR m;
 
 	for (int row=0; row<3; row++) {
 		for (int col=0; col<3; col++)  
-			out.Set(row, col, _elements[row*3+col]);
+			m.Set(row, col, this->Index(col,row));
 	}
-*/
-return (MatR (trans(_elements)));
+	return (m);
 }
 
 #ifdef _LINALG_
@@ -170,7 +191,7 @@ MatR MatR::Diagonalize () {
 
 double MatR::Trace () const {
 	
-	double out = _elements(0,0) + _elements(1,1) + _elements(2,2);
+	double out = _elements[xx] + _elements[yy] + _elements[zz];
 
 	return(out);
 }

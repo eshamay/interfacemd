@@ -26,6 +26,7 @@ private:
 	Bond_matrix		_matrix;		// the actual data structure for storing connection data
 	Atom_ptr_vec	_atoms;		// the atoms in the system
 	int 			_size;
+	bool 			_built;		// has the matrix been built to the current size?
 
 public: 
 
@@ -36,17 +37,18 @@ public:
 
 	void BuildMatrix ();
 	void ClearMatrix ();
+	void DeleteMatrix ();
 	void UpdateMatrix (const Atom_ptr_vec& atoms);
 
 	void SetBond (int x, int y, const double length) const;
 
-	int ID (Atom * ap) const;
+	int ID (Atom const * const ap) const;
 
-	Bond_ptr_vec Bonds (Atom * ap) const;
-	int NumBonds (Atom * ap) const;
-	int NumHBonds (Atom * ap) const;
+	Bond_ptr_vec Bonds (Atom const * const ap) const;
+	int NumBonds (Atom const * const ap) const;
+	int NumHBonds (Atom const * const ap) const;
 
-	coordination WaterCoordination (const Water * wat) const;
+	coordination WaterCoordination (Water const * const wat) const;
 
 /*
 	// returns the number of H-bonds that an atom is involved in (i.e. the diagonal element)

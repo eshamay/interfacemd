@@ -11,7 +11,7 @@
 
 #define AXIS	y
 
-#define TIMESTEPS	1
+#define TIMESTEPS	1000
 
 #define POSMIN	-5.0
 #define POSMAX	150.0

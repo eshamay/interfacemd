@@ -1,14 +1,13 @@
 #include "adjacencymatrix.h"
 
-AdjacencyMatrix::AdjacencyMatrix () : _size(0) {
-
-	ClearMatrix();
+AdjacencyMatrix::AdjacencyMatrix () : _size(0), _built(false) {
 
 return;
 }
 
-AdjacencyMatrix::AdjacencyMatrix (const Atom_ptr_vec& atoms) : _size(0) {
+AdjacencyMatrix::AdjacencyMatrix (const Atom_ptr_vec& atoms) : _size(atoms.size()), _built(false) {
 
+	BuildMatrix ();
 	UpdateMatrix (atoms);
 
 return;
@@ -16,24 +15,24 @@ return;
 
 AdjacencyMatrix::~AdjacencyMatrix () {
 
-	ClearMatrix();
+	DeleteMatrix();
 
 return;
 }
 
 void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {
 	
-	ClearMatrix();
-
 	// first form the matrix
 	_size = atoms.size();
 	_atoms.resize (_size, (Atom *)NULL);
 
+	BuildMatrix ();
+
+	ClearMatrix();
+
 	for (int i = 0; i < _size; i++) {
 		_atoms[i] = atoms[i];
 	}
-
-	BuildMatrix();
 
 	// now run through all atom combos and get their bondlengths
 	double bondlength = 0.0;
@@ -68,6 +67,8 @@ return;
 // Make sure the _size is already set before calling this
 void AdjacencyMatrix::BuildMatrix () {
 
+  if (!_built) {
+
 	if (!_size) {
 		cout << "\nAdjacencyMatrix::BuildMatrix () - trying to build a matrix of size 0" << endl;
 		exit(1);
@@ -82,10 +83,28 @@ void AdjacencyMatrix::BuildMatrix () {
 		}
 	}
 
+	_built = true;
+  }
+
 return;
 }
 
+// Set all the bonds to unbonded
 void AdjacencyMatrix::ClearMatrix () {
+
+	Bond * b;
+	for (int i = 0; i < _size - 1; i++) {
+		for (int j = i + 1; j < _size; j++) {
+			b = _matrix[i][j];
+			b->bond = unbonded;
+		}
+	}
+	
+return;
+}
+
+// final clean-up - delete everything from memory
+void AdjacencyMatrix::DeleteMatrix () {
 
 	Bond * b;
 	for (int i = 0; i < _size - 1; i++) {
@@ -115,7 +134,7 @@ void AdjacencyMatrix::SetBond (int x, int y, const double length) const {
 		y = tmp;
 	}
 
-	Bond * const b = _matrix[x][y];
+	Bond * b = _matrix[x][y];
 
 	b->bondlength = length;
 	b->SetBondType ();
@@ -124,7 +143,7 @@ return;
 }
 
 // returns the atom's location in the matrix
-int AdjacencyMatrix::ID (Atom * ap) const {
+int AdjacencyMatrix::ID (Atom const * const ap) const {
 	
 	int id = -1;
 
@@ -141,7 +160,7 @@ int AdjacencyMatrix::ID (Atom * ap) const {
 return (id);
 }
 
-Bond_ptr_vec AdjacencyMatrix::Bonds (Atom * ap) const {
+Bond_ptr_vec AdjacencyMatrix::Bonds (Atom const * const ap) const {
 
 	Bond_ptr_vec vb;
 
@@ -168,12 +187,12 @@ Bond_ptr_vec AdjacencyMatrix::Bonds (Atom * ap) const {
 return (vb);
 }
 
-int AdjacencyMatrix::NumBonds (Atom * ap) const {
+int AdjacencyMatrix::NumBonds (Atom const * const ap) const {
 
 return (Bonds(ap).size());
 }
 
-int AdjacencyMatrix::NumHBonds (Atom * ap) const {
+int AdjacencyMatrix::NumHBonds (Atom const * const ap) const {
 
 //********
 //printf ("%s) %d\n|", ap->Name().c_str(), ap->ID());
@@ -190,7 +209,7 @@ return (num);
 }
 
 // calculates the water bonding coordination of a given water molecule
-coordination AdjacencyMatrix::WaterCoordination (const Water * wat) const {
+coordination AdjacencyMatrix::WaterCoordination (Water const * const wat) const {
 	
 	int c = 0;
 	Atom * ap;

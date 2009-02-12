@@ -1,6 +1,6 @@
 #include "crdfile.h"
 
-CRDFile::CRDFile (string crdpath, int size) : _size(size) {
+CRDFile::CRDFile (std::string crdpath, int size) : _size(size) {
 
 	// first load up the file given the path
 	_file = (FILE *)NULL;
@@ -19,7 +19,7 @@ CRDFile::CRDFile (string crdpath, int size) : _size(size) {
 
 void CRDFile::LoadNext () {
 
-	_coords.clear();
+	this->_coords.clear();
 	double x, y, z;
 	//char line[1000];
 

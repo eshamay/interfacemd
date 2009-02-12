@@ -81,9 +81,11 @@ void AmberSystem::_ParseMolecules () {
 
 		// Then add all the atoms between the indexes of the molpointers in the topology file
 		// MPI had a weird problem **HERE**... fixed June 2007 ~ESS
-		for (int atomCount = 0; atomCount < _topfile.MolSizes()[mol]; atomCount++) {
+		int molsize = _topfile.MolSizes()[mol];
+		int molpointer = _topfile.MolPointers()[mol];
+		for (int atomCount = 0; atomCount < molsize; atomCount++) {
 			// sets the index of the current atom that's being added to the molecule
-			int curAtom = _topfile.MolPointers()[mol] + atomCount - 1;	
+			int curAtom = molpointer + atomCount - 1;	
 
 			// Now we're going to bless this new atom with loads of information about itself and its molecule
 			_mols[mol]->AddAtom( _atoms[curAtom] );			// First add the atom into the molecule

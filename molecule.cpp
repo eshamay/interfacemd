@@ -3,7 +3,7 @@
 int Molecule::numMolecules = 0;
 
 // A constructor for an empty molecule
-Molecule::Molecule () {
+Molecule::Molecule () : _centerofmass (VecR ()) {
 	_centerofmass = VecR ();
 	_mass = 0.0;
 	_atoms.clear();

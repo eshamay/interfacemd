@@ -1,6 +1,6 @@
 include ../Makefile
 
-AMBERFILES	= ../vecr.o ../atom.o ../ambersystem.o ../crdfile.o ../dipoleparm.o ../forcefile.o ../h2o.o ../hno3.o ../molecule.o ../topfile.o ../matrixr.o
+AMBERFILES	= ../vecr.o ../atom.o ../ambersystem.o ../crdfile.o ../forcefile.o ../h2o.o ../hno3.o ../molecule.o ../topfile.o ../matrixr.o
 MORITAFILES	= morita.o $(AMBERFILES) ../watersfg.o
 MPIMORITAFILES	= $(MORITAFILES) ../mpi/mpisys.o
 DENSITYFILES = $(AMBERFILES) densitytest.o 

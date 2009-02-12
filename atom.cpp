@@ -16,7 +16,7 @@ Atom::Atom () {
 	_force = VecR();
 }
 
-Atom::Atom (string name, VecR position, VecR force) {
+Atom::Atom (std::string name, VecR position, VecR force) {
 	_name = name;
 	_position = position;
 
@@ -33,7 +33,7 @@ Atom::Atom (string name, VecR position, VecR force) {
 	this->SetCharge ();
 }
 
-Atom::Atom (string name, VecR position) {
+Atom::Atom (std::string name, VecR position) {
 	_name = name;
 	_position = position;
 
@@ -89,12 +89,12 @@ void Atom::Print () const {
 void Atom::SetMass () {
 
 	//const double AMU2KG	= 1.6762158e-27;		// conversion for amu -> kg
-	if (_name.find("O") != string::npos) _mass = 15.9949146221;
-	if (_name.find("N") != string::npos) _mass = 14.0030740052;
-	if (_name.find("H") != string::npos) _mass = 1.0078250321;
-	if (_name.find("D") != string::npos) _mass = 2.0156500641;
-	if (_name.find("C") != string::npos) _mass = 12.0000000;
-	if (_name.find("S") != string::npos) _mass = 32.065;
+	if (_name.find("O") != std::string::npos) _mass = 15.9949146221;
+	if (_name.find("N") != std::string::npos) _mass = 14.0030740052;
+	if (_name.find("H") != std::string::npos) _mass = 1.0078250321;
+	if (_name.find("D") != std::string::npos) _mass = 2.0156500641;
+	if (_name.find("C") != std::string::npos) _mass = 12.0000000;
+	if (_name.find("S") != std::string::npos) _mass = 32.065;
 
 return;
 }
@@ -111,12 +111,12 @@ void Atom::Shift (VecR shift) {
 
 void Atom::SetCharge () {
 	
-	if (_name.find("O") != string::npos) _charge =  6.0;
-	if (_name.find("H") != string::npos) _charge = 1.0;
-	if (_name.find("N") != string::npos) _charge =  5.0;
-	if (_name.find("S") != string::npos) _charge =  6.0;
-	if (_name.find("Cl") != string::npos) _charge =  7.0;
-	if (_name.find("C") != string::npos) _charge =  4.0;
+	if (_name.find("O") != std::string::npos) _charge =  6.0;
+	if (_name.find("H") != std::string::npos) _charge = 1.0;
+	if (_name.find("N") != std::string::npos) _charge =  5.0;
+	if (_name.find("S") != std::string::npos) _charge =  6.0;
+	if (_name.find("Cl") != std::string::npos) _charge =  7.0;
+	if (_name.find("C") != std::string::npos) _charge =  4.0;
 
 return;
 }

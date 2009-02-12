@@ -10,7 +10,7 @@ class Molecule;
 
 class Atom {
 
-	string _name, 
+	std::string _name, 
 		   _residue;
 	
 	int    _ID;				// some numerical identifier in case the atom is in an ordered list
@@ -29,8 +29,8 @@ class Atom {
 public:
 	// constructors
 	Atom ();
-	Atom (string name, VecR position);
-	Atom (string name, VecR position, VecR force);
+	Atom (std::string name, VecR position);
+	Atom (std::string name, VecR position, VecR force);
 	Atom (VecR position);
 	Atom (const Atom& oldAtom);				// copy constructor for deep copies
 
@@ -38,7 +38,7 @@ public:
 	double operator[] (const coord index) const;	// get the atom's position by coordinate
 
 	// Input
-	void Name (const string name) { _name = name; }
+	void Name (const std::string name) { _name = name; }
 
 	void Position (const VecR& position) { _position = position; }
 	void Position (double X, double Y, double Z) { _position.Set(X, Y, Z); }
@@ -51,7 +51,7 @@ public:
 	void ID (int id) { _ID = id; }
 	//void Charge (double charge) { _charge = charge; }
 	void SetCharge ();
-	void Residue (string residue) { _residue = residue; }
+	void Residue (std::string residue) { _residue = residue; }
 
 	void X (double val) { _position.X(val); }			// for setting the atom's position
 	void Y (double val) { _position.Y(val); }
@@ -65,11 +65,11 @@ public:
 	void Shift (VecR shift);			// shift the atom's position
 	
 	// Output
-	string Name () const 	{ return (_name); }
+	std::string Name () const 	{ return (_name); }
 	double Mass () const 	{ return _mass; }
 	double Charge () const 	{ return _charge; }
 	int ID () const 		{ return _ID; }
-	string Residue () const { return _residue; }
+	std::string Residue () const { return _residue; }
 
 	const VecR& Position () const	{ return _position; }
 	//std::vector<double>& DPosition () { return _position.Coords(); }	// for returning the double array instead of the vector object
