@@ -1,13 +1,13 @@
 #include "adjacencymatrix.h"
 
-AdjacencyMatrix::AdjacencyMatrix () : _size(0), _built(false) {
+AdjacencyMatrix::AdjacencyMatrix () : _size(0) {
 
 return;
 }
 
-AdjacencyMatrix::AdjacencyMatrix (const Atom_ptr_vec& atoms) : _size(atoms.size()), _built(false) {
+AdjacencyMatrix::AdjacencyMatrix (const Atom_ptr_vec& atoms) : 
+	_size(atoms.size()) {
 
-	BuildMatrix ();
 	UpdateMatrix (atoms);
 
 return;
@@ -22,17 +22,20 @@ return;
 
 void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {
 	
-	// first form the matrix
+
+	// Clear out the old matrix
+	if (_size)
+		DeleteMatrix ();
+
+	// Form the atom list
 	_size = atoms.size();
 	_atoms.resize (_size, (Atom *)NULL);
-
-	BuildMatrix ();
-
-	ClearMatrix();
-
 	for (int i = 0; i < _size; i++) {
 		_atoms[i] = atoms[i];
 	}
+
+	// Build the matrix from the atom set given
+	BuildMatrix ();
 
 	// now run through all atom combos and get their bondlengths
 	double bondlength = 0.0;
@@ -67,8 +70,6 @@ return;
 // Make sure the _size is already set before calling this
 void AdjacencyMatrix::BuildMatrix () {
 
-  if (!_built) {
-
 	if (!_size) {
 		cout << "\nAdjacencyMatrix::BuildMatrix () - trying to build a matrix of size 0" << endl;
 		exit(1);
@@ -80,17 +81,15 @@ void AdjacencyMatrix::BuildMatrix () {
 	for (int i = 0; i < _size - 1; i++) {
 		for (int j = i + 1; j < _size; j++) {
 			_matrix[i][j] = new Bond;
+			_matrix[i][j]->bond = unbonded;
 		}
 	}
-
-	_built = true;
-  }
 
 return;
 }
 
 // Set all the bonds to unbonded
-void AdjacencyMatrix::ClearMatrix () {
+void AdjacencyMatrix::ClearBonds () {
 
 	Bond * b;
 	for (int i = 0; i < _size - 1; i++) {
@@ -103,7 +102,7 @@ void AdjacencyMatrix::ClearMatrix () {
 return;
 }
 
-// final clean-up - delete everything from memory
+// deletes all the bonds from memory - clean up
 void AdjacencyMatrix::DeleteMatrix () {
 
 	Bond * b;
@@ -112,10 +111,6 @@ void AdjacencyMatrix::DeleteMatrix () {
 			b = _matrix[i][j];
 			delete b;
 		}
-	}
-
-	for (int i = 0; i < _size; i++) {
-		_matrix[i].clear();
 	}
 
 	_matrix.clear();

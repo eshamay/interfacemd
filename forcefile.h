@@ -22,6 +22,7 @@ class ForceFile {
 public:
 	
 	ForceFile (std::string forcepath, int size);
+	~ForceFile ();
 
 	// Various control functions
 	void LoadFirst ();

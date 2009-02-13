@@ -1,37 +1,29 @@
 #include "coordination.h"
 
-CoordinationTest::CoordinationTest () {
+CoordinationTest::CoordinationTest () : 
+	sys(AmberSystem(PRMTOP, MDCRD, FORCE)),
+	output((FILE *)NULL),
+	posmin(POSMIN), posmax(POSMAX), posres(POSRES),
+	posbins(int ((posmax - posmin)/posres) + 1),
+	axis(AXIS),
+	int_low(INTERFACE_LOW), int_high(INTERFACE_HIGH),
+	output_freq(10),
+	timesteps(TIMESTEPS)
+{
 	
 	// here is our system for analysis
-	sys = new AmberSystem (PRMTOP, MDCRD, FORCE);
+	//sys = new AmberSystem (PRMTOP, MDCRD, FORCE);
 
 	printf ("Running a test to find water coordinations\n");
 
 	string output_name = "coordination.dat";
-	output = (FILE *)NULL;
 	output = fopen (output_name.c_str(), "w");
 	if (output == (FILE *)NULL) {
 		printf ("couldn't open the output file for reading!\n");
 		exit (1);
 	}
-
 	printf ("\noutput file = %s\n", output_name.c_str());
 
-	posmin = POSMIN;
-	posmax = POSMAX;
-	posres = POSRES;
-	
-	// first we figure out how many bins there are on the axis
-	posbins = int ((posmax - posmin)/posres) + 1;
-
-	axis = AXIS;
-
-	int_low = INTERFACE_LOW;
-	int_high = INTERFACE_HIGH;
-	
-	output_freq	=	10;					// how often the output file will be written (# of timesteps/10)
-	timesteps	=	TIMESTEPS;				// # of timesteps to process through
-	
 	printf ("Total timesteps = %d\n", timesteps);
 	
 	// here initialize all the histograms to get ready for binning the positions
@@ -77,9 +69,9 @@ void CoordinationTest::FindInterfacialWaters (VPWATER& int_mols, Atom_ptr_vec& i
 	Molecule * pmol;
 
 	// go through the system
-	RUN (sys->Molecules()) {
+	RUN (sys.Molecules()) {
 		// grab each molecule
-		pmol = sys->Molecules(i);
+		pmol = sys.Molecules(i);
 
 		// we're only looking at waters for SFG analysis right now
 		if (pmol->Name() != "h2o") continue;
@@ -111,9 +103,9 @@ void CoordinationTest::FindWaters (VPWATER& int_mols, Atom_ptr_vec& int_atoms) {
 	Water * water;
 
 	// go through the system
-	RUN (sys->Molecules()) {
+	RUN (sys.Molecules()) {
 		// grab each molecule
-		pmol = sys->Molecules(i);
+		pmol = sys.Molecules(i);
 
 		// we're only looking at waters for SFG analysis right now
 		if (pmol->Name() != "h2o") continue;
@@ -220,7 +212,7 @@ int main (int argc, char **argv) {
 			coords.histo[coord][bin]++;
 		}
 
-		coords.sys->LoadNext();
+		coords.sys.LoadNext();
 
 		coords.OutputStatus (step);
 		coords.OutputData (step);

@@ -19,8 +19,8 @@ private:
 	CRDFile		_coords;
 	ForceFile	_forces;
 
-	std::vector<Atom *> _atoms;			// A listing of all the atoms in the system with information parsed from the topfile and crdfile
-	std::vector<Molecule *> _mols;		// The molecules within a system - defined by the residues in the topology files
+	Atom_ptr_vec _atoms;			// A listing of all the atoms in the system with information parsed from the topfile and crdfile
+	Mol_ptr_vec _mols;		// The molecules within a system - defined by the residues in the topology files
 
 
 	void _ParseAtomInformation ();

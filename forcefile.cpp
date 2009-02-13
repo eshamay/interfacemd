@@ -1,16 +1,15 @@
 #include "forcefile.h"
 
-ForceFile::ForceFile (std::string forcepath, int size) : _size(size) {
-	_loaded = false;
+ForceFile::ForceFile (std::string forcepath, int size) : 
+	_size(size),
+	_file((FILE *)NULL),
+	_loaded(false),
+	_eof(true)
+	{
 	
 	// first load up the file given the path
-	_file = (FILE *)NULL;
 	_file = fopen64 (forcepath.c_str(), "r");
-	if (_file == (FILE *)NULL) {
-		//printf ("Couldn't load the force file %s\n", forcepath.c_str());
-		_loaded = false;
-	}
-	else {
+	if (_file != (FILE *)NULL) {
 		_loaded = true;
 
 		_eof = false;
@@ -19,6 +18,11 @@ ForceFile::ForceFile (std::string forcepath, int size) : _size(size) {
 		fgets(str, 1000, _file);		// first frame's header
 		this->LoadFirst ();	// load the first frame of the file
 	}
+}
+
+ForceFile::~ForceFile () {
+	if (_loaded)
+		fclose(_file);
 }
 
 void ForceFile::LoadNext () {

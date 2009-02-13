@@ -20,6 +20,7 @@ protected:
 	VecR			_x, _y, _z;			// molecular frame axes
 
 	bool			_set;				// just a little helper to see if the atoms of the molecule have been set or for any other special purpose
+	bool			_copy;				// this gets set if the molecule is a copy of a previous molecule
 
 	// this is broken last I checked - not updated with coordinate updates
 	VecR			_centerofmass;		// calculate by 1/M * Sum(m[i]*r[i])	where M = total mass, m[i] and r[i] are atom mass and pos
@@ -129,8 +130,8 @@ public:
 
 typedef std::vector<Molecule *>::iterator PMOL_IT;
 typedef std::vector<Molecule>::iterator MOL_IT;
-typedef std::vector<Molecule *> VPMOL;
-typedef std::vector<Molecule> VMOL;
+typedef std::vector<Molecule *> Mol_ptr_vec;
+typedef std::vector<Molecule> Mol_vec;
 
 
 #endif

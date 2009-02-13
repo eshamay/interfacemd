@@ -10,6 +10,7 @@ class Molecule;
 
 class Atom {
 
+protected:
 	std::string _name, 
 		   _residue;
 	

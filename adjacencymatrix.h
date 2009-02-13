@@ -17,8 +17,8 @@ As for the diagonal elements - instead of writing a routine that will count the 
 This leaves the bottom-diagonal free to store more information. If two atoms are covalently bound, then the bottom diagonal element will mark this with a 1.0. 
 */
 
-typedef std::vector< std::vector< Bond * > > Bond_matrix;
 typedef std::vector<Bond *> Bond_ptr_vec;
+typedef std::vector< Bond_ptr_vec > Bond_matrix;
 
 class AdjacencyMatrix {
 
@@ -36,9 +36,9 @@ public:
 	~AdjacencyMatrix ();
 
 	void BuildMatrix ();
-	void ClearMatrix ();
 	void DeleteMatrix ();
 	void UpdateMatrix (const Atom_ptr_vec& atoms);
+	void ClearBonds ();
 
 	void SetBond (int x, int y, const double length) const;
 

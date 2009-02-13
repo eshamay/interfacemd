@@ -4,14 +4,13 @@ AmberSystem::AmberSystem (string prmtop, string mdcrd, string mdvel = "")
 	// some initialization needs to happen here
 	: 	_topfile(TOPFile(prmtop)), 
 		_coords(CRDFile(mdcrd, _topfile.NumAtoms())), 
-		_forces(ForceFile (mdvel, _topfile.NumAtoms()))
+		_forces(ForceFile (mdvel, _topfile.NumAtoms())),
+		_atoms(Atom_ptr_vec(_topfile.NumAtoms(), (Atom *)NULL))
 {
 
 	// because some really useful functionality comes out of the Atom class if the Atom::Size() is set, we'll do that here
 	Atom::Size (_coords.Dims());
 	
-	// Then we have to form proper atoms. First setup the vector to hold them all.
-	_atoms.resize(_topfile.NumAtoms()); // = vector<Atom> (_topfile.NumAtoms(), Atom());
 	// and then actually create these bad mamma jammas
 	RUN (_atoms) {
 		_atoms[i] = new Atom ();
@@ -28,6 +27,9 @@ return;
 }
 
 AmberSystem::~AmberSystem () {
+	RUN (_atoms) {
+		delete _atoms[i];
+	}
 }
 
 // While the crdfile holds spatial coordinate information, and the topology file holds atomic information, the data has to be processed into proper atoms in order to play around with them more effectively.

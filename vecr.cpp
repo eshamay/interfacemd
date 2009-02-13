@@ -1,32 +1,27 @@
 #include "vecr.h"
 
-VecR::VecR () {
-	_coords.resize(3,0.0);
+VecR::VecR () : _coords(d_vector(3,0.0)) {
 }
 
-VecR::VecR (const double X, const double Y, const double Z) {
-	_coords.resize(3,0.0);
+VecR::VecR (const double X, const double Y, const double Z) : _coords(d_vector(3,0.0)) {
 	_coords[x] = X;
 	_coords[y] = Y;
 	_coords[z] = Z;
 }
 
-VecR::VecR (const VecR& oldVec) {
-	_coords.resize(3,0.0);
+VecR::VecR (const VecR& oldVec) : _coords(d_vector(3,0.0)) {
 	for (int i = 0; i < 3; i++) {
-		_coords[i] = oldVec[i];
+		_coords[i] = oldVec._coords[i];
 	}
 }
 
-VecR::VecR (const double * vec) {
-	_coords.resize(3,0.0);
+VecR::VecR (const double * vec) : _coords(d_vector(3,0.0)) {
 	for (int i = 0; i < 3; i++) {
 		_coords[i] = vec[i];
 	}
 }
 
-VecR::VecR (const std::vector<double>& oldVec) {
-	_coords.resize(3,0.0);
+VecR::VecR (const d_vector& oldVec) : _coords(d_vector(3,0.0)) {
 	for (int i = 0; i < 3; i++) {
 		_coords[i] = oldVec[i];
 	}
@@ -231,7 +226,7 @@ return (VecR(cx, cy, cz));
 
 // A function for calculating the minimum-image distance between the current vector and another, given the system size
 double VecR::MinDistance (const VecR& input, const VecR& size) const {
-	return this->MinVector(input, size).Magnitude();
+	return (MinVector(input, size).Magnitude());
 }
 
 /*

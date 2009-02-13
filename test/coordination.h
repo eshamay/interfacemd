@@ -11,7 +11,7 @@
 
 #define AXIS	y
 
-#define TIMESTEPS	1000
+#define TIMESTEPS	200000
 
 #define POSMIN	-5.0
 #define POSMAX	150.0
@@ -35,7 +35,7 @@ public:
 
 	CoordinationTest ();
 
-	AmberSystem * sys;
+	AmberSystem sys;
 	AdjacencyMatrix		matrix;
 
 	FILE * output;
@@ -63,8 +63,8 @@ public:
 
 	void OutputStatus (const int step) const;
 	void OutputData (const int step);
-	void FindWaters (VPWATER& int_mols, Atom_ptr_vec& int_atoms);
-	void FindInterfacialWaters (VPWATER& int_mols, Atom_ptr_vec& int_atoms);
+	void FindWaters (Water_ptr_vec& int_mols, Atom_ptr_vec& int_atoms);
+	void FindInterfacialWaters (Water_ptr_vec& int_mols, Atom_ptr_vec& int_atoms);
 };
 
 

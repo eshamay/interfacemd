@@ -10,18 +10,20 @@ enum coord {x=0, y=1, z=2};
 
 class MatR;
 
+typedef std::vector<double>	d_vector;
+
 class VecR {
 
 friend class MatR;
 
 protected:
-	std::vector<double>		_coords;
+	d_vector		_coords;
 
 public:
 	VecR ();
 	VecR (const double x, const double y, const double z);
 	VecR (const VecR& oldVec);						// A copy constructor
-	VecR (const std::vector<double>& oldVec);
+	VecR (const d_vector& oldVec);
 	VecR (const double * vec);
 	~VecR ();
 

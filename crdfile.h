@@ -20,6 +20,7 @@ class CRDFile {
 public:
 	
 	CRDFile (std::string crdpath, int size);
+	~CRDFile ();
 
 	// Various control functions
 	void LoadFirst ();

@@ -2,69 +2,74 @@
 
 VecR Atom::_size (0.0, 0.0, 0.0);
 
-Atom::Atom () {
-
-	_name = "";
-	_residue = "";
-	_ID = -1;
-	_molid = -1;
-	_pmolecule = (Molecule *)NULL;
-	_mass = 0.0;
-	_charge = 0.0;
-
-	_position = VecR();
-	_force = VecR();
+Atom::Atom () :
+	_name(""),
+	_residue(""),
+	_ID(-1),
+	_molid(-1),
+	_pmolecule((Molecule *)NULL),
+	_mass(0.0),
+	_charge(0.0),
+	_position(VecR()),
+	_force(VecR()) {
 }
 
-Atom::Atom (std::string name, VecR position, VecR force) {
-	_name = name;
-	_position = position;
-
-	_residue = "";
-	_ID = -1;
-	_molid = -1;
-	_pmolecule = (Molecule *)NULL;
-	_charge = 0.0;
-	_mass = 0.0;
-
-	_force = force;
+Atom::Atom (std::string name, VecR position, VecR force) :
+	_name(name),
+	_residue(""),
+	_ID(-1),
+	_molid(-1),
+	_pmolecule((Molecule *)NULL),
+	_mass(0.0),
+	_charge(0.0),
+	_position(position),
+	_force(force) {
 
 	this->SetMass ();			// set the atom's mass if the name is known
 	this->SetCharge ();
 }
 
-Atom::Atom (std::string name, VecR position) {
-	_name = name;
-	_position = position;
-
-	_residue = "";
-	_ID = -1;
-	_molid = -1;
-	_pmolecule = (Molecule *)NULL;
-	_charge = 0.0;
-	_mass = 0.0;
-
-	_force = VecR();
+Atom::Atom (std::string name, VecR position) :
+	_name(name),
+	_residue(""),
+	_ID(-1),
+	_molid(-1),
+	_pmolecule((Molecule *)NULL),
+	_mass(0.0),
+	_charge(0.0),
+	_position(position),
+	_force(VecR()) {
 
 	this->SetMass ();			// set the atom's mass if the name is known
 	this->SetCharge ();
 }
 
 // copy constructor will pull over all the member values, and copy over the vector values
-Atom::Atom (const Atom& oldAtom) {
-	_name = oldAtom.Name();
-	_residue = oldAtom.Residue();
-	_ID = oldAtom.ID();
+Atom::Atom (const Atom& oldAtom) :
+	_name(oldAtom._name),
+	_residue(oldAtom._residue),
+	_ID(oldAtom._ID),
+	_molid(oldAtom._molid),
+	_pmolecule(oldAtom._pmolecule),
+	_mass(oldAtom._mass),
+	_charge(oldAtom._charge),
+	_position(oldAtom._position),
+	_force(oldAtom._force) {
+
 	this->SetMass();
 	this->SetCharge();
-
-	// copying the vectors over
-	_position = oldAtom.Position();
-	_force = oldAtom.Force();
 }
 
-Atom::Atom (VecR position) {
-	_position = position;
+Atom::Atom (VecR position) :
+	_name(""),
+	_residue(""),
+	_ID(-1),
+	_molid(-1),
+	_pmolecule((Molecule *)NULL),
+	_mass(0.0),
+	_charge(0.0),
+	_position(position),
+	_force(VecR()) {
 }
 
 double Atom::operator[] (const coord index) const {
