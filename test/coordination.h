@@ -11,7 +11,7 @@
 
 #define AXIS	y
 
-#define TIMESTEPS	2
+#define TIMESTEPS	200000
 
 #define POSMIN	-5.0
 #define POSMAX	150.0
@@ -21,7 +21,7 @@
 #define INTERFACE_HIGH	35.0
 #define PBCFLIP	15.0
 
-#define HIGH_COORD	OOHH
+#define HIGH_COORD	OOOHH
 
 #define OUTPUT	"coord.dat"
 #define OUTPUT_FREQ	25

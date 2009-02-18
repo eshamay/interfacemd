@@ -9,7 +9,7 @@ CoordinationTest::CoordinationTest () :
 	int_low(INTERFACE_LOW), int_high(INTERFACE_HIGH),
 	output_freq(10),
 	timesteps(TIMESTEPS),
-	histo (COORD_HISTOGRAM (44, HISTOGRAM (posbins, 0)))
+	histo (COORD_HISTOGRAM (45, HISTOGRAM (posbins, 0)))
 {
 	
 	// here is our system for analysis
@@ -200,7 +200,7 @@ int main (int argc, char **argv) {
 			coordination coord = coords.matrix.WaterCoordination (wat);
 
 			// the highest coordination that we'll look at...
-			//if (coord > HIGH_COORD) continue;
+			if (coord > HIGH_COORD) continue;
 
 			// calculate its position in the slab, and find the histogram bin for it
 			Atom * oxy = wat->GetAtom ("O");
@@ -210,6 +210,7 @@ int main (int argc, char **argv) {
 			int bin = (int)((position - coords.posmin)/coords.posres);
 
 			// then, update the respective histogram for that coordination
+			//std::cout << bin << std::endl;
 			coords.histo[(int)coord][bin]++;
 		}
 

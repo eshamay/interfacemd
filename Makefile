@@ -4,7 +4,7 @@ CINCLUDE	= -I$(SRCLIB)
 CLIBS		= -L$(MKL) -lmkl_lapack -lmkl -lguide -lpthread
 CPPFLAGS	= $(CINCLUDE)
 #CXX			= mpiCC -g
-CXX			= g++ -g
+CXX			= g++ -g 
 MPICXX		= mpiCC -g -I$(MPI)/include
 
 ANALYSISFILES	=	analysis.o xyzsystem.o connectmatrix.o dipoleparm.o h2o.o hno3.o matrixr.o molecule.o atom.o vecr.o wannier.o xyzfile.o
