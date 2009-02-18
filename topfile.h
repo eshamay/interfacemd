@@ -31,7 +31,7 @@ public:
 	TOPFile (std::string path);
 	TOPFile (const TOPFile& topfile);
 	TOPFile ();
-	//~TOPFile ();
+	~TOPFile ();
 
 	// Various control functions
 	void FindFlag (std::string flag);		// To search through the file and find a particular section for parsing

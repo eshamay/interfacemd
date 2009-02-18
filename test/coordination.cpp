@@ -8,7 +8,8 @@ CoordinationTest::CoordinationTest () :
 	axis(AXIS),
 	int_low(INTERFACE_LOW), int_high(INTERFACE_HIGH),
 	output_freq(10),
-	timesteps(TIMESTEPS)
+	timesteps(TIMESTEPS),
+	histo (COORD_HISTOGRAM (44, HISTOGRAM (posbins, 0)))
 {
 	
 	// here is our system for analysis
@@ -54,14 +55,14 @@ CoordinationTest::CoordinationTest () :
 		coordination coord = coord_it->first;
 		string name = coord_it->second;
 		
-		histo[coord].resize(posbins, 0);
+		//histo[coord].resize(posbins, 0);
 		vcoords.push_back(coord);
 	}
 
 return;
 }
 
-void CoordinationTest::FindInterfacialWaters (VPWATER& int_mols, Atom_ptr_vec& int_atoms) {
+void CoordinationTest::FindInterfacialWaters (Water_ptr_vec& int_mols, Atom_ptr_vec& int_atoms) {
 	
 	int_mols.clear();
 	int_atoms.clear();
@@ -69,7 +70,7 @@ void CoordinationTest::FindInterfacialWaters (VPWATER& int_mols, Atom_ptr_vec& i
 	Molecule * pmol;
 
 	// go through the system
-	RUN (sys.Molecules()) {
+	for (int i = 0; i < sys.NumMols(); i++) {
 		// grab each molecule
 		pmol = sys.Molecules(i);
 
@@ -94,7 +95,7 @@ void CoordinationTest::FindInterfacialWaters (VPWATER& int_mols, Atom_ptr_vec& i
 return;
 }
 
-void CoordinationTest::FindWaters (VPWATER& int_mols, Atom_ptr_vec& int_atoms) {
+void CoordinationTest::FindWaters (Water_ptr_vec& int_mols, Atom_ptr_vec& int_atoms) {
 	
 	int_mols.clear();
 	int_atoms.clear();
@@ -103,7 +104,7 @@ void CoordinationTest::FindWaters (VPWATER& int_mols, Atom_ptr_vec& int_atoms) {
 	Water * water;
 
 	// go through the system
-	RUN (sys.Molecules()) {
+	for (int i = 0; i < sys.NumMols(); i++) {
 		// grab each molecule
 		pmol = sys.Molecules(i);
 
@@ -149,7 +150,7 @@ void CoordinationTest::OutputData (const int step) {
 			RUN2 (vcoords) {
 				coordination c = vcoords[j];
 				//if (vcoords[i] > HIGH_COORD) continue;
-				int val = histo[c][i];
+				int val = histo[(int)c][i];
 				fprintf (output, "% 8d", val);
 			}
 
@@ -181,7 +182,7 @@ int main (int argc, char **argv) {
 
 	CoordinationTest coords;
 
-	VPWATER waters;
+	Water_ptr_vec waters;
 	Atom_ptr_vec atoms;
 	for (int step = 0; step < coords.timesteps; step++) {
 
@@ -209,7 +210,7 @@ int main (int argc, char **argv) {
 			int bin = (int)((position - coords.posmin)/coords.posres);
 
 			// then, update the respective histogram for that coordination
-			coords.histo[coord][bin]++;
+			coords.histo[(int)coord][bin]++;
 		}
 
 		coords.sys.LoadNext();

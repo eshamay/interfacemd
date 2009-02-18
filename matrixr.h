@@ -57,29 +57,24 @@ private:
 	bool _eigenset;
 
 public:
-	MatR () : _elements(Double_matrix(9, 0.0)) {
-		_eigenset = false; 
+	MatR () : _eigenset(false) {
+		_elements.resize(9, 0.0);
 	}
 	
 
 	// constructor from a pre-built array (column-major)
-	MatR (double * const elements) : _elements(Double_matrix(9, 0.0)) {
+	MatR (double * const elements) : _eigenset(false) {
+		_elements.resize(9, 0.0);
 		for (int i = 0; i < 9; i++) {
 			_elements[i] = elements[i];
 		}
-		_eigenset = false; 
 	}
 	// constructor from a pre-built vector (column-major)
-	MatR (const Double_matrix elements) : _elements(Double_matrix(9, 0.0)) {
-		for (int i = 0; i < 9; i++) {
-			_elements[i] = elements[i];
-		}
-		_eigenset = false; 
+	MatR (const Double_matrix elements) : _elements(elements), _eigenset(false) {
 	}
 	
 	// A copy constructor
-	MatR (const MatR& oldMat) : _elements(Double_matrix(9, 0.0)) {
-		_eigenset = false; 
+	MatR (const MatR& oldMat) : _elements(oldMat._elements), _eigenset(false) {
 	}
 
 	~MatR () {};

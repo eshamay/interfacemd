@@ -71,8 +71,8 @@ public:
 	
 };
 
-typedef std::vector<Water *> VPWATER;
-typedef std::vector<Water> VWATER;
+typedef std::vector<Water *> Water_ptr_vec;
+typedef std::vector<Water> Water_vec;
 
 
 

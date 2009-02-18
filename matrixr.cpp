@@ -12,7 +12,7 @@ VecR MatR::operator* (const VecR& input) const {		// Vector rotation/matrix-vect
 
 	for (unsigned int i = 0; i < 3; i++) {
 		for (unsigned int j = 0; j < 3; j++) {
-			v._coords[i] += this->Index(i,j)*input[j];
+			v._coords[i] += (Index(i,j) * input[j]);
 		}
 	}
 	return (v);
@@ -28,7 +28,7 @@ MatR MatR::operator* (const MatR& input) const {		// Matrix rotation/multiplicat
 
 			val = 0.0;
 			for (int k = 0; k < 3; k++) {
-				val += this->Index(i,k) * input.Index(k,j);
+				val += (Index(i,k) * input.Index(k,j));
 			}
 			m.Set(i,j,val);
 		}
@@ -183,7 +183,7 @@ MatR MatR::Diagonalize () {
 	if (!_eigenset) this->CalcEigenSystem();
 
 	MatR U = this->Quaternion();
-	MatR out = U.Inverse() * (*this) * U;
+	MatR out = (U.Inverse() * (*this) * U);
 
 	return (out);
 }
@@ -191,7 +191,7 @@ MatR MatR::Diagonalize () {
 
 double MatR::Trace () const {
 	
-	double out = _elements[xx] + _elements[yy] + _elements[zz];
+	double out = (_elements[xx] + _elements[yy] + _elements[zz]);
 
 	return(out);
 }

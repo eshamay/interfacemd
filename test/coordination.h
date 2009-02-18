@@ -11,7 +11,7 @@
 
 #define AXIS	y
 
-#define TIMESTEPS	200000
+#define TIMESTEPS	2
 
 #define POSMIN	-5.0
 #define POSMAX	150.0
@@ -27,7 +27,8 @@
 #define OUTPUT_FREQ	25
 
 typedef std::vector<int> HISTOGRAM;
-typedef std::map<coordination, HISTOGRAM > COORD_HISTOGRAM;
+typedef std::vector< vector<int> > COORD_HISTOGRAM;
+//typedef std::map<coordination, HISTOGRAM > COORD_HISTOGRAM;
 
 class CoordinationTest {
 

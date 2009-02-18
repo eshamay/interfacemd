@@ -226,7 +226,11 @@ return (VecR(cx, cy, cz));
 
 // A function for calculating the minimum-image distance between the current vector and another, given the system size
 double VecR::MinDistance (const VecR& input, const VecR& size) const {
-	return (MinVector(input, size).Magnitude());
+
+	VecR min  = this->MinVector(input, size);
+	double mag = min.Magnitude();
+
+return (mag);
 }
 
 /*

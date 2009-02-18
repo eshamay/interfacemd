@@ -1,9 +1,10 @@
 #include "topfile.h"
 
-TOPFile::TOPFile (std::string path) {
+TOPFile::TOPFile (std::string path) :
+	_topfile((FILE *)NULL)
+	{
 
 	// Before anything, let's load the file!
-	_topfile = (FILE *)NULL;
 	_topfile = fopen(path.c_str(), "r");
 	if (_topfile == (FILE *)NULL) {
 		std::cout << "Error opening the topfile " << path << std::endl;
@@ -27,20 +28,23 @@ TOPFile::TOPFile (std::string path) {
 return;
 }
 
-TOPFile::TOPFile (const TOPFile& topfile) {
-	_topfile = topfile._topfile;;
-	_atomnames = topfile._atomnames;
-	_masses = topfile._masses;
-	_charges = topfile._charges;
-	_molnames = topfile._molnames;
-	_molpointers = topfile._molpointers;
-	_molsizes = topfile._molsizes;
-	_numAtoms = topfile._numAtoms;
-	_numMols = topfile._numMols;
-
-}
+TOPFile::TOPFile (const TOPFile& topfile) :
+	_topfile(topfile._topfile),
+	_atomnames(topfile._atomnames),
+	_masses(topfile._masses),
+	_charges(topfile._charges),
+	_molnames(topfile._molnames),
+	_molpointers(topfile._molpointers),
+	_molsizes(topfile._molsizes),
+	_numAtoms(topfile._numAtoms),
+	_numMols(topfile._numMols)
+{}
 
 TOPFile::TOPFile () {
+}
+
+TOPFile::~TOPFile () {
+	fclose(_topfile);
 }
 
 void TOPFile::FindFlag (std::string flag) {

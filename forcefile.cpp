@@ -27,7 +27,7 @@ ForceFile::~ForceFile () {
 
 void ForceFile::LoadNext () {
 
-	_forces.clear();
+	_forces.resize(_size, VecR());
 	double x, y, z;
 //	char line[1000];
 
@@ -38,7 +38,7 @@ void ForceFile::LoadNext () {
 			_eof = true;
 		}
 		else {
-			_forces.push_back(VecR (x, y, z));
+			_forces[i].Set(x,y,z);
 		}
 	}
 

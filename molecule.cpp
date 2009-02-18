@@ -292,10 +292,7 @@ void Molecule::Print () const {
 	RUN (_atoms) {
 		_atoms[i]->Print();
 	}
-	//RUN (_wanniers) {
-	printf ("wan)\t%d\n", _wanniers.size());
-	//	_wanniers[i].Print();
-	//}
+	//printf ("wan)\t%d\n", _wanniers.size());
 
 return;
 }

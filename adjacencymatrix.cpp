@@ -39,21 +39,27 @@ void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {
 
 	// now run through all atom combos and get their bondlengths
 	double bondlength = 0.0;
+	Atom *ai, *aj;
 	
 	// this little for-loop bit runs through all atom-pair combinations once and find the bond-types between them
-	for (unsigned int i = 0; i < _size - 1; i++) {
+	for (unsigned int i = 0; i < _size-1; i++) {
 		for (unsigned int j = i + 1; j < _size; j++) {
 			
+			ai = _atoms[i];
+			aj = _atoms[j];
+
 			// Don't connect oxygens to oxygens, and hydrogen to hydrogen...
 			if (
-				(_atoms[i]->Name().find("H") != string::npos and _atoms[j]->Name().find("H") != string::npos)
+				(ai->Name().find("H") != string::npos and aj->Name().find("H") != string::npos)
 				or
-				(_atoms[i]->Name().find("O") != string::npos and _atoms[j]->Name().find("O") != string::npos)
+				(ai->Name().find("O") != string::npos and aj->Name().find("O") != string::npos)
 			)
 				continue;
 			
 			// calculate the distance between the two atoms
-			double distance = *_atoms[i] - *_atoms[j];
+			//double distance = *_atoms[i] - *_atoms[j];
+			//double distance = _atoms[i]->MinDistance(_atoms[j]);
+			double distance = ai->Position().MinDistance(aj->Position(), Atom::_size);
 
 			// check that the distance is at least an H-bond
 			if (distance > HBONDLENGTH) continue;

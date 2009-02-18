@@ -87,6 +87,14 @@ double Atom::operator- (const Atom& input) const {
 	return (_position.MinDistance(input.Position(), _size));
 }
 
+double Atom::MinDistance (const Atom& input) const {
+	return (_position.MinDistance(input.Position(), _size));
+}
+
+double Atom::MinDistance (Atom const * const input) const {
+	return (_position.MinDistance(input->Position(), _size));
+}
+
 void Atom::Print () const {
 	printf ("%s (%d)\t%s\t% f\t% f\t% f\n", _name.c_str(), _ID, _residue.c_str(), _position[x], _position[y], _position[z]);
 }
