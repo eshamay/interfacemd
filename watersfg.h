@@ -56,8 +56,8 @@ const double GAMMA				= 2.0/AU2WAVENUMBER;				// the "damping parameter" first s
 const double GAMMA_SQ			= GAMMA*GAMMA;				// ...squared
 
 // frequency limits for calculating the spectra (given in cm-1)
-const double START_FREQ			= 2800.0/AU2WAVENUMBER;
-const double END_FREQ			= 3800.0/AU2WAVENUMBER;
+const double START_FREQ			= 2600.0/AU2WAVENUMBER;
+const double END_FREQ			= 4000.0/AU2WAVENUMBER;
 const double FREQ_STEP			= 1.0/AU2WAVENUMBER;		// step size when calculating the spectra
 const double NUM_STEP			= (END_FREQ-START_FREQ)/FREQ_STEP;
 
@@ -79,8 +79,8 @@ private:
 	double _MuDerivA, _MuDerivS;			// the total mu derivative with the eigenvector weighting from Eq 7.
 	double _AlphaDerivA, _AlphaDerivS;
 
-	vector< complex<double> > _Beta;		// hyperpolarizability of a given water (in the molecular frame)
-	vector< complex<double> > _Chi;		// hyperpolarizability of a given water (in the molecular frame)
+	std::vector< complex<double> > _Beta;		// hyperpolarizability of a given water (in the molecular frame)
+	std::vector< complex<double> > _Chi;		// hyperpolarizability of a given water (in the molecular frame)
 
 	//MatR _Rotation;				// rotation matrix for moving from the water molecular frame to the lab frame
 
@@ -111,14 +111,14 @@ public:
 	void PolarizabilityAndDipoleDerivs (Water& water, int const p, int const q, int const r);
 	//void PolarizabilityAndDipoleDerivs (Water& water);
 
-	vector< complex<double> >& Beta (Water& water, int const p, int const q, int const r);
-	//vector< complex<double> >& Beta (Water& water);
+	std::vector< std::complex<double> >& Beta (Water& water, int const p, int const q, int const r);
+	//std::vector< std::complex<double> >& Beta (Water& water);
 
 	// returns the rotation matrix to go from the water molecular frame to the lab frame
 	void RotationMatrix (Water& water);
 	
 	// returns the summed beta rotated into the lab frame
-	vector< complex<double> >& Chi (Water& water, int const l, int const m, int const n);	
+	std::vector< std::complex<double> >& Chi (Water& water, int const l, int const m, int const n);	
 	
 };
 

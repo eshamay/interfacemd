@@ -1,7 +1,7 @@
 #include "watersfg.h"
 
 //SFGWaterAnalyzer::SFGWaterAnalyzer (string const polarization, coord const axis) {
-SFGWaterAnalyzer::SFGWaterAnalyzer () {
+SFGWaterAnalyzer::SFGWaterAnalyzer () : _set(false) {
 
 	MuDeriv1.Set(-0.058, 0.000, 0.157);	// dipole derivative vector from the paper
 	MuDeriv2.Set(0.1287, 0.0, -0.1070);	// dipole derivative of the 2nd OH bond, in the frame of the first (found by direction cosine rotation)
@@ -14,12 +14,6 @@ SFGWaterAnalyzer::SFGWaterAnalyzer () {
 	AlphaDeriv1.Set (alpha_data1);
 	AlphaDeriv2.Set (alpha_data2);
 
-	//_polarization = polarization;
-	//_axis = axis;
-
-	//I = complex<double> (0.0, 1.0);
-
-	_set = false;
 }
 
 /* taken from Eq. 10c from the Morita-Hynes work to calculate the change in frequency of a bond under a force. Returns two frequency shifts due to forces on a molecule */
@@ -351,7 +345,7 @@ return;
 	
 
 /* here we calculate the hyperpolarizability spectrum for a water molecule. In the course of this, two spectra will be calculated and averaged based on the two values of the eigenfrequencies of a water molecule */
-vector< complex<double> >& SFGWaterAnalyzer::Beta (Water& water, int const p, int const q, int const r) {
+std::vector< std::complex<double> >& SFGWaterAnalyzer::Beta (Water& water, int const p, int const q, int const r) {
 //vector< complex<double> >& SFGWaterAnalyzer::Beta (Water& water) {
 
 	/* Now that we have all the data established for this one water molecule (i.e. coefficients for symmetric and antisymmetric modes, dipole derivatives, and polarizability derivatives for all valid polarizations) we can put it all together and calculate spectra. Two spectra will come out for the sym and anti-sym cases, and we have to include all the polarization combinations. The beta that comes out of here is still in the molecular frame and needs to be rotated.
@@ -387,7 +381,7 @@ vector< complex<double> >& SFGWaterAnalyzer::Beta (Water& water, int const p, in
 		realPart += premultAntiSym * dFreq/denominator;
 		imagPart += premultAntiSym * GAMMA/denominator;
 
-		_Beta.push_back (complex<double>(realPart, imagPart));
+		_Beta.push_back (std::complex<double>(realPart, imagPart));
 	}
 
 return (_Beta);
@@ -399,7 +393,7 @@ return (_Beta);
 // eq(7) of the paper lays out pretty simply that we use a direction cosine matrix to find all the interesting things that make up the hyperpolarizability.
 // l,m,n are the lab frame axes, and p,q,r are the molecular frame ones.
 // 
-vector< complex<double> >& SFGWaterAnalyzer::Chi (Water& water, int const l, int const m, int const n) {
+std::vector< std::complex<double> >& SFGWaterAnalyzer::Chi (Water& water, int const l, int const m, int const n) {
 
 	// let's find the rotation matrix for the water with which we're working
 	// this matrix takes us from the frame of the first OH bond into the lab frame
@@ -419,7 +413,7 @@ vector< complex<double> >& SFGWaterAnalyzer::Chi (Water& water, int const l, int
 
 		if (first) {
 			_Chi.clear();
-			_Chi.resize (_Beta.size(), complex<double>(0.0, 0.0));
+			_Chi.resize (_Beta.size(), std::complex<double>(0.0, 0.0));
 			first = false;
 		}
 
