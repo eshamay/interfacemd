@@ -5,6 +5,8 @@
 #include "../ambersystem.h"
 #include "../adjacencymatrix.h"
 
+#define AVG		// define this to average the two interfaces. Make sure to define the interfaces below!
+
 #define PRMTOP	"prmtop"
 #define MDCRD	"mdcrd"
 #define FORCE	""
@@ -13,15 +15,18 @@
 
 #define TIMESTEPS	200000
 
-#define POSMIN	-5.0
-#define POSMAX	150.0
+#ifdef AVG
+	#define POSMIN	-40.0
+	#define POSMAX	40.0
+#else
+	#define POSMIN	-5.0
+	#define POSMAX	150.0
+#endif
 #define POSRES	0.1
 
-#define INTERFACE_LOW	28.0
-#define INTERFACE_HIGH	35.0
 #define PBCFLIP	15.0
 
-#define HIGH_COORD	OOOHH
+#define HIGH_COORD	OOOHHH
 
 #define OUTPUT	"coord.dat"
 #define OUTPUT_FREQ	25
@@ -34,10 +39,10 @@ class CoordinationTest {
 
 public:
 
-	CoordinationTest ();
+	CoordinationTest (int argc, char **argv);
 
 	AmberSystem sys;
-	AdjacencyMatrix		matrix;
+	AdjacencyMatrix	matrix;
 
 	FILE * output;
 
@@ -66,6 +71,7 @@ public:
 	void OutputData (const int step);
 	void FindWaters (Water_ptr_vec& int_mols, Atom_ptr_vec& int_atoms);
 	void FindInterfacialWaters (Water_ptr_vec& int_mols, Atom_ptr_vec& int_atoms);
+	void BinPosition (Water const * const wat, coordination const coord);
 };
 
 

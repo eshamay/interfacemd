@@ -11,7 +11,7 @@ MDCRD2PDB = $(AMBERFILES) ../pdbfile.o mdcrd2pdb.o
 FILLBOX = $(AMBERFILES) ../pdbfile.o ../boxfiller.o
 MPIFILES	=	$(AMBERFILES) ../mpi/mpisys.o mpitest.o
 ORDERPARAMS = $(AMBERFILES) orderparams.o
-TEMPFILES	= temp.cpp $(AMBERFILES)
+TEMPFILES	= temp.cpp
 COORDINATION	= $(AMBERFILES) ../adjacencymatrix.o ../bond.o coordination.o
 
 ambertest : ambertest.o $(AMBERFILES)
@@ -54,7 +54,7 @@ fillbox : $(FILLBOX) fillbox.o
 	$(CXX) $(CPPFLAGS) fillbox.o $(FILLBOX) -o fillbox
 
 temp: $(TEMPFILES)
-	$(CXX) $(CPPFLAGS) -o temp $(TEMPFILES)
+	$(CXX) $(CXXFLAGS) -o temp $(TEMPFILES)
 
 mpitest: $(MPIFILES)
 	mpiCC $(CPPFLAGS) $(MPILIBS) -o mpitest $(MPIFILES)

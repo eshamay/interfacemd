@@ -1,12 +1,14 @@
 #include "coordination.h"
 
-CoordinationTest::CoordinationTest () : 
+CoordinationTest::CoordinationTest (int argc, char **argv) : 
 	sys(AmberSystem(PRMTOP, MDCRD, FORCE)),
 	output((FILE *)NULL),
-	posmin(POSMIN), posmax(POSMAX), posres(POSRES),
+	posmin(POSMIN), posmax(POSMAX), posres(POSRES), middle((int_low + int_high)/2.0),
 	posbins(int ((posmax - posmin)/posres) + 1),
 	axis(AXIS),
-	int_low(INTERFACE_LOW), int_high(INTERFACE_HIGH),
+	#ifdef AVG
+	int_low(atof(argv[1])), int_high(atof(argv[2])),
+	#endif
 	output_freq(10),
 	timesteps(TIMESTEPS),
 	histo (COORD_HISTOGRAM (45, HISTOGRAM (posbins, 0)))
@@ -17,7 +19,13 @@ CoordinationTest::CoordinationTest () :
 
 	printf ("Running a test to find water coordinations\n");
 
+#ifdef AVG
+	printf ("Averaging the two interfaces - make sure the interfaces are located as follows:\n***  low interface = % 5.3f\n***  high interface = % 5.3f\n", int_low, int_high);
+	string output_name = "coordination.avg.dat";
+#else
 	string output_name = "coordination.dat";
+#endif
+
 	output = fopen (output_name.c_str(), "w");
 	if (output == (FILE *)NULL) {
 		printf ("couldn't open the output file for reading!\n");
@@ -84,7 +92,7 @@ void CoordinationTest::FindInterfacialWaters (Water_ptr_vec& int_mols, Atom_ptr_
 		// and find molecules that sit within the interface.
 		if (position < PBCFLIP) position += Atom::Size()[axis];		// adjust for funky boundaries
 		// these values have to be adjusted for each system
-		if (position < INTERFACE_LOW or position > INTERFACE_HIGH) continue;				// set the interface cutoffs
+		if (position < posmin or position > posmax) continue;				// set the interface cutoffs
 		
 		int_mols.push_back (water);
 		RUN2(water->Atoms()) {
@@ -174,13 +182,43 @@ void CoordinationTest::OutputStatus (const int step) const {
 return;
 }
 
+void CoordinationTest::BinPosition (Water const * const wat, coordination const coord) {
 
+	// the highest coordination that we'll look at...
+	if (coord < HIGH_COORD) {
+
+		// calculate its position in the slab, and find the histogram bin for it
+		Atom * oxy = wat->GetAtom ("O");
+		VecR r = oxy->Position();
+		double position = r[axis];
+
+		if (position < PBCFLIP) position += Atom::Size()[axis];		// deal with the periodic cutoffs
+
+	#ifdef AVG
+		double distance = (position > middle) ? position - int_high : int_low - position;
+		int bin = (int)((distance - posmin)/posres);
+	#else
+		int bin = (int)((position - posmin)/posres);
+	#endif
+
+		// then, update the respective histogram for that coordination
+		//std::cout << bin << std::endl;
+		histo[(int)coord][bin]++;
+	}
+return;
+}
 
 
 
 int main (int argc, char **argv) {
 
-	CoordinationTest coords;
+	#ifdef AVG
+		if (argc < 3) {
+			printf ("for averaging, we need the two interface locations: <low> <high>\n");
+			exit(1);
+		}
+	#endif
+	CoordinationTest coords (argc, argv);
 
 	Water_ptr_vec waters;
 	Atom_ptr_vec atoms;
@@ -197,21 +235,9 @@ int main (int argc, char **argv) {
 		Water * wat;
 		RUN (waters) {
 			wat = waters[i];
+
 			coordination coord = coords.matrix.WaterCoordination (wat);
-
-			// the highest coordination that we'll look at...
-			if (coord > HIGH_COORD) continue;
-
-			// calculate its position in the slab, and find the histogram bin for it
-			Atom * oxy = wat->GetAtom ("O");
-			VecR r = oxy->Position();
-			double position = r[coords.axis];
-			if (position < PBCFLIP) position += Atom::Size()[coords.axis];
-			int bin = (int)((position - coords.posmin)/coords.posres);
-
-			// then, update the respective histogram for that coordination
-			//std::cout << bin << std::endl;
-			coords.histo[(int)coord][bin]++;
+			coords.BinPosition (wat, coord);
 		}
 
 		coords.sys.LoadNext();
