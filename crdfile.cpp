@@ -1,15 +1,21 @@
 #include "crdfile.h"
 
-CRDFile::CRDFile (string crdpath, int size) : _size(size) {
+CRDFile::CRDFile (std::string crdpath, int size) : 
+	_size(size), 
+	_file((FILE *)NULL), 
+	_eof(true),
+	_dims(VecR()),
+	_frame(0)
+{
 
 	// first load up the file given the path
-	_file = (FILE *)NULL;
 	_file = fopen64 (crdpath.c_str(), "r");
 	if (_file == (FILE *)NULL) {
 		printf ("Couldn't load the crdfile %s\n", crdpath.c_str());
+		exit(1);
 	}
 
-	_eof = false;
+	_eof = true;
 
 	char str[1000];	
 	fgets(str, 1000, _file);		// first frame's header
@@ -17,9 +23,13 @@ CRDFile::CRDFile (string crdpath, int size) : _size(size) {
 
 }
 
+CRDFile::~CRDFile () {
+	fclose(_file);
+}
+
 void CRDFile::LoadNext () {
 
-	_coords.clear();
+	_coords.resize(_size, VecR());
 	double x, y, z;
 	//char line[1000];
 
@@ -30,13 +40,13 @@ void CRDFile::LoadNext () {
 			_eof = true;
 		}
 		else {
-			_coords.push_back(VecR (x, y, z));
+			_coords[i].Set(x,y,z);
 		}
 	}
 
 	// process the next frame's header line (grab the box dimensions)
 	fscanf (_file, " %lf %lf %lf", &x, &y, &z);
-	_dims = VecR (x, y, z);
+	_dims.Set(x,y,z);
 	
 	_frame++;
 

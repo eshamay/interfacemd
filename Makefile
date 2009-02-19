@@ -1,11 +1,14 @@
 SRCLIB	 	= $(HOME)/work/src
 MPILIBS		= $(MPI)/lib/libmpi.so $(MPI)/lib/libmpi_cxx.so 
-CINCLUDE	= -I$(SRCLIB) -I$(BOOST) -I$(MPI)/include
+FTENSOR		= /common/src/FTensor-1.1pre25
+CINCLUDE	= -I$(SRCLIB) -I$(FTENSOR)
 CLIBS		= -L$(MKL) -lmkl_lapack -lmkl -lguide -lpthread
 CPPFLAGS	= $(CINCLUDE)
 #CXX			= mpiCC -g
-CXX			= g++ -g
-MPICXX		= mpiCC -g
+CXX			= g++ $(CXXFLAGS)
+CXXOPTIMIZE = -O3 -finline-functions -finline-limit-1000 -funroll-loops
+CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CXXOPTIMIZE)
+MPICXX		= mpiCC -g -I$(MPI)/include
 
 ANALYSISFILES	=	analysis.o xyzsystem.o connectmatrix.o dipoleparm.o h2o.o hno3.o matrixr.o molecule.o atom.o vecr.o wannier.o xyzfile.o
 
@@ -20,7 +23,7 @@ cleanall:
 	( cd test ; make cleantest )
 	( cd mpi ; make clean )
 
-%.o: %.cpp
+%.o: %.cpp %.h
 	$(CXX) $(CPPFLAGS) -c -o $@ $<
 
 #molecule.o: molecule.cpp molecule.h

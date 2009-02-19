@@ -1,29 +1,30 @@
 #ifndef VECR_H_
 #define VECR_H_
 
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/io.hpp>
 #include <iostream>
 #include <math.h>
 #include "matrixr.h"
+#include "utility.h"
 
-enum coord {x=0, y, z};
+enum coord {x=0, y=1, z=2};
 
 class MatR;
 
+typedef std::vector<double>	d_vector;
+
 class VecR {
 
-	friend class MatR;
+friend class MatR;
 
 protected:
-	boost::numeric::ublas::vector<double>	_coords;
+	d_vector		_coords;
 
 public:
 	VecR ();
 	VecR (const double x, const double y, const double z);
 	VecR (const VecR& oldVec);						// A copy constructor
-	VecR (const boost::numeric::ublas::vector<double>& oldVec);
+	VecR (const d_vector& oldVec);
+	VecR (const double * vec);
 	~VecR ();
 
 // Operators
@@ -45,11 +46,11 @@ public:
 // Input & vector manipulation
 	void Set (double X, double Y, double Z) {
 		//printf ("_coords in (%d)\n", _coords);
-		_coords(0) = X; // set all elements of a vector
-		_coords(1) = Y;
-		_coords(2) = Z;
+		_coords[0] = X; // set all elements of a vector
+		_coords[1] = Y;
+		_coords[2] = Z;
 	}
-	void Set (const coord axis, const double val) { _coords(axis) = val; }
+	void Set (const coord axis, const double val) { _coords[axis] = val; }
 
 	void Zero ();								// Zero all elements of a vector
 	void Scale (double val);					// scale the entire vector's magnitude
@@ -59,9 +60,9 @@ public:
 	//VecR RotateToFrame (VecR const * const frame) const; 
 	VecR Wrap (VecR size, VecR origin = VecR ());						// Used to wrap a vector into a central periodic cell of the given size
 
-	void X (const double val) { _coords(x) = val; }
-	void Y (const double val) { _coords(y) = val; }
-	void Z (const double val) { _coords(z) = val; }
+	void X (const double val) { _coords[x] = val; }
+	void Y (const double val) { _coords[y] = val; }
+	void Z (const double val) { _coords[z] = val; }
 
 // Output
 	double Magnitude () const;

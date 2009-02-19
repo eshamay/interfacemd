@@ -1,16 +1,14 @@
 #include "h2o.h"
 
+
 int Water::numWaters = 0;
 
 #ifdef H2O_DIPOLE_PARM
 WaterDipoleParms Water::_dipparms ("dipoleparm.dat");
 #endif
 
-Water::Water () {
-	_centerofmass = VecR ();
-	_mass = 0.0;
+Water::Water () : Molecule() {
 	_name = "h2o";
-	_set = false;
 	++numWaters;
 }
 
@@ -18,11 +16,7 @@ Water::~Water () {
 	numWaters--;
 }
 
-Water::Water (const Molecule& molecule) {
-	// copy over the old information
-	_centerofmass = molecule.CenterOfMass ();
-	_mass = molecule.Mass ();
-	_name = molecule.Name ();
+Water::Water (const Molecule& molecule) : Molecule(molecule) {
 
 	// now run through and make copies of all the atoms
 	RUN (molecule.Atoms()) {
@@ -30,10 +24,9 @@ Water::Water (const Molecule& molecule) {
 		Atom *newatom = new Atom(*molecule[i]);
 		_atoms.push_back (newatom);
 	}
-	_set = false;
 	++numWaters;
 }
-	
+
 void Water::SetAtoms () {
 
 	if (!_set) {

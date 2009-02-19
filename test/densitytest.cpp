@@ -82,13 +82,13 @@ this->Debug ("DensityAnalyzer::_PrintToFile\n");
 	// starting from the beginning of the file (i.e. overwrite it)
 	rewind (_output);
 
+	// the output value of the number density will be converted to the actual density in g/mL.
+	// the volume of a slice of the slab
+	double volume = Atom::Size()[x] * Atom::Size()[y] * Atom::Size()[z] / Atom::Size()[_axis];
+	volume *= _binsize;
+
 	for (int i=0; i < _posbins; i++) {
 		fprintf (_output, "% 10.4f", double(i)*_binsize+_start);		// the bin's position value
-
-		// the output value of the number density will be converted to the actual density in g/mL.
-		// the volume of a slice of the slab
-		double volume = Atom::Size()[x] * Atom::Size()[y] * Atom::Size()[z] / Atom::Size()[_axis];
-		volume *= _binsize;
 
 		RUN2 (_atomNames) {
 			// The density is thus transformed. The resulting values are the densities (mol/mL) of each species.
@@ -151,10 +151,10 @@ this->Debug ("DensityAnalyzer::AtomDensity\n");
 
 		#ifdef AVG
 		// here the bin will be selected based on the distance to a given interface. Negative distances are inside the water phase, positive are in the CCl4
-		if (position < START or position > END) continue;		// only bin stuff within the bounds that have been set up
 		double distance = (position > middle) ? position - int_high : int_low - position;
 		int bin = (int)((distance - _start)/_binsize);
 		#else
+		//if (position < START or position > END) continue;		// only bin stuff within the bounds that have been set up
 		int bin = (int)((position - _start)/_binsize);
 		#endif
 

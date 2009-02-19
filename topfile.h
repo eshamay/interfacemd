@@ -10,39 +10,41 @@
 
 
 class TOPFile {
-	
+
+protected:
+
 	FILE * _topfile;			// The associated topology file output by AMBER
 
-	std::vector<string> _atomnames;		// The listing of the atoms in the file
+	std::vector<std::string> _atomnames;		// The listing of the atoms in the file
 	std::vector<double> _masses;			// atomic masses
 	std::vector<double> _charges;		// atomic charges
 
-	std::vector<string> _molnames;		// molecule names
-	std::vector<int>	   _molpointers;	// prmtop pointers to each molecule (the location in the prmtop file, not c-style)
-	std::vector<int>	   _molsizes;		// the number of atoms in each molecule
+	std::vector<std::string> _molnames;		// molecule names
+	std::vector<int>	_molpointers;	// prmtop pointers to each molecule (the location in the prmtop file, not c-style)
+	std::vector<int>	_molsizes;		// the number of atoms in each molecule
 
 	int _numAtoms;
 	int _numMols;
 
 public:
 	
-	TOPFile (string path);
+	TOPFile (std::string path);
 	TOPFile (const TOPFile& topfile);
 	TOPFile ();
-	//~TOPFile ();
+	~TOPFile ();
 
 	// Various control functions
-	void FindFlag (string flag);		// To search through the file and find a particular section for parsing
-	void LoadSection(string flag);
+	void FindFlag (std::string flag);		// To search through the file and find a particular section for parsing
+	void LoadSection(std::string flag);
 
 	// output functions
 	FILE * File () const { return _topfile; }
-	std::vector<string> AtomNames () const { return _atomnames; }
-	std::vector<double> Masses () 	const { return _masses; }
-	std::vector<double> Charges () 	const { return _charges; }
-	std::vector<string> MolNames () const { return _molnames; }
-	std::vector<int> MolPointers () const { return _molpointers; }
-	std::vector<int> MolSizes ()	const { return _molsizes; }
+	std::vector<std::string>& AtomNames () { return _atomnames; }
+	std::vector<double>& Masses () 	{ return _masses; }
+	std::vector<double>& Charges () 	{ return _charges; }
+	std::vector<std::string>& MolNames () { return _molnames; }
+	std::vector<int>& MolPointers () { return _molpointers; }
+	std::vector<int>& MolSizes ()	{ return _molsizes; }
 
 	int NumAtoms () const { return _numAtoms; }
 	int NumMols () const { return _numMols; }

@@ -1,6 +1,6 @@
 include ../Makefile
 
-AMBERFILES	= ../vecr.o ../atom.o ../ambersystem.o ../crdfile.o ../dipoleparm.o ../forcefile.o ../h2o.o ../hno3.o ../molecule.o ../topfile.o ../bondgraph.o ../matrixr.o
+AMBERFILES	= ../vecr.o ../atom.o ../ambersystem.o ../crdfile.o ../forcefile.o ../h2o.o ../hno3.o ../molecule.o ../topfile.o ../matrixr.o
 MORITAFILES	= morita.o $(AMBERFILES) ../watersfg.o
 MPIMORITAFILES	= $(MORITAFILES) ../mpi/mpisys.o
 DENSITYFILES = $(AMBERFILES) densitytest.o 
@@ -11,7 +11,8 @@ MDCRD2PDB = $(AMBERFILES) ../pdbfile.o mdcrd2pdb.o
 FILLBOX = $(AMBERFILES) ../pdbfile.o ../boxfiller.o
 MPIFILES	=	$(AMBERFILES) ../mpi/mpisys.o mpitest.o
 ORDERPARAMS = $(AMBERFILES) orderparams.o
-TEMPFILES	= temp.cpp $(AMBERFILES)
+TEMPFILES	= temp.cpp
+COORDINATION	= $(AMBERFILES) ../adjacencymatrix.o ../bond.o coordination.o
 
 ambertest : ambertest.o $(AMBERFILES)
 	$(CXX) $(CPPFLAGS) ambertest.o $(AMBERFILES) -o ambertest
@@ -53,10 +54,13 @@ fillbox : $(FILLBOX) fillbox.o
 	$(CXX) $(CPPFLAGS) fillbox.o $(FILLBOX) -o fillbox
 
 temp: $(TEMPFILES)
-	$(CXX) $(CPPFLAGS) -o temp $(TEMPFILES)
+	$(CXX) $(CXXFLAGS) -o temp $(TEMPFILES)
 
 mpitest: $(MPIFILES)
 	mpiCC $(CPPFLAGS) $(MPILIBS) -o mpitest $(MPIFILES)
+
+coordination: $(COORDINATION)
+	$(CXX) $(CPPFLAGS) $(COORDINATION) -o coordination
 
 cleantest :
 	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams

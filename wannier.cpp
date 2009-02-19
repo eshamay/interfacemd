@@ -1,6 +1,6 @@
 #include "wannier.h"
 
-WannierFile::WannierFile (string wannierpath) {
+WannierFile::WannierFile (std::string wannierpath) {
 
 	// first load up the file given the path
 	_file = (FILE *) NULL;

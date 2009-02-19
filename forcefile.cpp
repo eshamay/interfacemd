@@ -1,16 +1,15 @@
 #include "forcefile.h"
 
-ForceFile::ForceFile (string forcepath, int size) : _size(size) {
-	_loaded = false;
+ForceFile::ForceFile (std::string forcepath, int size) : 
+	_size(size),
+	_file((FILE *)NULL),
+	_loaded(false),
+	_eof(true)
+	{
 	
 	// first load up the file given the path
-	_file = (FILE *)NULL;
 	_file = fopen64 (forcepath.c_str(), "r");
-	if (_file == (FILE *)NULL) {
-		//printf ("Couldn't load the force file %s\n", forcepath.c_str());
-		_loaded = false;
-	}
-	else {
+	if (_file != (FILE *)NULL) {
 		_loaded = true;
 
 		_eof = false;
@@ -21,9 +20,14 @@ ForceFile::ForceFile (string forcepath, int size) : _size(size) {
 	}
 }
 
+ForceFile::~ForceFile () {
+	if (_loaded)
+		fclose(_file);
+}
+
 void ForceFile::LoadNext () {
 
-	_forces.clear();
+	_forces.resize(_size, VecR());
 	double x, y, z;
 //	char line[1000];
 
@@ -34,7 +38,7 @@ void ForceFile::LoadNext () {
 			_eof = true;
 		}
 		else {
-			_forces.push_back(VecR (x, y, z));
+			_forces[i].Set(x,y,z);
 		}
 	}
 

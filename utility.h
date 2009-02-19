@@ -1,7 +1,6 @@
 #ifndef UTILITY_H_
 #define UTILITY_H_
-
-using namespace std;
+#include <vector>
 
 // These RUN macros should clean up code for checking through vectors and arrays
 #ifndef RUN

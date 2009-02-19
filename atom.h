@@ -10,7 +10,8 @@ class Molecule;
 
 class Atom {
 
-	string _name, 
+protected:
+	std::string _name, 
 		   _residue;
 	
 	int    _ID;				// some numerical identifier in case the atom is in an ordered list
@@ -24,22 +25,25 @@ class Atom {
 	VecR _position;			// Particle position
 	VecR _force;			// the external force on the atom at any given point in time
 
-	std::vector<Atom *>	_HBonds;	// a list of all the atoms to which this atom is hydrogen-bound
-	static VecR _size;		// system size
 
 public:
+	static VecR _size;				// system size
+
 	// constructors
 	Atom ();
-	Atom (string name, VecR position);
-	Atom (string name, VecR position, VecR force);
+	Atom (std::string name, VecR position);
+	Atom (std::string name, VecR position, VecR force);
 	Atom (VecR position);
 	Atom (const Atom& oldAtom);				// copy constructor for deep copies
 
 	double operator- (const Atom& input) const;		// operator usage to determine the distance between two atoms
 	double operator[] (const coord index) const;	// get the atom's position by coordinate
 
+	double MinDistance (const Atom& input) const;
+	double MinDistance (Atom const * const input) const;
+
 	// Input
-	void Name (const string name) { _name = name; }
+	void Name (const std::string name) { _name = name; }
 
 	void Position (const VecR& position) { _position = position; }
 	void Position (double X, double Y, double Z) { _position.Set(X, Y, Z); }
@@ -52,11 +56,7 @@ public:
 	void ID (int id) { _ID = id; }
 	//void Charge (double charge) { _charge = charge; }
 	void SetCharge ();
-	void Residue (string residue) { _residue = residue; }
-
-	void ClearHBonds ();
-	void FormHBond (Atom * atom);
-	int  NumHBonds () const { return _HBonds.size(); }
+	void Residue (std::string residue) { _residue = residue; }
 
 	void X (double val) { _position.X(val); }			// for setting the atom's position
 	void Y (double val) { _position.Y(val); }
@@ -65,24 +65,21 @@ public:
 	void MolID (const int mol) { _molid = mol; }	// sets the ID of the molecule containing this atom
 	void ParentMolecule (Molecule * mol) { _pmolecule = mol; }	// sets a pointer to the molecule that contains the atom
 	static void Size (VecR size) { _size = size; }	// sets the system size
-	static VecR Size ()	{ return _size; }
+	static const VecR& Size ()	{ return _size; }
 
 	void Shift (VecR shift);			// shift the atom's position
 	
 	// Output
-	string Name () const 	{ return (_name); }
+	std::string Name () const 	{ return (_name); }
 	double Mass () const 	{ return _mass; }
 	double Charge () const 	{ return _charge; }
 	int ID () const 		{ return _ID; }
-	string Residue () const { return _residue; }
+	std::string Residue () const { return _residue; }
 
-	// this is set only when using a connectivity matrix!
-	std::vector<Atom *>& HBonds () { return _HBonds; }	// get a listing of all the atoms to which this one is H-bound
-
-	VecR Position () const	{ return _position; }
+	const VecR& Position () const	{ return _position; }
 	//std::vector<double>& DPosition () { return _position.Coords(); }	// for returning the double array instead of the vector object
 
-	VecR Force () const		{ return _force; }
+	const VecR& Force () const		{ return _force; }
 	//double * DForce () 		{ return _force.Coords(); }
 
 	double X () const 		{ return _position[x]; }
@@ -93,5 +90,10 @@ public:
 	void Wrap (VecR origin);							// A way to wrap the atom's position into the central image of the system cell
 	void Print () const;
 };
+
+typedef std::vector<Atom>::iterator Atom_it;
+typedef std::vector<Atom *>::iterator Atom_ptr_it;
+typedef std::vector<Atom *> Atom_ptr_vec;
+typedef std::vector<Atom> Atom_vec;;
 
 #endif

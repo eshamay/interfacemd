@@ -14,12 +14,13 @@ using namespace std;
 class Molecule {
 	
 protected:
-	std::vector<Atom *>	_atoms;				// the list of the atoms in the molecule
+	Atom_ptr_vec 		_atoms;				// the list of the atoms in the molecule
 	std::vector<VecR>	_wanniers;			// the wannier centers in the molecule
 	VecR			_dipole;			// the molecular dipole
 	VecR			_x, _y, _z;			// molecular frame axes
 
 	bool			_set;				// just a little helper to see if the atoms of the molecule have been set or for any other special purpose
+	bool			_copy;				// this gets set if the molecule is a copy of a previous molecule
 
 	// this is broken last I checked - not updated with coordinate updates
 	VecR			_centerofmass;		// calculate by 1/M * Sum(m[i]*r[i])	where M = total mass, m[i] and r[i] are atom mass and pos
@@ -57,8 +58,8 @@ public:
 
 	// Output Functions
 	VecR CenterOfMass () const		{ return _centerofmass; }	
-	std::vector<Atom *> Atoms () const	{ return _atoms; }			// returns the molecule's atom list
-	Atom * Atoms (int index) 		{ return _atoms[index]; }
+	Atom_ptr_vec Atoms () const			{ return _atoms; }			// returns the molecule's atom list
+	Atom * Atoms (int index) const		{ return _atoms[index]; }
 	const std::vector<VecR>& Wanniers ()		const { return _wanniers; }
 	double Mass () const 			{ return _mass; }					// Returns the molecular mass
 	int size () const				{ return _atoms.size(); }
@@ -101,10 +102,10 @@ public:
 	void AddWannier (VecR& wannier) { _wanniers.push_back(wannier); } // adds a wannier center into the molecule
 	void ClearWanniers () { _wanniers.clear(); }	// clear out the entire list
 
-	void ClearHBonds ();
+	//void ClearHBonds ();
 	// return all the Hbonds that this molecule is involved in
-	std::vector<Atom *> HBonds () const;
-	int NumHBonds () const { return this->HBonds().size(); }
+	//std::vector<Atom *> HBonds () const;
+	//int NumHBonds () const { return this->HBonds().size(); }
 
 	// some functions to manipulate the molecule's position/orientation (symmetry operations)
 	void Reflect (coord const axis, double const plane = 0.0);
@@ -126,5 +127,11 @@ public:
 	void RotateMatrix (double rotation[][3], double matrix[][3]) const;
 
 };
+
+typedef std::vector<Molecule *>::iterator PMOL_IT;
+typedef std::vector<Molecule>::iterator MOL_IT;
+typedef std::vector<Molecule *> Mol_ptr_vec;
+typedef std::vector<Molecule> Mol_vec;
+
 
 #endif

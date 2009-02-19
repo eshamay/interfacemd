@@ -7,11 +7,10 @@
 #include "crdfile.h"
 #include "forcefile.h"
 #include "topfile.h"
-#include "bondgraph.h"
 #include "atom.h"
 #include "molecule.h"
-#include "hno3.h"
 #include "h2o.h"
+#include "hno3.h"
 	
 class AmberSystem {
 
@@ -20,10 +19,9 @@ private:
 	CRDFile		_coords;
 	ForceFile	_forces;
 
-	std::vector<Atom *> _atoms;			// A listing of all the atoms in the system with information parsed from the topfile and crdfile
-	std::vector<Molecule *> _mols;		// The molecules within a system - defined by the residues in the topology files
+	Atom_ptr_vec _atoms;			// A listing of all the atoms in the system with information parsed from the topfile and crdfile
+	Mol_ptr_vec _mols;		// The molecules within a system - defined by the residues in the topology files
 
-	BondGraph	_graph;					// our adjacency graph for calculating connections in the system
 
 	void _ParseAtomInformation ();
 	void _ParseAtomVectors ();
@@ -59,15 +57,6 @@ public:
 
 	// operators
 	Atom * operator[] (int index) { return _atoms[index]; }
-
-	void UpdateGraph (vector<Atom *>& int_atoms) { _graph.UpdateGraph(int_atoms); }						// update the connectivity matrix
-	double Distance (Atom * atom1, Atom * atom2) const { return _graph.Distance (atom1, atom2); }
-	vector<Atom *> AdjacentAtoms (Atom * atom) const { return _graph.AdjacentAtoms (atom); }
-	
-	// get the number of H-bonds the atom is involved in
-	//int HBonds (const int index) const { return _matrix->HBonds(_atoms[index]); }	
-
-	//coordination WaterCoord (const Water& water) const { return _matrix->FindWaterCoordination(water); }
 
 };
 

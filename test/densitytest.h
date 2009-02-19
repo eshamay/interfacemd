@@ -30,8 +30,8 @@ using namespace std;
 
 #define PBCFLIP			15.0
 
-#define INT_HIGH	82.479
-#define INT_LOW		35.005
+#define INT_HIGH	82.4596
+#define INT_LOW		35.98845
 
 class DensityAnalyzer {
 

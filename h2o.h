@@ -2,6 +2,7 @@
 #define H2O_H_
 
 #include "molecule.h"
+#include <map>
 
 #ifdef H2O_DIPOLE_PARM
 #include "dipoleparm.h"
@@ -10,12 +11,10 @@
 #include "matrixr.h"
 #include "utility.h"
 
-
 #define R_eq	0.9575		// equilibrium OH bond length
 #define Theta_eq	104.51	// equilibrium H-O-H angle
 #define qO_eq	-0.6750		// equilibrium partial charges of the oxygen
 #define qH_eq	 0.3285		// 		and the hydrogens
-
 
 // A water class to add a few functions for dealing with water molecules specifically.
 class Water: public Molecule {
@@ -29,9 +28,9 @@ protected:
 	MatR _alpha;					// polarizability of the molecule
 	#endif
 
-#ifdef H2O_DIPOLE_PARM
+	#ifdef H2O_DIPOLE_PARM
 	static WaterDipoleParms _dipparms;		// The water dipole parameter file
-#endif
+	#endif
 
 public:
 	Water ();	// a default constructor
@@ -39,6 +38,7 @@ public:
 	Water (const Molecule& molecule);	// copy constructor for casting from a molecule
 
 	static int numWaters;			// total number of waters in the system
+
 	// Functions for analysis
 	void SetAtoms ();
 	VecR Bisector ();		// calculates the bisector (unit vector) of the water
@@ -70,6 +70,11 @@ public:
 	double Angle () const { return acos(_oh1 < _oh2) * 180.0/M_PI; }
 	
 };
+
+typedef std::vector<Water *> Water_ptr_vec;
+typedef std::vector<Water> Water_vec;
+
+
 
 /******************************
  * Hydroxide (H3O+)
@@ -113,5 +118,7 @@ public:
 	VecR const * OH3 () const { return &_oh3; }
 };
 
+typedef std::vector<Water *> Water_ptr_vec;
+typedef std::vector<Water> Water_vec;
 
 #endif

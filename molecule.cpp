@@ -3,9 +3,13 @@
 int Molecule::numMolecules = 0;
 
 // A constructor for an empty molecule
-Molecule::Molecule () {
-	_centerofmass = VecR ();
-	_mass = 0.0;
+Molecule::Molecule () : 
+	_centerofmass (VecR (0.0, 0.0, 0.0)), 
+	_mass(0.0), 
+	_name(""), 
+	_set(false),
+	_copy(false) {
+
 	_atoms.clear();
 	_wanniers.clear();
 
@@ -13,13 +17,13 @@ Molecule::Molecule () {
 }
 
 // a copy constructor to do a deep copy of a molecule instead of just referencing a pre-existing one.
-Molecule::Molecule (const Molecule& oldMol) {
+Molecule::Molecule (const Molecule& oldMol) :
+	_centerofmass(oldMol.CenterOfMass()), 
+	_mass(oldMol.Mass()), 
+	_name(oldMol.Name()),
+	_set(false),
+	_copy(true) {
 	
-	// copy over the old information
-	_centerofmass = oldMol.CenterOfMass ();
-	_mass = oldMol.Mass ();
-	_name = oldMol.Name ();
-
 	// now run through and make copies of all the atoms (but this preserves the pointers to the atoms (not really a new molecule!))
 	_atoms.clear();
 	RUN (oldMol.Atoms()) {
@@ -31,6 +35,10 @@ Molecule::Molecule (const Molecule& oldMol) {
 
 Molecule::~Molecule () {
 	--numMolecules;
+	if (_copy) {
+		RUN (_atoms)
+			delete _atoms[i];
+	}
 }
 
 // Invert the molecule through a point in space. The point is specified by a VecR. 
@@ -58,7 +66,7 @@ return (_atoms.size());
 */
 
 // get back the atom pointer to the atom with the given name
-Atom* Molecule::operator[] (const string atomname) const {
+Atom * Molecule::operator[] (const string atomname) const {
 	
 	Atom *patom = (Atom *)NULL;
 	RUN (_atoms) {
@@ -284,10 +292,7 @@ void Molecule::Print () const {
 	RUN (_atoms) {
 		_atoms[i]->Print();
 	}
-	//RUN (_wanniers) {
-	printf ("wan)\t%d\n", _wanniers.size());
-	//	_wanniers[i].Print();
-	//}
+	//printf ("wan)\t%d\n", _wanniers.size());
 
 return;
 }
@@ -503,6 +508,7 @@ void Molecule::_FindEulerAngles () {
 return;
 }
 
+/*
 void Molecule::ClearHBonds () {
 	RUN (_atoms) {
 		_atoms[i]->ClearHBonds();
@@ -527,6 +533,7 @@ std::vector<Atom *> Molecule::HBonds () const {
 
 return (atoms);
 }
+*/
 
 // if given a 2nd molecule, this will merge the current and the new molecules into one larger molecule.
 Molecule * Molecule::Merge (Molecule * mol) {

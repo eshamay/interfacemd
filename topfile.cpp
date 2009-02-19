@@ -1,12 +1,13 @@
 #include "topfile.h"
 
-TOPFile::TOPFile (string path) {
+TOPFile::TOPFile (std::string path) :
+	_topfile((FILE *)NULL)
+	{
 
 	// Before anything, let's load the file!
-	_topfile = (FILE *)NULL;
 	_topfile = fopen(path.c_str(), "r");
 	if (_topfile == (FILE *)NULL) {
-		cout << "Error opening the topfile " << path << endl;
+		std::cout << "Error opening the topfile " << path << std::endl;
 		return;
 	}
 
@@ -27,23 +28,26 @@ TOPFile::TOPFile (string path) {
 return;
 }
 
-TOPFile::TOPFile (const TOPFile& topfile) {
-	_topfile = topfile.File();	
-	_atomnames = topfile.AtomNames();
-	_masses = topfile.Masses();
-	_charges = topfile.Charges();
-	_molnames = topfile.MolNames();
-	_molpointers = topfile.MolPointers();
-	_molsizes = topfile.MolSizes();
-	_numAtoms = topfile.NumAtoms();
-	_numMols = topfile.NumMols();
-
-}
+TOPFile::TOPFile (const TOPFile& topfile) :
+	_topfile(topfile._topfile),
+	_atomnames(topfile._atomnames),
+	_masses(topfile._masses),
+	_charges(topfile._charges),
+	_molnames(topfile._molnames),
+	_molpointers(topfile._molpointers),
+	_molsizes(topfile._molsizes),
+	_numAtoms(topfile._numAtoms),
+	_numMols(topfile._numMols)
+{}
 
 TOPFile::TOPFile () {
 }
 
-void TOPFile::FindFlag (string flag) {
+TOPFile::~TOPFile () {
+	fclose(_topfile);
+}
+
+void TOPFile::FindFlag (std::string flag) {
 	rewind (_topfile);
 	char str[1000] = "";
 
@@ -62,7 +66,7 @@ return;
 The topfile uses the %FLAG ATOM_NAME to mark the beginning of the atom-names section. After that point the atom names are all listed sequentially. A very easy parsing job.
 */
 // As with ATOM_NAME, the rest of the sections will parse out various properties of each atom or molecule
-void TOPFile::LoadSection(string flag) {
+void TOPFile::LoadSection(std::string flag) {
 	this->FindFlag (flag);
 
 	char value[1000] = "";

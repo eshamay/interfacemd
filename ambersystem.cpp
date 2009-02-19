@@ -4,14 +4,13 @@ AmberSystem::AmberSystem (string prmtop, string mdcrd, string mdvel = "")
 	// some initialization needs to happen here
 	: 	_topfile(TOPFile(prmtop)), 
 		_coords(CRDFile(mdcrd, _topfile.NumAtoms())), 
-		_forces(ForceFile (mdvel, _topfile.NumAtoms()))
+		_forces(ForceFile (mdvel, _topfile.NumAtoms())),
+		_atoms(Atom_ptr_vec(_topfile.NumAtoms(), (Atom *)NULL))
 {
 
 	// because some really useful functionality comes out of the Atom class if the Atom::Size() is set, we'll do that here
 	Atom::Size (_coords.Dims());
-
-	// Then we have to form proper atoms. First setup the vector to hold them all.
-	_atoms.resize(_topfile.NumAtoms()); // = vector<Atom> (_topfile.NumAtoms(), Atom());
+	
 	// and then actually create these bad mamma jammas
 	RUN (_atoms) {
 		_atoms[i] = new Atom ();
@@ -28,6 +27,9 @@ return;
 }
 
 AmberSystem::~AmberSystem () {
+	RUN (_atoms) {
+		delete _atoms[i];
+	}
 }
 
 // While the crdfile holds spatial coordinate information, and the topology file holds atomic information, the data has to be processed into proper atoms in order to play around with them more effectively.
@@ -81,9 +83,11 @@ void AmberSystem::_ParseMolecules () {
 
 		// Then add all the atoms between the indexes of the molpointers in the topology file
 		// MPI had a weird problem **HERE**... fixed June 2007 ~ESS
-		for (int atomCount = 0; atomCount < _topfile.MolSizes()[mol]; atomCount++) {
+		int molsize = _topfile.MolSizes()[mol];
+		int molpointer = _topfile.MolPointers()[mol];
+		for (int atomCount = 0; atomCount < molsize; atomCount++) {
 			// sets the index of the current atom that's being added to the molecule
-			int curAtom = _topfile.MolPointers()[mol] + atomCount - 1;	
+			int curAtom = molpointer + atomCount - 1;	
 
 			// Now we're going to bless this new atom with loads of information about itself and its molecule
 			_mols[mol]->AddAtom( _atoms[curAtom] );			// First add the atom into the molecule
