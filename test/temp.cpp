@@ -1,13 +1,20 @@
 #include <iostream>
-#include "/common/src/FTensor-1.1pre25/FTensor.h"
+#include "../vecr.h"
 
-using namespace FTensor;
+using namespace std;
+
 int main () {
 
-	Tensor1<double,3> v (8,5,1);
-	const Index<'i',3> i;
+	VecR u (1,1,0);
+	VecR v (5,3.5,0);
+	VecR size (6,4,0);
 
-	std::cout << v(i) * v(i) << std::endl;
+	VecR w = u.MinVector(v, size);
+	w.Print();
+	cout << v.MinDistance(u,size);
+
+
+	
 
 return 0;
 }

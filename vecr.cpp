@@ -1,37 +1,25 @@
 #include "vecr.h"
 
-VecR::VecR () : _coords(d_vector(3,0.0)) {
+VecR::VecR () : _coords(d_vector(0.0,0.0,0.0)) {
 }
 
-VecR::VecR (const double X, const double Y, const double Z) : _coords(d_vector(3,0.0)) {
-	_coords[x] = X;
-	_coords[y] = Y;
-	_coords[z] = Z;
+VecR::VecR (const double X, const double Y, const double Z) : _coords(d_vector(X,Y,Z)) {
 }
 
-VecR::VecR (const VecR& oldVec) : _coords(d_vector(3,0.0)) {
-	for (int i = 0; i < 3; i++) {
-		_coords[i] = oldVec._coords[i];
-	}
+VecR::VecR (const VecR& oldVec) : _coords(oldVec._coords) {
 }
 
-VecR::VecR (const double * vec) : _coords(d_vector(3,0.0)) {
-	for (int i = 0; i < 3; i++) {
-		_coords[i] = vec[i];
-	}
+VecR::VecR (const double * vec) : _coords(d_vector(vec[0],vec[1],vec[2])) {
 }
 
-VecR::VecR (const d_vector& oldVec) : _coords(d_vector(3,0.0)) {
-	for (int i = 0; i < 3; i++) {
-		_coords[i] = oldVec[i];
-	}
+VecR::VecR (const d_vector& oldVec) : _coords(oldVec) {
 }
 
 VecR::~VecR () {
 }
 
 double VecR::operator[] (const coord index) const {
-	return _coords[index];
+	return _coords(index);
 }
 
 double VecR::operator[] (const int index) const {
@@ -40,91 +28,100 @@ double VecR::operator[] (const int index) const {
 		this->Print();
 		exit (1);
 	}
-	return _coords[index];
+	return _coords(index);
+}
+
+double VecR::operator() (const coord index) const {
+	return _coords(index);
+}
+
+double VecR::operator() (const int index) const {
+	return _coords(index);
 }
 
 bool VecR::operator== (const VecR& input) const {
 	bool output = false;
 
-	if (_coords[x] == input[x] && _coords[y] == input[y] && _coords[z] == input[z])
+	if (_coords(x) == input(x) && _coords(y) == input(y) && _coords(z) == input(z))
 		output = true;
 
 return output;
 }
 
 VecR VecR::operator+ (const VecR& input) const {
-	VecR v (_coords);
-	for (unsigned int i = 0; i < 3; i++)
-		v._coords[i] += input._coords[i];
-		
+	VecR v;
+	FTensor::Index<'i',3> i;
+	v._coords(i) = _coords(i) + input._coords(i);
 	return (v);
 }
 
 VecR VecR::operator- (const VecR& input) const {
-	VecR v (_coords);
-	for (unsigned int i = 0; i < 3; i++)
-		v._coords[i] -= input._coords[i];
-		
+	VecR v;
+	FTensor::Index<'i',3> i;
+	v._coords(i) = _coords(i) - input._coords(i);
 	return (v);
 }
 
 void VecR::operator+= (const VecR& input) {
-	for (unsigned int i = 0; i < 3; i++)
-		_coords[i] += input._coords[i];
+	FTensor::Index<'i',3> i;
+	_coords(i) += input._coords(i);
+	return;
+}
+
+void VecR::operator+= (const double input) {
+	FTensor::Index<'i',3> i;
+	_coords(i) += input;
 	return;
 }
 
 double VecR::operator* (const VecR& input) const {
-	double prod = 0;
-	for (unsigned int i = 0; i < 3; i++) {
-		prod += _coords[i] * input._coords[i];
-	}
-	return (prod);
+	FTensor::Index<'i',3> i;
+	return (_coords(i) * input._coords(i));
 }
 
 VecR VecR::operator* (const double input) const {
-	VecR v (_coords);
-	for (unsigned int i = 0; i < 3; i++) {
-		v._coords[i] *= input;
-	}
+	VecR v;
+	FTensor::Index<'i',3> i;
+	v._coords(i) = _coords(i) * input;
 	return (v);
 }
 
+/*
 VecR VecR::operator* (const MatR& input) const {
 	VecR v;
-
-	for (unsigned int i = 0; i < 3; i++) {
-		for (unsigned int j = 0; j < 3; j++) {
-			v._coords[i] += _coords[j]*input.Index(j,i);
-		}
-	}
-	//v[x] = _coords[x]*input[xx] + _coords[y]*input[yx] + _coords[z]*input[zx];
-	//v[y] = _coords[x]*input[xy] + _coords[y]*input[yy] + _coords[z]*input[zy];
-	//v[z] = _coords[x]*input[xz] + _coords[y]*input[yz] + _coords[z]*input[zz];
+	FTensor::Index<'i',3> i;
+	FTensor::Index<'j',3> j;
+	v(i) = _coords(i)*input._matrix(i,j);
 	return (v);
 }
+*/
 
 void VecR::operator*= (const double input) {
-	for (unsigned int i = 0; i < 3; i++)
-		_coords[i] *= input;
+	FTensor::Index<'i',3> i;
+	_coords(i) *= input;
 	return;
 }
 
 VecR VecR::operator% (const VecR& input) const {
 	VecR v;
-	v._coords[x] = _coords[y]*input[z] - _coords[z]*input[y];
-	v._coords[y] = _coords[z]*input[x] - _coords[x]*input[z];
-	v._coords[z] = _coords[x]*input[y] - _coords[y]*input[x];
-
+	v._coords(0) = _coords(1)*input._coords(2) - _coords(2)*input._coords(1);
+	v._coords(1) = _coords(2)*input._coords(0) - _coords(0)*input._coords(2);
+	v._coords(2) = _coords(0)*input._coords(1) - _coords(1)*input._coords(0);
 	return (v);
 }
 
 void VecR::operator-= (const VecR& input) {
-	for (unsigned int i = 0; i < 3; i++)
-		_coords[i] -= input[i];
+	FTensor::Index<'i',3> i;
+	_coords(i) -= input._coords(i);
 	return;
 }
 	
+void VecR::operator-= (const double input) {
+	FTensor::Index<'i',3> i;
+	_coords(i) -= input;
+	return;
+}
+
 double VecR::operator< (const VecR& input) const {
 	// determine the cos(angle) between two vectors by applying the dot product, and dividing by the magnitudes
 	// cos(angle) = dotproduct/magnitudes
@@ -134,14 +131,14 @@ double VecR::operator< (const VecR& input) const {
 
 void VecR::Zero () {
 	for (int i=0; i<3; i++) {
-		_coords[i] = 0.0;
+		_coords(i) = 0.0;
 	}
 }
 
 double VecR::Magnitude () const {
 	double mag = 0.0;
 	for (int i=0; i<3; i++)
-		mag += _coords[i]*_coords[i];
+		mag += _coords(i)*_coords(i);
 	return (sqrt(mag));
 }
 
@@ -149,39 +146,39 @@ VecR VecR::Unit () const {
 	VecR v;
 	double mag = this->Magnitude();
 	for (int i=0; i<3; i++)
-		v._coords[i] = _coords[i] / mag;
+		v._coords(i) = _coords(i) / mag;
 	return (v);
 }
 	
 void VecR::Print () const {
-	printf ("% 8.4f\t% 8.4f\t% 8.4f\n", _coords[x], _coords[y], _coords[z]);
+	printf ("% 8.4f\t% 8.4f\t% 8.4f\n", _coords(x), _coords(y), _coords(z));
 }
 
 // Get back a vector wrapped into a periodic cell's central-image (given by the size of the cell). this assumes that the origin is at 0,0,0
 VecR VecR::Wrap (VecR size, VecR origin) {
 	
-	while (fabs(_coords[x] - origin[x]) > size[x] / 2.0) {
-		if (_coords[x] < origin[x]) 	
-			_coords[x] += size[x];
+	while (fabs(_coords(x) - origin[x]) > size(x) / 2.0) {
+		if (_coords(x) < origin[x]) 	
+			_coords(x) += size(x);
 		else 		  			
-			_coords[x] -= size[x];
+			_coords(x) -= size(x);
 	}
 
-	while (fabs(_coords[y] - origin[y]) > size[y]/2.0) {
-		if (_coords[y] < origin[y]) 	
-			_coords[y] += size[y];
+	while (fabs(_coords(y) - origin[y]) > size(y)/2.0) {
+		if (_coords(y) < origin[y]) 	
+			_coords(y) += size(y);
 		else 		  			
-			_coords[y] -= size[y];
+			_coords(y) -= size(y);
 	}
 
-	while (fabs(_coords[z] - origin[z]) > size[z]/2.0) {
-		if (_coords[z] < origin[z]) 	
-			_coords[z] += size[z];
+	while (fabs(_coords(z) - origin[z]) > size(z)/2.0) {
+		if (_coords(z) < origin[z]) 	
+			_coords(z) += size(z);
 		else	 		  		
-			_coords[z] -= size[z];
+			_coords(z) -= size(z);
 	}
 
-return VecR(_coords[x], _coords[y], _coords[z]);
+return VecR(_coords(x), _coords(y), _coords(z));
 }
 
 // Find the smallest vector between two locations in a periodic system defined by he size parameter
@@ -189,9 +186,9 @@ return VecR(_coords[x], _coords[y], _coords[z]);
 VecR VecR::MinVector (const VecR& input, const VecR& size) const {
 	
 	// first we gather all our coordinates for point a (current vector) and point b (the end-point vector)
-	double ax = _coords[x];
-	double ay = _coords[y];
-	double az = _coords[z];
+	double ax = _coords(x);
+	double ay = _coords(y);
+	double az = _coords(z);
 
 	double bx = input[x];
 	double by = input[y];

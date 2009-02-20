@@ -5,6 +5,7 @@
 #include <iostream>
 #include "vecr.h"
 #include "utility.h"
+#include "FTensor.h"
 
 class VecR;
 
@@ -41,10 +42,10 @@ class MatR {
 friend class VecR;
 
 protected:
-	Double_matrix	_elements;
+	Tensor2<double,3,3>	_matrix;
 
 private:
-	//double _elements[9];		// elements will be entered column-major to preserve the fortran style of lapack
+	//double _matrix[9];		// elements will be entered column-major to preserve the fortran style of lapack
 	/* i.e. if we were to list the indices of the elements in the matrix they would look like:
 	 * 		0	3	6
 	 * 		1	4	7
@@ -58,23 +59,27 @@ private:
 
 public:
 	MatR () : _eigenset(false) {
-		_elements.resize(9, 0.0);
 	}
-	
 
 	// constructor from a pre-built array (column-major)
 	MatR (double * const elements) : _eigenset(false) {
-		_elements.resize(9, 0.0);
-		for (int i = 0; i < 9; i++) {
-			_elements[i] = elements[i];
+		for (unsigned int row = 0; row < 3; row++) {
+			for (unsigned int col = 0; col < 3; col++) {
+				_matrix(row,col) = elements[row+3*col];
+			}
 		}
 	}
 	// constructor from a pre-built vector (column-major)
-	MatR (const Double_matrix elements) : _elements(elements), _eigenset(false) {
+	MatR (const Double_matrix elements) : _eigenset(false) {
+		for (unsigned int row = 0; row < 3; row++) {
+			for (unsigned int col = 0; col < 3; col++) {
+				_matrix(row,col) = elements[row+3*col];
+			}
+		}
 	}
 	
 	// A copy constructor
-	MatR (const MatR& oldMat) : _elements(oldMat._elements), _eigenset(false) {
+	MatR (const MatR& oldMat) : _matrix(oldMat._matrix), _eigenset(false) {
 	}
 
 	~MatR () {};
@@ -98,11 +103,14 @@ public:
 
 	void	Set (int const row, int const col, double const val);	// Set the element
 	void	Set (double * data) {
-		for (int i=0; i<9; i++) 
-			_elements[i] = data[i];
+		for (unsigned int row = 0; row < 3; row++) {
+			for (unsigned int col = 0; col < 3; col++) {
+				_matrix(row,col) = elements[row+3*col];
+			}
+		}
 	}
 	void	Set (const MatR& input) 
-		{ _elements = input._elements; }
+		{ _matrix = input._matrix; }
 		
 	MatR	Transpose () 	const;
 
@@ -114,7 +122,7 @@ public:
 // Input & matrix manipulation
 	void Zero () {								// Zero all elements of a matrix
 		for (int i = 0; i < 9; i++)
-			_elements[i] = 0.0;
+			_matrix[i] = 0.0;
 	}
 
 // Output
