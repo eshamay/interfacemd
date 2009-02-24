@@ -5,7 +5,7 @@
 #include <iostream>
 #include "vecr.h"
 #include "utility.h"
-#include "FTensor.h"
+//#include "FTensor.h"
 
 class VecR;
 
@@ -33,16 +33,14 @@ extern "C" {
 
 #endif
 
-typedef std::vector<double>	Double_matrix;
+typedef FTensor::Tensor2<double,3,3>	Double_matrix;
 
 // ***** NOTE ******
 // all matrices are to be treated as column-major - see below for more info
 class MatR {
 
-friend class VecR;
-
 protected:
-	Tensor2<double,3,3>	_matrix;
+	Double_matrix	_matrix;
 
 private:
 	//double _matrix[9];		// elements will be entered column-major to preserve the fortran style of lapack
@@ -58,24 +56,16 @@ private:
 	bool _eigenset;
 
 public:
-	MatR () : _eigenset(false) {
+	MatR () : _eigenset(false), _matrix(Double_matrix(0,0,0,0,0,0,0,0,0)) {
 	}
 
 	// constructor from a pre-built array (column-major)
 	MatR (double * const elements) : _eigenset(false) {
-		for (unsigned int row = 0; row < 3; row++) {
-			for (unsigned int col = 0; col < 3; col++) {
-				_matrix(row,col) = elements[row+3*col];
-			}
-		}
+		this->Set(elements);
 	}
+
 	// constructor from a pre-built vector (column-major)
-	MatR (const Double_matrix elements) : _eigenset(false) {
-		for (unsigned int row = 0; row < 3; row++) {
-			for (unsigned int col = 0; col < 3; col++) {
-				_matrix(row,col) = elements[row+3*col];
-			}
-		}
+	MatR (const Double_matrix elements) : _eigenset(false), _matrix(elements) {
 	}
 	
 	// A copy constructor
@@ -88,24 +78,28 @@ public:
 	MatR	operator+ (const MatR& input) const;		// matrix addition
 	VecR 	operator* (const VecR& input) const;		// Vector rotation
 	MatR 	operator* (const MatR& input) const;		// Matrix rotation
-	MatR 	operator*= (const MatR& input);		// Matrix rotation
+	//MatR 	operator*= (const MatR& input);				// Matrix rotation
 	
-	void 	operator= (const MatR& input) {		// Matrix rotation
-		this->Set (input); 
+	void 	operator= (const MatR& input) {				// assignment
+		_matrix = input._matrix;
 	}
 
-	double	operator[] (element const index) const;	// Return the coordinate
-	double	operator[] (int const index) const;	// Return the coordinate
+	//double	operator[] (element const index) const;	// Return the coordinate
+	//double	operator[] (int const index) const;	// Return the coordinate
+	double	operator() (int const row, int const col) const;
+	
+	Double_matrix Matrix() const { return _matrix; }
 	
 	//MatR RotateToFrame (VecR const * const frame) const;
 
 	double	Index (int const row, int const col) const;	// Return the element
 
 	void	Set (int const row, int const col, double const val);	// Set the element
-	void	Set (double * data) {
+
+	void	Set (double const * const data) {
 		for (unsigned int row = 0; row < 3; row++) {
 			for (unsigned int col = 0; col < 3; col++) {
-				_matrix(row,col) = elements[row+3*col];
+				_matrix(row,col) = data[row*3+col];
 			}
 		}
 	}
@@ -121,8 +115,11 @@ public:
 
 // Input & matrix manipulation
 	void Zero () {								// Zero all elements of a matrix
-		for (int i = 0; i < 9; i++)
-			_matrix[i] = 0.0;
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				_matrix(i,j) = 0.0;
+			}
+		}
 	}
 
 // Output
@@ -132,7 +129,8 @@ public:
 	void 						CalcEigenSystem ();
 	MatR 						Quaternion ();
 #endif
-	double						Trace ()			const;
+	double	Trace () const;
+	double Determinant () const;
 
 	void Print () const;
 

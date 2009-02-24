@@ -22,14 +22,14 @@
 
 
 // set the interface correctly - different simulation = different location!!
-#define INTERFACE_LOW		55.0			// the location of the interface (the top one, only, for now)
-#define INTERFACE_HIGH		63.0
+#define INTERFACE_LOW		57.5			// the location of the interface (the top one, only, for now)
+#define INTERFACE_HIGH		70.0
 #define PBC_FLIP			15.0			// used for funcy periodic boundaries
 
 const coord axis = y;
-#define	 OUTPUT_FREQ	10					// how often the output file will be written (# of timesteps/10)
-#define	 TIMESTEPS		20000				// # of timesteps to process through
-#define	 POLARIZATION	"SPS"				// the polarization scheme used for the analysis
+#define	 OUTPUT_FREQ	100					// how often the output file will be written (# of timesteps/10)
+#define	 TIMESTEPS		200000				// # of timesteps to process through
+#define	 POLARIZATION	"SSP"				// the polarization scheme used for the analysis
 #define	 OUTPUTFILE		"morita.sfg.dat"	// name of the output file for the final spectra
 
 

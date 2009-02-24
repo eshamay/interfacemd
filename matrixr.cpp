@@ -1,42 +1,36 @@
 #include "matrixr.h"
 
 MatR MatR::operator+ (const MatR& input) const {
-	MatR m (_elements);
-	for (unsigned int i = 0; i < 9; i++)
-		m._elements[i] += input[i];
+	FTensor::Index<'i',3> i;
+	FTensor::Index<'j',3> j;
+	MatR m;
+
+	m._matrix(i,j) = _matrix(i,j) + input._matrix(i,j);
 	return (m);
 }
 
 VecR MatR::operator* (const VecR& input) const {		// Vector rotation/matrix-vector inner product
 	VecR v;
+	FTensor::Index<'i',3> i;
+	FTensor::Index<'j',3> j;
+	
+	v._coords(i) = _matrix(i,j)*input._coords(j);
 
-	for (unsigned int i = 0; i < 3; i++) {
-		for (unsigned int j = 0; j < 3; j++) {
-			v._coords[i] += (Index(i,j) * input[j]);
-		}
-	}
 	return (v);
 }
 
 MatR MatR::operator* (const MatR& input) const {		// Matrix rotation/multiplication
 	MatR m;
-	m.Zero();
+	FTensor::Index<'i',3> i;
+	FTensor::Index<'j',3> j;
+	FTensor::Index<'k',3> k;
 
-	double val;
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-
-			val = 0.0;
-			for (int k = 0; k < 3; k++) {
-				val += (Index(i,k) * input.Index(k,j));
-			}
-			m.Set(i,j,val);
-		}
-	}
+	m._matrix(i,j) = _matrix(i,k) * input._matrix(k,j);
 
 return (m);
 }
 
+/*
 double	MatR::operator[] (element const index) const {	// Return the coordinate
 	if (index < 0 || index > 8) {
 		std::cout << "Trying to access illegal index in MatrixR::operator[] (int const index)\nFix This\nMatrix:" << std::endl;
@@ -54,26 +48,17 @@ double	MatR::operator[] (int const index) const {	// Return the coordinate
 	}
 	return _elements[index];
 }
-
-double	MatR::Index (int const row, int const col) const {	// Return the element
-	if (row > 2 || col > 2) {
-		std::cout << "Trying to access illegal index in MatrixR::Index (int const row, int const col)\nFix This\nMatrix:" << std::endl;
-		this->Print();
-		exit(1);
-	}
-	return (_elements[row+3*col]);
+*/
+double MatR::operator() (int const row, int const col) const {
+	return (_matrix(row,col));
 }
 
-void	MatR::Set (int const row, int const col, double const val) {	// Set the element
+double MatR::Index (int const row, int const col) const {	// Return the element
+	return (_matrix(row, col));
+}
 
-	if (row > 2 || row < 0 || col > 2 || col < 0) {
-		std::cout << "Trying to access illegal index in MatrixR::Set (int const row, int const col, double const val)\nFix This\nMatrix:" << std::endl;
-		this->Print();
-		exit(1);
-	}
-
-	_elements[row+3*col] = val;
-
+void MatR::Set (int const row, int const col, double const val) {	// Set the element
+	_matrix(row,col) = val;
 	return;
 }
 
@@ -135,11 +120,10 @@ vector< complex<double> > MatR::EigenValues () {
 
 MatR MatR::Transpose () const {
 	MatR m;
+	FTensor::Index<'i',3> i;
+	FTensor::Index<'j',3> j;
 
-	for (int row=0; row<3; row++) {
-		for (int col=0; col<3; col++)  
-			m.Set(row, col, this->Index(col,row));
-	}
+	m._matrix(i,j) = _matrix(j,i);
 	return (m);
 }
 
@@ -191,10 +175,25 @@ MatR MatR::Diagonalize () {
 
 double MatR::Trace () const {
 	
-	double out = (_elements[xx] + _elements[yy] + _elements[zz]);
+	double out = (_matrix(0,0) + _matrix(1,1) + _matrix(2,2));
 
 	return(out);
 }
+
+double MatR::Determinant () const {
+	
+	double det = 0.0;
+	det += _matrix(0,0)*_matrix(1,1)*_matrix(2,2);
+	det -= _matrix(0,0)*_matrix(1,2)*_matrix(2,1);
+	det += _matrix(0,1)*_matrix(1,2)*_matrix(2,0);
+	det -= _matrix(0,1)*_matrix(1,0)*_matrix(2,2);
+	det += _matrix(0,2)*_matrix(1,0)*_matrix(2,1);
+	det -= _matrix(0,2)*_matrix(1,1)*_matrix(2,0);
+
+	return (det);
+}
+
+
 
 /*
 // This matrix is now rotated to another frame, thus we supply the x, y, and z axes vectors that we want to rotate to.

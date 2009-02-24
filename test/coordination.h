@@ -14,6 +14,7 @@
 #define AXIS	y
 
 #define TIMESTEPS	200000
+#define RESTART		94750
 
 #ifdef AVG
 	#define POSMIN	-40.0

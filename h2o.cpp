@@ -211,8 +211,10 @@ MatR const & Water::DCMToLab (const coord axis) {
 	}
 
     // Here we'll create the lab-frame rotation matrix to rotate molecular properties into the lab-frame
-    double rotation_data[9] = {_x<X, _x<Y, _x<Z, _y<X, _y<Y, _y<Z, _z<X, _z<Y, _z<Z};
-    DCM.Set (rotation_data);
+    double rotation_data[9] = {	_x<X, _y<X, _z<X,
+								_x<Y, _y<Y, _z<Y, 
+								_x<Z, _y<Z, _z<Z   };
+    DCM.Set(rotation_data);
 
 return DCM;
 }

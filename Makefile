@@ -7,7 +7,7 @@ CPPFLAGS	= $(CINCLUDE)
 #CXX			= mpiCC -g
 CXX			= g++ $(CXXFLAGS)
 CXXOPTIMIZE = -O3 -finline-functions -finline-limit-1000 -funroll-loops
-CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CXXOPTIMIZE)
+CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CXXOPTIMIZE) $(CINCLUDE)
 MPICXX		= mpiCC -g -I$(MPI)/include
 
 ANALYSISFILES	=	analysis.o xyzsystem.o connectmatrix.o dipoleparm.o h2o.o hno3.o matrixr.o molecule.o atom.o vecr.o wannier.o xyzfile.o

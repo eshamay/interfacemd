@@ -222,7 +222,13 @@ int main (int argc, char **argv) {
 
 	Water_ptr_vec waters;
 	Atom_ptr_vec atoms;
-	for (int step = 0; step < coords.timesteps; step++) {
+	int step = 0;
+	// if restarting, then fast-forward to the point where we'll restart
+	for (step = 0; step < RESTART; step++) {
+		coords.sys.LoadNext();
+	}
+
+	for (step = RESTART; step < coords.timesteps; step++) {
 
 		// we'll go through and pick out all the waters in the system at the interface
 		//coords.FindInterfacialWaters (waters, atoms, coords.sys);

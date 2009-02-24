@@ -27,9 +27,9 @@ int main (int argc, char **argv) {
 	Water * water;	// our prototypical water molecule
 
 	// Sets up the axes for the system
-	const int P = 2;		// perpendicular to the interface
+	const int P = 1;		// perpendicular to the interface
 	const int S1 = 0;		// the two that are parallel to the surface
-	const int S2 = 1;
+	const int S2 = 2;
 
 
 	// just so we don't have to always iterate over the entire system, we're only going to look at interfacial molecules - the ones were interested in.
@@ -51,7 +51,7 @@ int main (int argc, char **argv) {
 		FindInterfacialWaters (int_mols, int_atoms, sys);
 
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
-		sys.UpdateGraph (int_atoms);
+		//sys.UpdateGraph (int_atoms);
 
 		numMolsProcessed += int_mols.size();
 
@@ -63,7 +63,7 @@ int main (int argc, char **argv) {
 			MolChi.clear();
 
 			// and then calculate the chi spectrum for the molecule SPS
-			MolChi = sfg.Chi (*water, S1, P, S1);
+			MolChi = sfg.Chi (*water, S1, S1, P);
 
 			// when starting a new timestep...
 			if (firstmol) {
@@ -82,7 +82,7 @@ int main (int argc, char **argv) {
 			CollectChi (MolChi, TimestepChi);
 
 			// now add in the next equivalent polarization
-			MolChi = sfg.Chi (*water, S2, P, S2);
+			MolChi = sfg.Chi (*water, S2, S2, P);
 	
 			// perform the summation for the other half of the polarization
 			CollectChi (MolChi, TimestepChi);

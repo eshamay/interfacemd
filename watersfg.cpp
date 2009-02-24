@@ -397,10 +397,10 @@ std::vector< std::complex<double> >& SFGWaterAnalyzer::Chi (Water& water, int co
 
 	// let's find the rotation matrix for the water with which we're working
 	// this matrix takes us from the frame of the first OH bond into the lab frame
-	MatR DCM = water.DCMToLabMorita(y);
+	MatR DCM = water.DCMToLabMorita(z);
 
 	// the three components of the rotation matrix that we multiply beta by
-	double Dlp, Dmq, Dnr;
+	double Dpl, Dqm, Drn;
 
 	bool first = true;	// a useful flag
 
@@ -417,13 +417,13 @@ std::vector< std::complex<double> >& SFGWaterAnalyzer::Chi (Water& water, int co
 			first = false;
 		}
 
-		// here we pick out elements from the DCM. D(A,a) where A = lab frame coord, and a = molecular frame coord.
-		Dlp = DCM.Index (l, p);
-		Dmq = DCM.Index (m, q);
-		Dnr = DCM.Index (n, r);
+		// These are the coefficients (direction-cosine-matrix components) for performing the unitary transformation into the lab-frame
+		Dpl = DCM(p,l);
+		Dqm = DCM(q,m);
+		Drn = DCM(r,n);
 
 		RUN (_Beta) {
-			_Chi[i] += Dlp * Dmq * Dnr * _Beta[i];
+			_Chi[i] += Dpl * Dqm * Drn * _Beta[i];
 		}
 	}}}
 
@@ -445,7 +445,8 @@ double SFGWaterAnalyzer::CouplingConstant (Water& water) const {
 
 	double V12 = COUPLING_CONST;
 
-	int N = water.NumHBonds();
+	//int N = water.NumHBonds();
+	int N = 1;
 
 	if (N > 1) {
 		V12 /= sqrt(double(N));
