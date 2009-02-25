@@ -1,6 +1,8 @@
 include ../Makefile
 
 AMBERFILES	= ../vecr.o ../atom.o ../ambersystem.o ../crdfile.o ../forcefile.o ../h2o.o ../hno3.o ../molecule.o ../topfile.o ../matrixr.o
+WATERSYSTEM	= $(AMBERFILES) ../watersystem.o ../adjacencymatrix.o ../bond.o
+
 MORITAFILES	= morita.o $(AMBERFILES) ../watersfg.o
 MPIMORITAFILES	= $(MORITAFILES) ../mpi/mpisys.o
 DENSITYFILES = $(AMBERFILES) densitytest.o 
@@ -10,9 +12,9 @@ QPT = $(XYZSYSTEM) ../hno3analysis.o Qpt.o
 MDCRD2PDB = $(AMBERFILES) ../pdbfile.o mdcrd2pdb.o
 FILLBOX = $(AMBERFILES) ../pdbfile.o ../boxfiller.o
 MPIFILES	=	$(AMBERFILES) ../mpi/mpisys.o mpitest.o
-ORDERPARAMS = $(AMBERFILES) orderparams.o
+ORDERPARAMS = $(WATERSYSTEM) orderparams.o
 TEMPFILES	= temp.cpp $(AMBERFILES)
-COORDINATION	= $(AMBERFILES) ../adjacencymatrix.o ../bond.o coordination.o
+COORDINATION	= $(WATERSYSTEM) coordination.o
 
 ambertest : ambertest.o $(AMBERFILES)
 	$(CXX) $(CPPFLAGS) ambertest.o $(AMBERFILES) -o ambertest

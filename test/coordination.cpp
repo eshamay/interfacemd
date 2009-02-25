@@ -1,40 +1,15 @@
 #include "coordination.h"
 
-CoordinationTest::CoordinationTest (int argc, char **argv) : 
-	sys(AmberSystem(PRMTOP, MDCRD, FORCE)),
-	output((FILE *)NULL),
-	posmin(POSMIN), posmax(POSMAX), posres(POSRES), middle((int_low + int_high)/2.0),
-	posbins(int ((posmax - posmin)/posres) + 1),
-	axis(AXIS),
-	#ifdef AVG
-	int_low(atof(argv[1])), int_high(atof(argv[2])),
-	#endif
-	output_freq(10),
-	timesteps(TIMESTEPS),
+CoordinationTest::CoordinationTest (int argc, char **argv, const WaterSystemParams& params) : 
+	WaterSystem(argc, argv, params),
 	histo (COORD_HISTOGRAM (45, HISTOGRAM (posbins, 0)))
 {
 	
 	// here is our system for analysis
 	//sys = new AmberSystem (PRMTOP, MDCRD, FORCE);
 
-	printf ("Running a test to find water coordinations\n");
+	printf ("***Data Analysis***\nRunning a test to find water coordinations\n");
 
-#ifdef AVG
-	printf ("Averaging the two interfaces - make sure the interfaces are located as follows:\n***  low interface = % 5.3f\n***  high interface = % 5.3f\n", int_low, int_high);
-	string output_name = "coordination.avg.dat";
-#else
-	string output_name = "coordination.dat";
-#endif
-
-	output = fopen (output_name.c_str(), "w");
-	if (output == (FILE *)NULL) {
-		printf ("couldn't open the output file for reading!\n");
-		exit (1);
-	}
-	printf ("\noutput file = %s\n", output_name.c_str());
-
-	printf ("Total timesteps = %d\n", timesteps);
-	
 	// here initialize all the histograms to get ready for binning the positions
 	// to do this, we have to get all the different coordination types possible. Those come from the coordination type map in the bondgraph
 	
@@ -55,7 +30,6 @@ CoordinationTest::CoordinationTest (int argc, char **argv) :
  	name_map[OOHHH] = "OOHHH";
  	name_map[OOOHHH] = "OOOHHH";
  
-
 	coord_map::iterator coord_it, coord_end;
 	vcoords.clear();
 	for (coord_it = name_map.begin(); coord_it != name_map.end(); coord_it++) {
@@ -70,72 +44,9 @@ CoordinationTest::CoordinationTest (int argc, char **argv) :
 return;
 }
 
-void CoordinationTest::FindInterfacialWaters (Water_ptr_vec& int_mols, Atom_ptr_vec& int_atoms) {
-	
-	int_mols.clear();
-	int_atoms.clear();
+void CoordinationTest::OutputData () {
 
-	Molecule * pmol;
-
-	// go through the system
-	for (int i = 0; i < sys.NumMols(); i++) {
-		// grab each molecule
-		pmol = sys.Molecules(i);
-
-		// we're only looking at waters for SFG analysis right now
-		if (pmol->Name() != "h2o") continue;
-
-		// first thing we do is grab a water molecule to work with
-		Water * water = static_cast<Water *>(pmol);
-
-		double position = water->Atoms(0)->Position()[axis];
-		// and find molecules that sit within the interface.
-		if (position < PBCFLIP) position += Atom::Size()[axis];		// adjust for funky boundaries
-		// these values have to be adjusted for each system
-		if (position < posmin or position > posmax) continue;				// set the interface cutoffs
-		
-		int_mols.push_back (water);
-		RUN2(water->Atoms()) {
-			int_atoms.push_back (water->Atoms(j));
-		}
-	}
-
-return;
-}
-
-void CoordinationTest::FindWaters (Water_ptr_vec& int_mols, Atom_ptr_vec& int_atoms) {
-	
-	int_mols.clear();
-	int_atoms.clear();
-
-	Molecule * pmol;
-	Water * water;
-
-	// go through the system
-	for (int i = 0; i < sys.NumMols(); i++) {
-		// grab each molecule
-		pmol = sys.Molecules(i);
-
-		// we're only looking at waters for SFG analysis right now
-		if (pmol->Name() != "h2o") continue;
-
-		// first thing we do is grab a water molecule to work with
-		water = static_cast<Water *>(pmol);
-		// add it to the group
-		int_mols.push_back (water);
-
-		// and then add all of its atoms
-		RUN2(water->Atoms()) {
-			int_atoms.push_back (water->Atoms(j));
-		}
-	}
-
-return;
-}
-
-void CoordinationTest::OutputData (const int step) {
-
-	if (!(step % (OUTPUT_FREQ * 10))) {
+	if (!(timestep % (output_freq * 10))) {
 
 		rewind (output);
 
@@ -169,12 +80,12 @@ void CoordinationTest::OutputData (const int step) {
 return;
 }
 
-void CoordinationTest::OutputStatus (const int step) const {
+void CoordinationTest::OutputStatus () const {
 	
-	if (!(step % (OUTPUT_FREQ * 10)))
-		printf ("\n%10d/%d)  ", step, TIMESTEPS);
+	if (!(timestep % (output_freq * 10)))
+		printf ("\n%10d/%d)  ", timestep, timesteps);
 
-	if (!(step % OUTPUT_FREQ)) 
+	if (!(timestep % output_freq)) 
 		printf ("*");
 
 	fflush (stdout);
@@ -192,7 +103,7 @@ void CoordinationTest::BinPosition (Water const * const wat, coordination const 
 		VecR r = oxy->Position();
 		double position = r[axis];
 
-		if (position < PBCFLIP) position += Atom::Size()[axis];		// deal with the periodic cutoffs
+		if (position < pbcflip) position += Atom::Size()[axis];		// deal with the periodic cutoffs
 
 	#ifdef AVG
 		double distance = (position > middle) ? position - int_high : int_low - position;
@@ -208,7 +119,46 @@ void CoordinationTest::BinPosition (Water const * const wat, coordination const 
 return;
 }
 
+void CoordinationTest::Analysis () {
 
+	// if restarting, then fast-forward to the point where we'll restart
+	#ifdef RESTART
+	for (timestep = 0; timestep < RESTART; timestep++) {
+		sys.LoadNext();
+	}
+
+	for (timestep = RESTART; timestep < timesteps; timestep++) {
+	#else 
+	for (timestep = 0; timestep < timesteps; timestep++) {
+	#endif
+
+		// we'll go through and pick out all the waters in the system at the interface
+		//this->FindInterfacialWaters (waters, atoms, coords.sys);
+		this->FindWaters ();
+
+		// to find the coordination of the atoms we have to update the bond graph
+		this->UpdateMatrix();
+
+		// now, for each water, we find its coordination
+		Water * wat;
+		RUN (int_mols) {
+			wat = int_mols[i];
+
+			coordination coord = this->matrix.WaterCoordination (wat);
+			this->BinPosition (wat, coord);
+		}
+
+		this->sys.LoadNext();
+
+		this->OutputStatus ();
+		this->OutputData ();
+	}
+
+	//final output
+	this->OutputData ();
+
+return;
+}
 
 int main (int argc, char **argv) {
 
@@ -218,42 +168,33 @@ int main (int argc, char **argv) {
 			exit(1);
 		}
 	#endif
-	CoordinationTest coords (argc, argv);
 
-	Water_ptr_vec waters;
-	Atom_ptr_vec atoms;
-	int step = 0;
-	// if restarting, then fast-forward to the point where we'll restart
-	for (step = 0; step < RESTART; step++) {
-		coords.sys.LoadNext();
-	}
+	WaterSystemParams params;
 
-	for (step = RESTART; step < coords.timesteps; step++) {
+	params.prmtop = "prmtop";
+	params.mdcrd = "mdcrd";
+	params.mdvel = "";
+	params.axis = y;
+	params.timesteps = 200000;
+	params.restart = 0;
+	#ifdef AVG
+		params.avg = true;
+		params.posmin = -40.0;
+		params.posmax = 40.0;
+		params.output = "coordination.avg.dat";
+	#else
+		params.avg = false;
+		params.posmin = -5.0;
+		params.posmax = 150.0;
+		params.output = "coordination.dat";
+	#endif
+	params.posres = 0.100;
+	params.pbcflip = 15.0;
+	params.output_freq = 25;
 
-		// we'll go through and pick out all the waters in the system at the interface
-		//coords.FindInterfacialWaters (waters, atoms, coords.sys);
-		coords.FindWaters (waters, atoms);
+	CoordinationTest coords (argc, argv, params);
 
-		// to find the coordination of the atoms we have to update the bond graph
-		coords.matrix.UpdateMatrix(atoms);
-
-		// now, for each water, we find its coordination
-		Water * wat;
-		RUN (waters) {
-			wat = waters[i];
-
-			coordination coord = coords.matrix.WaterCoordination (wat);
-			coords.BinPosition (wat, coord);
-		}
-
-		coords.sys.LoadNext();
-
-		coords.OutputStatus (step);
-		coords.OutputData (step);
-	}
-
-	coords.OutputData (0);
-
+	coords.Analysis ();
 
 return 0;
 }
