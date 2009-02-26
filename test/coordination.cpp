@@ -123,11 +123,13 @@ void CoordinationTest::Analysis () {
 
 	// if restarting, then fast-forward to the point where we'll restart
 	#ifdef RESTART
-	for (timestep = 0; timestep < RESTART; timestep++) {
+	printf ("\n\n*** Restart Run ***\n\tNow skipping %d steps before beginning analysis\n", restart);
+	for (timestep = 0; timestep < restart; timestep++) {
 		sys.LoadNext();
 	}
 
-	for (timestep = RESTART; timestep < timesteps; timestep++) {
+	printf ("\n*** Begin Analysis ***\n\tStarting analysis at timestep %d\n\n", timestep);
+	for (timestep = restart; timestep < timesteps; timestep++) {
 	#else 
 	for (timestep = 0; timestep < timesteps; timestep++) {
 	#endif
@@ -176,7 +178,12 @@ int main (int argc, char **argv) {
 	params.mdvel = "";
 	params.axis = y;
 	params.timesteps = 200000;
-	params.restart = 0;
+	#ifdef RESTART
+		params.restart = 138750;
+	#else
+		params.restart = 0;
+	#endif
+
 	#ifdef AVG
 		params.avg = true;
 		params.posmin = -40.0;

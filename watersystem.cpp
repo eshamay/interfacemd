@@ -7,7 +7,7 @@ WaterSystem::WaterSystem (const WaterSystemParams& params) :
 	posbins(int ((posmax - posmin)/posres) + 1),
 	axis(params.axis),
 	output_freq(params.output_freq),
-	timesteps(params.timesteps)
+	timesteps(params.timesteps), restart(params.restart)
 {
 	
 	if (params.avg) {	// when averaging, the interface locations are taken from the command line.
@@ -26,14 +26,14 @@ WaterSystem::WaterSystem (const WaterSystemParams& params) :
 	return;
 }
 
-WaterSystem::WaterSystem (int argc, char **argv, const WaterSystemParams& params) : 
+WaterSystem::WaterSystem (const int argc, const char **argv, const WaterSystemParams& params) : 
 	sys(AmberSystem(params.prmtop, params.mdcrd, params.mdvel)),
 	output(fopen(params.output.c_str(), "w")),
 	posmin(params.posmin), posmax(params.posmax), posres(params.posres), pbcflip(params.pbcflip),
 	posbins(int ((posmax - posmin)/posres) + 1),
 	axis(params.axis),
 	output_freq(params.output_freq),
-	timesteps(params.timesteps)
+	timesteps(params.timesteps), restart(params.restart)
 	
 {
 	if (params.avg) {	// when averaging, the interface locations are taken from the command line.

@@ -5,6 +5,7 @@
 
 #define AVG		// define this to average the two interfaces. Make sure to define the interfaces below!
 #define HIGH_COORD	OOOHHH
+#define RESTART
 
 typedef std::vector<int> HISTOGRAM;
 typedef std::vector< vector<int> > COORD_HISTOGRAM;

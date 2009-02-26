@@ -56,7 +56,7 @@ class WaterSystem {
 public:
 
 	WaterSystem (const WaterSystemParams& params);
-	WaterSystem (int argc, char **argv, const WaterSystemParams& params);
+	WaterSystem (const int argc, const char **argv, const WaterSystemParams& params);
 	~WaterSystem ();
 
 	void OpenFile ();
@@ -81,7 +81,7 @@ protected:
 
 	int	output_freq;
 	unsigned int timesteps;
-	unsigned int timestep;
+	unsigned int timestep, restart;
 
 	// position boundaries and bin width
 	double	posmin;

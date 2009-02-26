@@ -1,9 +1,10 @@
 #ifndef	ORDER_PARAMS_H_
 #define	ORDER_PARAMS_H_
 
+#define AVG
+
 #include "../watersystem.h"
 
-#define AVG
 
 class OrderParameters : public WaterSystem {
 

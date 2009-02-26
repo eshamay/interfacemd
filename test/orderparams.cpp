@@ -29,12 +29,12 @@ void OrderParameters::OutputData () {
 
 	rewind (output);
 
-	if (!((timestep*10) % (output_freq * 10))) {
+	if (!(timestep % (output_freq * 10))) {
 		for (unsigned int pos = 0; pos < posbins; pos++) {
 
-			double position = double(pos) * posres + posmin;
+			double position = double(pos) * this->posres + this->posmin;
 			double N = (double)number_density[pos];
-			if (N == 0) continue;
+			if (!N) continue;
 
 			// straightforward output of the equations for the order parameters
 			fprintf (output, "% 10.3f% 10.3f% 10.3f\n", 
@@ -78,16 +78,19 @@ void OrderParameters::Analysis () {
 
 			Water * wat = int_mols[i];
 
-			// take each water and find its position in the slab
-			double pos = wat->GetAtom("O")->Y();
-			if (pos < 15.0) pos += Atom::Size()[axis];
+			// calculate its position in the slab, and find the histogram bin for it
+			Atom * oxy = wat->GetAtom ("O");
+			VecR r = oxy->Position();
+			double position = r[axis];
+
+			if (position < pbcflip) position += Atom::Size()[axis];		// deal with the periodic cutoffs
 
 			// we're going to do averaging of the two interfaces.
 			// First we find if the water is in the upper or lower interface and find its position relative to the gibbs dividing surface
-			double distance = (pos > middle) ? pos - int_high : int_low - pos;
+			double distance = (position > middle) ? position - int_high : int_low - position;
 
 			// find the position bin
-			int posbin = int ((distance-posmin)/posres);
+			int posbin = int ((distance - this->posmin)/this->posres);
 
 			// The two order parameters are calculated from the Euler angles, so let's find those
 			// first set the molecular axes up
@@ -111,7 +114,6 @@ void OrderParameters::Analysis () {
 			int S2_num_bin = int ((S2_num-angmin)/angres);
 			int S2_den_bin = int ((S2_den-angmin)/angres);
 */
-
 			S1[posbin] += S1_value;
 			S2_num[posbin] += S2_num_value;
 			S2_den[posbin] += S2_den_value;
@@ -120,11 +122,11 @@ void OrderParameters::Analysis () {
 
 		this->sys.LoadNext();
 
-		OutputStatus ();
-		OutputData ();
+		this->OutputStatus ();
+		this->OutputData ();
 	}
 
-	OutputData ();
+	this->OutputData ();
 
 	return;
 }

@@ -5,7 +5,7 @@ WATERSYSTEM	= $(AMBERFILES) ../watersystem.o ../adjacencymatrix.o ../bond.o
 
 MORITAFILES	= morita.o $(AMBERFILES) ../watersfg.o
 MPIMORITAFILES	= $(MORITAFILES) ../mpi/mpisys.o
-DENSITYFILES = $(AMBERFILES) densitytest.o 
+DENSITYFILES = $(WATERSYSTEM) densitytest.o 
 XYZSYSTEM = ../xyzsystem.o ../xyzfile.o ../atom.o ../h2o.o ../hno3.o ../molecule.o ../vecr.o ../wannier.o ../bondgraph.o ../matrixr.o
 DIPOLETCF = $(XYZSYSTEM) dipoletcf.o ../hno3analysis.o
 QPT = $(XYZSYSTEM) ../hno3analysis.o Qpt.o
