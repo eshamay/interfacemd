@@ -1,6 +1,6 @@
 #include "orderparams.h"
 
-OrderParameters::OrderParameters (int argc, char **argv, const WaterSystemParams& params)
+OrderParameters::OrderParameters (int argc, const char **argv, const WaterSystemParams& params)
 	:	WaterSystem(argc, argv, params),
 	angmax (1.0), angmin (-1.0), angres (0.01), angbins ((angmax-angmin)/angres),
 	S1 (std::vector<double> (posbins, 0.0)),
@@ -131,7 +131,7 @@ void OrderParameters::Analysis () {
 	return;
 }
 
-int main (int argc, char **argv) {
+int main (int argc, const char **argv) {
 
 	WaterSystemParams params;
 

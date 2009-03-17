@@ -17,7 +17,6 @@ public:
 
 	CoordinationTest (int argc, char **argv, const WaterSystemParams& params);
 
-	void OutputStatus () const;
 	void OutputData ();
 
 	void Analysis ();
@@ -31,8 +30,8 @@ protected:
 	// the data structure is a map so we can easily access each histogram just by giving a coordination
 	COORD_HISTOGRAM histo;
 
+	void InitCoordMaps ();
 	void BinPosition (Water const * const wat, coordination const coord);
-
 };
 
 

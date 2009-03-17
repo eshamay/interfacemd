@@ -15,6 +15,7 @@ MPIFILES	=	$(AMBERFILES) ../mpi/mpisys.o mpitest.o
 ORDERPARAMS = $(WATERSYSTEM) orderparams.o
 TEMPFILES	= temp.cpp $(AMBERFILES)
 COORDINATION	= $(WATERSYSTEM) coordination.o
+ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
 
 ambertest : ambertest.o $(AMBERFILES)
 	$(CXX) $(CPPFLAGS) ambertest.o $(AMBERFILES) -o ambertest
@@ -63,6 +64,9 @@ mpitest: $(MPIFILES)
 
 coordination: $(COORDINATION)
 	$(CXX) $(CPPFLAGS) $(COORDINATION) -o coordination
+
+ordercoords: $(ORDERCOORDS)
+	$(CXX) $(CPPFLAGS) $(ORDERCOORDS) -o ordercoords
 
 cleantest :
 	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams

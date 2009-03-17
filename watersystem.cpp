@@ -37,6 +37,10 @@ WaterSystem::WaterSystem (const int argc, const char **argv, const WaterSystemPa
 	
 {
 	if (params.avg) {	// when averaging, the interface locations are taken from the command line.
+		if (argc < 3) {
+			printf ("not enough parameters given (interface locations?)\n");
+			exit(1);
+		}
 		int_low = atof(argv[1]);
 		int_high = atof(argv[2]);
 		middle = (int_low + int_high)/2.0;

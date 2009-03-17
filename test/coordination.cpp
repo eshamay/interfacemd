@@ -10,8 +10,12 @@ CoordinationTest::CoordinationTest (int argc, char **argv, const WaterSystemPara
 
 	printf ("***Data Analysis***\nRunning a test to find water coordinations\n");
 
-	// here initialize all the histograms to get ready for binning the positions
-	// to do this, we have to get all the different coordination types possible. Those come from the coordination type map in the bondgraph
+return;
+}
+
+void CoordinationTest::InitCoordMaps () {
+
+	// get all the different coordination types possible. Those come from the coordination type map in the bondgraph
 	
  	name_map[UNBOUND] = "UNBOUND";
  	name_map[O] = "O";
@@ -76,19 +80,6 @@ void CoordinationTest::OutputData () {
 			fprintf (output, "\n");
 		}
 	}
-
-return;
-}
-
-void CoordinationTest::OutputStatus () const {
-	
-	if (!(timestep % (output_freq * 10)))
-		printf ("\n%10d/%d)  ", timestep, timesteps);
-
-	if (!(timestep % output_freq)) 
-		printf ("*");
-
-	fflush (stdout);
 
 return;
 }
@@ -161,6 +152,7 @@ void CoordinationTest::Analysis () {
 
 return;
 }
+
 
 int main (int argc, char **argv) {
 

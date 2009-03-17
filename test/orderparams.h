@@ -10,7 +10,7 @@ class OrderParameters : public WaterSystem {
 
 public:
 
-	OrderParameters (int argc, char **argv, const WaterSystemParams& params);
+	OrderParameters (int argc, const char **argv, const WaterSystemParams& params);
 
 	void Analysis ();
 

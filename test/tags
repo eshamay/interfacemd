@@ -91,9 +91,9 @@ CPPFLAGS	../Makefile	/^CPPFLAGS	= $(CINCLUDE)$/;"	m
 CRDFILE_H_	../crdfile.h	2;"	d
 CRDFile	../crdfile.cpp	/^CRDFile::CRDFile (std::string crdpath, int size) : $/;"	f	class:CRDFile
 CRDFile	../crdfile.h	/^class CRDFile {$/;"	c
-CXX	../Makefile	/^CXX			= g++ $(CXXFLAGS)$/;"	m
+CXX	../Makefile	/^CXX			= g++ -g $(CXXFLAGS)$/;"	m
 CXXFLAGS	../Makefile	/^CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CXXOPTIMIZE) $(CINCLUDE)$/;"	m
-CXXOPTIMIZE	../Makefile	/^CXXOPTIMIZE = -O3 -finline-functions -finline-limit-1000 -funroll-loops$/;"	m
+CXXOPTIMIZE	../Makefile	/^CXXOPTIMIZE = -O0 -finline-functions -finline-limit-1000 -funroll-loops$/;"	m
 CalcDipole	../h2o.cpp	/^void Water::CalcDipole () {$/;"	f	class:Water
 CalcDipole	../molecule.cpp	/^void Molecule::CalcDipole () {$/;"	f	class:Molecule
 CalcEigenSystem	../matrixr.cpp	/^void MatR::CalcEigenSystem () {$/;"	f	class:MatR
@@ -558,7 +558,7 @@ WaterDipoleParms	../dipoleparm.cpp	/^WaterDipoleParms::WaterDipoleParms (string 
 WaterDipoleParms	../dipoleparm.h	/^class WaterDipoleParms {$/;"	c
 WaterEigenSystem	../watersfg.cpp	/^void SFGWaterAnalyzer::WaterEigenSystem (Water& water) {$/;"	f	class:SFGWaterAnalyzer
 WaterSystem	../watersystem.cpp	/^WaterSystem::WaterSystem (const WaterSystemParams& params) :$/;"	f	class:WaterSystem
-WaterSystem	../watersystem.cpp	/^WaterSystem::WaterSystem (int argc, char **argv, const WaterSystemParams& params) : $/;"	f	class:WaterSystem
+WaterSystem	../watersystem.cpp	/^WaterSystem::WaterSystem (const int argc, const char **argv, const WaterSystemParams& params) : $/;"	f	class:WaterSystem
 WaterSystem	../watersystem.h	/^class WaterSystem {$/;"	c
 WaterSystemParams	../watersystem.h	/^typedef struct WaterSystemParams {$/;"	s
 Water_ptr_vec	../h2o.h	/^typedef std::vector<Water *> Water_ptr_vec;$/;"	t
@@ -926,6 +926,7 @@ qH_eq	../h2o.h	17;"	d
 qO_eq	../h2o.h	16;"	d
 q_pt	../hno3analysis.cpp	/^double q_pt (XYZSystem& sys, Molecule * hno3) {$/;"	f
 restart	../watersystem.h	/^	int timesteps, restart;$/;"	m	struct:WaterSystemParams
+restart	../watersystem.h	/^	unsigned int timestep, restart;$/;"	m	class:WaterSystem
 size	../ambersystem.h	/^	int		size ()			const 	{ return _atoms.size(); }$/;"	f	class:AmberSystem
 size	../crdfile.h	/^	int size () 	const { return _size; }$/;"	f	class:CRDFile
 size	../forcefile.h	/^	int size () 	{ return _size; }$/;"	f	class:ForceFile
@@ -935,7 +936,7 @@ size	../wannier.h	/^	int size () 	const { return _size; }$/;"	f	class:WannierFil
 size	../xyzfile.h	/^	int size () const { return _atoms.size(); }$/;"	f	class:XYZFile
 size	../xyzsystem.h	/^	int size ()	const { return _atoms.size(); }$/;"	f	class:XYZSystem
 sys	../watersystem.h	/^	AmberSystem sys;$/;"	m	class:WaterSystem
-timestep	../watersystem.h	/^	unsigned int timestep;$/;"	m	class:WaterSystem
+timestep	../watersystem.h	/^	unsigned int timestep, restart;$/;"	m	class:WaterSystem
 timesteps	../watersystem.h	/^	int timesteps, restart;$/;"	m	struct:WaterSystemParams
 timesteps	../watersystem.h	/^	unsigned int timesteps;$/;"	m	class:WaterSystem
 trajectory	../wateranalyzer.h	/^typedef vector<double> trajectory;$/;"	t
