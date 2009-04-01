@@ -143,8 +143,8 @@ int main (int argc, const char **argv) {
 	params.restart = 0;
 	#ifdef AVG
 		params.avg = true;
-		params.posmin = -40.0;
-		params.posmax = 40.0;
+		params.posmin = -50.0;
+		params.posmax = 50.0;
 		params.output = "orderparams.avg.dat";
 	#else
 		params.avg = false;
@@ -154,7 +154,7 @@ int main (int argc, const char **argv) {
 	#endif
 	params.posres = 0.100;
 	params.pbcflip = 15.0;
-	params.output_freq = 25;
+	params.output_freq = 50;
 
 	OrderParameters par (argc, argv, params);
 	

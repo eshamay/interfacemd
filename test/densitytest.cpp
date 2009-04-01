@@ -8,7 +8,7 @@ DensityAnalyzer::DensityAnalyzer (int const argc, const char **argv, const Water
 
 	printf ("\n*** Performing a DENSITY analysis of the system ***\n");
 
-	// from the command line, grab all the atom name that we'll be working with (remember that the first two arguments are interface locations
+	// from the command line, grab all the atom name that we'll be working with (remember that the first two arguments are interface locations if averaging)
 	atomNames.clear();
 	#ifdef AVG
 	for (int i = 3; i < argc; i++) {
@@ -165,7 +165,7 @@ int main (const int argc, const char **argv) {
 		params.output = "density.dat";
 	#endif
 	params.posres = 0.100;
-	params.pbcflip = 15.0;
+	params.pbcflip = 20.0;
 	params.output_freq = 25;
 
 
