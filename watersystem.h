@@ -66,6 +66,7 @@ public:
 	void OutputStatus () const;
 	void OutputData ();
 	void FindWaters ();
+	void SliceWaters (const double low, const double high);
 	void FindInterfacialWaters ();
 
 	void UpdateMatrix () { this->matrix.UpdateMatrix (int_atoms); }

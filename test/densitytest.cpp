@@ -75,11 +75,15 @@ vector<int> DensityAnalyzer::AtomDensity (string const atomname) {
 		
 		//if (_sys[i]->Name().find(atomname) == string::npos) continue;
 		if (sys[i]->Name() != atomname) continue;
-
 		// grab the position info of the atom
 		VecR r = patom->Position();
 		double position = r[axis];
 		if (position < pbcflip) position += Atom::Size()[axis];
+
+	// ***********
+	// For testing Na2SO4 & NaNO3
+		if (position > 50) continue;
+	// **********
 
 		#ifdef AVG
 		// here the bin will be selected based on the distance to a given interface. Negative distances are inside the water phase, positive are in the CCl4
@@ -166,7 +170,7 @@ int main (const int argc, const char **argv) {
 	#endif
 	params.posres = 0.100;
 	params.pbcflip = 20.0;
-	params.output_freq = 25;
+	params.output_freq = 100;
 
 
 	DensityAnalyzer den (argc, argv, params);

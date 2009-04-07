@@ -72,6 +72,25 @@ void OrderParameters::Analysis () {
 		// find all the waters
 		this->FindWaters ();
 
+	//*******
+	// for testing on Na2SO4 - only use the lower interface
+		std::vector<Water *> wats;
+		RUN (int_mols) {
+			Water * wat = int_mols[i];
+			Atom * oxy = wat->GetAtom ("O");
+			VecR r = oxy->Position();
+			double position = r[axis];
+			if (position < pbcflip) position += Atom::Size()[axis];		// deal with the periodic cutoffs
+			if (position < 50.0) {
+				wats.push_back(wat);
+			}
+		}
+		int_mols.clear();
+		RUN (wats) {
+			int_mols.push_back(wats[i]);
+		}
+	// *******
+
 		this->UpdateMatrix ();
 
 		RUN (int_mols) {
@@ -82,7 +101,6 @@ void OrderParameters::Analysis () {
 			Atom * oxy = wat->GetAtom ("O");
 			VecR r = oxy->Position();
 			double position = r[axis];
-
 			if (position < pbcflip) position += Atom::Size()[axis];		// deal with the periodic cutoffs
 
 			// we're going to do averaging of the two interfaces.

@@ -1,14 +1,15 @@
 #include "coordination.h"
 
-CoordinationTest::CoordinationTest (int argc, char **argv, const WaterSystemParams& params) : 
+CoordinationTest::CoordinationTest (const int argc, const char **argv, const WaterSystemParams& params) :
 	WaterSystem(argc, argv, params),
-	histo (COORD_HISTOGRAM (45, HISTOGRAM (posbins, 0)))
+	histo (Int_histo (45, Int_vec (posbins, 0)))
 {
 	
 	// here is our system for analysis
-	//sys = new AmberSystem (PRMTOP, MDCRD, FORCE);
 
 	printf ("***Data Analysis***\nRunning a test to find water coordinations\n");
+
+	this->InitCoordMaps();
 
 return;
 }
@@ -129,6 +130,9 @@ void CoordinationTest::Analysis () {
 		//this->FindInterfacialWaters (waters, atoms, coords.sys);
 		this->FindWaters ();
 
+// For testing on Na2SO4 and maybe NaNO3
+		this->SliceWaters (0.0, 50.0);
+
 		// to find the coordination of the atoms we have to update the bond graph
 		this->UpdateMatrix();
 
@@ -154,7 +158,7 @@ return;
 }
 
 
-int main (int argc, char **argv) {
+int main (const int argc, const char **argv) {
 
 	#ifdef AVG
 		if (argc < 3) {
@@ -189,7 +193,7 @@ int main (int argc, char **argv) {
 	#endif
 	params.posres = 0.100;
 	params.pbcflip = 15.0;
-	params.output_freq = 25;
+	params.output_freq = 100;
 
 	CoordinationTest coords (argc, argv, params);
 

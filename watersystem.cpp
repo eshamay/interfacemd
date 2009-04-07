@@ -160,3 +160,26 @@ void WaterSystem::OutputStatus () const {
 
 return;
 }
+
+// Let's the analysis only look at a particular piece of the system instead of the entire system. That is, only use waters that are between certain positions on the long-axis
+void WaterSystem::SliceWaters (const double low, const double high) {
+
+	std::vector<Water *> wats;
+	RUN (int_mols) {
+		Water * wat = int_mols[i];
+		Atom * oxy = wat->GetAtom ("O");
+		VecR r = oxy->Position();
+		double position = r[axis];
+		if (position < pbcflip) position += Atom::Size()[axis];		// deal with the periodic cutoffs
+
+		if (position > low && position < high) {
+			wats.push_back(wat);
+		}
+	}
+	int_mols.clear();
+	RUN (wats) {
+		int_mols.push_back(wats[i]);
+	}
+
+return;
+}

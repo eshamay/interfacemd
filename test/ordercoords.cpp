@@ -130,6 +130,8 @@ void CoordOrderParams::Analysis () {
 		// find all the waters in the system
 		this->FindWaters ();
 
+		this->SliceWaters (0.0, 50.0);
+
 		// update our adjacency matrix with connectivity and bonding data
 		this->UpdateMatrix ();
 
