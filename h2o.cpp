@@ -244,21 +244,22 @@ void Water::CalcEulerAngles (const coord axis) {
 	// Don't forget to set the molecular axes before using this!
 	this->DCMToLab (axis);
 
-	// here is the direct calculation of the euler angles from the direction cosine matrix. This method comes from 
+	// here is the direct calculation of the euler angles from the direction cosine matrix. This method comes from wikipedia of all places :)
+	double x3 = DCM.Index(0,2);
+	double y3 = DCM.Index(1,2);
 	double z1 = DCM.Index(2,0);
 	double z2 = DCM.Index(2,1);
 	double z3 = DCM.Index(2,2);
-	double x2 = DCM.Index(0,2);
-	double y2 = DCM.Index(1,2);
 
 	/* If all three axes in the molecular (xyz) and lab (XYZ) frames are aligned, then the euler rotations work by rotating about the body-fixed 
 	 * axes as follows based on the ZXZ convention:
-	 * First a rotation of alpha about the z-axis
+	 * First a rotation of alpha about the z-axis.
 	 * Second a rotation of beta about the x-axis. This is also known as the "tilt" angle because it is the angle between the z and Z axes.
 	 * Lastly a rotation of gamma about the body-fixed z-axis. This is the "twist" angle.
 	 */
-	double alpha = atan2(x2,-y2);
-	double beta = atan2(sqrt(z1*z1+z2*z2), z3);
+	double beta = acos(z3);
+	//double beta = atan2(sqrt(z1*z1+z2*z2), z3);
+	double alpha = atan2(x3,-y3);
 	double gamma = atan2(z1,z2);
 
 	//printf ("% 10.4f% 10.4f% 10.4f\n", theta, phi, chi);

@@ -2,6 +2,7 @@
 #define	ORDER_PARAMS_H_
 
 #define AVG
+#define RESTART
 
 #include "../watersystem.h"
 

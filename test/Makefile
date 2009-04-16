@@ -13,7 +13,7 @@ MDCRD2PDB = $(AMBERFILES) ../pdbfile.o mdcrd2pdb.o
 FILLBOX = $(AMBERFILES) ../pdbfile.o ../boxfiller.o
 MPIFILES	=	$(AMBERFILES) ../mpi/mpisys.o mpitest.o
 ORDERPARAMS = $(WATERSYSTEM) orderparams.o
-TEMPFILES	= temp.cpp $(AMBERFILES)
+TEMPFILES	= temp.cpp $(AMBERFILES) ../pdbfile.o
 COORDINATION	= $(WATERSYSTEM) coordination.o
 ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
 
@@ -57,7 +57,7 @@ fillbox : $(FILLBOX) fillbox.o
 	$(CXX) $(CPPFLAGS) fillbox.o $(FILLBOX) -o fillbox
 
 temp: $(TEMPFILES)
-	$(CXX) $(CXXFLAGS) -o temp $(TEMPFILES)
+	$(CXX) $(TEMPFLAGS) -g -o temp $(TEMPFILES)
 
 mpitest: $(MPIFILES)
 	mpiCC $(CPPFLAGS) $(MPILIBS) -o mpitest $(MPIFILES)
@@ -69,7 +69,7 @@ ordercoords: $(ORDERCOORDS)
 	$(CXX) $(CPPFLAGS) $(ORDERCOORDS) -o ordercoords
 
 cleantest :
-	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams
+	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams ordercoords
 
 #densitytest.o: densitytest.cpp densitytest.h
 #toptest.o: toptest.cpp toptest.h

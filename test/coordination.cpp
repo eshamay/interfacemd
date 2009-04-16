@@ -175,16 +175,13 @@ int main (const int argc, const char **argv) {
 	params.axis = y;
 	params.timesteps = 200000;
 	#ifdef RESTART
-		params.restart = 138750;
-	#else
-		params.restart = 0;
+		params.restart = 100000;
 	#endif
-
 	#ifdef AVG
 		params.avg = true;
 		params.posmin = -40.0;
 		params.posmax = 40.0;
-		params.output = "coordination.avg.dat";
+		params.output = "coordination.avg.100+.dat";
 	#else
 		params.avg = false;
 		params.posmin = -5.0;

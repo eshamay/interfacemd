@@ -5,7 +5,8 @@
 #include <math.h>
 //#include "matrixr.h"
 #include "utility.h"
-#include "/common/src/FTensor-1.1pre25/FTensor.h"
+//#include "/common/src/FTensor-1.1pre25/FTensor.h"
+#include "FTensor.h"
 
 enum coord {x=0, y=1, z=2};
 

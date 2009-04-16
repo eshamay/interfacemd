@@ -124,13 +124,22 @@ return;
 
 void CoordOrderParams::Analysis () {
 
+	#ifdef RESTART
+		for (timestep = 0; timestep < restart; timestep++) {
+			if (!(timestep % 1000))
+				printf ("skipping timesteps: %d\n", timestep);
+			sys.LoadNext();
+		}
+		for (timestep = restart; timestep < timesteps; timestep++) {
+	#else
 	// start the analysis - run through each timestep
 	for (timestep = 0; timestep < timesteps; timestep++) {
+	#endif
 
 		// find all the waters in the system
 		this->FindWaters ();
 
-		this->SliceWaters (0.0, 50.0);
+		//this->SliceWaters (0.0, 50.0);
 
 		// update our adjacency matrix with connectivity and bonding data
 		this->UpdateMatrix ();
@@ -171,9 +180,9 @@ void CoordOrderParams::Analysis () {
 			// calculate the S1 term (3*cos(tilt)^2-1)
 			double S1_value = 3.0 * cos(tilt) * cos(tilt) - 1.0;
 		
-			// and the S2 numerator and denominator (S2 = <sin(t)cos(2t)>/<sin(t)>)
-			double S2_num_value = sin(tilt) * cos(2.0 * twist);
-			double S2_den_value = sin(tilt);
+			// and the S2 numerator and denominator (S2 = <sin^2(t)cos(2t)>/<sin^2(t)>)
+			double S2_num_value = sin(tilt) * sin(tilt) * cos(2.0 * twist);
+			double S2_den_value = sin(tilt) * sin(tilt);
 		
 			// and now to bin all that data
 			this->S1[coord][posbin] += S1_value;
@@ -201,8 +210,11 @@ int main (const int argc, const char **argv) {
 	params.mdcrd = "mdcrd";
 	params.mdvel = "";
 	params.axis = y;
-	params.timesteps = 200000;
+	params.timesteps = 100000;
 	params.restart = 0;
+	#ifdef RESTART
+		params.restart = 50000;
+	#endif
 	#ifdef AVG
 		params.avg = true;
 		params.posmin = -40.0;

@@ -38,9 +38,9 @@ void OrderParameters::OutputData () {
 
 			// straightforward output of the equations for the order parameters
 			fprintf (output, "% 10.3f% 10.3f% 10.3f\n", 
-				position,
-				0.5 * S1[pos]/N,
-				S2_num[pos] / S2_den[pos]
+				position,						// position along the axis
+				0.5 * (3.0 * S1[pos]/N - 1), 	// S1
+				S2_num[pos] / S2_den[pos]		// S2
 			);
 		}
 	}
@@ -66,30 +66,27 @@ return;
 */
 void OrderParameters::Analysis () {
 
+	// if restarting, then fast-forward to the point where we'll restart
+	#ifdef RESTART
+	printf ("\n\n*** Restart Run ***\n\tNow skipping %d steps before beginning analysis\n", restart);
+	for (timestep = 0; timestep < restart; timestep++) {
+		sys.LoadNext();
+	}
+
+	printf ("\n*** Begin Analysis ***\n\tStarting analysis at timestep %d\n\n", timestep);
+	for (timestep = restart; timestep < timesteps; timestep++) {
+	#else
 	// start the analysis - run through each timestep
 	for (timestep = 0; timestep < timesteps; timestep++) {
+	#endif
 
 		// find all the waters
 		this->FindWaters ();
 
-	//*******
-	// for testing on Na2SO4 - only use the lower interface
-		std::vector<Water *> wats;
-		RUN (int_mols) {
-			Water * wat = int_mols[i];
-			Atom * oxy = wat->GetAtom ("O");
-			VecR r = oxy->Position();
-			double position = r[axis];
-			if (position < pbcflip) position += Atom::Size()[axis];		// deal with the periodic cutoffs
-			if (position < 50.0) {
-				wats.push_back(wat);
-			}
-		}
-		int_mols.clear();
-		RUN (wats) {
-			int_mols.push_back(wats[i]);
-		}
-	// *******
+// ***********************************
+// used for testing on so4 + no3
+		this->SliceWaters (0.0, 50.0);
+// ***********************************
 
 		this->UpdateMatrix ();
 
@@ -120,11 +117,12 @@ void OrderParameters::Analysis () {
 			double twist = wat->EulerAngles[2];
 
 			// calculate the S1 term
-			double S1_value = 3.0 * cos(tilt) * cos(tilt) - 1.0;
+			double S1_value = cos(tilt) * cos(tilt);
 
 			// and the S2 numerator and denominator
-			double S2_num_value = sin(tilt) * cos(2.0 * twist);
-			double S2_den_value = sin(tilt);
+			double sin_tilt_sq = sin(tilt) * sin(tilt);	// this is just done for a little more speed - not calculating sin twice... (?)
+			double S2_num_value = sin_tilt_sq * cos(2.0 * twist);
+			double S2_den_value = sin_tilt_sq;
 
 /*
 			// and now bin all those values for the histogram
@@ -159,6 +157,9 @@ int main (int argc, const char **argv) {
 	params.axis = y;
 	params.timesteps = 200000;
 	params.restart = 0;
+	#ifdef RESTART
+		params.restart = 100000;
+	#endif
 	#ifdef AVG
 		params.avg = true;
 		params.posmin = -50.0;

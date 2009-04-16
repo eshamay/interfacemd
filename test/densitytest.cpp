@@ -80,10 +80,10 @@ vector<int> DensityAnalyzer::AtomDensity (string const atomname) {
 		double position = r[axis];
 		if (position < pbcflip) position += Atom::Size()[axis];
 
-	// ***********
-	// For testing Na2SO4 & NaNO3
-		if (position > 50) continue;
-	// **********
+// **********
+// Used for Na2SO4 + NaNO3
+		if (position > 50.0) continue;
+// **********
 
 		#ifdef AVG
 		// here the bin will be selected based on the distance to a given interface. Negative distances are inside the water phase, positive are in the CCl4
@@ -108,8 +108,17 @@ return (density);
 
 void DensityAnalyzer::SystemDensities () {
 
-	// now let's run through the timestesp
+	#ifdef RESTART
+		for (timestep = 0; timestep < restart; timestep++) {
+			if (!(timestep % 1000))
+				printf ("skipping timesteps: %d\n", timestep);
+			sys.LoadNext();
+		}
+		for (timestep = restart; timestep < timesteps; timestep++) {
+	#else
+	// now let's run through the timesteps
 	for (timestep=0; timestep < timesteps; timestep++) {
+	#endif
 		
 		// for each atom that we're testing we'll add the histogram data into the final data-set
 		for (unsigned int atom = 0; atom < atomNames.size(); atom++) {
@@ -152,21 +161,18 @@ int main (const int argc, const char **argv) {
 	params.axis = y;
 	params.timesteps = 200000;
 	#ifdef RESTART
-		params.restart = 138750;
-	#else
-		params.restart = 0;
+		params.restart = 100000;
 	#endif
-
 	#ifdef AVG
 		params.avg = true;
 		params.posmin = -40.0;
 		params.posmax = 40.0;
-		params.output = "density.avg.dat";
+		params.output = "density.avg.100+.dat";
 	#else
 		params.avg = false;
 		params.posmin = -5.0;
 		params.posmax = 150.0;
-		params.output = "density.dat";
+		params.output = "density.100+.dat";
 	#endif
 	params.posres = 0.100;
 	params.pbcflip = 20.0;

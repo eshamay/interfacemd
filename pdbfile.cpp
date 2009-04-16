@@ -52,7 +52,7 @@ void PDBFile::LoadNext () {
 		// if we hit an ATOM entry, then parse it into the current working molecule
 		if (!strcmp(word, "ATOM")) {
 			// add an atom to the current molecule
-			*pmol += _ParseAtom(line);
+			pmol->AddAtom(_ParseAtom(line));
 			_numAtoms++;
 		}
 

@@ -6,6 +6,7 @@
 using namespace std;
 
 #define AVG
+#define RESTART
 
 class DensityAnalyzer : public WaterSystem {
 
