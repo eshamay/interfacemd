@@ -55,7 +55,7 @@ void BoxFiller::_FillBoxRandom () {
 
 			while (!fits) {
 
-				if (attempts % 100 == 0) { 
+				if (attempts % 100 == 0) {
 					VecR vRot (2.0 * RANDOM - 1.0, 2.0 * RANDOM - 1.0, 2.0*RANDOM-1.0);
 					double rot = 2.0 * M_PI * RANDOM - 1.0;
 					// randomly rotate it
@@ -141,7 +141,7 @@ void BoxFiller::_FillBoxLattice () {
 
 
 	while (_residueNames.size()) {
-		
+
 		int res = int(RANDOM * _residueNames.size());
 		printf ("%d\n", res);
 		// we go through the PDB file and find the template residue
@@ -150,7 +150,7 @@ void BoxFiller::_FillBoxLattice () {
 			// set the template molecule and prepare to populate
 			tempMol = *_pdb[tMol];
 		}
-	
+
 		Molecule newMol = tempMol;				// create a new molecule to add into the system
 
 		VecR vRot (2.0 * RANDOM - 1.0, 2.0 * RANDOM - 1.0, 2.0*RANDOM-1.0);

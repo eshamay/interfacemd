@@ -9,7 +9,7 @@ WaterSystem::WaterSystem (const WaterSystemParams& params) :
 	output_freq(params.output_freq),
 	timesteps(params.timesteps), restart(params.restart)
 {
-	
+
 	if (params.avg) {	// when averaging, the interface locations are taken from the command line.
 		printf ("WaterSystem::WaterSystem () --> Interface locations are needed\n");
 		exit(1);
@@ -26,7 +26,7 @@ WaterSystem::WaterSystem (const WaterSystemParams& params) :
 	return;
 }
 
-WaterSystem::WaterSystem (const int argc, const char **argv, const WaterSystemParams& params) : 
+WaterSystem::WaterSystem (const int argc, const char **argv, const WaterSystemParams& params) :
 	sys(AmberSystem(params.prmtop, params.mdcrd, params.mdvel)),
 	output(fopen(params.output.c_str(), "w")),
 	posmin(params.posmin), posmax(params.posmax), posres(params.posres), pbcflip(params.pbcflip),
@@ -34,7 +34,7 @@ WaterSystem::WaterSystem (const int argc, const char **argv, const WaterSystemPa
 	axis(params.axis),
 	output_freq(params.output_freq),
 	timesteps(params.timesteps), restart(params.restart)
-	
+
 {
 	if (params.avg) {	// when averaging, the interface locations are taken from the command line.
 		if (argc < 3) {
@@ -64,7 +64,7 @@ WaterSystem::~WaterSystem () {
 }
 
 void WaterSystem::OpenFile () {
-	
+
 	//output = fopen (params, 'w');
 	if (output == (FILE *)NULL) {
 		printf ("WaterSystem::WaterSystem (argc, argv) - couldn't open the output file!\n");
@@ -87,7 +87,7 @@ void WaterSystem::OutputHeader(const WaterSystemParams& params) const {
 }
 
 void WaterSystem::FindInterfacialWaters () {
-	
+
 	int_mols.clear();
 	int_atoms.clear();
 
@@ -109,7 +109,7 @@ void WaterSystem::FindInterfacialWaters () {
 		if (position < pbcflip) position += Atom::Size()[axis];		// adjust for funky boundaries
 		// these values have to be adjusted for each system
 		if (position < posmin or position > posmax) continue;				// set the interface cutoffs
-		
+
 		int_mols.push_back (water);
 		RUN2(water->Atoms()) {
 			int_atoms.push_back (water->Atoms(j));
@@ -120,7 +120,7 @@ return;
 }
 
 void WaterSystem::FindWaters () {
-	
+
 	int_mols.clear();
 	int_atoms.clear();
 
@@ -151,11 +151,11 @@ return;
 
 void WaterSystem::OutputStatus () const {
 
-	if (!(timestep % (output_freq * 10))) 
+	if (!(timestep % (output_freq * 10)))
 		cout << endl << timestep << "/" << timesteps << " ) ";
-	if (!(timestep % output_freq))  
+	if (!(timestep % output_freq))
 		cout << "*";
-	
+
 	fflush (stdout);
 
 return;

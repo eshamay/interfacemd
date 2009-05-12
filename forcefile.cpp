@@ -1,12 +1,12 @@
 #include "forcefile.h"
 
-ForceFile::ForceFile (std::string forcepath, int size) : 
+ForceFile::ForceFile (std::string forcepath, int size) :
 	_size(size),
 	_file((FILE *)NULL),
 	_loaded(false),
 	_eof(true)
 	{
-	
+
 	// first load up the file given the path
 	_file = fopen64 (forcepath.c_str(), "r");
 	if (_file != (FILE *)NULL) {
@@ -14,7 +14,7 @@ ForceFile::ForceFile (std::string forcepath, int size) :
 
 		_eof = false;
 
-		char str[1000];	
+		char str[1000];
 		fgets(str, 1000, _file);		// first frame's header
 		this->LoadFirst ();	// load the first frame of the file
 	}

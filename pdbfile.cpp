@@ -2,16 +2,16 @@
 
 PDBFile::PDBFile (string path) {
 	_loaded = 0;
-	
+
 	_path = path;
 
 	_file = (FILE *)NULL;
 	_file = fopen (path.c_str(), "r");
-	if (_file != (FILE *)NULL) 
+	if (_file != (FILE *)NULL)
 	{
 		_loaded = 1;
-	} 
-	else 
+	}
+	else
 	{
 		printf ("Couldn't load the PDB coordinate file:: %s\n", path.c_str());
 		exit(1);
@@ -43,12 +43,12 @@ void PDBFile::LoadNext () {
 	// first process the frame's header and get to the 'ATOM' entries. We need an initial 'word' to see where we are
 	fgets (line, 1000, _file);
 	sscanf (line, " %s", word);
-	
+
 	Molecule *pmol;
 	pmol = new Molecule;
 	//Start parsing atoms until the 'END' of the frame
 	while (strcmp(word, "END")) {
-		
+
 		// if we hit an ATOM entry, then parse it into the current working molecule
 		if (!strcmp(word, "ATOM")) {
 			// add an atom to the current molecule
@@ -64,18 +64,18 @@ void PDBFile::LoadNext () {
 			pmol = new Molecule;
 			_numMols++;
 		}
-				
+
 		// then get the next line for processing
 		fgets (line, 1000, _file);
 		sscanf (line, " %s", word);
 	}
-	
+
 	_currentstep++;
 }
 
-// Take the next line of the file, and parse the 
+// Take the next line of the file, and parse the
 Atom *PDBFile::_ParseAtom (const char *atomEntry) {
-	
+
 	double x, y, z;
 	int temp;
 	char name[10], residue[10];
@@ -160,7 +160,7 @@ void PDBFile::WritePDB (vector<Molecule *> sys) {
 		Molecule * mol = sys[i];
 		// and print out each atom
 		for (int atom = 0; atom < mol->size(); atom++) {
-		
+
 			Atom *tatom = mol->Atoms(atom);
 			printf ("ATOM  %5d  %-4s%3s %5d    % 8.3f% 8.3f% 8.3f\n",
 				atomCount++, tatom->Name().c_str(), tatom->Residue().c_str(), molCount,

@@ -115,7 +115,7 @@ void VecR::operator-= (const VecR& input) {
 	_coords(i) -= input._coords(i);
 	return;
 }
-	
+
 void VecR::operator-= (const double input) {
 	FTensor::Index<'i',3> i;
 	_coords(i) -= input;
@@ -149,32 +149,32 @@ VecR VecR::Unit () const {
 		v._coords(i) = _coords(i) / mag;
 	return (v);
 }
-	
+
 void VecR::Print () const {
 	printf ("% 8.4f\t% 8.4f\t% 8.4f\n", _coords(x), _coords(y), _coords(z));
 }
 
 // Get back a vector wrapped into a periodic cell's central-image (given by the size of the cell). this assumes that the origin is at 0,0,0
 VecR VecR::Wrap (VecR size, VecR origin) {
-	
+
 	while (fabs(_coords(x) - origin[x]) > size(x) / 2.0) {
-		if (_coords(x) < origin[x]) 	
+		if (_coords(x) < origin[x])
 			_coords(x) += size(x);
-		else 		  			
+		else
 			_coords(x) -= size(x);
 	}
 
 	while (fabs(_coords(y) - origin[y]) > size(y)/2.0) {
-		if (_coords(y) < origin[y]) 	
+		if (_coords(y) < origin[y])
 			_coords(y) += size(y);
-		else 		  			
+		else
 			_coords(y) -= size(y);
 	}
 
 	while (fabs(_coords(z) - origin[z]) > size(z)/2.0) {
-		if (_coords(z) < origin[z]) 	
+		if (_coords(z) < origin[z])
 			_coords(z) += size(z);
-		else	 		  		
+		else
 			_coords(z) -= size(z);
 	}
 
@@ -184,7 +184,7 @@ return VecR(_coords(x), _coords(y), _coords(z));
 // Find the smallest vector between two locations in a periodic system defined by he size parameter
 // the resulting vector will point from the current vector to the (VecR& input) location
 VecR VecR::MinVector (const VecR& input, const VecR& size) const {
-	
+
 	// first we gather all our coordinates for point a (current vector) and point b (the end-point vector)
 	double ax = _coords(x);
 	double ay = _coords(y);
@@ -193,7 +193,7 @@ VecR VecR::MinVector (const VecR& input, const VecR& size) const {
 	double bx = input[x];
 	double by = input[y];
 	double bz = input[z];
-	
+
 	double cx, cy, cz;		// this will be our output vector
 
 	// Now we'll hold one coordinate while move the other through its periodic images until the distance between the two is <= size/2
@@ -233,7 +233,7 @@ return (mag);
 /*
 // Rotating a vector to a new coordinate axes/frame
 VecR VecR::RotateToFrame (VecR const * const frame) const {
-	
+
 	VecR _x = frame[0];
 	VecR _y = frame[1];
 	VecR _z = frame[2];

@@ -36,7 +36,7 @@ int main (int argc, char **argv) {
 	std::vector<Water *> int_mols;
 	// and these are the atoms of those molecules
 	std::vector<Atom *> int_atoms;
-	
+
 	bool firsttimestep = true;	// first time through (first timestep)
 	bool firstmol;			// first molecule processed
 
@@ -56,7 +56,7 @@ int main (int argc, char **argv) {
 		numMolsProcessed += int_mols.size();
 
 		for (int mol = 0; mol < int_mols.size(); mol++) {
-			
+
 			water = int_mols[mol];
 
 			sfg.Reset();		// reset the calculator for a new molecule
@@ -77,17 +77,17 @@ int main (int argc, char **argv) {
 				TotalChi.resize (numData, complex<double> (0.0, 0.0));
 				firsttimestep = false;
 			}
-		
+
 			// perform the summation for averaging over the system
 			CollectChi (MolChi, TimestepChi);
 
 			// now add in the next equivalent polarization
 			MolChi = sfg.Chi (*water, S2, S2, P);
-	
+
 			// perform the summation for the other half of the polarization
 			CollectChi (MolChi, TimestepChi);
 		}
-		
+
 		// now output something to the screen (once in a while = every set # of timesteps)
 		OutputStatus (step);
 
@@ -119,10 +119,10 @@ void CollectChi (std::vector< std::complex<double> >& Chi_step, std::vector< std
 
 return;
 }
-	
+
 // print an informative header
 void OutputHeader () {
-	
+
 	printf ("Generating SFG for %d timesteps\n\"*\" = %d steps\n", TIMESTEPS, OUTPUT_FREQ);
 	printf ("Polarization = %s\n", POLARIZATION);
 	printf ("outputting to file: %s\n", OUTPUTFILE);
@@ -136,9 +136,9 @@ void OutputStatus (int const count) {
 	if (!(count % (OUTPUT_FREQ * 10)))
 		printf ("\n%10d/%d)  ", count, TIMESTEPS);
 
-	if (!(count % OUTPUT_FREQ)) 
+	if (!(count % OUTPUT_FREQ))
 		printf ("*");
-	
+
 	fflush (stdout);
 
 
@@ -162,7 +162,7 @@ return;
 }
 
 void FindInterfacialWaters (vector<Water *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys) {
-	
+
 	int_mols.clear();
 	int_atoms.clear();
 
@@ -184,7 +184,7 @@ void FindInterfacialWaters (vector<Water *>& int_mols, vector<Atom *>& int_atoms
 		if (position < PBC_FLIP) position += Atom::Size()[axis];		// adjust for funky boundaries
 		// these values have to be adjusted for each system
 		if (position < INTERFACE_LOW or position > INTERFACE_HIGH) continue;				// set the interface cutoffs
-		
+
 		int_mols.push_back (water);
 		RUN2(water->Atoms()) {
 			int_atoms.push_back (water->Atoms(j));

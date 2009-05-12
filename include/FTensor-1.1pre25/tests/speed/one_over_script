@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# Make the files if they aren't already.  Useful if running this test
+# multiple times.
+
+make one_over one_over_fast
+
+# Run the tests, putting the output into files to see that they
+# performed the same computation.
+
+echo "fast 1"
+time ./one_over_1_minus_x_fast1 > output_fast1
+echo "Tensor 1"
+time ./one_over_1_minus_x1 > output1
+echo "fast 2"
+time ./one_over_1_minus_x_fast2 > output_fast2
+echo "Tensor 2"
+time ./one_over_1_minus_x2 > output2
+echo "fast 3"
+time ./one_over_1_minus_x_fast3 > output_fast3
+echo "Tensor 3"
+time ./one_over_1_minus_x3 > output3
+echo "fast 4"
+time ./one_over_1_minus_x_fast4 > output_fast4
+echo "Tensor 4"
+time ./one_over_1_minus_x4 > output4
+echo "fast 5"
+time ./one_over_1_minus_x_fast5 > output_fast5
+echo "Tensor 5"
+time ./one_over_1_minus_x5 > output5
+echo "fast 6"
+time ./one_over_1_minus_x_fast6 > output_fast6
+echo "Tensor 6"
+time ./one_over_1_minus_x6 > output6
+echo "fast 7"
+time ./one_over_1_minus_x_fast7 > output_fast7
+echo "Tensor 7"
+time ./one_over_1_minus_x7 > output7
+echo "fast 8"
+time ./one_over_1_minus_x_fast8 > output_fast8
+echo "Tensor 8"
+time ./one_over_1_minus_x8 > output8
+echo "fast 9"
+time ./one_over_1_minus_x_fast9 > output_fast9
+echo "Tensor 9"
+time ./one_over_1_minus_x9 > output9
+
+# Check that the two versions (ordinary arrays and FTensor's)
+# performed the same computation.
+
+if diff output1 output_fast1; then
+    echo PASS: one_over_1_minus_x1
+else
+    echo FAIL: one_over_1_minus_x1
+fi
+
+if diff output2 output_fast2; then
+    echo PASS: one_over_2_minus_x2
+else
+    echo FAIL: one_over_2_minus_x2
+fi
+
+if diff output3 output_fast3; then
+    echo PASS: one_over_3_minus_x3
+else
+    echo FAIL: one_over_3_minus_x3
+fi
+
+if diff output4 output_fast4; then
+    echo PASS: one_over_4_minus_x4
+else
+    echo FAIL: one_over_4_minus_x4
+fi
+
+if diff output5 output_fast5; then
+    echo PASS: one_over_5_minus_x5
+else
+    echo FAIL: one_over_5_minus_x5
+fi
+
+if diff output6 output_fast6; then
+    echo PASS: one_over_6_minus_x6
+else
+    echo FAIL: one_over_6_minus_x6
+fi
+
+if diff output7 output_fast7; then
+    echo PASS: one_over_7_minus_x7
+else
+    echo FAIL: one_over_7_minus_x7
+fi
+
+if diff output8 output_fast8; then
+    echo PASS: one_over_8_minus_x8
+else
+    echo FAIL: one_over_8_minus_x8
+fi
+
+if diff output9 output_fast9; then
+    echo PASS: one_over_9_minus_x9
+else
+    echo FAIL: one_over_9_minus_x9
+fi
+

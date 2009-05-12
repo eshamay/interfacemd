@@ -10,14 +10,14 @@ CoordOrderParams::CoordOrderParams (const int argc, const char **argv, const Wat
 	number_density (Int_histo (45, Int_vec (posbins, 0.0)))
 
 {
-	
+
 	printf ("Running an order parameter analysis on water-coordination types with the following options:\n");
 
 	if (argc < 3) {
 		printf ("Rerun with the two interface locations:\norderparams <int_low> <int_high>\n");
 		exit(1);
 	}
-	
+
 	printf ("\tAngle cosines will range from:\n\t\tMax = % 8.3f\n\t\tMin = % 8.3f\n\t\tResolution = % 8.3f\n", angmin, angmax, angres);
 
 	// set up all the coordination types
@@ -25,11 +25,11 @@ CoordOrderParams::CoordOrderParams (const int argc, const char **argv, const Wat
 
 return;
 }
-	
+
 void CoordOrderParams::SetHistograms (const int argc, const char **argv) {
 
 	// get all the different coordination types possible. Those come from the coordination type map in the bondgraph
-	
+
  	name_map[UNBOUND] = "UNBOUND";
  	name_map[O] = "O";
  	name_map[OO] = "OO";
@@ -46,7 +46,7 @@ void CoordOrderParams::SetHistograms (const int argc, const char **argv) {
  	name_map[OHHH] = "OHHH";
  	name_map[OOHHH] = "OOHHH";
  	name_map[OOOHHH] = "OOOHHH";
- 
+
  	// so here we grab the names of all the coordination types
 	coord_map::iterator coord_it, coord_end;
 	vcoords.clear();
@@ -54,7 +54,7 @@ void CoordOrderParams::SetHistograms (const int argc, const char **argv) {
 
 		coordination coord = coord_it->first;
 		string name = coord_it->second;
-		
+
 		//histo[coord].resize(posbins, 0);
 		vcoords.push_back(coord);
 	}
@@ -77,10 +77,10 @@ void CoordOrderParams::OutputData () {
 			fprintf (output, "%s\t", name_map[vcoords[i]].c_str());
 		}
 		fprintf (output, "\n");
-	
+
 		// The output for each row will be the position followed by S1-S2 pairs for each coordination
 		for (int i = 0; i < posbins; i++) {
-			
+
 			// calculate the slab position
 			double pos = double(i) * posres + posmin;
 
@@ -103,13 +103,13 @@ void CoordOrderParams::OutputData () {
 				double N = double(number_density[coord][i]);
 				//if (number_density[coord][i])
 //printf ("coord = %d, i = %d, %d\n", coord, i, number_density[coord][i]);
-				double s1 = 0.5 * (S1[coord][i]/N);					// the S1 order parameter
+				double s1 = 0.5 * (3.0 * (S1[coord][i]/N) - 1.0);					// the S1 order parameter
 				fprintf (output, "% 10.3f", s1);
 
 				double s2 = (S2_num[coord][i]) / (S2_den[coord][i]);		// S2 order parameter
 				fprintf (output, "% 10.3f", s2);
 
-				//printf ("% 8d% 8d% 8d% 8.3f% 8.3f% 8.3f\n", 
+				//printf ("% 8d% 8d% 8d% 8.3f% 8.3f% 8.3f\n",
 					//coord, int(N), i, S1[coord][i], S2_num[coord][i], S2_den[coord][i]);
 
 			}
@@ -152,7 +152,7 @@ void CoordOrderParams::Analysis () {
 			int coord = int(this->matrix.WaterCoordination (wat));
 			// note that we're only collecting data on coordinations up to a certain type...
 			if (coord >= this->S1.size()) continue;
-	
+
 			// take each water and find its position in the slab
 			Atom * oxy = wat->GetAtom ("O");
 			VecR r = oxy->Position();
@@ -167,30 +167,31 @@ void CoordOrderParams::Analysis () {
 
 			// we should have a data space large enough for binning, but hey, sometimes things go wacky
 			if (posbin >= posbins) continue;
-			
+
 			// The two order parameters are calculated from the Euler angles, so let's find those
 			// first set the molecular axes up
 			wat->SetOrderAxes ();
-		
+
 			// then find the Euler angles for the tilt and twist of the molecule
 			wat->CalcEulerAngles (this->axis);
+			double phi = wat->EulerAngles[0];
 			double tilt = wat->EulerAngles[1];
 			double twist = wat->EulerAngles[2];
-		
+
 			// calculate the S1 term (3*cos(tilt)^2-1)
-			double S1_value = 3.0 * cos(tilt) * cos(tilt) - 1.0;
-		
+			double S1_value = cos(tilt) * cos(tilt);
+
 			// and the S2 numerator and denominator (S2 = <sin^2(t)cos(2t)>/<sin^2(t)>)
-			double S2_num_value = sin(tilt) * sin(tilt) * cos(2.0 * twist);
+			double S2_num_value = sin(tilt) * sin(tilt) * cos(2.0 * phi);
 			double S2_den_value = sin(tilt) * sin(tilt);
-		
+
 			// and now to bin all that data
 			this->S1[coord][posbin] += S1_value;
 			this->S2_num[coord][posbin] += S2_num_value;
 			this->S2_den[coord][posbin] += S2_den_value;
 			this->number_density[coord][posbin] += 1;
 		}
-	
+
 		this->sys.LoadNext();
 
 		this->OutputStatus ();
@@ -210,10 +211,10 @@ int main (const int argc, const char **argv) {
 	params.mdcrd = "mdcrd";
 	params.mdvel = "";
 	params.axis = y;
-	params.timesteps = 100000;
+	params.timesteps = 200000;
 	params.restart = 0;
 	#ifdef RESTART
-		params.restart = 50000;
+		params.restart = 100000;
 	#endif
 	#ifdef AVG
 		params.avg = true;
@@ -231,7 +232,7 @@ int main (const int argc, const char **argv) {
 	params.output_freq = 25;
 
 	CoordOrderParams par (argc, argv, params);
-	
+
 	par.Analysis();
 
 return 0;

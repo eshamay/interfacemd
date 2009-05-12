@@ -21,7 +21,7 @@ int main (int argc, char *argv) {
 		}
 	}
 
-	
+
 /*
 	Molecule * mol = sys.Molecules(0);
 
@@ -43,7 +43,7 @@ int main (int argc, char *argv) {
 		RUN2 (atom->HBonds()) {
 			Atom * hbond = atom->HBonds()[j];
 
-			printf ("%5d(%s) : %5d(%s)\t%10.4f\n", 
+			printf ("%5d(%s) : %5d(%s)\t%10.4f\n",
 				atom->ID(), atom->Name().c_str(), hbond->ID(), hbond->Name().c_str(), *atom - *hbond);
 		}
 	}

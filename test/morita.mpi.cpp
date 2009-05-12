@@ -39,7 +39,7 @@ int main (int argc, char **argv) {
 	std::vector<Molecule *> int_mols;
 	// and these are the atoms of those molecules
 	std::vector<Atom *> int_atoms;
-	
+
 	bool firsttimestep = true;	// first time through (first timestep)
 	bool firstmol;			// first molecule processed
 
@@ -58,7 +58,7 @@ for (int i = 0; i < 5; i++) {
 }
 */
 
-	  if (sys.Master()) 
+	  if (sys.Master())
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
 		sys.UpdateGraph (int_atoms);
 
@@ -92,17 +92,17 @@ for (int i = 0; i < 5; i++) {
 				TotalChi.resize (numData, complex<double> (0.0, 0.0));
 				firsttimestep = false;
 			}
-		
+
 			// perform the summation for averaging over the system
 			CollectChi (MolChi, TimestepChi);
 
 			// now add in the next equivalent polarization
 			MolChi = sfg.Chi (*water, S2, P, S2);
-	
+
 			// perform the summation for the other half of the polarization
 			CollectChi (MolChi, TimestepChi);
 		}
-		
+
 		// now output something to the screen (once in a while = every set # of timesteps)
 		OutputStatus (step, sys);
 
@@ -149,7 +149,7 @@ void MPI_PackageChi (std::vector< std::complex<double> >& TimestepChi, std::vect
 		total_real[i] = 0.0;
 		total_imag[i] = 0.0;
 	}
-		
+
 	// now we sum the data from each node
 	MPI_Allreduce (real_data, total_real, numData, MPI_DOUBLE, MPI_SUM, sys.WorldComm());
 	MPI_Allreduce (imag_data, total_imag, numData, MPI_DOUBLE, MPI_SUM, sys.WorldComm());
@@ -173,10 +173,10 @@ void CollectChi (std::vector< std::complex<double> >& Chi_step, std::vector< std
 
 return;
 }
-	
+
 // print an informative header
 void OutputHeader (MPIMolSystem& sys) {
-	
+
   if (sys.Master()) {
 	printf ("Generating SFG for %d timesteps\n\"*\" = %d steps\n", TIMESTEPS, OUTPUT_FREQ);
 	printf ("Polarization = %s\n", POLARIZATION);
@@ -193,9 +193,9 @@ void OutputStatus (int const count, MPIMolSystem& sys) {
 	if (!(count % (OUTPUT_FREQ * 10)))
 		printf ("\n%10d/%d)  ", count, TIMESTEPS);
 
-	if (!(count % OUTPUT_FREQ)) 
+	if (!(count % OUTPUT_FREQ))
 		printf ("*");
-	
+
 	fflush (stdout);
 
   }
@@ -219,7 +219,7 @@ return;
 }
 
 void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_atoms, MPIMolSystem& sys) {
-	
+
 	int_mols.clear();
 	int_atoms.clear();
 
@@ -234,7 +234,7 @@ void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_ato
 		if (position < PBC_FLIP) position += Atom::Size()[axis];		// adjust for funky boundaries
 		// these values have to be adjusted for each system
 		if (position < INTERFACE_LOW || position > INTERFACE_HIGH) continue;				// set the interface cutoffs
-		
+
 		int_mols.push_back (pmol);
 		RUN2(pmol->Atoms()) {
 			int_atoms.push_back (pmol->Atoms(j));
@@ -248,10 +248,10 @@ void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_ato
 	vector<int> molIDs, atomIDs;
 	if (sys.Master()) {
 
-		RUN (int_atoms) 
+		RUN (int_atoms)
 			atomIDs.push_back(int_atoms[i]->ID());
-		RUN (int_mols) 
-			molIDs.push_back(int_mols[i]->MolID());	
+		RUN (int_mols)
+			molIDs.push_back(int_mols[i]->MolID());
 	}
 
 	// deconstruct, ship out, and reconstruct on each node
@@ -260,12 +260,12 @@ void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_ato
 
 	// then the other nodes fix up their own lists of atoms and molecules in the interface
 	if (!sys.Master()) {
-		
-		RUN (molIDs) 
+
+		RUN (molIDs)
 			int_mols.push_back (sys.Molecules (molIDs[i]));
 		RUN (atomIDs)
 			int_atoms.push_back (sys.Atoms (atomIDs[i]));
 	}
-	
+
 return;
 }

@@ -5,7 +5,7 @@ AdjacencyMatrix::AdjacencyMatrix () : _size(0) {
 return;
 }
 
-AdjacencyMatrix::AdjacencyMatrix (const Atom_ptr_vec& atoms) : 
+AdjacencyMatrix::AdjacencyMatrix (const Atom_ptr_vec& atoms) :
 	_size(atoms.size()) {
 
 	UpdateMatrix (atoms);
@@ -21,7 +21,7 @@ return;
 }
 
 void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {
-	
+
 
 	// Clear out the old matrix
 	if (_size)
@@ -40,11 +40,11 @@ void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {
 	// now run through all atom combos and get their bondlengths
 	double bondlength = 0.0;
 	Atom *ai, *aj;
-	
+
 	// this little for-loop bit runs through all atom-pair combinations once and find the bond-types between them
 	for (unsigned int i = 0; i < _size-1; i++) {
 		for (unsigned int j = i + 1; j < _size; j++) {
-			
+
 			ai = _atoms[i];
 			aj = _atoms[j];
 
@@ -55,7 +55,7 @@ void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {
 				(ai->Name().find("O") != string::npos and aj->Name().find("O") != string::npos)
 			)
 				continue;
-			
+
 			// calculate the distance between the two atoms
 			//double distance = *_atoms[i] - *_atoms[j];
 			//double distance = _atoms[i]->MinDistance(_atoms[j]);
@@ -82,7 +82,7 @@ void AdjacencyMatrix::BuildMatrix () {
 	}
 
 	_matrix.resize (_size, Bond_ptr_vec(_size, (Bond *)NULL));
-	
+
 	// only set up the upper-triangle of the matrix (don't include the diagonal)
 	for (int i = 0; i < _size - 1; i++) {
 		for (int j = i + 1; j < _size; j++) {
@@ -104,7 +104,7 @@ void AdjacencyMatrix::ClearBonds () {
 			b->bond = unbonded;
 		}
 	}
-	
+
 return;
 }
 
@@ -145,14 +145,14 @@ return;
 
 // returns the atom's location in the matrix
 int AdjacencyMatrix::ID (Atom const * const ap) const {
-	
+
 	int id = -1;
 
 	for (unsigned int i = 0; i < _size; i++) {
 		if (_atoms[i] == ap)
 			id = i;
 	}
-		
+
 	if (id == -1) {
 		cout << "\nAdjacencyMatrix::ID (Atom * ap)\nCouldn't find the atom in the matrix" << endl;
 		exit (1);
@@ -171,8 +171,8 @@ Bond_ptr_vec AdjacencyMatrix::Bonds (Atom const * const ap) const {
 		if (_matrix[row][id]->bond == unbonded) continue;
 
 		vb.push_back (_matrix[row][id]);
-//		if (_matrix[row][id]->bond == hbond) 
-//			printf ("-- %4.3f -->%s) %d\n|", 
+//		if (_matrix[row][id]->bond == hbond)
+//			printf ("-- %4.3f -->%s) %d\n|",
 //				_matrix[row][id]->bondlength, _atoms[row]->Name().c_str(), _atoms[row]->ID());
 	}
 
@@ -180,8 +180,8 @@ Bond_ptr_vec AdjacencyMatrix::Bonds (Atom const * const ap) const {
 		if (_matrix[id][col]->bond == unbonded) continue;
 
 		vb.push_back (_matrix[id][col]);
-//		if (_matrix[id][col]->bond == hbond) 
-//			/printf ("-- %4.3f -- >%s) %d\n|", 
+//		if (_matrix[id][col]->bond == hbond)
+//			/printf ("-- %4.3f -- >%s) %d\n|",
 //				_matrix[id][col]->bondlength, _atoms[col]->Name().c_str(), _atoms[col]->ID());
 	}
 
@@ -211,7 +211,7 @@ return (num);
 
 // calculates the water bonding coordination of a given water molecule
 coordination AdjacencyMatrix::WaterCoordination (Water const * const wat) const {
-	
+
 	int c = 0;
 	Atom * ap;
 	for (int atom = 0; atom < wat->size(); atom++) {

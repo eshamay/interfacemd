@@ -3,10 +3,10 @@
 int Molecule::numMolecules = 0;
 
 // A constructor for an empty molecule
-Molecule::Molecule () : 
-	_centerofmass (VecR (0.0, 0.0, 0.0)), 
-	_mass(0.0), 
-	_name(""), 
+Molecule::Molecule () :
+	_centerofmass (VecR (0.0, 0.0, 0.0)),
+	_mass(0.0),
+	_name(""),
 	_set(false),
 	_copy(false) {
 
@@ -18,12 +18,12 @@ Molecule::Molecule () :
 
 // a copy constructor to do a deep copy of a molecule instead of just referencing a pre-existing one.
 Molecule::Molecule (const Molecule& oldMol) :
-	_centerofmass(oldMol.CenterOfMass()), 
-	_mass(oldMol.Mass()), 
+	_centerofmass(oldMol.CenterOfMass()),
+	_mass(oldMol.Mass()),
 	_name(oldMol.Name()),
 	_set(false),
 	_copy(true) {
-	
+
 	// now run through and make copies of all the atoms (but this preserves the pointers to the atoms (not really a new molecule!))
 	_atoms.clear();
 	RUN (oldMol.Atoms()) {
@@ -41,7 +41,7 @@ Molecule::~Molecule () {
 	}
 }
 
-// Invert the molecule through a point in space. The point is specified by a VecR. 
+// Invert the molecule through a point in space. The point is specified by a VecR.
 /* The trick here is to shift the entire system such that the point of inversion is at the origin. The invert each coordinate, and return the system back to it's original location.
 */
 /*
@@ -67,7 +67,7 @@ return (_atoms.size());
 
 // get back the atom pointer to the atom with the given name
 Atom * Molecule::operator[] (const string atomname) const {
-	
+
 	Atom *patom = (Atom *)NULL;
 	RUN (_atoms) {
 		if (_atoms[i]->Name() != atomname) continue;
@@ -81,7 +81,7 @@ return(patom);
 }
 
 Atom * Molecule::GetAtom (const string atomname) const {
-	
+
 	Atom * patom = (*this)[atomname];
 
 return(patom);
@@ -140,7 +140,7 @@ VecR Molecule::UpdateCenterOfMass () {
 	// first zero it out
 	_centerofmass.Zero();
 	_mass = 0.0;
-	
+
 	// then run through each atom's coords and add in its contribution.
 	// But, we'll calculate the center of mass with the origin set at the first atom in the molecule
 	VecR r1 = _atoms[0]->Position();
@@ -150,7 +150,7 @@ VecR Molecule::UpdateCenterOfMass () {
 		double mi = _atoms[i]->Mass();
 
 		_centerofmass += (r1.MinVector (ri, Atom::Size()) * mi);
-		
+
 		_mass += mi;
 	}
 	_centerofmass = _centerofmass * (1.0/_mass);
@@ -206,7 +206,7 @@ return d(point, *B);
 void Molecule::Rotate (VecR origin, VecR axis, double angle) {
 
 	double nx = 0.0, ny = 0.0, nz = 0.0;
-	
+
 	axis = axis.Unit();
 
 	RUN (_atoms) {
@@ -235,7 +235,7 @@ void Molecule::Rotate (VecR origin, VecR axis, double angle) {
 }
 
 void Molecule::Shift (VecR shift) {
-	
+
 	RUN (_atoms) {
 		_atoms[i]->Shift (shift);
 	}
@@ -286,9 +286,9 @@ return (forces);
 */
 
 void Molecule::Print () const {
-	
+
 	printf ("Residue = %s\tmass = % .3f\n", _name.c_str(), _mass);
-	
+
 	RUN (_atoms) {
 		_atoms[i]->Print();
 	}
@@ -309,7 +309,7 @@ void Molecule::clear () {
 
 // This should calculate the dipole of a molecule given that we've already generated the wannier centers
 void Molecule::CalcDipole () {
-	
+
 	this->UpdateCenterOfMass();
 
 	_dipole.Zero();
@@ -352,13 +352,13 @@ double Molecule::MinDistance (Molecule& mol) {
 			}
 		}
 	}
-	
+
 return (min);
 }
 
 // This builds a rotation matrix to rotate from the Lab-frame to the body-fixed frame coordinates
 void Molecule::RotateToMol (double vector[3]) const {
-	
+
 	// here's the lab-frame coordinates
 	VecR X (1.0, 0.0, 0.0);
 	VecR Y (0.0, 1.0, 0.0);
@@ -372,13 +372,13 @@ void Molecule::RotateToMol (double vector[3]) const {
 		{ _z < X, _z < Y, _z < Z}
 	};
 
-	this->RotateVector(rotation, vector); 
+	this->RotateVector(rotation, vector);
 
 return;
 }
 
 void Molecule::RotateToMol (double matrix[][3]) const {
-	
+
 	// here's the lab-frame coordinates
 	VecR X (1.0, 0.0, 0.0);
 	VecR Y (0.0, 1.0, 0.0);
@@ -399,7 +399,7 @@ return;
 
 // This builds a rotation matrix to rotate from the Lab-frame to the body-fixed frame coordinates
 void Molecule::RotateToLab (double vector[3]) const {
-	
+
 	// here's the lab-frame coordinates
 	VecR X (1.0, 0.0, 0.0);
 	VecR Y (0.0, 1.0, 0.0);
@@ -459,7 +459,7 @@ return;
 void Molecule::RotateMatrix (double rotation[][3], double matrix[][3]) const {
 
 	// apply the matrix rotation to the given matrix (probably something like the polarizability derivative matrix)
-	
+
 	double temp[3][3];	// this is a temp output matrix to work with
 
 	for (int i = 0; i < 3; i++) {
@@ -519,7 +519,7 @@ return;
 
 // generate a list of all the atoms that are hydrogen-bonding to atoms within this molecule
 std::vector<Atom *> Molecule::HBonds () const {
-	
+
 	std::vector<Atom *> atoms, atomBonds;
 	atoms.clear();
 

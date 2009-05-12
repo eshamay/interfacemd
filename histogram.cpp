@@ -12,7 +12,7 @@ Histogram::Histogram (double const min, double const max, int numbins) {
 }
 
 Histogram::Histogram (double const min, double const max, double binsize) {
-	
+
 	_min = min;
 	_max = max;
 	_binSize = binsize;
@@ -23,9 +23,9 @@ Histogram::Histogram (double const min, double const max, double binsize) {
 }
 
 void Histogram::Print () {
-	
+
 	for (int i = 0; i < _numBins; i++)
-		
+
 		printf ("% 8.4f\t% d\n", _min + double(i)*_binSize, _histogram[i]);
 
 return;

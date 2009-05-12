@@ -6,7 +6,7 @@ MPIMolSystem::MPIMolSystem (int *argc, char ***argv, string xyzfile, VecR& syssi
 #ifdef	SYSTEM_AMBER
 MPIMolSystem::MPIMolSystem (int *argc, char ***argv, string const prmtop, string const mdcrd, string const mdvel) {
 #endif
-	
+
 	// First we set up the internal MPI data for each node
 	_MPISystemInit(argc, argv);
 
@@ -25,7 +25,7 @@ MPIMolSystem::MPIMolSystem (int *argc, char ***argv, string const prmtop, string
 	// update the coords on the other nodes
 	_UpdateCoords ();
 
-}	
+}
 
 MPIMolSystem::~MPIMolSystem () {
 	// before ending, let's do all the clean up we need!
@@ -66,7 +66,7 @@ void MPIMolSystem::_MolSystemInit (string xyzfile, VecR& syssize, string wannier
 #ifdef	SYSTEM_AMBER
 void MPIMolSystem::_MolSystemInit (string prmtop, string mdcrd, string mdvel) {
 #endif
- 
+
 	if (_master) {
 		// first we establish the system on the master node for working the I/O
 		#ifdef	SYSTEM_XYZ
@@ -79,7 +79,7 @@ void MPIMolSystem::_MolSystemInit (string prmtop, string mdcrd, string mdvel) {
 		_numMols = _sys->Molecules().size();
 	}
 	// now we let each node know how many atoms we're working with
-	
+
 	MPI_Bcast (&_numAtoms, 1, MPI_INT, 0, _worldcomm);
 	MPI_Bcast (&_numMols, 1, MPI_INT, 0, _worldcomm);
 
@@ -122,7 +122,7 @@ void MPIMolSystem::_InitAtoms () {
 			}
 			molNames[molNamesOffset] = (char)NULL;
 			molNamesOffset++;
-		}	
+		}
 	}
 
 	// broadcast lotsa stuff for names of atoms and molecules
@@ -168,7 +168,7 @@ void MPIMolSystem::_InitAtoms () {
 
 		// while we're at it, let's set the mol-ID, too
 		_mols[mol].MolID(mol);
-	}		
+	}
 
 return;
 }
@@ -178,7 +178,7 @@ void MPIMolSystem::_ParseMols () {
 	// we need to set up the number of atoms in each molecule, so first the master node has to find that out
 	int numAtoms[_numMols];
 	if (_master) {
-		for (int mol = 0; mol < _numMols; mol++) 
+		for (int mol = 0; mol < _numMols; mol++)
 			numAtoms[mol] = _sys->Molecules()[mol]->size();
 	}
 
@@ -193,12 +193,12 @@ void MPIMolSystem::_ParseMols () {
 			offset++;
 		}
 	}
-		
+
 return;
 }
 
 void MPIMolSystem::_UpdateCoords () {
-	
+
 	// let's have the master grab all the updated positions and such
 	double pos[3];
 	double force[3];
@@ -231,7 +231,7 @@ void MPIMolSystem::_UpdateCoords () {
 		_atoms[atom].Position (_positions[atom*3], _positions[atom*3+1], _positions[atom*3+2]);
 		_atoms[atom].Force (_forces[atom*3], _forces[atom*3+1], _forces[atom*3+2]);
 	}
-		
+
 
 return;
 }
@@ -240,7 +240,7 @@ return;
 void MPIMolSystem::LoadNext () {
 
 	if (_master) _sys->LoadNext();
-	
+
 	this->_UpdateCoords();
 
 return;
@@ -262,7 +262,7 @@ void MPIMolSystem::BroadcastVector (vector<int>& vec) {
 
 	// and the master populates the outgoing array
 	if (_master) {
-		RUN(vec) 
+		RUN(vec)
 			ph[i] = vec[i];
 	}
 
@@ -274,9 +274,9 @@ void MPIMolSystem::BroadcastVector (vector<int>& vec) {
 		for (int i = 0; i < vec_size; i++)
 			vec[i] = ph[i];
 	}
-	
+
 	// now each node should have the vector recreated from the master copy!
-	
+
 return;
 }
 
@@ -291,7 +291,7 @@ void MPIMolSystem::UpdateHBonds (vector<Atom *>& int_atoms) {
 	if (_master) {
 		RUN(int_atoms) {
 			std::vector<Atom *> hbonds = int_atoms[i]->HBonds();
-			
+
 			RUN2 (hbonds) {
 				HBondIDs.push_back (hbonds[j]->ID());
 			}
@@ -299,10 +299,10 @@ void MPIMolSystem::UpdateHBonds (vector<Atom *>& int_atoms) {
 			HBondIDs.push_back (-1);
 		}
 	}
-	
+
 	// now all the other nodes need to get in on this
 	this->BroadcastVector (HBondIDs);
-	
+
 
 	vector<Atom *>::iterator atom;
 	vector<int>::iterator hbond;
@@ -324,6 +324,6 @@ void MPIMolSystem::UpdateHBonds (vector<Atom *>& int_atoms) {
 			atom++;
 		}
 	}
-	
+
 return;
 }

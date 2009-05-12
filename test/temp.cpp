@@ -8,10 +8,10 @@ void movetoorigin (Molecule * wat);
 MatR r_matrix (double alpha, double beta, double gamma, int fwd);
 void rotate (MatR R, Molecule * mol);
 
-int main () {
-
+int main (int argc, char **argv) {
 	AmberSystem sys ("prmtop", "mdcrd", "");
 
+/*
 	// original water in molecular frame
 	Water * mol = new Water();
 	Atom o ("O", VecR(0.0,0.0,0.0));
@@ -42,30 +42,45 @@ int main () {
 		double val = mol->EulerAngles[i];
 		printf ("Angle [%d] = % 5.3f\n", i, val * 180.0/M_PI);
 	}
-
-	/*
-	Water * wat = static_cast<Water *>(sys.Molecules(180));
-
-	Atom * w1 = wat->GetAtom("H1");
-	Atom * w2 = wat->GetAtom("H2");
-
-	movetoorigin(wat);
-
-	printf ("before rotation\n");
-	wat->Print();
-	wat->SetOrderAxes();
-	wat->CalcEulerAngles(z);
-
-	for (int i = 0; i < 3; i++) {
-		double val = wat->EulerAngles[i];
-		printf ("Angle [%d] = % 5.3f\n", i, val * 180.0/M_PI);
-	}
-
-	MatR R = r_matrix (-wat->EulerAngles[0], -wat->EulerAngles[1], -wat->EulerAngles[2], 0);
-	rotate (R, wat);
-	printf ("after rotating back\n");
-	wat->Print();
 */
+	//for (int step = 0; step < 20; step++) {
+	//RUN (sys.Molecules()) {
+		//Molecule * mol = sys.Molecules(atof(argv[1]));
+		Molecule * mol = sys.Molecules(175);
+		//if (mol->Name() != "h2o") continue;
+
+		Water * wat = static_cast<Water *>(mol);
+		//wat->Print();
+
+		wat->SetOrderAxes();
+		wat->CalcEulerAngles(y);
+
+		double phi = wat->EulerAngles[0] * 180.0/M_PI;
+		double theta = wat->EulerAngles[1] * 180.0/M_PI;
+		double psi = wat->EulerAngles[2] * 180.0/M_PI;
+
+		VecR c = wat->Bisector() * -1.0;
+		double euler_tilt = wat->EulerAngles[1] * 180.0/M_PI;
+
+		double c_tilt = acos(VecR(0.0,1.0,0.0) < c) * 180.0/M_PI;
+
+		printf ("% 8.3f\t% 8.3f\t% 8.3f\n", phi, theta, psi);
+	//}
+	//sys.LoadNext();
+	//}
+
+		printf ("% 8.3f\t% 8.3f\n", cos(2.0*atan2(1.2,1.4)), cos(2.0*atan2(1.4,1.2)));
+/*
+		for (int i = 0; i < 3; i++) {
+			double val = wat->EulerAngles[i];
+			printf ("Angle [%d] = % 5.3f\n", i, val * 180.0/M_PI);
+		}
+
+*/
+	//MatR R = r_matrix (-wat->EulerAngles[0], -wat->EulerAngles[1], -wat->EulerAngles[2], 0);
+	//rotate (R, wat);
+	//printf ("after rotating back\n");
+	//wat->Print();
 
 
 

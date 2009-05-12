@@ -1,9 +1,9 @@
 #include "xyzsystem.h"
 
-XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath) 
+XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath)
 	: _atoms(XYZFile(filepath)), _dims(size), _wanniers(WannierFile(wannierpath))
 {
-	
+
 	// set the system size
 	Atom::Size (size);
 
@@ -22,7 +22,7 @@ XYZSystem::~XYZSystem () {
 }
 
 void XYZSystem::_ParseMolecules () {
-	
+
 /***********************************************************************************
  * This is the top-level parsing routine to give the overall idea of what's going on
  * *********************************************************************************/
@@ -35,7 +35,7 @@ void XYZSystem::_ParseMolecules () {
 		delete _mols[i];		// get rid of all the molecules in memory
 	}
 	_mols.clear();				// then clear out the molecule list
-	
+
 	// we also have to go through and clear out some info on all the atoms
 	// like the parentmolecules and names
 	RUN (_atoms) {
@@ -43,7 +43,7 @@ void XYZSystem::_ParseMolecules () {
 		_atoms[i]->Residue ("");
 		_atoms[i]->MolID (-1);
 	}
-	
+
 /*******************
  * Processing Waters
  *******************/
@@ -94,14 +94,14 @@ void XYZSystem::_ParseMolecules () {
 			_mols.push_back (new Hydronium ());
 		}
 
-		else if (atoms.size() == 0) { 
-			//printf ("found water with %d H's\n", Hcount); 
-			continue; 
+		else if (atoms.size() == 0) {
+			//printf ("found water with %d H's\n", Hcount);
+			continue;
 		}
 
 		Molecule * newmol = _mols[molIndex];
 		newmol->MolID (molIndex);
-			
+
 
 		// let's set all the atom properties that we can, and add them into the molecule
 		// and we also add in the hydrogens that are covalently bound - note, this can be more than 2 in the case of H3O+
@@ -129,19 +129,19 @@ void XYZSystem::_ParseMolecules () {
 
 		// analogous to water, let's grab all the (covalently) bound O's of the molecule
 		std::vector<Atom *> NAatoms = _bondgraph.CovalentBonds (_atoms[N], "O");
-		
+
 		int Ocount = NAatoms.size();	// number of Os on the molecule
 		// at least 3 oxygens for a nitrate/nitric acid
 		if (Ocount != 3) continue;
 
 		bool fullNA = false;	// let's us know if the molecule is an hno3 or an no3
 		Atom * no3H = (Atom *)NULL;				// this is the H bonded to an NO3 (we use it down below)
-		Atom * no3O = (Atom *)NULL;				// this is the oxgen of the no3 that is closest to the H 
+		Atom * no3O = (Atom *)NULL;				// this is the oxgen of the no3 that is closest to the H
 		double no3OHdistance = 1000.0;				// the distance of the H to the nearest O
 
 		// let's do a quick check to look at the oxygens of the molecule and see if it's a proper HNO3 or an NO3.
 		RUN (NAatoms) {
-			
+
 			Atom * O = NAatoms[i];
 
 			// these are all the Hs bound to the O
@@ -161,12 +161,12 @@ void XYZSystem::_ParseMolecules () {
 			}
 		}
 
-	
+
 		// now... there are situations where the no3 and its closest water are actually sharing the hydrogen. We have to check here to see if it is closer to the water or closer to the no3 group to assign it either way.
 		// first we check if there was even an H in the molecule
 		if (fullNA) {
 			// if there is an H, let's check to see if it's already assigned to a water from before:
-	
+
 			// first, is the H even attached to another molecule?
 			if (no3H->ParentMolecule() != (Molecule *)NULL) {
 				// if it is shared, then we have to ***ASSUME*** that it's being shared with a water molecule (for now).
@@ -174,7 +174,7 @@ void XYZSystem::_ParseMolecules () {
 				Water * wat = static_cast<Water *>(no3H->ParentMolecule());
 				Atom * watO = wat->GetAtom("O");
 				double watOHdistance = _bondgraph.Distance (no3H, watO);
-		
+
 				// If the H is closer to the no3, then we call this a full hno3, and move the atom from the water to this new molecule.
 				if (no3OHdistance < watOHdistance) {
 					// first remove it from the water
@@ -205,12 +205,12 @@ void XYZSystem::_ParseMolecules () {
 			_mols.push_back (new NitricAcid());
 			NAatoms.push_back (no3H);
 		}
-			
+
 		// and let's not forget to add the nitrogen
 		NAatoms.push_back (_atoms[N]);
 
 		_mols[molIndex]->MolID (molIndex);
-		
+
 		// let's set all the atom properties that we can, and add them into the molecule
 		RUN (NAatoms) {
 			_mols[molIndex]->AddAtom (NAatoms[i]);
@@ -231,7 +231,7 @@ void XYZSystem::_ParseWanniers () {
 	RUN (_mols) {
 		_mols[i]->ClearWanniers();
 	}
-	
+
 	// try a new approach here
 	vector<VecR> wans (_wanniers.Coords());
 	vector<VecR>::iterator vi;
@@ -245,10 +245,10 @@ void XYZSystem::_ParseWanniers () {
 
 		// and then go through all the wanniers in order to find the ones attached to the oxygen
 		for (vi = wans.begin(); vi != wans.end(); vi++) {
-			
+
 			// we find the distance to the oxygen from the wannier center
 			double distance = O->Position().MinDistance (*vi, Atom::Size());
-			
+
 			// if it's close enough, then that oxygen gets it
 			if (distance < 1.0) {
 				mol->AddWannier(*vi);
@@ -257,12 +257,12 @@ void XYZSystem::_ParseWanniers () {
 
 		}
 	}
-				
+
 
 
 /*
 	//bool home = false;
-	
+
 	// Right now we calculate the wannier centers for each molecule based on the oxygens. So run through each oxygen and find the 4 nearest wanniers
 	RUN (_atoms) {
 		if (_atoms[i]->Name().find("O") == string::npos) continue;
@@ -272,7 +272,7 @@ void XYZSystem::_ParseWanniers () {
 		// run through and find the distance to each wannier center
 		for (int wan = 0; wan < _wanniers.size(); wan++) {
 			vector<double> temp;
-			
+
 			double distance = _atoms[i]->Position().MinDistance (_wanniers[wan], Atom::Size());
 			temp.push_back(distance);
 			temp.push_back((double)wan);
@@ -283,7 +283,7 @@ void XYZSystem::_ParseWanniers () {
 		// then sort the wannier centers by distance to the oxygen
 		sort(distances.begin(), distances.end());
 
-		//printf ("setting wan in oxy (%d)\t parent = %s  [%d]\n", 
+		//printf ("setting wan in oxy (%d)\t parent = %s  [%d]\n",
 			//_atoms[i]->ID(), _atoms[i]->Residue().c_str(), _atoms[i]->MolID());
 		// then add in the 4 closest wannier centers
 		for (int wan = 0; wan < 4; wan++) {
@@ -300,8 +300,8 @@ void XYZSystem::LoadFirst () {
 
 	this->_ParseMolecules();
 
-	if (_wanniers.Loaded()) { 
-		_wanniers.LoadFirst(); 
+	if (_wanniers.Loaded()) {
+		_wanniers.LoadFirst();
 		this->_ParseWanniers();
 	}
 
@@ -317,8 +317,8 @@ void XYZSystem::LoadNext () {
 	_atoms.LoadNext();
 	this->_ParseMolecules();
 
-	if (_wanniers.Loaded()) { 
-		_wanniers.LoadNext(); 
+	if (_wanniers.Loaded()) {
+		_wanniers.LoadNext();
 		this->_ParseWanniers();
 	}
 }
@@ -326,7 +326,7 @@ void XYZSystem::LoadNext () {
 // This will calculate the total dipole moment of the system based on atom locations and wannier center positions
 // The origin is shifted to the center of the system in order to get closest images (wrapped into the box) of all the atoms/wanniers
 VecR XYZSystem::SystemDipole () {
-	
+
 	VecR dipole;
 	VecR center = Atom::Size() * 0.5;	// center of the system
 

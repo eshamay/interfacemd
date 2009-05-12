@@ -10,6 +10,6 @@ int main (int argc, char *argv) {
 		printf ("%s\n", topfile.MolNames()[i].c_str());
 		printf ("%d\n", topfile.MolSizes()[i]);
 	}
-	
+
 return 0;
 }

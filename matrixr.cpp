@@ -13,7 +13,7 @@ VecR MatR::operator* (const VecR& input) const {		// Vector rotation/matrix-vect
 	VecR v;
 	FTensor::Index<'i',3> i;
 	FTensor::Index<'j',3> j;
-	
+
 	v._coords(i) = _matrix(i,j)*input._coords(j);
 
 	return (v);
@@ -38,7 +38,7 @@ double	MatR::operator[] (element const index) const {	// Return the coordinate
 		exit(1);
 	}
 	return _elements[index];
-}	
+}
 
 double	MatR::operator[] (int const index) const {	// Return the coordinate
 	if (index > 8) {
@@ -64,7 +64,7 @@ void MatR::Set (int const row, int const col, double const val) {	// Set the ele
 
 void MatR::Print () const {
 	for (int row=0; row < 3; row++) {
-		for (int col=0; col<3; col++) 
+		for (int col=0; col<3; col++)
 			printf ("% 8.4f\t", this->Index(row, col));
 		printf("\n");
 	}
@@ -72,7 +72,7 @@ void MatR::Print () const {
 
 #ifdef _LINALG_
 void MatR::CalcEigenSystem () {
-	
+
 	double A[9];
 	for (int i=0; i<9; i++)
 		A[i] = _elements[i];
@@ -89,7 +89,7 @@ void MatR::CalcEigenSystem () {
 	int info;
 
 	dgeev_(&jobvl, &jobvr, &N, A, &lda, _eigenvalsR, _eigenvalsI, vl, &ldvl, _eigenvecs, &ldvr, work, &lwork, &info);
-	
+
 	_eigenset = true;
 }
 
@@ -101,12 +101,12 @@ vector<VecR> MatR::EigenVectors () {
 	out.push_back (VecR(_eigenvecs[0], _eigenvecs[1], _eigenvecs[2]));
 	out.push_back (VecR(_eigenvecs[3], _eigenvecs[4], _eigenvecs[5]));
 	out.push_back (VecR(_eigenvecs[6], _eigenvecs[7], _eigenvecs[8]));
-	
+
 	return (out);
 }
 
 vector< complex<double> > MatR::EigenValues () {
-	
+
 	if (!_eigenset) this->CalcEigenSystem();
 
 	vector< complex<double> > out;
@@ -129,7 +129,7 @@ MatR MatR::Transpose () const {
 
 #ifdef _LINALG_
 MatR MatR::Quaternion () {
-	
+
 	if (!_eigenset) this->CalcEigenSystem();
 
 	MatR out (_eigenvecs);
@@ -138,7 +138,7 @@ MatR MatR::Quaternion () {
 }
 
 MatR MatR::Inverse () const {
-	
+
 	int m = 3;
 	int n = 3;
 	int lda = 3;
@@ -163,7 +163,7 @@ MatR MatR::Inverse () const {
 }
 
 MatR MatR::Diagonalize () {
-	
+
 	if (!_eigenset) this->CalcEigenSystem();
 
 	MatR U = this->Quaternion();
@@ -174,14 +174,14 @@ MatR MatR::Diagonalize () {
 #endif
 
 double MatR::Trace () const {
-	
+
 	double out = (_matrix(0,0) + _matrix(1,1) + _matrix(2,2));
 
 	return(out);
 }
 
 double MatR::Determinant () const {
-	
+
 	double det = 0.0;
 	det += _matrix(0,0)*_matrix(1,1)*_matrix(2,2);
 	det -= _matrix(0,0)*_matrix(1,2)*_matrix(2,1);
@@ -198,7 +198,7 @@ double MatR::Determinant () const {
 /*
 // This matrix is now rotated to another frame, thus we supply the x, y, and z axes vectors that we want to rotate to.
 MatR MatR::RotateToFrame (VecR const * const frame) const {
-	
+
 	VecR _x = frame[0];
 	VecR _y = frame[0];
 	VecR _z = frame[0];

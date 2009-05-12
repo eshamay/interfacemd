@@ -45,7 +45,7 @@ void BondGraph::UpdateGraph (Atom_ptr_vec& atoms) {
 
 	// now run through all atom combos and get their bondlengths
 	double bondlength;
-	
+
 	// this little for-loop bit runs through all atom-pair combinations once and find the bond-types between them
 	for (unsigned int i = 0; i < _nodes.size() - 1; i++) {
 
@@ -171,7 +171,7 @@ Atom_ptr_vec BondGraph::AdjacentAtoms (const Atom * atom, const bondtype bond) c
 		// check that the bond type is the one we want
 		tie(ed, connect) = edge (*v1, *adj, _graph);
 		if (_graph[ed].bond != bond) continue;
-		
+
 //		v2 = target(*adj, _graph);
 
 //		if (v2 == *v1) cout << "something wrong with the graph" << endl;
@@ -233,7 +233,7 @@ void Bond::SetBondType () {
 		or (u->atom->Name().find("O") != string::npos and v->atom->Name().find("H") != string::npos) ) {
 
 		// one type of bond is the O-H covalent
-		if (bondlength < OHBONDLENGTH) 
+		if (bondlength < OHBONDLENGTH)
 			bond = ohbond;
 
 		// Or an H-bond is formed!
@@ -247,7 +247,7 @@ return;
 /*
 
 Bond * BondGraph::FindBond (const Atom * atom1, const Atom * atom2) const {
-	
+
 	Bond * e;
 	AtomNode * v1, * v2;
 
@@ -265,7 +265,7 @@ return (e);
 Bond * BondGraph::FindBond (const AtomNode * v1, const AtomNode * v2) const {
 
 	Bond * e = (Bond *)NULL;
-	
+
 	// search through the edges of vertex 1 until we find the one that has v2 listed
 	RUN (v1->edges) {
 		RUN2 (v2->edges) {
@@ -295,14 +295,14 @@ return (e->bondlength);
 }
 
 void BondGraph::ClearGraph () {
-		
+
 	// first remove all the old bonds
 	vector<Bond *>::iterator ei;
 	for (ei = _edges.begin(); ei != _edges.end(); ei++) {
 		delete (*ei);
 	}
 	_edges.clear();
-	
+
 	// then remove the old atoms
 	RUN(_vertices) {
 		delete (_vertices[i]);
@@ -314,7 +314,7 @@ return;
 
 // find the atom at the other end of an edge from a given vertex
 Atom * BondGraph::Adjacent (const AtomNode * v, const Bond * e) const {
-	
+
 	AtomNode * v2;
 
 	v2 = (e->_v1 == v) ? v2 = e->_v2 : v2 = e->_v1;
@@ -359,7 +359,7 @@ return (atoms);
 
 // a more specific version of above that only looks for bound atoms of a given name
 std::vector<Atom *> BondGraph::CovalentBonds (const Atom * atom, const string name) const {
-	
+
 	std::vector<Atom *> atoms (this->CovalentBonds (atom));
 	std::vector<Atom *> matches;
 
@@ -368,7 +368,7 @@ std::vector<Atom *> BondGraph::CovalentBonds (const Atom * atom, const string na
 
 		matches.push_back (atoms[i]);
 	}
-			
+
 return (matches);
 }
 
@@ -413,7 +413,7 @@ std::vector<Atom *> BondGraph::ClosestAtoms (const Atom * atom, const string nam
 
 		distances.push_back (temp);
 	}
-	
+
 	// next we sort the list of the atoms we've generated based on distance
 	std::sort (distances.begin(), distances.end());
 

@@ -1,10 +1,10 @@
 #include "connectmatrix.h"
 
-const string CoordName (coordination coord) { 
-	return COORD_NAMES[coord]; 
+const string CoordName (coordination coord) {
+	return COORD_NAMES[coord];
 }
 
-ConnectivityMatrix::ConnectivityMatrix (std::vector<Atom *>& atoms) : _atoms(atoms) { 
+ConnectivityMatrix::ConnectivityMatrix (std::vector<Atom *>& atoms) : _atoms(atoms) {
 
 	// and resize the matrix to include all the atoms
 	_matrix.resize(_atoms.size());
@@ -30,7 +30,7 @@ return;
 }
 
 // let's us update the H-bond information (diagonal elements) and also let the atoms know they are H-bound to something
-void ConnectivityMatrix::_FormHBond (Atom * atom1, Atom * atom2) {	
+void ConnectivityMatrix::_FormHBond (Atom * atom1, Atom * atom2) {
 
 	_matrix[atom1->ID()][atom1->ID()]++;
 	_matrix[atom2->ID()][atom2->ID()]++;
@@ -82,21 +82,21 @@ void ConnectivityMatrix::_FindBonds (Atom * atom1, Atom * atom2) {
 	if ( (atom1->Name().find("H") != string::npos && atom2->Name().find("O") != string::npos)
 		|| (atom2->Name().find("H") != string::npos && atom1->Name().find("O") != string::npos) ) {
 
-		// let's form placeholders 
+		// let's form placeholders
 		Atom * o, * h;
 		//Atom * o2;
 		if (atom1->Name().find("H") != string::npos) { h = atom1; o = atom2; }
 		else { h = atom2; o = atom1; }
 //		o2 = (*h->ParentMolecule())["O"];
-			
+
 		// check here the covalent OH-oscillator criteria (distance)
-		if (distance < OH_BOND_LENGTH) 
+		if (distance < OH_BOND_LENGTH)
 			this->_FormCovalentBond(o, h);
-		
+
 		// check the H-bond criteria (larger than a covalent OH-bond but smaller than the H-bond cutoff)
 		if (distance < H_BOND_LENGTH && distance > OH_BOND_LENGTH) {
 			this->_FormHBond (o, h);
-		
+
 /* 2ndly, check the angle cut-off criteria. This is explained well in the paper by DSW & Dennis Hore (J Phys Chem B, vol 110, No 41, 2006). To summarize: an H-bond is composed of an oxygen and hydrogen that are not covalently bound. Of that pair, find the covalent OH vector of the hydrogen, and the vector of the h-bonding pair. The angle between those two vectors should be < 30 degrees (according to the paper). */
 /*
 			o2 = (*h->ParentMolecule())["O"];
@@ -111,20 +111,20 @@ void ConnectivityMatrix::_FindBonds (Atom * atom1, Atom * atom2) {
 */
 		}
 	}
-		
+
 	// bonding between N and O
 	if ( (atom1->Name().find("N") != string::npos && atom2->Name().find("O") != string::npos)
 		|| (atom2->Name().find("N") != string::npos && atom1->Name().find("O") != string::npos) ) {
 
-		if (distance < NO_BOND_LENGTH) 
+		if (distance < NO_BOND_LENGTH)
 			this->_FormCovalentBond (atom1, atom2);
 	}
 
 	// bonding between N and H
 	if ( (atom1->Name().find("N") != string::npos && atom2->Name().find("H") != string::npos)
 		|| (atom2->Name().find("N") != string::npos && atom1->Name().find("H") != string::npos) ) {
-	
-		if (distance < NO_BOND_LENGTH) 
+
+		if (distance < NO_BOND_LENGTH)
 			this->_FormCovalentBond (atom1, atom2);
 	}
 
@@ -135,7 +135,7 @@ return;
 // 		Top triangle = distance between atoms
 // 		Bottom triangle = covalent bonds
 void ConnectivityMatrix::UpdateMatrix () {
-	
+
 	// first clear out the matrix and resize it appropriately
 	_matrix.resize(_atoms.size());
 
@@ -151,7 +151,7 @@ printf ("starting\n");
 		// let's only worry about water molecules... for now
 		for (unsigned int j = i+1; j < _atoms.size(); j++) {
 			if (_atoms[j]->Residue() != "h2o" && _atoms[j]->Residue().find("no3") == string::npos) continue;
-			
+
 			_matrix[i][j] = *_atoms[i] - *_atoms[j];
 			// and form bonds if they exist (covalent/hbonds)
 			this->_FindBonds (_atoms[i], _atoms[j]);
@@ -165,10 +165,10 @@ return;
 /* Given a water molecule object, let's use the connectivity matrix to determine its coordination number.
  * What this means is counting up all the H-bond interactions on the hydrogens and the oxygens, and then reporting a number value that corresponds to a given coordination type. */
 coordination ConnectivityMatrix::FindWaterCoordination (const Water& water) const {
-	
+
 	coordination coord;		// This will be our output
 	int donor = 0, acceptor = 0;
-	
+
 	for (int atom = 0; atom < water.size(); atom++) {
 		// check for donor bonds
 		if (water[atom]->Name().find("H") != string::npos) {
@@ -179,7 +179,7 @@ coordination ConnectivityMatrix::FindWaterCoordination (const Water& water) cons
 		if (water[atom]->Name().find("O") != string::npos) {
 			acceptor += this->HBonds(water[atom]);
 		}
-			
+
 	}
 	// copied for reference
 	// enum coordination {UNBOUND, O, OH, OHH, OO, OOH, OOHH, H, HH, OOOHH, OOHHH, OVER};
@@ -204,7 +204,7 @@ return coord;
 }
 
 std::vector<Atom *> ConnectivityMatrix::ClosestAtoms (const int input, const string atomname, const int number) const {
-	
+
 	std::vector< std::vector<double> > distances;	// [distance][test atom ID]
 	distances.clear();
 
@@ -223,7 +223,7 @@ std::vector<Atom *> ConnectivityMatrix::ClosestAtoms (const int input, const str
 	}
 
 	sort (distances.begin(), distances.end());
-		
+
 	std::vector<Atom *> output;
 
 	for (int atom = 0; atom < number; atom++) {

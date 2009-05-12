@@ -4,7 +4,7 @@
 #include "../watersystem.h"
 
 #define AVG
-#define RESTART
+//#define RESTART
 
 typedef std::vector<double> 		Double_vec;
 typedef std::vector<Double_vec> 	Double_histo;

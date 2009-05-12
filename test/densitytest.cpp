@@ -17,7 +17,7 @@ DensityAnalyzer::DensityAnalyzer (int const argc, const char **argv, const Water
 	#endif
 		atomNames.push_back (argv[i]);
 	}
-	
+
 	// some info before starting
 	printf ("Analyzing densities of the atoms: ");
 	RUN (atomNames) {
@@ -27,7 +27,7 @@ DensityAnalyzer::DensityAnalyzer (int const argc, const char **argv, const Water
 
 	// now we set up the histogram(s) such that we may bin the positions of each atom
 	histo.resize(atomNames.size(), vector<int> (posbins, 0));
-	
+
 return;
 }
 
@@ -66,13 +66,13 @@ return;
 vector<int> DensityAnalyzer::AtomDensity (string const atomname) {
 
 	vector<int> density (posbins, 0);
-	
+
 	// and now run through the actual calculations to find number densities
 	RUN (sys) {
-			
+
 		// find the atom of interest
 		Atom * patom = sys[i];
-		
+
 		//if (_sys[i]->Name().find(atomname) == string::npos) continue;
 		if (sys[i]->Name() != atomname) continue;
 		// grab the position info of the atom
@@ -119,7 +119,7 @@ void DensityAnalyzer::SystemDensities () {
 	// now let's run through the timesteps
 	for (timestep=0; timestep < timesteps; timestep++) {
 	#endif
-		
+
 		// for each atom that we're testing we'll add the histogram data into the final data-set
 		for (unsigned int atom = 0; atom < atomNames.size(); atom++) {
 			vector<int> atomDensity = this->AtomDensity (atomNames[atom]);
@@ -129,7 +129,7 @@ void DensityAnalyzer::SystemDensities () {
 				histo[atom][bin] += atomDensity[bin];
 			}
 		}
-			
+
 		// and set up the system for the next timestep
 		sys.LoadNext();
 

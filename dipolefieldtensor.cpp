@@ -1,7 +1,7 @@
 #include "dipolefieldtensor.h"
 
 DipoleFieldTensor::DipoleFieldTensor (double const * const r) {
-	
+
 	_r = r;		// set the pointer internally
 
 	_distance = sqrt(_r[0]*_r[0] + _r[1]*_r[1] + _r[2]*_r[2]);	// calculate the magnitude of the distance vector
@@ -13,7 +13,7 @@ DipoleFieldTensor::DipoleFieldTensor (double const * const r) {
 
 	for (int col=0; col<3; col++) {
 		for (int row=0; row<3; row++) {
-			
+
 			_tensor[col*3 + row] = C1 + C2*_r[row]*_r[col];
 		}
 	}
@@ -21,5 +21,5 @@ DipoleFieldTensor::DipoleFieldTensor (double const * const r) {
 }
 
 DipoleFieldTensor::~DipoleFieldTensor () {
-	
+
 }

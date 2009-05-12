@@ -5,7 +5,7 @@ WATERSYSTEM	= $(AMBERFILES) ../watersystem.o ../adjacencymatrix.o ../bond.o
 
 MORITAFILES	= morita.o $(AMBERFILES) ../watersfg.o
 MPIMORITAFILES	= $(MORITAFILES) ../mpi/mpisys.o
-DENSITYFILES = $(WATERSYSTEM) densitytest.o 
+DENSITYFILES = $(WATERSYSTEM) densitytest.o
 XYZSYSTEM = ../xyzsystem.o ../xyzfile.o ../atom.o ../h2o.o ../hno3.o ../molecule.o ../vecr.o ../wannier.o ../bondgraph.o ../matrixr.o
 DIPOLETCF = $(XYZSYSTEM) dipoletcf.o ../hno3analysis.o
 QPT = $(XYZSYSTEM) ../hno3analysis.o Qpt.o
@@ -19,19 +19,19 @@ ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
 
 ambertest : ambertest.o $(AMBERFILES)
 	$(CXX) $(CPPFLAGS) ambertest.o $(AMBERFILES) -o ambertest
-	
+
 densitytest : $(DENSITYFILES)
 	$(CXX) $(CPPFLAGS) $(DENSITYFILES) -o densitytest
 
 morita : $(MORITAFILES)
 	$(CXX) $(CPPFLAGS) $(MORITAFILES) -o morita
-	
+
 mpimorita : $(MPIMORITAFILES)
 	$(MPICXX) $(CPPFLAGS) $(MPILIBS) $(MPIMORITAFILES) -o mpi-morita
 
 matrixtest : matrixtest.o ../vecr.o ../matrixr.o
 	$(CXX) $(CPPFLAGS) matrixtest.o ../vecr.o ../matrixr.o -o matrixtest
-	
+
 toptest : toptest.o ../topfile.o
 	$(CXX) $(CPPFLAGS) toptest.o ../topfile.o -o toptest
 
@@ -45,7 +45,7 @@ dipoletcf : $(DIPOLETCF)
 	$(CXX) $(CPPFLAGS) $(DIPOLETCF) -o dipoletcf
 
 qpt : $(QPT)
-	$(CXX) $(CPPFLAGS) -o qpt_test $(QPT) 
+	$(CXX) $(CPPFLAGS) -o qpt_test $(QPT)
 
 closest : $(AMBERFILES) closest.o ../pdbfile.o
 	$(CXX) $(CPPFLAGS) closest.o ../pdbfile.o $(AMBERFILES) -o closest

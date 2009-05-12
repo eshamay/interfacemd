@@ -1,16 +1,16 @@
 #include "ambersystem.h"
 
-AmberSystem::AmberSystem (string prmtop, string mdcrd, string mdvel = "") 
+AmberSystem::AmberSystem (string prmtop, string mdcrd, string mdvel = "")
 	// some initialization needs to happen here
-	: 	_topfile(TOPFile(prmtop)), 
-		_coords(CRDFile(mdcrd, _topfile.NumAtoms())), 
+	: 	_topfile(TOPFile(prmtop)),
+		_coords(CRDFile(mdcrd, _topfile.NumAtoms())),
 		_forces(ForceFile (mdvel, _topfile.NumAtoms())),
 		_atoms(Atom_ptr_vec(_topfile.NumAtoms(), (Atom *)NULL))
 {
 
 	// because some really useful functionality comes out of the Atom class if the Atom::Size() is set, we'll do that here
 	Atom::Size (_coords.Dims());
-	
+
 	// and then actually create these bad mamma jammas
 	RUN (_atoms) {
 		_atoms[i] = new Atom ();
@@ -52,14 +52,14 @@ void AmberSystem::_ParseAtomVectors () {
 		_atoms[i]->Position ( _coords[i] );
 		if (_forces.Loaded()) _atoms[i]->Force ( _forces[i] );
 	}
-	
+
 return;
 }
 
 /* the mol pointers in the topology file list the beginning and end atoms of each molecule. This function will group all atoms in a molecule, form a molecule object, and add it to the _mols vector
 */
 void AmberSystem::_ParseMolecules () {
-	
+
 	// Here we run through each mol pointer, create a new molecule, and add in the appropriate atoms
 	for (int mol = 0; mol < _topfile.NumMols(); mol++) {
 
@@ -87,7 +87,7 @@ void AmberSystem::_ParseMolecules () {
 		int molpointer = _topfile.MolPointers()[mol];
 		for (int atomCount = 0; atomCount < molsize; atomCount++) {
 			// sets the index of the current atom that's being added to the molecule
-			int curAtom = molpointer + atomCount - 1;	
+			int curAtom = molpointer + atomCount - 1;
 
 			// Now we're going to bless this new atom with loads of information about itself and its molecule
 			_mols[mol]->AddAtom( _atoms[curAtom] );			// First add the atom into the molecule
@@ -99,7 +99,7 @@ void AmberSystem::_ParseMolecules () {
 	}
 
 return;
-}			
+}
 
 void AmberSystem::LoadFirst () {
 	_coords.LoadFirst();
@@ -115,7 +115,7 @@ void AmberSystem::LoadNext () {
 	this->_ParseAtomVectors ();
 	RUN (_atoms)
 		_atoms[i]->ParentMolecule()->Unset ();
-	
+
 return;
 }
 

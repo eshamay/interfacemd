@@ -23,11 +23,11 @@ NitricAcid::~NitricAcid () {
 
 /* To define the plane of a nitric acid molecule all we really need is the coordinates of the three oxygen atoms. Choosing one atom and finding the vectors from that atom to the other two, we can then find a vector normal to the plane of the molecule by finding the cross-product of the two vectors. That normal vector then defines the plane (sans a point of origin). */
 VecR NitricAcid::MolecularPlaneVector () {
-	 
+
 	// now we can calculate the two O-O vectors
 	VecR oo1 = _o1->Position() - _oh->Position();
 	VecR oo2 = _o2->Position() - _oh->Position();
-	
+
 	// lastly we find the normal vector to the molecular plane
 	_molPlane = oo1 % oo2;
 
@@ -36,7 +36,7 @@ return(_molPlane.Unit());
 
 // specialized routine for calculating the dipole of a nitric acid's NO2 group
 bool NitricAcid::CalcNO2Dipole () {
-	
+
 	if(!_set) this->SetAtoms();
 	this->UpdateCenterOfMass();
 
@@ -44,7 +44,7 @@ bool NitricAcid::CalcNO2Dipole () {
 	_no2wanniers.clear();
 	VecR size = Atom::Size();
 	RUN (_wanniers) {
-	
+
 		// check for O1 wans
 		double distance = _wanniers[i].MinDistance (_o1->Position(), size);
 		if (distance < WANNIER_BOND) _no2wanniers.push_back (_wanniers[i]);
@@ -79,7 +79,7 @@ return true;
 }
 
 void NitricAcid::PrintNO2 () const {
-	
+
 	cout << "Mag. " << _no2dipole.Magnitude() << "\tNum of Wanniers: " << _no2wanniers.size() << endl;
 	_no2dipole.Print();
 	_n->Print();
@@ -90,7 +90,7 @@ void NitricAcid::PrintNO2 () const {
 		printf ("wan) ");
 		_no2wanniers[i].Print();
 	}
-	
+
 return;
 }
 
@@ -98,7 +98,7 @@ return;
 // this just helps speed up various calculations
 void NitricAcid::SetAtoms () {
 	if (!_set) {
-	
+
 		// here's the hydrogen and nitrogen atoms
 		_h = (*this)["H"];
 		_n = (*this)["N"];
@@ -110,7 +110,7 @@ void NitricAcid::SetAtoms () {
 
 		// we'll go through the three oxygens and find the one closest to the hydrogen - that becomes _oh. The other two then just get set as _o1 and _o2
 		RUN (_atoms) {
-			
+
 			if (_atoms[i]->Name().find("O") == string::npos) continue;
 
 			std::vector<double> temp;
@@ -124,11 +124,11 @@ void NitricAcid::SetAtoms () {
 
 		// sort them by distance
 		sort(oxygens.begin(), oxygens.end());
-			
+
 		// and set the right oxygens
-		_oh = _atoms[(int)(oxygens[0][1])];	
-		_o1 = _atoms[(int)(oxygens[1][1])];	
-		_o2 = _atoms[(int)(oxygens[2][1])];	
+		_oh = _atoms[(int)(oxygens[0][1])];
+		_o1 = _atoms[(int)(oxygens[1][1])];
+		_o2 = _atoms[(int)(oxygens[2][1])];
 
 		_set = true;
 	}
@@ -140,7 +140,7 @@ return;
 }
 
 VecR NitricAcid::NO2Bisector () {
-	
+
 	if (!_set) this->SetAtoms();
 
 	VecR no1 = _o1->Position() - _n->Position();
@@ -176,7 +176,7 @@ Nitrate::~Nitrate () {
 // The first time a nitric acid molecule is created, the atom pointers are set to point to the specific parts of the molecule
 // this just helps speed up various calculations
 void Nitrate::SetAtoms () {
-	
+
 		// here's the hydrogen and nitrogen atoms
 		_n = (*this)["N"];
 

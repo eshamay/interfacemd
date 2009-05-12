@@ -17,10 +17,16 @@ public:
 
 protected:
 
+/*
+	vector<double> phi;
+	vector<double> theta;
+	vector<double> psi;
 	vector<double> S1;
 	vector<double> S2_num;
 	vector<double> S2_den;
-	vector<int> number_density;
+*/
+	vector< vector<double> >	_data;
+	vector<unsigned long int> number_density;
 
 	double	angmax;
 	double	angmin;

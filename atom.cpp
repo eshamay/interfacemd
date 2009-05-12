@@ -123,7 +123,7 @@ void Atom::Shift (VecR shift) {
 }
 
 void Atom::SetCharge () {
-	
+
 	if (_name.find("O") != std::string::npos) _charge =  6.0;
 	if (_name.find("H") != std::string::npos) _charge = 1.0;
 	if (_name.find("N") != std::string::npos) _charge =  5.0;

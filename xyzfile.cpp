@@ -2,12 +2,12 @@
 
 XYZFile::XYZFile (string path) {
 	_initialized = false;
-	
+
 	_path = path;
 
 	_file = (FILE *)NULL;
 	_file = fopen (path.c_str(), "r");
-	if (_file == (FILE *)NULL) 
+	if (_file == (FILE *)NULL)
 	{
 		printf ("Couldn't load the XYZ coordinate file file:: %s\n", path.c_str());
 		exit(1);
@@ -15,7 +15,7 @@ XYZFile::XYZFile (string path) {
 
 	// find the number of timesteps in the file
 	this->_FindSteps();
-	// Initialize the atoms 
+	// Initialize the atoms
 	this->LoadFirst();
 }
 
@@ -56,7 +56,7 @@ void XYZFile::LoadNext () {
 	for (int atom = 0; atom < _numatoms; atom++) {
 		// now parse each line's information into the atoms
 		fscanf (_file, " %s %lf %lf %lf", name, &X, &Y, &Z);
-		
+
 		// if we haven't already done so, let's create all the atoms we'll need
 		if (!_initialized) {
 			_atoms[atom]->Name (string(name));
@@ -67,7 +67,7 @@ void XYZFile::LoadNext () {
 
 		// finally we set the position of each atom for the timestep
 		_atoms[atom]->Position(X, Y, Z);
-		
+
 	}
 	_initialized = true;
 	_currentstep++;
@@ -78,7 +78,7 @@ return;
 /*
 // Take the next line of the file, and parse the atom information from it, compiling it all into the atom given
 Atom XYZFile::_ParseAtom (Atom * pAtom) {
-	
+
 	double x, y, z;
 
 	fscanf (_file, " %s %lf %lf %lf", name, &x, &y, &z);    // parse the info from the line into holders
@@ -129,7 +129,7 @@ void XYZFile::LoadFirst() {
 }
 
 void XYZFile::Seek (int step) {
-	
+
 	rewind (_file);
 
 	while (_currentstep != step) {

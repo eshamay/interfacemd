@@ -2,7 +2,7 @@
 
 // all we need is a path to a valid data file
 ComplexDataFile::ComplexDataFile (const char * pathname) {
-	
+
 	_file.open(pathname, std::ios::in);
 	if (!_file.is_open()) {
 		std::cout << "***** ComplexDataFile::ComplexDataFile - Error - Couldn't open the data file: " << pathname << ".*****\nNow exiting." << std::endl;
@@ -25,7 +25,7 @@ void ComplexDataFile::_ParseFile () {
 		_data.push_back (data);
 		_complex.push_back (std::complex<double> (real, imag));
 	}
-		
+
 return;
 }
 
@@ -39,7 +39,7 @@ std::complex<double> ComplexDataFile::DataPoint (const double data) {
 	int datum_low, datum_high;
 
 	for (unsigned int datum = 0; datum < _data.size(); datum++) {
-		
+
 		// here we find the higher and lower data values
 		if (_data[datum] > data) {
 			datum_high = datum;

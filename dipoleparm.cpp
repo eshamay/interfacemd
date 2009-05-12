@@ -1,7 +1,7 @@
 #include "dipoleparm.h"
 
 WaterDipoleParms::WaterDipoleParms (string parmpath="dipoleparm.dat") {
-	
+
 	// firstly, we need to find out some information about the file's contents. We assume here that the file has a single line of header information, and the rest is data layed out as follows:
 	// 		R1	R2	Theta	X	Y	Z	Norm
 	//
@@ -11,9 +11,9 @@ WaterDipoleParms::WaterDipoleParms (string parmpath="dipoleparm.dat") {
 	// 		Theta	= Angle of the water molecule
 	// 		X, Y, Z	= vector of the dipole moment
 	// 		Norm	= Norm (magnitude) of the dipole moment vector
-	// 
+	//
 	// So let's find out about the file and load it's contents into some data structures!
-	
+
 	_file = (FILE *)NULL;
 	_file = fopen(parmpath.c_str(), "r");
 	if (_file == (FILE *)NULL) {
@@ -22,7 +22,7 @@ WaterDipoleParms::WaterDipoleParms (string parmpath="dipoleparm.dat") {
 	}
 
 	// Now we have the task of finding out how many data points we have for each parameter (R1, R2, and theta). We'll use some shell commands to dig out the data
-	
+
 	for (int i = 0; i < 3; i++) {
 		// here's the commands we'll use to get some info
 		char col [10];
@@ -35,7 +35,7 @@ WaterDipoleParms::WaterDipoleParms (string parmpath="dipoleparm.dat") {
 		fscanf (fp, "%d", &_num_bins[i]);
 		_num_bins[i]--;
 		pclose(fp);
-		
+
 		// to get the max values
 		string max_com = "awk '{print $" + col_str + "}' " + parmpath + " | sort -g | uniq | tail -n 1";
 		fp = popen(max_com.c_str(), "r");
@@ -65,9 +65,9 @@ WaterDipoleParms::WaterDipoleParms (string parmpath="dipoleparm.dat") {
 				_data[r1][r2][theta] = (double *) malloc (4 * sizeof(double));
 			}
 		}
-	}	
+	}
 
-		
+
 	// the final step of setup is to read through the file and pull each bit of data into the _data holder
 	rewind(_file);
 	fscanf (_file, " %*s %*s %*s %*s %*s %*s %*s");		// skip the header
@@ -84,7 +84,7 @@ WaterDipoleParms::WaterDipoleParms (string parmpath="dipoleparm.dat") {
 		data[2] = z;
 		data[3] = norm;
 	}
-	
+
 return;
 }
 

@@ -23,7 +23,7 @@ TOPFile::TOPFile (std::string path) :
 	this->LoadSection("RESIDUE_LABEL");
 	this->LoadSection("RESIDUE_POINTER");
 	this->LoadSection("ATOMS_PER_MOLECULE");
-	
+
 	_numMols = _molnames.size();
 return;
 }
@@ -53,16 +53,16 @@ void TOPFile::FindFlag (std::string flag) {
 
 	// run through the file until the flag is found
 	while (strcmp(str, flag.c_str())) {
-		fgets (str, 1000, _topfile); 		// load the string up 
+		fgets (str, 1000, _topfile); 		// load the string up
 		sscanf (str, " %*s %s", str);
 	}
 	// then strip the next line which holds a 'format' for the section
-	fgets (str, 1000, _topfile); 		// load the string up 
+	fgets (str, 1000, _topfile); 		// load the string up
 
 return;
 }
 
-/* 
+/*
 The topfile uses the %FLAG ATOM_NAME to mark the beginning of the atom-names section. After that point the atom names are all listed sequentially. A very easy parsing job.
 */
 // As with ATOM_NAME, the rest of the sections will parse out various properties of each atom or molecule

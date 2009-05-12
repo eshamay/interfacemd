@@ -1,6 +1,6 @@
 SRCLIB	 	= $(HOME)/work/src
-MPILIBS		= $(MPI)/lib/libmpi.so $(MPI)/lib/libmpi_cxx.so 
-FTENSOR		= /common/src/FTensor-1.1pre25
+MPILIBS		= $(MPI)/lib/libmpi.so $(MPI)/lib/libmpi_cxx.so
+FTENSOR		= $(SRCLIB)/include/FTensor-1.1pre25
 CINCLUDE	= -I$(SRCLIB) -I$(FTENSOR)
 CLIBS		= -L$(MKL) -lmkl_lapack -lmkl -lguide -lpthread
 CPPFLAGS	= $(CINCLUDE)

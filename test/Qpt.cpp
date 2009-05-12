@@ -3,7 +3,7 @@
 int main () {
 
 	VecR dims (xSize, ySize, zSize);
-	
+
 	XYZSystem sys (filename, dims, wannierfile);
 
 
@@ -12,7 +12,7 @@ int main () {
 			Molecule * na = sys.Molecules(i);
 			// find the nitric acid molecule.
 			if (na->Name() != "hno3") continue;
-			
+
 			double qpt = q_pt (sys, na);
 			printf ("%10d% 10.4f\n", step, qpt);
 			fflush (stdout);

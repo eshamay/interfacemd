@@ -1,20 +1,20 @@
 #include "angledistro.h"
 
 AngleDistro::AngleDistro () : _sys(AmberSystem (PRMTOP, MDCRD, FORCE)){
-	
+
 	_zmax = ZMAX;
 	_zmin = ZMIN;
 	_zres = ZRES;
-	
+
 	_anglemax = AMAX;
 	_anglemin = AMIN;
 	_angleres = ARES;
-	
+
 	_zbins = int((_zmax-_zmin)/_zres) + 1;
 	_anglebins = int((_anglemax-_anglemin)/_angleres) + 1;
 
 	_axis = AXIS;
-	
+
 	_timestep = 0;
 
 	_output = (FILE *)NULL;
@@ -30,7 +30,7 @@ return;
 }
 
 AngleDistro::~AngleDistro () {
-	
+
 	fclose(_output);
 
 return;
@@ -40,9 +40,9 @@ return;
 // a status output meter
 void AngleDistro::_PrintStatus () const {
 
-	if (!(_timestep % 2500)) 
+	if (!(_timestep % 2500))
 		cout << endl << _timestep << ") ";
-	if (!(_timestep % 250))  
+	if (!(_timestep % 250))
 		cout << "*";
 
 return;
@@ -56,8 +56,8 @@ void AngleDistro::_PrintOutput () const {
 		for (int j = 0; j < _anglebins; j++) {
 			fprintf (_output, "% 10d", _histo[i][j]);
 /*
-			fprintf (output, "% 10.3f\t% 10.3f\t% 10d\n", 
-				(double)i*zres+zmin, 
+			fprintf (output, "% 10.3f\t% 10.3f\t% 10d\n",
+				(double)i*zres+zmin,
 				(double)j*angleres+anglemin, histo[i][j]);
 */
 		}
@@ -79,7 +79,7 @@ std::vector< std::vector<int> > AngleDistro::_WaterStepHistogram () {
 		//std::cout << _sys.Molecules(i)->Name() << std::endl;
 	//}
 	RUN (_sys.Molecules()) {
-			
+
 		if (_sys.Molecules(i)->Name() != "h2o") continue;
 
 		Water * wat = static_cast<Water *>(_sys.Molecules(i));
@@ -117,7 +117,7 @@ std::vector< std::vector<int> >& AngleDistro::WaterHistogram (int const timestep
 			}
 		}
 
-		if (!(_timestep % 2500)) 
+		if (!(_timestep % 2500))
 			this->_PrintOutput ();
 		this->_PrintStatus();
 
@@ -128,14 +128,14 @@ return _histo;
 }
 
 void AngleDistro::_ClearHisto () {
-	
+
 	_histo.clear();
 	_histo.resize(_zbins, std::vector<int> ());
 
 	RUN (_histo) {
 		_histo[i].resize (_anglebins, 0);
 	}
-			
+
 return;
 }
 

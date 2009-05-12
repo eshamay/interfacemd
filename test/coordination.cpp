@@ -4,7 +4,7 @@ CoordinationTest::CoordinationTest (const int argc, const char **argv, const Wat
 	WaterSystem(argc, argv, params),
 	histo (Int_histo (45, Int_vec (posbins, 0)))
 {
-	
+
 	// here is our system for analysis
 
 	printf ("***Data Analysis***\nRunning a test to find water coordinations\n");
@@ -17,7 +17,7 @@ return;
 void CoordinationTest::InitCoordMaps () {
 
 	// get all the different coordination types possible. Those come from the coordination type map in the bondgraph
-	
+
  	name_map[UNBOUND] = "UNBOUND";
  	name_map[O] = "O";
  	name_map[OO] = "OO";
@@ -34,14 +34,14 @@ void CoordinationTest::InitCoordMaps () {
  	name_map[OHHH] = "OHHH";
  	name_map[OOHHH] = "OOHHH";
  	name_map[OOOHHH] = "OOOHHH";
- 
+
 	coord_map::iterator coord_it, coord_end;
 	vcoords.clear();
 	for (coord_it = name_map.begin(); coord_it != name_map.end(); coord_it++) {
 
 		coordination coord = coord_it->first;
 		string name = coord_it->second;
-		
+
 		//histo[coord].resize(posbins, 0);
 		vcoords.push_back(coord);
 	}
@@ -63,12 +63,12 @@ void CoordinationTest::OutputData () {
 			fprintf (output, "%s\t", name_map[vcoords[i]].c_str());
 		}
 		fprintf (output, "\n");
-	
+
 		// and now print all the data out
 		for (int i = 0; i < posbins; i++) {
-			
+
 			double pos = double(i) * posres + posmin;
-	
+
 			fprintf (output, "% 8.3f", pos);
 
 			RUN2 (vcoords) {
@@ -122,7 +122,7 @@ void CoordinationTest::Analysis () {
 
 	printf ("\n*** Begin Analysis ***\n\tStarting analysis at timestep %d\n\n", timestep);
 	for (timestep = restart; timestep < timesteps; timestep++) {
-	#else 
+	#else
 	for (timestep = 0; timestep < timesteps; timestep++) {
 	#endif
 

@@ -1,13 +1,13 @@
 #include "xyzdipole_analysis.h"
 
 int main (int *argc, char **argv) {
-	
+
 	VecR dims (xSize, ySize, zSize);
-	
+
 	XYZSystem sys (filename, dims, wannierfile);
 
 	FILE * output = fopen (outputfilename.c_str(), "w");
-	
+
 	// run through a bunch of timesteps
 	printf ("systemsize for this analysis: %8.3f%8.3f%8.3f\n", dims[x], dims[y], dims[z]);
 	printf ("number of timesteps = %d\n", sys.NumSteps());
@@ -116,6 +116,6 @@ int main (int *argc, char **argv) {
 	}
 
 	fclose(output);
-		
+
 return 0;
 }

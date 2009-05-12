@@ -3,27 +3,33 @@
 OrderParameters::OrderParameters (int argc, const char **argv, const WaterSystemParams& params)
 	:	WaterSystem(argc, argv, params),
 	angmax (1.0), angmin (-1.0), angres (0.01), angbins ((angmax-angmin)/angres),
+	_data (std::vector< std::vector<double> > (25, std::vector<double> (posbins, 0.0))),
+	number_density (std::vector<unsigned long int> (posbins, 0))
+	/*
+	phi (std::vector<double> (posbins, 0.0)),
+	theta (std::vector<double> (posbins, 0.0)),
+	psi (std::vector<double> (posbins, 0.0)),
 	S1 (std::vector<double> (posbins, 0.0)),
 	S2_num (std::vector<double> (posbins, 0.0)),
 	S2_den (std::vector<double> (posbins, 0.0)),
-	number_density (std::vector<int> (posbins, 0))
-	
+	*/
+
 {
-	
+
 	printf ("Running an order parameter analysis with the following options:\n");
 
 	if (argc < 3) {
 		printf ("Rerun with the two interface locations:\norderparams <int_low> <int_high>\n");
 		exit(1);
 	}
-	
+
 	printf ("\tAngle cosines will range from:\n\t\tMax = % 8.3f\n\t\tMin = % 8.3f\n\t\tResolution = % 8.3f\n", angmin, angmax, angres);
 
 	// The histogram looks like histo[y-position][S1][S2 numerator][S2 denominator]
 
 return;
 }
-	
+
 // output data to a file
 void OrderParameters::OutputData () {
 
@@ -33,15 +39,28 @@ void OrderParameters::OutputData () {
 		for (unsigned int pos = 0; pos < posbins; pos++) {
 
 			double position = double(pos) * this->posres + this->posmin;
-			double N = (double)number_density[pos];
+			unsigned long int N = number_density[pos];
 			if (!N) continue;
 
+			/*
 			// straightforward output of the equations for the order parameters
-			fprintf (output, "% 10.3f% 10.3f% 10.3f\n", 
+			fprintf (output, "% 10.3f% 10.3f% 10.3f\n",
 				position,						// position along the axis
-				0.5 * (3.0 * S1[pos]/N - 1), 	// S1
+				0.5 * (3.0 * S1[pos]/N - 1.0), 	// S1
 				S2_num[pos] / S2_den[pos]		// S2
 			);
+			*/
+
+			// print out the position for each data row
+			fprintf (output, "% 12.5f", position);
+
+			// then each bit of compiled data
+			for (int i = 0; i < _data.size(); i++) {
+				fprintf (output, "% 15.5f", _data[i][pos]);
+			}
+
+			// and lastly the number density for that location in the slab
+			fprintf (output, "% 15d\n", N);
 		}
 	}
 
@@ -54,11 +73,11 @@ return;
 // a status output meter
 void OrderParameters::OutputStatus () const {
 
-	if (!(timestep % 2500)) 
+	if (!(timestep % 2500))
 		cout << endl << timestep << "/" << timesteps << " ) ";
-	if (!(timestep % 250))  
+	if (!(timestep % 250))
 		cout << "*";
-	
+
 	fflush (stdout);
 
 return;
@@ -111,28 +130,49 @@ void OrderParameters::Analysis () {
 			// first set the molecular axes up
 			wat->SetOrderAxes ();
 
-			// then find the Euler angles for the tilt and twist of the molecule
+			// then find the Euler angles for the molecule
 			wat->CalcEulerAngles (this->axis);
-			double tilt = wat->EulerAngles[1];
-			double twist = wat->EulerAngles[2];
+
+			double phi_val = wat->EulerAngles[0];
+			double theta_val = wat->EulerAngles[1];
+			// for theta, if the molecule is on the bottom interface we need to adjust for the fact that the normal points in the opposite direction of the top interface. This is done just by adding 180 degrees (pi) to the angle value
+			if (position < middle)
+				theta_val += M_PI;
+			double psi_val = wat->EulerAngles[2];
 
 			// calculate the S1 term
-			double S1_value = cos(tilt) * cos(tilt);
+			//double S1_value = cos(theta_val) * cos(theta_val);
 
 			// and the S2 numerator and denominator
-			double sin_tilt_sq = sin(tilt) * sin(tilt);	// this is just done for a little more speed - not calculating sin twice... (?)
-			double S2_num_value = sin_tilt_sq * cos(2.0 * twist);
-			double S2_den_value = sin_tilt_sq;
+			//double S2_num_value = sin(theta_val) * sin(theta_val) * cos(2.0 * psi_val);
+			//double S2_den_value = sin(theta_val) * sin(theta_val);
 
-/*
-			// and now bin all those values for the histogram
-			int S1_bin = int ((S1-posmin)/posres);
-			int S2_num_bin = int ((S2_num-angmin)/angres);
-			int S2_den_bin = int ((S2_den-angmin)/angres);
-*/
-			S1[posbin] += S1_value;
-			S2_num[posbin] += S2_num_value;
-			S2_den[posbin] += S2_den_value;
+			// bin the euler angle values (cos() of...)
+			_data[0][posbin] += phi_val;							// direct angle values
+			_data[1][posbin] += theta_val;
+			_data[2][posbin] += psi_val;
+			_data[3][posbin] += sin(phi_val);						// <sin()>
+			_data[4][posbin] += sin(theta_val);
+			_data[5][posbin] += sin(psi_val);
+			_data[6][posbin] += sin(2.0*phi_val);					// <sin(2*angle)>
+			_data[7][posbin] += sin(2.0*theta_val);
+			_data[8][posbin] += sin(2.0*psi_val);
+			_data[9][posbin] += sin(phi_val)*sin(phi_val);			// <sin^2()>
+			_data[10][posbin] += sin(theta_val)*sin(theta_val);
+			_data[11][posbin] += sin(psi_val)*sin(psi_val);
+			_data[12][posbin] += cos(phi_val);						// <cos()>
+			_data[13][posbin] += cos(theta_val);
+			_data[14][posbin] += cos(psi_val);
+			_data[15][posbin] += cos(2.0*phi_val);					// <cos(2.0*angle)>
+			_data[16][posbin] += cos(2.0*theta_val);
+			_data[17][posbin] += cos(2.0*psi_val);
+			_data[18][posbin] += cos(phi_val)*cos(phi_val);			// <cos^2()>
+			_data[19][posbin] += cos(theta_val)*cos(theta_val);
+			_data[20][posbin] += cos(psi_val)*cos(psi_val);
+			_data[21][posbin] += sin(theta_val)*cos(2.0*phi_val);					// <sin(theta)*cos(2phi)>
+			_data[22][posbin] += sin(theta_val)*cos(2.0*psi_val);					// <sin(theta)*cos(2psi)>
+			_data[23][posbin] += sin(theta_val)*sin(theta_val)*cos(2.0*phi_val);	// <sin^2(theta)*cos(2phi)>
+			_data[24][posbin] += sin(theta_val)*sin(theta_val)*cos(2.0*psi_val);	// <sin^2(theta)*cos(2psi)>
 			++number_density[posbin];
 		}
 
@@ -176,7 +216,7 @@ int main (int argc, const char **argv) {
 	params.output_freq = 50;
 
 	OrderParameters par (argc, argv, params);
-	
+
 	par.Analysis();
 
 return 0;

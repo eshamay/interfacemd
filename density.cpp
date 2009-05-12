@@ -13,7 +13,7 @@ vector<int> NumberDensity (AmberSystem& sys, double const start, double const en
 
 	// and now run through the actual calculations to find number densities
 	RUN (sys) {
-			
+
 		VecR r = sys[i]->Position();
 		double position = r[axis];
 		int bin = (int)((position-start)/binsize);
@@ -37,7 +37,7 @@ vector<int> MoleculeDensity ( AmberSystem& sys, double const start, double const
 
 	// and now run through the actual calculations to find number densities
 	RUN (sys.Molecules()) {
-			
+
 		Atom * patom = sys.Molecules(i)->GetAtom(atomname);
 		VecR r = patom->Position();
 		double position = r[axis];

@@ -4,13 +4,13 @@
 void OutputStatus (int step);
 
 int main (int *argc, char **argv) {
-	
+
 	VecR dims (xSize, ySize, zSize);
-	
+
 	XYZSystem sys (filename, dims, wannierfile);
 
 	FILE * output = fopen (outputfilename.c_str(), "w");
-	
+
 	// run through a bunch of timesteps
 	printf ("Performing a TCF analysis of the system dipole\n");
 	printf ("system size for this analysis: %8.3f%8.3f%8.3f\n", dims[x], dims[y], dims[z]);
@@ -28,13 +28,13 @@ int h3o = 0, no3 = 0, hno3 = 0, oh = 0, h2o = 0, und = 0;
 			//if (sys.Molecules(i)->Name() != "h2o") continue;
 
 			mol = sys.Molecules(i);
-if (mol->Name() == "hno3") 
+if (mol->Name() == "hno3")
 	hno3++;
-if (mol->Name() == "h2o") 
+if (mol->Name() == "h2o")
 	h2o++;
-if (mol->Name() == "oh") 
+if (mol->Name() == "oh")
 	oh++;
-if (mol->Name() == "no3") 
+if (mol->Name() == "no3")
 	no3++;
 if (mol->Name() == "h3o")
 	h3o++;
@@ -64,13 +64,13 @@ if (mol->Name() == "undefined")
 	}
 
 	fclose(output);
-		
+
 return 0;
 }
 
 void OutputStatus (int step) {
 
-	if (!(step % (OUTPUT_FREQ * 10))) 
+	if (!(step % (OUTPUT_FREQ * 10)))
 		printf ("\n%d)  ", step);
 	if (!(step % OUTPUT_FREQ))
 		printf ("*"); fflush (stdout);

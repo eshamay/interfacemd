@@ -5,7 +5,7 @@ int Node::num_nodes = 0;
 
 // create a new unconnected node
 Node::Node () {
-	
+
 	++Node::num_nodes;
 	edges.clear();
 
@@ -27,11 +27,11 @@ void Node::AddEdge (Edge * e) {
 
 // remove a single edge from a node
 void Node::RemoveEdge (Edge * e) {
-	
+
 	Edge_it ei;
-	
+
 	for (ei = edges.begin(); ei != edges.end(); ei++) {
-		
+
 		// find the matching edge in the list
 		if (*ei != e) continue;
 

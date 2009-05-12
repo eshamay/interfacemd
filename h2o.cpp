@@ -32,11 +32,11 @@ void Water::SetAtoms () {
 	if (!_set) {
 		// first let's grab pointers to the three atoms and give them reasonable names
 		_h1 = (Atom *)NULL; _h2 = (Atom *)NULL;
-	
+
 		RUN (_atoms) {
 			if (_atoms[i]->Name().find("O") != string::npos)
 				_o = _atoms[i];
-	
+
 			if (_atoms[i]->Name().find("H") != string::npos) {
 				if (_h1 == (Atom *)NULL)
 					_h1 = _atoms[i];
@@ -44,7 +44,7 @@ void Water::SetAtoms () {
 					_h2 = _atoms[i];
 			}
 		}
-	
+
 		// we can calculate the two O-H vectors
 		_oh1 = _o->Position().MinVector(_h1->Position(), Atom::Size());
 		_oh2 = _o->Position().MinVector(_h2->Position(), Atom::Size());
@@ -64,7 +64,7 @@ return bisector.Unit();
 }
 
 void Water::CalcDipole () {
-	
+
 	// this plan goes along the same method of Morita/Hynes (J. Phys. Chem. B, Vol. 106, No. 3, 2002) for calculating the dipole moment. It's based on a parameterization of the water partial charges
 	this->SetAtoms();
 
@@ -86,17 +86,17 @@ void Water::CalcDipole () {
 
 	double alpha = C7*X2 + C8*X1*X2 + C9*X2*X3;		// originally delta q1 - delta q2
 	double dqO = C1*X1 + C2*X3 + C3*X1*X1 + C4*X2*X2 + C5*X3*X3 + C6*X1*X3;	// originally delta q0
-	
+
 	// and calculating the partial charges...
 	double qO = qO_eq + dqO;		// partial charge on the oxygen
-	double q1 = (alpha - qO) / 2.0; 
+	double q1 = (alpha - qO) / 2.0;
 	double q2 = (-alpha - qO) / 2.0;
 
 	//printf ("%f\t%f\t%f\t%f\t%f\n", alpha, beta, q0, q1, q2);
 	// now the dipole moment is calculated classically
 	_dipole = _o->Position()*qO + _h1->Position()*q1 + _h2->Position()*q2;
-	
-return; 
+
+return;
 }
 
 /* The molecular axes are defined as follows:
@@ -105,7 +105,7 @@ return;
  * 	The X-axis is then normal to the Z and Y axes, where the 2nd OH bond lies in the positive x-direction
  */
 void Water::SetMoritaAxes (const int Zbond) {
-	
+
 	this->SetAtoms();
 
 	// try one of the oh bonds as the z-axis
@@ -131,7 +131,7 @@ return;
  * x-axis = y % z
  */
 void Water::SetOrderAxes () {
-	
+
 	this->SetAtoms ();
 
 	// the z-axis is the negative of the C2V axis - so find the bisector and set the vector pointing towards the O
@@ -150,8 +150,8 @@ return;
 #ifdef WATER_POLARIZ
 // This calculations of the molecular polarizability is based on the Morita-Hynes 2002 paper where they use ab initio calcs to find fitting parameters to calculate alpha. We calculate a polarizability tensor for both OH bonds, and then rotate each one into the molecular frame, and then sum them to get the molecular polarizability.
 void Water::CalcAlpha () {
-	
-	double 	D1 = 4.6077, 
+
+	double 	D1 = 4.6077,
 			D2 = 4.8894,
 			D3 = 5.5062,
 			D4 = 1.6890,
@@ -160,22 +160,22 @@ void Water::CalcAlpha () {
 			D7 = 3.4710;
 
 	this->FindOHBonds();
-	
+
 	double oh1 = _oh1.Magnitude();
 	double oh2 = _oh2.Magnitude();
 
-	MatR alpha_1; 
+	MatR alpha_1;
 	alpha_1.Set (0,0, oh1*D4 + D1);
 	alpha_1.Set (1,1, oh1*D5 + D2);
 	alpha_1.Set (2,2, oh1*D6 + oh1*oh1*D7 + D3);
 
-	MatR alpha_2; 
+	MatR alpha_2;
 	alpha_2.Set (0,0, oh2*D4 + D1);
 	alpha_2.Set (1,1, oh2*D5 + D2);
 	alpha_2.Set (2,2, oh2*D6 + oh2*oh2*D7 + D3);
 
 	this->SetMoritaAxes (1);
-	
+
 	VecR frame[3];
 	frame[0] = _x; frame[1] = _y; frame[2] = _z;
 	MatR alpha_1_rot = alpha_1.RotateToFrame (frame);
@@ -212,7 +212,7 @@ MatR const & Water::DCMToLab (const coord axis) {
 
     // Here we'll create the lab-frame rotation matrix to rotate molecular properties into the lab-frame
     double rotation_data[9] = {	_x<X, _y<X, _z<X,
-								_x<Y, _y<Y, _z<Y, 
+								_x<Y, _y<Y, _z<Y,
 								_x<Z, _y<Z, _z<Z   };
     DCM.Set(rotation_data);
 
@@ -222,7 +222,7 @@ return DCM;
 // The molecular axes are defined as per Morita&Hynes (2000) where they set one of the OH bonds (oh1) as the molecular z-axis, and the other bond points in the positive x-axis direction. The result is setting DCM as the direction cosine matrix, that, when operating on a vector in the molecular frame will rotate it into lab-frame coordinates
 MatR const & Water::DCMToLabMorita (const coord axis) {
     this->SetMoritaAxes ();
-	
+
 	this->DCMToLab (axis);
 
 return DCM;
@@ -231,7 +231,7 @@ return DCM;
 // the alternative is to use the axes definition based on the molecular z-axis lying on the H2O bisector
 MatR const & Water::DCMToLabOrder () {
     this->SetOrderAxes ();
-	
+
 	this->DCMToLab ();
 
 return DCM;
@@ -251,7 +251,7 @@ void Water::CalcEulerAngles (const coord axis) {
 	double z2 = DCM.Index(2,1);
 	double z3 = DCM.Index(2,2);
 
-	/* If all three axes in the molecular (xyz) and lab (XYZ) frames are aligned, then the euler rotations work by rotating about the body-fixed 
+	/* If all three axes in the molecular (xyz) and lab (XYZ) frames are aligned, then the euler rotations work by rotating about the body-fixed
 	 * axes as follows based on the ZXZ convention:
 	 * First a rotation of alpha about the z-axis.
 	 * Second a rotation of beta about the x-axis. This is also known as the "tilt" angle because it is the angle between the z and Z axes.
@@ -262,6 +262,15 @@ void Water::CalcEulerAngles (const coord axis) {
 	double alpha = atan2(x3,-y3);
 	double gamma = atan2(z1,z2);
 
+	// alpha is ranged in [-pi/2, pi/2]
+	//alpha = fmod(alpha, M_PI/2.0);
+
+	// beta is ranged in [0, pi]
+	//beta = fmod(beta, M_PI);
+
+	// because of water's biaxial symmetry, gamma ranges [-pi/2,pi/2]
+	//gamma = fmod(gamma, M_PI/2.0);
+
 	//printf ("% 10.4f% 10.4f% 10.4f\n", theta, phi, chi);
 
 	//alpha = -alpha;
@@ -269,24 +278,25 @@ void Water::CalcEulerAngles (const coord axis) {
 	EulerAngles[1] = beta;
 	EulerAngles[2] = gamma;
 
+	double sa = sin(alpha);
+	double sb = sin(beta);
+	double sg = sin(gamma);
+	double ca = cos(alpha);
+	double cb = cos(beta);
+	double cg = cos(gamma);
+
 	// and now set up the euler rotation matrix according to the ZXZ convention for euler rotations
     double euler_matrix[9] = {
-		cos(alpha)*cos(gamma) - sin(alpha)*cos(beta)*sin(gamma),
-		sin(alpha)*cos(gamma) + cos(alpha)*cos(beta)*sin(gamma),
-		sin(beta)*sin(gamma),
-		-cos(alpha)*sin(gamma)-sin(alpha)*cos(beta)*cos(gamma),
-		-sin(alpha)*sin(gamma)+cos(alpha)*cos(beta)*cos(gamma),
-		sin(beta)*cos(gamma),
-		sin(beta)*sin(alpha),
-		-sin(beta)*cos(alpha),
-		cos(beta)
+		ca*cg-sa*cb*sg, 	sa*cg+ca*cb*sg, 	sb*sg,
+		-ca*sg-sa*cb*cg, 	-sa*sg+ca*cb*cg, 	sb*cg,
+		sb*sa, 				-sb*ca,				cb
 	};
 
     EulerMatrix.Set (euler_matrix);
 
 return;
 }
-	
+
 int Hydroxide::numHydroxides = 0;
 
 Hydroxide::Hydroxide () {
@@ -327,7 +337,7 @@ Hydronium::~Hydronium () {
 }
 
 void Hydronium::SetAtoms () {
-	
+
 		// here's the hydrogen and nitrogen atoms
 		_o = (*this)["O"];
 
