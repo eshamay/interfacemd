@@ -7,8 +7,8 @@ CPPFLAGS	= $(CINCLUDE)
 #CXX			= mpiCC -g
 CXX			= g++ $(CXXFLAGS)
 CXXOPTIMIZE = -O2 -finline-functions -finline-limit-1000 -funroll-loops
-#CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CXXOPTIMIZE) $(CINCLUDE)
-CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CINCLUDE)
+CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CXXOPTIMIZE) $(CINCLUDE)
+#CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CINCLUDE)
 TEMPFLAGS	= $(CINCLUDE)
 MPICXX		= mpiCC -g -I$(MPI)/include
 

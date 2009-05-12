@@ -5,7 +5,7 @@
 #include <iostream>
 #include "vecr.h"
 #include "utility.h"
-//#include "FTensor.h"
+#include "FTensor.h"
 
 class VecR;
 

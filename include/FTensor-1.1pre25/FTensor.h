@@ -1,3 +1,5 @@
+#ifndef FTENSOR_H_
+#define FTENSOR_H_
 /* Include file for the Fast Tensor classes (FTensor).  Everything is
    in namespace FTensor. */
 
@@ -76,3 +78,5 @@ namespace FTensor {
 #include "Tensor4_ddg.h"
 #include "Tensor4_Riemann.h"
 }
+
+#endif
