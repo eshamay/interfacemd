@@ -1,63 +1,48 @@
 #include "morita.h"
 
-int main (int argc, char **argv) {
+SFGAnalyzer::SFGAnalyzer (int const argc, const char **argv, const WaterSystemParams& params)
+	:	WaterSystem (argc, argv, params),
+		MolChi (Complex_vec (0, complex<double>(0.0,0.0))),
+		TimestepChi (Complex_vec (0, complex<double>(0.0,0.0))),
+		TotalChi (Complex_vec (0, complex<double>(0.0,0.0)))
+{
 
-	// here is our system for analysis
-	AmberSystem sys (PRMTOP, MDCRD, FORCE);
+	printf ("\n*** Performing an SFG analysis of the system ***\n");
 
-	// This will be our sfg-analysis toybox
-	SFGWaterAnalyzer sfg;
+return;
+}
 
-	// a little info sent to the screen about what we're doing
-	OutputHeader ();
-
-	FILE * output = (FILE *)NULL;
-
-	output = fopen (OUTPUTFILE, "w");
-	if (output == (FILE *)NULL) {
-		std::cout << "couldn't open the output file!!" << endl;
-		exit (1);
-	}
-
-	// let's set up a few useful containers that we'll use later on
-	std::vector< complex<double> > MolChi;			// chi for a given molecule
-	std::vector< complex<double> > TimestepChi;		// chi spectrum of several different molecules collected over an entire timestep
-	std::vector< complex<double> > TotalChi;		// Running total of all the data for several timesteps
+void SFGAnalyzer::Analyze () {
 
 	Water * water;	// our prototypical water molecule
 
 	// Sets up the axes for the system
-	const int P = 1;		// perpendicular to the interface
 	const int S1 = 0;		// the two that are parallel to the surface
 	const int S2 = 2;
+	const int P = 1;		// perpendicular to the interface
 
+	bool firstmol = true;			// first molecule processed
 
-	// just so we don't have to always iterate over the entire system, we're only going to look at interfacial molecules - the ones were interested in.
-	std::vector<Water *> int_mols;
-	// and these are the atoms of those molecules
-	std::vector<Atom *> int_atoms;
+	numMolsProcessed = 0;
 
-	bool firsttimestep = true;	// first time through (first timestep)
-	bool firstmol;			// first molecule processed
-
-	unsigned int numMolsProcessed = 0;
 	// okay, now let's start iterating over timesteps
-	for (int step=0; step < TIMESTEPS; step++) {
+	for (timestep = 0; timestep < timesteps; timestep++) {
 
 		TimestepChi.clear();	// it's a new timestep
 		firstmol = true;		// every timestep we will have to go through all the molecules again
 
 		// first let's find all the molecules in the interface
-		FindInterfacialWaters (int_mols, int_atoms, sys);
+		this->FindWaters ();
+		this->SliceWaters (40.0, 70.0);
 
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
-		//sys.UpdateGraph (int_atoms);
+		// sys.UpdateGraph (int_atoms);
 
 		numMolsProcessed += int_mols.size();
 
 		for (int mol = 0; mol < int_mols.size(); mol++) {
 
-			water = int_mols[mol];
+			water = static_cast<Water *>(int_mols[mol]);
 
 			sfg.Reset();		// reset the calculator for a new molecule
 			MolChi.clear();
@@ -72,10 +57,9 @@ int main (int argc, char **argv) {
 			}
 
 			// for the very first timestep...
-			if (firsttimestep) {
+			if (!timestep) {
 				int numData = MolChi.size();	// number of data points collected for the chi spectrum
 				TotalChi.resize (numData, complex<double> (0.0, 0.0));
-				firsttimestep = false;
 			}
 
 			// perform the summation for averaging over the system
@@ -88,108 +72,96 @@ int main (int argc, char **argv) {
 			CollectChi (MolChi, TimestepChi);
 		}
 
-		// now output something to the screen (once in a while = every set # of timesteps)
-		OutputStatus (step);
-
 		// we collect the data for each timestep into the running total
 		CollectChi (TimestepChi, TotalChi);
 
+		// now output something to the screen (once in a while = every set # of timesteps)
+		OutputStatus ();
+
 		// and once in a while, also output the data to a file for reading
-		if (!(step % (OUTPUT_FREQ * 10))) {
-			OutputData (output, TotalChi, step * numMolsProcessed);		// output the data to the data file
-		}
+		OutputData ();
 
 		sys.LoadNext();
 	}
 
 	// final output of the data to the file
-	OutputData (output, TotalChi, TIMESTEPS * numMolsProcessed);
+	OutputData ();
 
 	fclose(output);
 
-return 0;
+return;
 }
 
 // sum up the Chi spectra from each molecule
-void CollectChi (std::vector< std::complex<double> >& Chi_step, std::vector< std::complex<double> >& Chi_total) {
+void SFGAnalyzer::CollectChi (Complex_vec& newchi, Complex_vec& totalchi) {
 
-	RUN (Chi_step) {
-		Chi_total[i] += Chi_step[i];
+	RUN (newchi) {
+		totalchi[i] += newchi[i];
 	}
-
-return;
-}
-
-// print an informative header
-void OutputHeader () {
-
-	printf ("Generating SFG for %d timesteps\n\"*\" = %d steps\n", TIMESTEPS, OUTPUT_FREQ);
-	printf ("Polarization = %s\n", POLARIZATION);
-	printf ("outputting to file: %s\n", OUTPUTFILE);
-
-return;
-}
-
-// output a status meter to the screen
-void OutputStatus (int const count) {
-
-	if (!(count % (OUTPUT_FREQ * 10)))
-		printf ("\n%10d/%d)  ", count, TIMESTEPS);
-
-	if (!(count % OUTPUT_FREQ))
-		printf ("*");
-
-	fflush (stdout);
-
 
 return;
 }
 
 // output data to the file
-void OutputData (FILE * fp, vector< complex<double> >& chi, unsigned int factor) {
+void SFGAnalyzer::OutputData () {
 
-	rewind (fp);
+	if (!(timestep % (output_freq * 10))) {
+		rewind (output);
 
-	RUN (chi) {
-		double freq = (double(i)*FREQ_STEP+START_FREQ)*AU2WAVENUMBER;
-		double mag = abs(chi[i])*abs(chi[i]) / (double)factor;
-		fprintf (fp, "% 12.8e\t% 12.8e\n", freq, mag);
-	}
-
-	fflush (fp);
-
-return;
-}
-
-void FindInterfacialWaters (vector<Water *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys) {
-
-	int_mols.clear();
-	int_atoms.clear();
-
-	Molecule * pmol;
-
-	// go through the system
-	RUN (sys.Molecules()) {
-		// grab each molecule
-		pmol = sys.Molecules(i);
-
-		// we're only looking at waters for SFG analysis right now
-		if (pmol->Name() != "h2o") continue;
-
-		// first thing we do is grab a water molecule to work with
-		Water * water = static_cast<Water *>(pmol);
-
-		double position = water->Atoms(0)->Position()[axis];
-		// and find molecules that sit within the interface.
-		if (position < PBC_FLIP) position += Atom::Size()[axis];		// adjust for funky boundaries
-		// these values have to be adjusted for each system
-		if (position < INTERFACE_LOW or position > INTERFACE_HIGH) continue;				// set the interface cutoffs
-
-		int_mols.push_back (water);
-		RUN2(water->Atoms()) {
-			int_atoms.push_back (water->Atoms(j));
+		//RUN (TotalChi) {
+			//printf ("t - %f\n", abs(TotalChi[i]));
+		//}
+		RUN (TotalChi) {
+			double freq = (double(i)*FREQ_STEP+START_FREQ)*AU2WAVENUMBER;
+			double r = real(TotalChi[i]);
+			double im = imag(TotalChi[i]);
+			fprintf (output, "% 12.8e\t% 12.8e\t% 12.8e\n", freq, r/numMolsProcessed, im/numMolsProcessed);
 		}
+
+		fflush (output);
 	}
 
 return;
 }
+
+int main (const int argc, const char **argv) {
+
+	#ifdef AVG
+		if (argc < 3) {
+			printf ("for averaging, we need the two interface locations: <low> <high>\n");
+			exit(1);
+		}
+	#endif
+
+	WaterSystemParams params;
+
+	params.prmtop = "prmtop";
+	params.mdcrd = "mdcrd";
+	params.mdvel = "mdvel";
+	params.axis = y;
+	params.timesteps = 200000;
+	#ifdef RESTART
+		params.restart = 100000;
+	#endif
+	#ifdef AVG
+		params.avg = true;
+		params.posmin = -40.0;
+		params.posmax = 40.0;
+		params.output = "sfg.morita.avg.dat";
+	#else
+		params.avg = false;
+		params.posmin = -5.0;
+		params.posmax = 150.0;
+		params.output = "sfg.morita.dat";
+	#endif
+	params.posres = 0.100;
+	params.pbcflip = 20.0;
+	params.output_freq = 10;
+
+	SFGAnalyzer analyzer (argc, argv, params);
+
+	analyzer.Analyze ();
+
+return 0;
+}
+

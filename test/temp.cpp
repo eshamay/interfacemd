@@ -1,6 +1,7 @@
 #include <iostream>
+#include "../utility.h"
 #include "../ambersystem.h"
-#include "../pdbfile.h"
+//#include "../pdbfile.h"
 
 using namespace std;
 
@@ -9,7 +10,7 @@ MatR r_matrix (double alpha, double beta, double gamma, int fwd);
 void rotate (MatR R, Molecule * mol);
 
 int main (int argc, char **argv) {
-	AmberSystem sys ("prmtop", "mdcrd", "");
+	AmberSystem sys ("prmtop", "mdcrd", "mdvel");
 
 /*
 	// original water in molecular frame
@@ -44,32 +45,44 @@ int main (int argc, char **argv) {
 	}
 */
 	//for (int step = 0; step < 20; step++) {
-	//RUN (sys.Molecules()) {
+	Water * wat;
+	RUN (sys.Molecules()) {
 		//Molecule * mol = sys.Molecules(atof(argv[1]));
-		Molecule * mol = sys.Molecules(175);
-		//if (mol->Name() != "h2o") continue;
+		Molecule * mol = sys.Molecules(i);
+		if (mol->Name() != "h2o") continue;
 
-		Water * wat = static_cast<Water *>(mol);
-		//wat->Print();
+		wat =  static_cast<Water *>(mol);
+		break;
+	}
+	wat->Print();
 
-		wat->SetOrderAxes();
-		wat->CalcEulerAngles(y);
+	MatR dcm = wat->DCMToLabMorita(z);
 
-		double phi = wat->EulerAngles[0] * 180.0/M_PI;
-		double theta = wat->EulerAngles[1] * 180.0/M_PI;
-		double psi = wat->EulerAngles[2] * 180.0/M_PI;
+	//wat->CalcEulerAngles(y);
 
-		VecR c = wat->Bisector() * -1.0;
-		double euler_tilt = wat->EulerAngles[1] * 180.0/M_PI;
+	VecR oh1 = *(wat->OH1());
+	oh1.Print();
+	x = VecR(1,0,0);
+	y = VecR(0,1,0);
+	z = VecR(0,0,1);
 
-		double c_tilt = acos(VecR(0.0,1.0,0.0) < c) * 180.0/M_PI;
+	//double phi = wat->EulerAngles[0] * 180.0/M_PI;
+	//double theta = wat->EulerAngles[1] * 180.0/M_PI;
+	//double psi = wat->EulerAngles[2] * 180.0/M_PI;
 
-		printf ("% 8.3f\t% 8.3f\t% 8.3f\n", phi, theta, psi);
+	(dcm.Transpose() * oh1).Print();
+	(dcm * ).Print();
+		//VecR c = wat->Bisector() * -1.0;
+		//double euler_tilt = wat->EulerAngles[1] * 180.0/M_PI;
+
+		//double c_tilt = acos(VecR(0.0,1.0,0.0) < c) * 180.0/M_PI;
+
+	//printf ("% 8.3f\t% 8.3f\t% 8.3f\n", phi, theta, psi);
 	//}
 	//sys.LoadNext();
 	//}
 
-		printf ("% 8.3f\t% 8.3f\n", cos(2.0*atan2(1.2,1.4)), cos(2.0*atan2(1.4,1.2)));
+		//printf ("% 8.3f\t% 8.3f\n", cos(2.0*atan2(1.2,1.4)), cos(2.0*atan2(1.4,1.2)));
 /*
 		for (int i = 0; i < 3; i++) {
 			double val = wat->EulerAngles[i];

@@ -61,7 +61,7 @@ const double END_FREQ			= 4000.0/AU2WAVENUMBER;
 const double FREQ_STEP			= 1.0/AU2WAVENUMBER;		// step size when calculating the spectra
 const double NUM_STEP			= (END_FREQ-START_FREQ)/FREQ_STEP;
 
-class SFGWaterAnalyzer {
+class SFGCalculator {
 	
 private:
 	
@@ -98,8 +98,8 @@ public:
 	MatR AlphaDeriv1;			// polarizability deriv matrix for the first OH bond in the frame of the 1st OH bond
 	MatR AlphaDeriv2;			// polarizability deriv matrix of the 2nd OH in the frame of the 1st OH (through unitary transformation)
 
-	//SFGWaterAnalyzer (string polarization, coord axis);		// For loading up the entire system
-	SFGWaterAnalyzer ();		// For loading up the entire system
+	//SFGCalculator (string polarization, coord axis);		// For loading up the entire system
+	SFGCalculator ();		// For loading up the entire system
 
 	void Reset () { _set = false; }
 

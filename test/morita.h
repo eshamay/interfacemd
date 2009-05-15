@@ -3,50 +3,35 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../utility.h"
 #include "../watersfg.h"
-#include "../matrixr.h"
+#include "../watersystem.h"
 
-// if we're running this on an MPI system
+// if we're running this on an MPI system to do some parallel work:
 //#define MPI_SYS
-
 #ifdef	MPI_SYS
-#include "../mpi/mpisys.h"
-#else
-#include "../ambersystem.h"
+	#include "../mpi/mpisys.h"
 #endif
 
-#define PRMTOP	"prmtop"
-#define MDCRD	"mdcrd"
-#define FORCE	"mdvel"
+typedef std::vector< complex<double> > Complex_vec;
 
+class SFGAnalyzer : public WaterSystem {
 
-// set the interface correctly - different simulation = different location!!
-#define INTERFACE_LOW		57.5			// the location of the interface (the top one, only, for now)
-#define INTERFACE_HIGH		70.0
-#define PBC_FLIP			15.0			// used for funcy periodic boundaries
+public:
+	SFGAnalyzer (const int argc, const char **argv, const WaterSystemParams& params);
+	void Analyze ();
 
-const coord axis = y;
-#define	 OUTPUT_FREQ	100					// how often the output file will be written (# of timesteps/10)
-#define	 TIMESTEPS		200000				// # of timesteps to process through
-#define	 POLARIZATION	"SSP"				// the polarization scheme used for the analysis
-#define	 OUTPUTFILE		"morita.sfg.dat"	// name of the output file for the final spectra
+private:
 
+	SFGCalculator	sfg;
+	Complex_vec MolChi;			// chi for a given molecule
+	Complex_vec TimestepChi;	// chi spectrum of several different molecules collected over an entire timestep
+	Complex_vec TotalChi;		// Running total of all the data for several timesteps
 
-#ifdef MPI_SYS
-void OutputHeader (MPIMolSystem& sys);
-void OutputStatus (int const count, MPIMolSystem& sys);
-void MPI_PackageChi (std::vector< std::complex<double> >& TimestepChi, std::vector< std::complex<double> >& TotalChi, MPIMolSystem& sys);
-void FindInterfacialWaters (vector<Molecule *>& int_mols, vector<Atom *>& int_atoms, MPIMolSystem& sys);
-#else
-void OutputHeader ();
-void OutputStatus (int const count);
-void FindInterfacialWaters (vector<Water *>& int_mols, vector<Atom *>& int_atoms, AmberSystem& sys);
-#endif
+	unsigned long numMolsProcessed;
 
-void OutputData (FILE * fp, vector< complex<double> >& chi, unsigned int factor);
+	void OutputData ();
+	void CollectChi (Complex_vec& newchi, Complex_vec& totalchi);
 
-void CollectChi (std::vector< std::complex<double> >& MolChi, std::vector< std::complex<double> >& TotalChi);
-
+};
 
 #endif

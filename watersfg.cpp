@@ -1,7 +1,7 @@
 #include "watersfg.h"
 
-//SFGWaterAnalyzer::SFGWaterAnalyzer (string const polarization, coord const axis) {
-SFGWaterAnalyzer::SFGWaterAnalyzer () : _set(false) {
+//SFGCalculator::SFGCalculator (string const polarization, coord const axis) {
+SFGCalculator::SFGCalculator () : _set(false) {
 
 	MuDeriv1.Set(-0.058, 0.000, 0.157);	// dipole derivative vector from the paper
 	MuDeriv2.Set(0.1287, 0.0, -0.1070);	// dipole derivative of the 2nd OH bond, in the frame of the first (found by direction cosine rotation)
@@ -17,14 +17,12 @@ SFGWaterAnalyzer::SFGWaterAnalyzer () : _set(false) {
 }
 
 /* taken from Eq. 10c from the Morita-Hynes work to calculate the change in frequency of a bond under a force. Returns two frequency shifts due to forces on a molecule */
-void SFGWaterAnalyzer::FreqShift (Water& water) {
+void SFGCalculator::FreqShift (Water& water) {
 
 	// first we grab the force vectors on each of the atoms	(Units = kcal/mol/Angstrom)
 	VecR vForceO = water["O"]->Force();
 	VecR vForceH1 = water["H1"]->Force();
 	VecR vForceH2 = water["H2"]->Force();
-
-	water.SetAtoms();
 
 /******************************
  * Calculate the forces on the two bonds
@@ -32,23 +30,23 @@ void SFGWaterAnalyzer::FreqShift (Water& water) {
 
 	/* The force calculation - splitting up the forces on the atoms between the two bonds - is done by find the inner-product of the force with the OH bond. Another method to try is also to scale the oxygen force and hydrogen force based on their distance from center of mass, or based on mass of the atom as a percentage of the total mass, etc. Here we use a simple direct dot-product approach to calculate the force until it's time to tweak it later
 	*/
-	double ForceOH1 = vForceH1 * water.OH1()->Unit() - vForceO * water.OH1()->Unit();
-	double ForceOH2 = vForceH2 * water.OH2()->Unit() - vForceO * water.OH2()->Unit();
+	double ForceOH1 = (vForceH1 * water.OH1()->Unit()) - (vForceO * water.OH1()->Unit());
+	double ForceOH2 = (vForceH2 * water.OH2()->Unit()) - (vForceO * water.OH2()->Unit());
 
 	// convert the forces into atomic units
 	ForceOH1 *= AMBER2ATOMIC;
 	ForceOH2 *= AMBER2ATOMIC;
+	//printf ("% 10.3f\t% 10.3f\n", _OH1FreqShift*AU2WAVENUMBER, _OH2FreqShift*AU2WAVENUMBER);
 
 /******************************
  * Calculate frequency shifts due to forces compressing or stretching bonds
  ******************************/
 	/* now perform the direct application of the equation Eq.10c */
-	// note: the frequency shift is given as an angular frequency (omega) in the equation. Do we need a conversion to freuency here?
+	// note: the frequency shift is given as an angular frequency (omega) in the equation. Do we need a conversion to Hz style frequency here?
 	_OH1FreqShift = (PREFACTOR * ForceOH1)/2.0/M_PI;		// now in frequency in atomic units
 	_OH2FreqShift = (PREFACTOR * ForceOH2)/2.0/M_PI;
 
-	//printf ("% 10.3f\t% 10.3f\n", _OH1FreqShift*AU2WAVENUMBER, _OH2FreqShift*AU2WAVENUMBER);
-
+	//printf ("% 10.3f\n% 10.3f\n", _OH1FreqShift*AU2WAVENUMBER, _OH2FreqShift*AU2WAVENUMBER);
 
 #ifdef	DIPOLE_DIPOLE		// only if adding in the dipole-dipole correction term (which should be pretty small)
 /*********************************************************************************************
@@ -173,13 +171,13 @@ void SFGWaterAnalyzer::FreqShift (Water& water) {
 	_w1 = UNCOUPLED_OH_FREQ + _OH1FreqShift;
 	_w2 = UNCOUPLED_OH_FREQ + _OH2FreqShift;
 
-	//printf ("% 10.5f\t% 10.5f\n", _w1*AU2WAVENUMBER, _w2*AU2WAVENUMBER);
+	//printf ("% 10.5f\n% 10.5f\n", _w1*AU2WAVENUMBER, _w2*AU2WAVENUMBER);
 return;
 }
 
 // Here we calculate several values that play right off the equations of the paper - primarily Eq 7 and 8
 /* here we calculate the eigenfrequencies (normal modes) and the eigenvectors of the normal modes of the water. */
-void SFGWaterAnalyzer::WaterEigenSystem (Water& water) {
+void SFGCalculator::WaterEigenSystem (Water& water) {
 
 	// calculate the two frequency shifts of the OH bonds
 	this->FreqShift (water);
@@ -203,6 +201,7 @@ void SFGWaterAnalyzer::WaterEigenSystem (Water& water) {
 	_ws = 0.5*(_w1+_w2 - wt);
 	_wa = 0.5*(_w1+_w2 + wt);
 
+	//printf ("% 10.5f\n% 10.5f\n", _ws*AU2WAVENUMBER, _wa*AU2WAVENUMBER);
 /*
 	double b = -_w1 - _w2;		// atomic units
 	double c = (_w1 * _w2) - V12*V12;
@@ -221,7 +220,6 @@ void SFGWaterAnalyzer::WaterEigenSystem (Water& water) {
 		printf ("Only found 1 root to the eigenfrequency equations! Check to see if this is right or not\n");
 	}
 
-	//printf ("ws = %f\nwa = %f\n", _ws, _wa);
 
 // let's set the symmetric frequency to be lower than the anti-symmetric
 	double temp = _ws;
@@ -269,8 +267,8 @@ The polarization will be specified as S and P... we are dealing in molecular-fra
 
 We're going to go through both OH bonds and treat each separately.
 */
-void SFGWaterAnalyzer::PolarizabilityAndDipoleDerivs (Water& water, int const p, int const q, int const r) {
-//void SFGWaterAnalyzer::PolarizabilityAndDipoleDerivs (Water& water) {
+void SFGCalculator::PolarizabilityAndDipoleDerivs (Water& water, int const p, int const q, int const r) {
+//void SFGCalculator::PolarizabilityAndDipoleDerivs (Water& water) {
 
 	if (!_set) this->WaterEigenSystem (water);
 
@@ -345,8 +343,8 @@ return;
 
 
 /* here we calculate the hyperpolarizability spectrum for a water molecule. In the course of this, two spectra will be calculated and averaged based on the two values of the eigenfrequencies of a water molecule */
-std::vector< std::complex<double> >& SFGWaterAnalyzer::Beta (Water& water, int const p, int const q, int const r) {
-//vector< complex<double> >& SFGWaterAnalyzer::Beta (Water& water) {
+std::vector< std::complex<double> >& SFGCalculator::Beta (Water& water, int const p, int const q, int const r) {
+//vector< complex<double> >& SFGCalculator::Beta (Water& water) {
 
 	/* Now that we have all the data established for this one water molecule (i.e. coefficients for symmetric and antisymmetric modes, dipole derivatives, and polarizability derivatives for all valid polarizations) we can put it all together and calculate spectra. Two spectra will come out for the sym and anti-sym cases, and we have to include all the polarization combinations. The beta that comes out of here is still in the molecular frame and needs to be rotated.
 	*/
@@ -393,7 +391,7 @@ return (_Beta);
 // eq(7) of the paper lays out pretty simply that we use a direction cosine matrix to find all the interesting things that make up the hyperpolarizability.
 // l,m,n are the lab frame axes, and p,q,r are the molecular frame ones.
 //
-std::vector< std::complex<double> >& SFGWaterAnalyzer::Chi (Water& water, int const l, int const m, int const n) {
+std::vector< std::complex<double> >& SFGCalculator::Chi (Water& water, int const l, int const m, int const n) {
 
 	// let's find the rotation matrix for the water with which we're working
 	// this matrix takes us from the frame of the first OH bond into the lab frame
@@ -418,9 +416,10 @@ std::vector< std::complex<double> >& SFGWaterAnalyzer::Chi (Water& water, int co
 		}
 
 		// These are the coefficients (direction-cosine-matrix components) for performing the unitary transformation into the lab-frame
-		Dpl = DCM(p,l);
-		Dqm = DCM(q,m);
-		Drn = DCM(r,n);
+		Dpl = DCM(l,p);
+		Dqm = DCM(m,q);
+		Drn = DCM(n,r);
+
 
 		RUN (_Beta) {
 			_Chi[i] += Dpl * Dqm * Drn * _Beta[i];
@@ -431,7 +430,7 @@ return (_Chi);
 }
 
 // calculates the dipole-dipole interaction potential for two dipoles separated by a distance R.
-double SFGWaterAnalyzer::DipolePotential (const VecR& muA, const VecR& muB, const VecR& R) {
+double SFGCalculator::DipolePotential (const VecR& muA, const VecR& muB, const VecR& R) {
 
 	double potential;
 
@@ -441,7 +440,7 @@ return (potential);
 }
 
 // A scaling factor of 1/sqrt(N) is applied to the coupling constant to account for how OH intramolecular coupling is red-shifted when in solution. Thus, DSW introduced a factor of 1/sqrt(N), where N is the number of hydrogen bonds on the water molecule. 0 or 1 bond would leave the coupling constant unchanged.
-double SFGWaterAnalyzer::CouplingConstant (Water& water) const {
+double SFGCalculator::CouplingConstant (Water& water) const {
 
 	double V12 = COUPLING_CONST;
 

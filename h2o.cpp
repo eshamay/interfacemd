@@ -119,7 +119,7 @@ void Water::SetMoritaAxes (const int Zbond) {
 		_y = (_oh2 % _oh1).Unit();
 	}
 
-	// the X-axis is just the cross produce of the other two
+	// the X-axis is just the cross product of the other two
 	_x = (_y % _z).Unit();
 
 return;
