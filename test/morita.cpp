@@ -17,9 +17,9 @@ void SFGAnalyzer::Analyze () {
 	Water * water;	// our prototypical water molecule
 
 	// Sets up the axes for the system
-	const int S1 = 0;		// the two that are parallel to the surface
+	const int S1 = 1;		// the two that are parallel to the surface
 	const int S2 = 2;
-	const int P = 1;		// perpendicular to the interface
+	const int P = 0;		// perpendicular to the interface
 
 	bool firstmol = true;			// first molecule processed
 
@@ -33,7 +33,7 @@ void SFGAnalyzer::Analyze () {
 
 		// first let's find all the molecules in the interface
 		this->FindWaters ();
-		this->SliceWaters (40.0, 70.0);
+		this->SliceWaters (55.0, 70.0);
 
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
 		// sys.UpdateGraph (int_atoms);
@@ -105,7 +105,7 @@ return;
 // output data to the file
 void SFGAnalyzer::OutputData () {
 
-	if (!(timestep % (output_freq * 10))) {
+	if (timestep && !(timestep % (output_freq * 10))) {
 		rewind (output);
 
 		//RUN (TotalChi) {

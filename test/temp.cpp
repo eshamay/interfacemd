@@ -54,28 +54,45 @@ int main (int argc, char **argv) {
 		wat =  static_cast<Water *>(mol);
 		break;
 	}
-	wat->Print();
+	//wat->Print();
 
 	MatR dcm = wat->DCMToLabMorita(z);
 
 	//wat->CalcEulerAngles(y);
 
-	VecR oh1 = *(wat->OH1());
-	oh1.Print();
-	x = VecR(1,0,0);
-	y = VecR(0,1,0);
-	z = VecR(0,0,1);
+	//VecR oh1 = *(wat->OH1());
+	VecR x (1,0,0);
+	VecR y (0,1,0);
+	VecR z (0,0,1);
 
+	VecR mu (-0.058, 0.000, 0.157);
+	double alpha_data[9] = {1.539, 0.000, -0.163, 0.000, 1.656, 0.000, -0.163, 0.000, 7.200};
+	MatR alpha(alpha_data);
+	double d[9] = {0.333, 0.0, 0.9428, 0.0, -1.0, 0.0, 0.9428, 0.0, -0.3333};
+	MatR D(d);
+
+	MatR a = D.Transpose()*alpha*D;
+	a.Print();
+
+	double sum=0.0;
+
+	for (int i=0; i<3; i++) {
+	for (int j=0; j<3; j++) {
+
+	sum = 0.0;
+
+	for (int l=0; l<3; l++) {
+	for (int m=0; m<3; m++) {
+		sum += D(l,i)*D(m,j)*alpha(l,m);
+	}}
+
+	std::cout << sum << "\t";
+	}
+	cout << std::endl;
+	}
 	//double phi = wat->EulerAngles[0] * 180.0/M_PI;
 	//double theta = wat->EulerAngles[1] * 180.0/M_PI;
 	//double psi = wat->EulerAngles[2] * 180.0/M_PI;
-
-	(dcm.Transpose() * oh1).Print();
-	(dcm * ).Print();
-		//VecR c = wat->Bisector() * -1.0;
-		//double euler_tilt = wat->EulerAngles[1] * 180.0/M_PI;
-
-		//double c_tilt = acos(VecR(0.0,1.0,0.0) < c) * 180.0/M_PI;
 
 	//printf ("% 8.3f\t% 8.3f\t% 8.3f\n", phi, theta, psi);
 	//}

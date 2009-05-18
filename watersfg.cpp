@@ -7,9 +7,13 @@ SFGCalculator::SFGCalculator () : _set(false) {
 	MuDeriv2.Set(0.1287, 0.0, -0.1070);	// dipole derivative of the 2nd OH bond, in the frame of the first (found by direction cosine rotation)
 
 	double alpha_data1[9] = {1.539, 0.000, -0.163, 0.000, 1.656, 0.000, -0.163, 0.000, 7.200};
-	// alpha_data2 is found by taking the du/dr in the frame of the 2nd OH bond, and representing it in the frame of the first through a unitary transformation. POL3 water in Amber has a OH bond length of 1.0, and an angle set at 109.4719
-	//double alpha_data2[9] = {6.7655, 0.0, -1.5154, 0.0, 1.656, 0.0, -1.5154, 0.0, 1.9732};	// this is for a molecule with oh-oh angle of 104.5
-	double alpha_data2[9] = {6.4684, 0.0, -1.9057, 0.0, 1.656, 0.0, -1.9057, 0.0, 2.2703};	// this is from a unitary transformation, oh-oh angle of 109.4719
+	// alpha_data2 is found by taking the du/dr in the frame of the 2nd OH bond, and representing it in the frame of the first through a unitary transformation (or some type of rotation?). POL3 water in Amber has a OH bond length of 1.0, and an angle set at 109.4719
+	double alpha_data2[9] = {6.7655, 0.0, -1.5154, 0.0, 1.656, 0.0, -1.5154, 0.0, 1.9732};	// this is for a molecule with oh-oh angle of 104.5
+
+	//double alpha_data2[9] = {6.4684, 0.0, -1.9057, 0.0, 1.656, 0.0, -1.9057, 0.0, 2.2703};	// this is from a unitary transformation, oh-oh angle of 109.4719
+
+	// this is for a direct rotation D*alpha, without any unitary transform business taking place. Just direct left-multiplication by the DCM from oh2 to oh1 using the POL3 109.4719 angle.
+	//double alpha_data2[9] = {0.3588, 0.0, 6.7339, 0.0, -1.656, 0.0, 1.5053, 0.0, -2.5534};
 
 	AlphaDeriv1.Set (alpha_data1);
 	AlphaDeriv2.Set (alpha_data2);
@@ -34,9 +38,9 @@ void SFGCalculator::FreqShift (Water& water) {
 	double ForceOH2 = (vForceH2 * water.OH2()->Unit()) - (vForceO * water.OH2()->Unit());
 
 	// convert the forces into atomic units
+	//printf ("% 10.3f\t% 10.3f\n", ForceOH1, ForceOH2);
 	ForceOH1 *= AMBER2ATOMIC;
 	ForceOH2 *= AMBER2ATOMIC;
-	//printf ("% 10.3f\t% 10.3f\n", _OH1FreqShift*AU2WAVENUMBER, _OH2FreqShift*AU2WAVENUMBER);
 
 /******************************
  * Calculate frequency shifts due to forces compressing or stretching bonds
@@ -46,7 +50,7 @@ void SFGCalculator::FreqShift (Water& water) {
 	_OH1FreqShift = (PREFACTOR * ForceOH1)/2.0/M_PI;		// now in frequency in atomic units
 	_OH2FreqShift = (PREFACTOR * ForceOH2)/2.0/M_PI;
 
-	//printf ("% 10.3f\n% 10.3f\n", _OH1FreqShift*AU2WAVENUMBER, _OH2FreqShift*AU2WAVENUMBER);
+	//printf ("% 10.3f\t% 10.3f\n", _OH1FreqShift*AU2WAVENUMBER, _OH2FreqShift*AU2WAVENUMBER);
 
 #ifdef	DIPOLE_DIPOLE		// only if adding in the dipole-dipole correction term (which should be pretty small)
 /*********************************************************************************************
@@ -161,9 +165,9 @@ void SFGCalculator::FreqShift (Water& water) {
 	_OH1FreqShift += dipolePotential[0];
 	_OH2FreqShift += dipolePotential[1];
 
+	//printf ("% 10.3f\t% 10.3f\n", dipolePotential[0]*AU2WAVENUMBER, dipolePotential[1]*AU2WAVENUMBER);
 #endif
 
-	//printf ("% 10.3f\t% 10.3f\n", dipolePotential[0]*AU2WAVENUMBER, dipolePotential[1]*AU2WAVENUMBER);
 /*********************************************
  * Final calculation of the OH bond frequency
  *********************************************/
@@ -171,7 +175,7 @@ void SFGCalculator::FreqShift (Water& water) {
 	_w1 = UNCOUPLED_OH_FREQ + _OH1FreqShift;
 	_w2 = UNCOUPLED_OH_FREQ + _OH2FreqShift;
 
-	//printf ("% 10.5f\n% 10.5f\n", _w1*AU2WAVENUMBER, _w2*AU2WAVENUMBER);
+	//printf ("[w1,w2] = % 10.3f\t% 10.3f\n", _w1*AU2WAVENUMBER, _w2*AU2WAVENUMBER);
 return;
 }
 
@@ -193,13 +197,20 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
 	/* We solve this with the quadratic equation: (-b +/- sqrt(b^2-4ac)) / 2a... first grab the values of a, b, and c...
 		i.e. a = 1, b = -(w1+w2), c = (w1*w2 - V12^2) */
 
-	//double V12 = this->CouplingConstant (water);
-	double V12 = COUPLING_CONST;
+	double V12 = this->CouplingConstant (water);
+	//double V12 = COUPLING_CONST;
 
 /* As per Dave's code in inter.f: */
 	double wt = sqrt(_w1*_w1 + _w2*_w2 - 2.0*_w1*_w2 + 4.0*V12*V12);
 	_ws = 0.5*(_w1+_w2 - wt);
 	_wa = 0.5*(_w1+_w2 + wt);
+
+// let's set the symmetric frequency to be lower than the anti-symmetric
+	double temp = _ws;
+	if (_wa < _ws) {
+		_ws = _wa;
+		_wa = temp;
+	}
 
 	//printf ("% 10.5f\n% 10.5f\n", _ws*AU2WAVENUMBER, _wa*AU2WAVENUMBER);
 /*
@@ -221,12 +232,6 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
 	}
 
 
-// let's set the symmetric frequency to be lower than the anti-symmetric
-	double temp = _ws;
-	if (_wa < _ws) {
-		_ws = _wa;
-		_wa = temp;
-	}
 */
 
 /* continuing the solution of Eq. 8 - let's calculate the coefficients C1 and C2. We begin with 2 values of the eigenfrequencies. Thus we will have two sets of equations, and two values of C1 and C2 (one for symmetric, and one for antisymmetric). Both are kept and used in the calculation and averaged over later on.
@@ -241,12 +246,33 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
 	_C1a = -V12/(_w1-_wa);
 */
 
-/* Now again, as per Dave's: */
+/* Now again, as per Dave's solution: */
+/*
 	_C1s = V12/(sqrt(V12*V12 + (_ws-_w1)*(_ws-_w1)));
 	_C1a = V12/(sqrt(V12*V12 + (_wa-_w1)*(_wa-_w1)));
 
 	_C2s = (_ws-_w1)/(sqrt(V12*V12 + (_ws-_w1)*(_ws-_w1)));
 	_C2a = (_wa-_w1)/(sqrt(V12*V12 + (_wa-_w1)*(_wa-_w1)));
+	//printf ("old =>\nc1 = % 12f\t% 12f\nc2 = % 12f\t% 12f\n", _C1s, _C1a, _C2s, _C2a);
+*/
+/* As per hand-calculated output */
+	double t = sqrt(4.0*V12*V12 + (_w1-_w2)*(_w1-_w2));
+
+	_C1s = -((_w2-_w1) + t)/(2.0*V12);
+	_C2s = 1.0;
+
+	double norm = sqrt(_C1s*_C1s+1.0);
+	_C1s /= norm;
+	_C2s /= norm;
+
+	_C1a = -((_w2-_w1) - t)/(2.0*V12);
+	_C2a = 1.0;
+
+	norm = sqrt(_C1a*_C1a+1.0);
+	_C1a /= norm;
+	_C2a /= norm;
+
+	//printf ("new =>\nc1 = % 12f\t% 12f\nc2 = % 12f\t% 12f\n", _C1s, _C1a, _C2s, _C2a);
 
 /*
 // before leaving, let's normalize the eigen vectors {C1x,C2x} to a magnitude of 1.0
@@ -403,9 +429,13 @@ std::vector< std::complex<double> >& SFGCalculator::Chi (Water& water, int const
 	bool first = true;	// a useful flag
 
 	// now, summing over the indices of p,q,r and finding the components of the rotation matrices
+	// These are the coefficients (direction-cosine-matrix components) for performing the unitary transformation into the lab-frame
 	for (int p=0; p<3; p++) {
 	for (int q=0; q<3; q++) {
 	for (int r=0; r<3; r++) {
+		Dpl = DCM(l,p);
+		Dqm = DCM(m,q);
+		Drn = DCM(n,r);
 
 		this->Beta (water, p, q, r);	// this creates a spectrum for Beta across the frequency range for the given orientation (p,q,r)
 
@@ -415,15 +445,10 @@ std::vector< std::complex<double> >& SFGCalculator::Chi (Water& water, int const
 			first = false;
 		}
 
-		// These are the coefficients (direction-cosine-matrix components) for performing the unitary transformation into the lab-frame
-		Dpl = DCM(l,p);
-		Dqm = DCM(m,q);
-		Drn = DCM(n,r);
-
-
 		RUN (_Beta) {
 			_Chi[i] += Dpl * Dqm * Drn * _Beta[i];
 		}
+
 	}}}
 
 return (_Chi);
