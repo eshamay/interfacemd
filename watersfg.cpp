@@ -8,9 +8,9 @@ SFGCalculator::SFGCalculator () : _set(false) {
 
 	double alpha_data1[9] = {1.539, 0.000, -0.163, 0.000, 1.656, 0.000, -0.163, 0.000, 7.200};
 	// alpha_data2 is found by taking the du/dr in the frame of the 2nd OH bond, and representing it in the frame of the first through a unitary transformation (or some type of rotation?). POL3 water in Amber has a OH bond length of 1.0, and an angle set at 109.4719
-	double alpha_data2[9] = {6.7655, 0.0, -1.5154, 0.0, 1.656, 0.0, -1.5154, 0.0, 1.9732};	// this is for a molecule with oh-oh angle of 104.5
+	//double alpha_data2[9] = {6.7655, 0.0, -1.5154, 0.0, 1.656, 0.0, -1.5154, 0.0, 1.9732};	// this is for a molecule with oh-oh angle of 104.5
 
-	//double alpha_data2[9] = {6.4684, 0.0, -1.9057, 0.0, 1.656, 0.0, -1.9057, 0.0, 2.2703};	// this is from a unitary transformation, oh-oh angle of 109.4719
+	double alpha_data2[9] = {6.4684, 0.0, -1.9057, 0.0, 1.656, 0.0, -1.9057, 0.0, 2.2703};	// this is from a unitary transformation, oh-oh angle of 109.4719
 
 	// this is for a direct rotation D*alpha, without any unitary transform business taking place. Just direct left-multiplication by the DCM from oh2 to oh1 using the POL3 109.4719 angle.
 	//double alpha_data2[9] = {0.3588, 0.0, 6.7339, 0.0, -1.656, 0.0, 1.5053, 0.0, -2.5534};
