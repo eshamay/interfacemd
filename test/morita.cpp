@@ -16,11 +16,6 @@ void SFGAnalyzer::Analyze () {
 
 	Water * water;	// our prototypical water molecule
 
-	// Sets up the axes for the system
-	const int S1 = 1;		// the two that are parallel to the surface
-	const int S2 = 2;
-	const int P = 0;		// perpendicular to the interface
-
 	bool firstmol = true;			// first molecule processed
 
 	numMolsProcessed = 0;
@@ -44,11 +39,10 @@ void SFGAnalyzer::Analyze () {
 
 			water = static_cast<Water *>(int_mols[mol]);
 
-			sfg.Reset();		// reset the calculator for a new molecule
 			MolChi.clear();
 
 			// and then calculate the chi spectrum for the molecule SPS
-			MolChi = sfg.Chi (*water, S1, S1, P);
+			MolChi = sfg.Chi (*water);
 
 			// when starting a new timestep...
 			if (firstmol) {
@@ -63,12 +57,6 @@ void SFGAnalyzer::Analyze () {
 			}
 
 			// perform the summation for averaging over the system
-			CollectChi (MolChi, TimestepChi);
-
-			// now add in the next equivalent polarization
-			MolChi = sfg.Chi (*water, S2, S2, P);
-
-			// perform the summation for the other half of the polarization
 			CollectChi (MolChi, TimestepChi);
 		}
 

@@ -293,13 +293,14 @@ The polarization will be specified as S and P... we are dealing in molecular-fra
 
 We're going to go through both OH bonds and treat each separately.
 */
-void SFGCalculator::PolarizabilityAndDipoleDerivs (Water& water, int const p, int const q, int const r) {
-//void SFGCalculator::PolarizabilityAndDipoleDerivs (Water& water) {
+void SFGCalculator::PolarizabilityAndDipoleDerivs (Water& water) {
 
-	if (!_set) this->WaterEigenSystem (water);
+	// let's find the rotation matrix for the water with which we're working
+	// this matrix takes us from the frame of the first OH bond into the lab frame
+	_DCM = water.DCMToLabMorita(z);
 
-	//this->RotationMatrix(water);
-	//
+	this->WaterEigenSystem (water);
+
 	// Equation (14) from the paper adjusts the value of the dipole derivative term by scaling based on the frequency shift on the two OH bonds. Here we'll also calculate that scaling factor
 	double scale1, scale2;
 
@@ -311,65 +312,44 @@ void SFGCalculator::PolarizabilityAndDipoleDerivs (Water& water, int const p, in
 	//scale2 = (1.0 - 9.5138e-3 * _OH2FreqShift * AU2WAVENUMBER)/AU2WAVENUMBER;
 	scale1 = (1.0 - 9.5138e-3 * _OH1FreqShift * AU2WAVENUMBER);
 	scale2 = (1.0 - 9.5138e-3 * _OH2FreqShift * AU2WAVENUMBER);
+	//printf ("% 10.3f% 10.3f\n", scale1, scale2);
 
 /*	the old way of doing things */
+/*
 	_AlphaDerivS = _C1s * AlphaDeriv1.Index(p,q) + _C2s * AlphaDeriv2.Index(p,q);
 	_AlphaDerivA = _C1a * AlphaDeriv1.Index(p,q) + _C2a * AlphaDeriv2.Index(p,q);
 
 	_MuDerivS = _C1s * MuDeriv1[r] * scale1 + _C2s * MuDeriv2[r] * scale2;
 	_MuDerivA = _C1a * MuDeriv1[r] * scale1 + _C2a * MuDeriv2[r] * scale2;
+*/
 
-/* New way of "pre-"rotating the alpha and mu tensors to avoid rotating the total Beta. a la DSW
+// New way of "pre-"rotating the alpha and mu tensors to avoid rotating the total Beta. a la DSW
 	// here we'll set up the dipole and alpha derivative tensors, but rotated into the lab frame from where they were in the frame of the 1st OH bond
-	VecR rotMu1, rotMu2;
-	MatR rotAlpha1, rotAlpha2;
-
-	// vector rotation into the lab frame is easy - just multiply by the rotation matrix
-	rotMu1 = _Rotation * (MuDeriv1 * scale1);
-	rotMu2 = _Rotation * (MuDeriv2 * scale2);
 
 	// matrix rotation requires a unitary transformation to go into the lab frame
-	// *** testing out the new math (U'AU instead of UAU') where ' = transpose
-	rotAlpha1 = _Rotation * AlphaDeriv1 * _Rotation.Transpose(); 	// the 1st OH bond
-	rotAlpha2 = _Rotation * AlphaDeriv2 * _Rotation.Transpose();	// the 2nd bond
+	MatR rotAlpha1 = _DCM.Transpose() * AlphaDeriv1 * _DCM;
+	MatR rotAlpha2 = _DCM.Transpose() * AlphaDeriv2 * _DCM;
 
-	*/
-	/*
-	// now we'll pull out values for the collective mode terms (dA/dQ's) based on the polarization scheme being used
-	if (_polarization == "SSP") {
+	_AlphaDerivS += _C1s * rotAlpha1(0,0) + _C2s * rotAlpha2(0,0);
+	_AlphaDerivS += _C1s * rotAlpha1(2,2) + _C2s * rotAlpha2(2,2);
 
-		_MuDerivS = _C1s * rotMu1[_axis] + _C2s * rotMu2[_axis];
-		_MuDerivA = _C1a * rotMu1[_axis] + _C2a * rotMu2[_axis];
+	_AlphaDerivA += _C1a * rotAlpha1(0,0) + _C2a * rotAlpha2(0,0);
+	_AlphaDerivA += _C1a * rotAlpha1(2,2) + _C2a * rotAlpha2(2,2);
 
-		for (int ax = 0; ax < 3; ax++) {
-			if (ax == _axis) continue;
+	// vector rotation into the lab frame is easy - just multiply by the rotation matrix
+	VecR rotMu1 (_DCM * (MuDeriv1 * scale1));
+	VecR rotMu2 (_DCM * (MuDeriv2 * scale2));
 
-			_AlphaDerivS += _C1s * rotAlpha1.Index(ax,ax) + _C2s * rotAlpha2.Index(ax,ax);
-			_AlphaDerivA += _C1a * rotAlpha1.Index(ax,ax) + _C2a * rotAlpha2.Index(ax,ax);
-		}
-	}
+	_MuDerivS = _C1s * rotMu1[1] * scale1 + _C2s * rotMu2[1] * scale2;
+	_MuDerivA = _C1a * rotMu1[1] * scale1 + _C2a * rotMu2[1] * scale2;
 
-	if (_polarization == "SPS") {
-
-		for (int ax = 0; ax < 3; ax++) {
-			if (ax == _axis) continue;
-
-			_AlphaDerivS += _C1s * rotAlpha1.Index(ax,_axis) + _C2s * rotAlpha2.Index(ax,_axis);
-			_AlphaDerivA += _C1a * rotAlpha1.Index(ax,_axis) + _C2a * rotAlpha2.Index(ax,_axis);
-
-			_MuDerivS += _C1s * rotMu1[ax] + _C2s * rotMu2[ax];
-			_MuDerivA += _C1a * rotMu1[ax] + _C2a * rotMu2[ax];
-		}
-	}
-
-*/
 	//printf ("MuDeriv = \t%f\t%f\nAlphaDeriv = \t%f\t%f\n", _MuDerivS, _MuDerivA, _AlphaDerivS, _AlphaDerivA);
 return;
 }
 
 
 /* here we calculate the hyperpolarizability spectrum for a water molecule. In the course of this, two spectra will be calculated and averaged based on the two values of the eigenfrequencies of a water molecule */
-std::vector< std::complex<double> >& SFGCalculator::Beta (Water& water, int const p, int const q, int const r) {
+std::vector< std::complex<double> >& SFGCalculator::Beta (Water& water) {
 //vector< complex<double> >& SFGCalculator::Beta (Water& water) {
 
 	/* Now that we have all the data established for this one water molecule (i.e. coefficients for symmetric and antisymmetric modes, dipole derivatives, and polarizability derivatives for all valid polarizations) we can put it all together and calculate spectra. Two spectra will come out for the sym and anti-sym cases, and we have to include all the polarization combinations. The beta that comes out of here is still in the molecular frame and needs to be rotated.
@@ -378,8 +358,7 @@ std::vector< std::complex<double> >& SFGCalculator::Beta (Water& water, int cons
 	// we've collected lots of information, so now let's construct some spectra!
 	_Beta.clear();	// clear out the previous spectrum
 
-	this->PolarizabilityAndDipoleDerivs (water, p,q,r);
-	//this->PolarizabilityAndDipoleDerivs (water);
+	this->PolarizabilityAndDipoleDerivs (water);
 
 	// let's calculate a pre-multiplier from equation (5)
 	double premultSym = 0.5 / M / _ws * _AlphaDerivS * _MuDerivS;
@@ -417,41 +396,11 @@ return (_Beta);
 // eq(7) of the paper lays out pretty simply that we use a direction cosine matrix to find all the interesting things that make up the hyperpolarizability.
 // l,m,n are the lab frame axes, and p,q,r are the molecular frame ones.
 //
-std::vector< std::complex<double> >& SFGCalculator::Chi (Water& water, int const l, int const m, int const n) {
+std::vector< std::complex<double> >& SFGCalculator::Chi (Water& water) {
 
-	// let's find the rotation matrix for the water with which we're working
-	// this matrix takes us from the frame of the first OH bond into the lab frame
-	MatR DCM = water.DCMToLabMorita(z);
+	this->Beta (water);	// this calculates the beta spectrum
 
-	// the three components of the rotation matrix that we multiply beta by
-	double Dpl, Dqm, Drn;
-
-	bool first = true;	// a useful flag
-
-	// now, summing over the indices of p,q,r and finding the components of the rotation matrices
-	// These are the coefficients (direction-cosine-matrix components) for performing the unitary transformation into the lab-frame
-	for (int p=0; p<3; p++) {
-	for (int q=0; q<3; q++) {
-	for (int r=0; r<3; r++) {
-		Dpl = DCM(l,p);
-		Dqm = DCM(m,q);
-		Drn = DCM(n,r);
-
-		this->Beta (water, p, q, r);	// this creates a spectrum for Beta across the frequency range for the given orientation (p,q,r)
-
-		if (first) {
-			_Chi.clear();
-			_Chi.resize (_Beta.size(), std::complex<double>(0.0, 0.0));
-			first = false;
-		}
-
-		RUN (_Beta) {
-			_Chi[i] += Dpl * Dqm * Drn * _Beta[i];
-		}
-
-	}}}
-
-return (_Chi);
+return (_Beta);
 }
 
 // calculates the dipole-dipole interaction potential for two dipoles separated by a distance R.

@@ -82,7 +82,7 @@ private:
 	std::vector< complex<double> > _Beta;		// hyperpolarizability of a given water (in the molecular frame)
 	std::vector< complex<double> > _Chi;		// hyperpolarizability of a given water (in the molecular frame)
 
-	//MatR _Rotation;				// rotation matrix for moving from the water molecular frame to the lab frame
+	MatR _DCM;				// rotation matrix for moving from the water molecular frame to the lab frame
 
 	//string _polarization;		// the polarization (i.e. SSP, SPS, etc) of the system
 	//coord _axis;			// the axis perpendicular to the interface
@@ -108,17 +108,17 @@ public:
 	void WaterEigenSystem (Water& water);
 
 	// calculate the total value of the collective product of the dipole and polarizability derivative terms
-	void PolarizabilityAndDipoleDerivs (Water& water, int const p, int const q, int const r);
+	void PolarizabilityAndDipoleDerivs (Water& water);
 	//void PolarizabilityAndDipoleDerivs (Water& water);
 
-	std::vector< std::complex<double> >& Beta (Water& water, int const p, int const q, int const r);
+	std::vector< std::complex<double> >& Beta (Water& water);
 	//std::vector< std::complex<double> >& Beta (Water& water);
 
 	// returns the rotation matrix to go from the water molecular frame to the lab frame
 	void RotationMatrix (Water& water);
 	
 	// returns the summed beta rotated into the lab frame
-	std::vector< std::complex<double> >& Chi (Water& water, int const l, int const m, int const n);	
+	std::vector< std::complex<double> >& Chi (Water& water);
 	
 };
 
