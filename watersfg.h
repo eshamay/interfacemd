@@ -15,9 +15,10 @@
 #include "h2o.h"			// defines the Water class - derived from Molecule class
 #include "matrixr.h"
 #include "utility.h"
+#include "adjacencymatrix.h"
 
 /***** Set this if using the dipole-dipole correction term *****/
-//#define DIPOLE_DIPOLE		
+#define DIPOLE_DIPOLE
 
 
 /* system constants as defined in the morita-hynes paper */
@@ -56,7 +57,7 @@ const double GAMMA				= 2.0/AU2WAVENUMBER;				// the "damping parameter" first s
 const double GAMMA_SQ			= GAMMA*GAMMA;				// ...squared
 
 // frequency limits for calculating the spectra (given in cm-1)
-const double START_FREQ			= 2000.0/AU2WAVENUMBER;
+const double START_FREQ			= 2500.0/AU2WAVENUMBER;
 const double END_FREQ			= 4000.0/AU2WAVENUMBER;
 const double FREQ_STEP			= 1.0/AU2WAVENUMBER;		// step size when calculating the spectra
 const double NUM_STEP			= (END_FREQ-START_FREQ)/FREQ_STEP;
@@ -78,30 +79,22 @@ private:
 
 	double _MuDerivA, _MuDerivS;			// the total mu derivative with the eigenvector weighting from Eq 7.
 	double _AlphaDerivA, _AlphaDerivS;
+	VecR MuDeriv1;				// dipole derivative vector from the paper
+	VecR MuDeriv2;				// dipole derivative of the 2nd OH bond in the frame of the first
+	MatR AlphaDeriv1;			// polarizability deriv matrix for the first OH bond in the frame of the 1st OH bond
+	MatR AlphaDeriv2;			// polarizability deriv matrix of the 2nd OH in the frame of the 1st OH (through unitary transformation)
 
 	std::vector< complex<double> > _Beta;		// hyperpolarizability of a given water (in the molecular frame)
 	std::vector< complex<double> > _Chi;		// hyperpolarizability of a given water (in the molecular frame)
 
 	MatR _DCM;				// rotation matrix for moving from the water molecular frame to the lab frame
 
-	//string _polarization;		// the polarization (i.e. SSP, SPS, etc) of the system
-	//coord _axis;			// the axis perpendicular to the interface
+	AdjacencyMatrix * _matrix;		// a connectivity matrix for analyzing water-bonding
 
 	// calculate the dipole-dipole interaction potential between two dipoles (muA and muB) separated a distance R
 	double DipolePotential (const VecR& muA, const VecR& muB, const VecR& R);
 
 	double CouplingConstant (Water& water) const;
-public:
-
-	VecR MuDeriv1;				// dipole derivative vector from the paper
-	VecR MuDeriv2;				// dipole derivative of the 2nd OH bond in the frame of the first
-	MatR AlphaDeriv1;			// polarizability deriv matrix for the first OH bond in the frame of the 1st OH bond
-	MatR AlphaDeriv2;			// polarizability deriv matrix of the 2nd OH in the frame of the 1st OH (through unitary transformation)
-
-	//SFGCalculator (string polarization, coord axis);		// For loading up the entire system
-	SFGCalculator ();		// For loading up the entire system
-
-	void Reset () { _set = false; }
 
 	void FreqShift (Water& water);		// Calculate the frequency shift on a given water-OH bond
 
@@ -114,12 +107,14 @@ public:
 	std::vector< std::complex<double> >& Beta (Water& water);
 	//std::vector< std::complex<double> >& Beta (Water& water);
 
-	// returns the rotation matrix to go from the water molecular frame to the lab frame
-	void RotationMatrix (Water& water);
-	
+public:
+
+	//SFGCalculator (string polarization, coord axis);		// For loading up the entire system
+	SFGCalculator (AdjacencyMatrix * matrix);		// For loading up the entire system
+
+	void Reset () { _set = false; }
 	// returns the summed beta rotated into the lab frame
 	std::vector< std::complex<double> >& Chi (Water& water);
-	
 };
 
 #endif

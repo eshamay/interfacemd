@@ -7,9 +7,7 @@ Bond::Bond () : bond(unbonded) {
 return;
 }
 
-Bond::Bond (double length) : bondlength(length) {
-
-	SetBondType ();
+Bond::Bond (double length, bondtype btype) : bondlength(length), bond(btype) {
 
 return;
 }
@@ -21,17 +19,9 @@ Bond::~Bond () {
 return;
 }
 
-void Bond::SetBondType () {
+void Bond::SetBondType (const bondtype btype) {
 
-	bond = unbonded;
-
-	// one type of bond is the O-H covalent
-	if (bondlength <= OHBONDLENGTH)
-		bond = ohbond;
-
-	// Or an H-bond is formed!
-	if (bondlength <= HBONDLENGTH and bondlength > OHBONDLENGTH)
-		bond = hbond;
+	bond = btype;
 
 	if (bond != unbonded)
 		++Bond::num_bonds;

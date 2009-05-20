@@ -2,6 +2,7 @@
 
 SFGAnalyzer::SFGAnalyzer (int const argc, const char **argv, const WaterSystemParams& params)
 	:	WaterSystem (argc, argv, params),
+		sfg (SFGCalculator(&matrix)),
 		MolChi (Complex_vec (0, complex<double>(0.0,0.0))),
 		TimestepChi (Complex_vec (0, complex<double>(0.0,0.0))),
 		TotalChi (Complex_vec (0, complex<double>(0.0,0.0)))
@@ -28,16 +29,19 @@ void SFGAnalyzer::Analyze () {
 
 		// first let's find all the molecules in the interface
 		this->FindWaters ();
-		this->SliceWaters (55.0, 70.0);
+		this->SliceWaters (45.0, 65.0);
 
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
-		// sys.UpdateGraph (int_atoms);
+		UpdateMatrix ();
 
 		numMolsProcessed += int_mols.size();
 
 		for (int mol = 0; mol < int_mols.size(); mol++) {
 
 			water = static_cast<Water *>(int_mols[mol]);
+
+			//int coord = static_cast<int>(matrix.WaterCoordination (water));
+			//		printf ("%d\n", coord);
 
 			MolChi.clear();
 
@@ -144,7 +148,7 @@ int main (const int argc, const char **argv) {
 	#endif
 	params.posres = 0.100;
 	params.pbcflip = 20.0;
-	params.output_freq = 10;
+	params.output_freq = 50;
 
 	SFGAnalyzer analyzer (argc, argv, params);
 

@@ -3,10 +3,11 @@
 
 #include <map>
 #include <vector>
+#include <math.h>
 
-const double OHBONDLENGTH = 1.1;
-const double HBONDLENGTH  = 2.46;
-const double HBONDANGLE	= 0.866025;		// cos(theta) has to be less than this value to be considered an H-bond
+const double OHBONDLENGTH = 1.01;				// used to be 1.1
+const double HBONDLENGTH  = 2.5;				// used to be 2.46
+const double HBONDANGLE	= 30.0*M_PI/180.0;		// bonding angle has to be less than this value to be considered an H-bond
 const double NOBONDLENGTH = 2.0;
 const double NHBONDLENGTH = 1.3;		// uhmm... check this?
 
@@ -33,7 +34,7 @@ class Bond {
 public:
 
 	Bond ();
-	Bond (double length);
+	Bond (double length, bondtype btype);
 	~Bond ();
 
 	double	bondlength;	// bond length
@@ -41,7 +42,7 @@ public:
 
 	static int num_bonds;
 
-	void SetBondType ();		// sets the bond type based on the current
+	void SetBondType (const bondtype btype);		// sets the bond type based on the current
 	
 };
 

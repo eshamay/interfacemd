@@ -4,7 +4,7 @@
 #include "../watersystem.h"
 
 #define AVG		// define this to average the two interfaces. Make sure to define the interfaces below!
-#define RESTART
+//#define RESTART
 #define HIGH_COORD	OOOHHH
 
 typedef std::vector<int> Int_vec;

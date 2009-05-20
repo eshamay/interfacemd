@@ -40,15 +40,24 @@ public:
 	void UpdateMatrix (const Atom_ptr_vec& atoms);
 	void ClearBonds ();
 
-	void SetBond (int x, int y, const double length) const;
+	void SetBond (int x, int y, const double blength, const bondtype btype) const;
 
 	int ID (Atom const * const ap) const;
 
 	Bond_ptr_vec Bonds (Atom const * const ap) const;
-	int NumBonds (Atom const * const ap) const;
-	int NumHBonds (Atom const * const ap) const;
+	Bond_ptr_vec HBonds (Atom const * const ap) const;
+	Atom_ptr_vec BondedAtoms (Atom const * const ap) const;
+	Atom_ptr_vec BondedAtoms (Atom const * const ap, bondtype const b) const;
+
+	int NumBonds (Atom const * const ap) const {
+		return (Bonds(ap).size());
+	}
+	int NumHBonds (Atom const * const ap) const {
+		return (HBonds(ap).size());
+	}
 
 	coordination WaterCoordination (Water const * const wat) const;
+	int NumHBonds (Water const * const wat) const;
 
 /*
 	// returns the number of H-bonds that an atom is involved in (i.e. the diagonal element)

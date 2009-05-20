@@ -181,7 +181,7 @@ int main (const int argc, const char **argv) {
 		params.avg = true;
 		params.posmin = -40.0;
 		params.posmax = 40.0;
-		params.output = "coordination.avg.100+.dat";
+		params.output = "coordination.avg.dat";
 	#else
 		params.avg = false;
 		params.posmin = -5.0;

@@ -176,9 +176,15 @@ void WaterSystem::SliceWaters (const double low, const double high) {
 			wats.push_back(wat);
 		}
 	}
+
 	int_mols.clear();
+	int_atoms.clear();
+
 	RUN (wats) {
 		int_mols.push_back(wats[i]);
+		RUN2(wats[i]->Atoms()) {
+			int_atoms.push_back(wats[i]->Atoms(j));
+		}
 	}
 
 return;

@@ -69,7 +69,7 @@ public:
 	void SliceWaters (const double low, const double high);
 	void FindInterfacialWaters ();
 
-	void UpdateMatrix () { this->matrix.UpdateMatrix (int_atoms); }
+	void UpdateMatrix () { matrix.UpdateMatrix (int_atoms); }
 
 protected:
 
