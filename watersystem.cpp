@@ -170,9 +170,36 @@ void WaterSystem::SliceWaters (const double low, const double high) {
 		Atom * oxy = wat->GetAtom ("O");
 		VecR r = oxy->Position();
 		double position = r[axis];
-		if (position < pbcflip) position += Atom::Size()[axis];		// deal with the periodic cutoffs
+		if (position < pbcflip) {
+			position += Atom::Size()[axis];		// deal with the periodic cutoffs
+		}
 
 		if (position > low && position < high) {
+			wats.push_back(wat);
+		}
+	}
+
+	int_mols.clear();
+	int_atoms.clear();
+
+	RUN (wats) {
+		int_mols.push_back(wats[i]);
+		RUN2(wats[i]->Atoms()) {
+			int_atoms.push_back(wats[i]->Atoms(j));
+		}
+	}
+
+return;
+}
+
+void WaterSystem::SliceWaterCoordination (const coordination coord) {
+
+	Water_ptr_vec wats;
+
+	RUN (int_mols) {
+		Water * wat = int_mols[i];
+		coordination c = matrix.WaterCoordination(wat);
+		if (c == coord) {
 			wats.push_back(wat);
 		}
 	}

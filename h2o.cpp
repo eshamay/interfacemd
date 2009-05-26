@@ -205,9 +205,9 @@ MatR const & Water::DCMToLab (const coord axis) {
 	// but if the system is funky and we want to use different lab-frame coords, perhaps treating the Y-axis as the primary axis, then this will work
 	// This is just changing the 'primary' axis used to define the 'tilt' angle when calculating Euler angles
 	if (axis == y) {
-    	X.Set (0.,0.,1.);
-    	Y.Set (1.,0.,0.);
-    	Z.Set (0.,1.,0.);
+		X.Set (0.,1.,0.);
+		Y.Set (0.,0.,1.);
+		Z.Set (1.,0.,0.);
 	}
 
     // Here we'll create the lab-frame rotation matrix to rotate molecular properties into the lab-frame
@@ -257,9 +257,9 @@ void Water::CalcEulerAngles (const coord axis) {
 	 * Second a rotation of beta about the x-axis. This is also known as the "tilt" angle because it is the angle between the z and Z axes.
 	 * Lastly a rotation of gamma about the body-fixed z-axis. This is the "twist" angle.
 	 */
+	double alpha = atan2(x3,-y3);
 	double beta = acos(z3);
 	//double beta = atan2(sqrt(z1*z1+z2*z2), z3);
-	double alpha = atan2(x3,-y3);
 	double gamma = atan2(z1,z2);
 
 	// alpha is ranged in [-pi/2, pi/2]

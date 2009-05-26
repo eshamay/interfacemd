@@ -67,6 +67,7 @@ public:
 	void OutputData ();
 	void FindWaters ();
 	void SliceWaters (const double low, const double high);
+	void SliceWaterCoordination (const coordination coord);
 	void FindInterfacialWaters ();
 
 	void UpdateMatrix () { matrix.UpdateMatrix (int_atoms); }

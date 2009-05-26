@@ -5,7 +5,7 @@
 #include <vector>
 #include <math.h>
 
-const double OHBONDLENGTH = 1.01;				// used to be 1.1
+const double OHBONDLENGTH = 1.1;				// used to be 1.1
 const double HBONDLENGTH  = 2.5;				// used to be 2.46
 const double HBONDANGLE	= 30.0*M_PI/180.0;		// bonding angle has to be less than this value to be considered an H-bond
 const double NOBONDLENGTH = 2.0;

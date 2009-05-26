@@ -18,7 +18,7 @@
 #include "adjacencymatrix.h"
 
 /***** Set this if using the dipole-dipole correction term *****/
-#define DIPOLE_DIPOLE
+//#define DIPOLE_DIPOLE
 
 
 /* system constants as defined in the morita-hynes paper */
@@ -43,7 +43,7 @@ const double HZ2AU			=	2.418884324306202e-17;			// convert Hz to atomic units of
 const double AU2WAVENUMBER		=	HZ2WAVENUMBER/HZ2AU;			// convert from frequencies in atomic units to cm-1 (note: **not angular frequencies!** For that we need to fix the factor of 2*Pi)
 
 const double UNCOUPLED_OH_FREQ	= 3706.5/AU2WAVENUMBER;			// the frequency of uncoupled OH bonds in the vapor phase (converted to frequency in atomic units)
-const double COUPLING_CONST		= 49.5/AU2WAVENUMBER;				// Coupling const taken from the energy gap of the sym + antisym stretches (V12 in atomic units)
+const double COUPLING_CONST		= -49.5/AU2WAVENUMBER;				// Coupling const taken from the energy gap of the sym + antisym stretches (V12 in atomic units)
 
 // Value of the magnitude of the dipole moment derivative (square root of the sum of the squares)
 const double MU_DERIV_MAGNITUDE = sqrt(-0.058*-0.058 + 0.157*0.157);
@@ -63,9 +63,9 @@ const double FREQ_STEP			= 1.0/AU2WAVENUMBER;		// step size when calculating the
 const double NUM_STEP			= (END_FREQ-START_FREQ)/FREQ_STEP;
 
 class SFGCalculator {
-	
+
 private:
-	
+
 	//complex<double> I;
 
 	bool 	_set;			// set when the water molecule has already gone through prelim calculations that don't need to be repeated for each calculation of Beta
@@ -101,11 +101,9 @@ private:
 	void WaterEigenSystem (Water& water);
 
 	// calculate the total value of the collective product of the dipole and polarizability derivative terms
-	void PolarizabilityAndDipoleDerivs (Water& water);
+	void PolarizabilityAndDipoleDerivs (Water& water, const int s1, const int s2, const int p);
 	//void PolarizabilityAndDipoleDerivs (Water& water);
 
-	std::vector< std::complex<double> >& Beta (Water& water);
-	//std::vector< std::complex<double> >& Beta (Water& water);
 
 public:
 
@@ -114,7 +112,7 @@ public:
 
 	void Reset () { _set = false; }
 	// returns the summed beta rotated into the lab frame
-	std::vector< std::complex<double> >& Chi (Water& water);
+	std::vector< std::complex<double> >& Beta (Water& water, const int s1, const int s2, const int p);
 };
 
 #endif

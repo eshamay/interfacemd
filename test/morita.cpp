@@ -29,24 +29,23 @@ void SFGAnalyzer::Analyze () {
 
 		// first let's find all the molecules in the interface
 		this->FindWaters ();
-		this->SliceWaters (45.0, 65.0);
+		this->SliceWaters (50.0, 70.0);
 
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
 		UpdateMatrix ();
-
-		numMolsProcessed += int_mols.size();
+		// only grab the OH-waters for now
+		this->SliceWaterCoordination (OH);
 
 		for (int mol = 0; mol < int_mols.size(); mol++) {
 
 			water = static_cast<Water *>(int_mols[mol]);
 
-			//int coord = static_cast<int>(matrix.WaterCoordination (water));
-			//		printf ("%d\n", coord);
-
 			MolChi.clear();
 
 			// and then calculate the chi spectrum for the molecule SPS
-			MolChi = sfg.Chi (*water);
+			MolChi = sfg.Beta (*water, 0,2,1);
+
+			numMolsProcessed++;
 
 			// when starting a new timestep...
 			if (firstmol) {
@@ -105,9 +104,10 @@ void SFGAnalyzer::OutputData () {
 		//}
 		RUN (TotalChi) {
 			double freq = (double(i)*FREQ_STEP+START_FREQ)*AU2WAVENUMBER;
-			double r = real(TotalChi[i]);
-			double im = imag(TotalChi[i]);
-			fprintf (output, "% 12.8e\t% 12.8e\t% 12.8e\n", freq, r/numMolsProcessed, im/numMolsProcessed);
+			double scale = numMolsProcessed;
+			double r = real(TotalChi[i]) / scale;
+			double im = imag(TotalChi[i]) / scale;
+			fprintf (output, "% 12.8e\t% 12.8e\t% 12.8e\n", freq, r, im);
 		}
 
 		fflush (output);
@@ -147,7 +147,7 @@ int main (const int argc, const char **argv) {
 		params.output = "sfg.morita.dat";
 	#endif
 	params.posres = 0.100;
-	params.pbcflip = 20.0;
+	params.pbcflip = 15.0;
 	params.output_freq = 50;
 
 	SFGAnalyzer analyzer (argc, argv, params);

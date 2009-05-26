@@ -1,7 +1,7 @@
 #include "watersfg.h"
 
 //SFGCalculator::SFGCalculator (string const polarization, coord const axis) {
-SFGCalculator::SFGCalculator (AdjacencyMatrix * matrix) : _set(false), _matrix(matrix) {
+SFGCalculator::SFGCalculator (AdjacencyMatrix * matrix) : _matrix(matrix) {
 
 	MuDeriv1.Set(-0.058, 0.000, 0.157);	// dipole derivative vector from the paper
 	MuDeriv2.Set(0.1287, 0.0, -0.1070);	// dipole derivative of the 2nd OH bond, in the frame of the first (found by direction cosine rotation)
@@ -32,13 +32,38 @@ void SFGCalculator::FreqShift (Water& water) {
  * Calculate the forces on the two bonds
  ******************************/
 
-	/* The force calculation - splitting up the forces on the atoms between the two bonds - is done by find the inner-product of the force with the OH bond. Another method to try is also to scale the oxygen force and hydrogen force based on their distance from center of mass, or based on mass of the atom as a percentage of the total mass, etc. Here we use a simple direct dot-product approach to calculate the force until it's time to tweak it later
+	/* The force calculation - splitting up the forces on the atoms between the two bonds - is done by find the inner-product of the force with the OH bond. Another method to try is also to scale the oxygen force and hydrogen force based on their distance from center of mass, angle ratios of the force vector with the oh bond, or based on mass of the atom as a percentage of the total mass, etc.
 	*/
-	double ForceOH1 = (vForceH1 * water.OH1()->Unit()) - (vForceO * water.OH1()->Unit());
-	double ForceOH2 = (vForceH2 * water.OH2()->Unit()) - (vForceO * water.OH2()->Unit());
+
+	// we need certain values before being able to proceed. We'll need the two target water OH's. And in order to generate those, we'll need the target water geometry. Let's start with the OH bond vectors (pointing from O to H).
+	VecR const * const oh1 = water.OH1();
+	VecR const * const oh2 = water.OH2();
+	// and the location of the target water's oxygen
+	VecR o = water.GetAtom("O")->Position();
+
+	// the forces on the hydrogens are scaled by the distance from the center of mass to the hydrogen and are taken as the dot product of the force vector with that scaled bond vector.
+	double Hscale = (OH_LENGTH - OH_COM_LENGTH)/ANG2BOHR;
+	double ForceH1 = (vForceH1 * oh1->Unit()) * Hscale;
+	double ForceH2 = (vForceH2 * oh2->Unit()) * Hscale;
+
+	// here are the angles between the oxygen force vectors and the vectors pointing from the oxygens to the center of masses
+	// these below are the cosines of the angles
+	double cos1 = fabs(vForceO < oh1->Unit());
+	double cos2 = fabs(vForceO < oh2->Unit());
+
+	// to get the oxygen force distributed we do a few things:
+	// 	first we need to determine the amount of the oxygen force that goes into each bond. One way is to find some ratio of angles between the force vector and the bonds. if we have theta1 as the angle between the force and OH bond1, and theta2 for the other, then we should be able to work a way to distribute the force completely.
+	// 		cos1/fabs(cos1) gives us a sense of the direction of the force - is it compressing or stretching the bond. Negative values imply that the bond is being stretched. Because we're interested in the "stretching" force on the bond, we take the negative of this ratio.
+	// 		The angle ratio is tempramental... still working that out
+	double Oscale = OH_COM_LENGTH/ANG2BOHR;
+	double ForceO1 = (vForceO * (oh1->Unit() * Oscale)) * cos1/(cos1+cos2);
+	double ForceO2 = (vForceO * (oh2->Unit() * Oscale)) * cos2/(cos1+cos2);
+
+	double ForceOH1 = ForceH1 - ForceO1;
+	double ForceOH2 = ForceH2 - ForceO2;
+	//printf ("% 10.3f\t% 10.3f\n", ForceOH1, ForceOH2);
 
 	// convert the forces into atomic units
-	//printf ("% 10.3f\t% 10.3f\n", ForceOH1, ForceOH2);
 	ForceOH1 *= AMBER2ATOMIC;
 	ForceOH2 *= AMBER2ATOMIC;
 
@@ -47,8 +72,8 @@ void SFGCalculator::FreqShift (Water& water) {
  ******************************/
 	/* now perform the direct application of the equation Eq.10c */
 	// note: the frequency shift is given as an angular frequency (omega) in the equation. Do we need a conversion to Hz style frequency here?
-	_OH1FreqShift = (PREFACTOR * ForceOH1)/2.0/M_PI;		// now in frequency in atomic units
-	_OH2FreqShift = (PREFACTOR * ForceOH2)/2.0/M_PI;
+	_OH1FreqShift = PREFACTOR * ForceOH1 / 2.0/M_PI;		// now in frequency in atomic units
+	_OH2FreqShift = PREFACTOR * ForceOH2 / 2.0/M_PI;
 
 	//printf ("% 10.3f\t% 10.3f\n", _OH1FreqShift*AU2WAVENUMBER, _OH2FreqShift*AU2WAVENUMBER);
 
@@ -62,18 +87,16 @@ void SFGCalculator::FreqShift (Water& water) {
 	// two OH bonds on the target water, so we will have two sets of shifts from dipole-dipole interactions
 	double dipolePotential[2] = {0.0, 0.0};
 
-	// we need certain values before being able to proceed. We'll need the dipoles from each of the two target water OH's. And in order to generate those, we'll need the target water geometry. Let's start with the OH bond vectors (pointing from O to H).
-	VecR const * const oh1 = water.OH1();
-	VecR const * const oh2 = water.OH2();
-	// and the location of the target water's oxygen
-	VecR o = water.GetAtom("O")->Position();
-	// now let's find the center of mass location vector for both OH's
+	// the dipole moment derivatives for each OH bond are calculated along the O->H vector, and have a magnitude of the same vector as in the MH paper.
+	// For the dipole moment derivative, we can just take the one from the molecular frame and rotate it out to the lab frame
+	// Originally the dipole moment derivative was assumed to be along the OH bond... as per DSW below:
+	VecR mu1 = oh1->Unit() * MU_DERIV_LENGTH * OH_COM_LENGTH;	// these are in atomic units
+	VecR mu2 = oh2->Unit() * MU_DERIV_LENGTH * OH_COM_LENGTH;
+	// But perhaps another idea, if taking the actual dipole deriv. doesn't work, is to take the dot product of the actual one with the OH bond unit vector. (?)
+
+	// find the center of mass locations for both target OH bonds
 	VecR com1 = o + (oh1->Unit() * (OH_COM_LENGTH/ANG2BOHR));	// this is in Angstroms...
 	VecR com2 = o + (oh2->Unit() * (OH_COM_LENGTH/ANG2BOHR));
-
-	// the dipole moment derivatives for each OH bond are calculated along the O->H vector, and have a magnitude of the same vector as in the MH paper.
-	VecR mu1 = oh1->Unit() * MU_DERIV_LENGTH;	// these are in atomic units
-	VecR mu2 = oh2->Unit() * MU_DERIV_LENGTH;
 
 	// Now we go through the calculation of each neighboring H-bonded water (the "source" waters, acting as the "source" of the dipole-dipole interactions) and find the contribution from each OH dipole. First we'll start with source OH's that are bound through the target oxygen. (I'll use the nomenclature of sH to mean source-hydrogen, and tO to mean target oxygen, etc.)
 
@@ -90,7 +113,6 @@ void SFGCalculator::FreqShift (Water& water) {
 
 		// now we have to find the center of mass separation vectors, and also the dipole moment derivatives for each of the source OHs
 		VecR sMu = sOH.Unit() * MU_DERIV_LENGTH;		// in atomic units
-
 		// The R vectors point from the source to the target
 		VecR R1 = sCOM.MinVector (com1, Atom::Size());
 		VecR R2 = sCOM.MinVector (com2, Atom::Size());
@@ -181,12 +203,11 @@ void SFGCalculator::FreqShift (Water& water) {
 	_w1 = UNCOUPLED_OH_FREQ + _OH1FreqShift;
 	_w2 = UNCOUPLED_OH_FREQ + _OH2FreqShift;
 
-	//printf ("[w1,w2] = % 10.3f\t% 10.3f\n", _w1*AU2WAVENUMBER, _w2*AU2WAVENUMBER);
 return;
 }
 
 // Here we calculate several values that play right off the equations of the paper - primarily Eq 7 and 8
-/* here we calculate the eigenfrequencies (normal modes) and the eigenvectors of the normal modes of the water. */
+/* such as the eigenfrequencies (normal modes) and the eigenvectors of the normal modes of the water. */
 void SFGCalculator::WaterEigenSystem (Water& water) {
 
 	// calculate the two frequency shifts of the OH bonds
@@ -208,15 +229,17 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
 
 /* As per Dave's code in inter.f: */
 	double wt = sqrt(_w1*_w1 + _w2*_w2 - 2.0*_w1*_w2 + 4.0*V12*V12);
-	_ws = 0.5*(_w1+_w2 - wt);
-	_wa = 0.5*(_w1+_w2 + wt);
+	_ws = 0.5*(_w1+_w2 + wt);
+	_wa = 0.5*(_w1+_w2 - wt);
 
 // let's set the symmetric frequency to be lower than the anti-symmetric
+/*
 	double temp = _ws;
 	if (_wa < _ws) {
 		_ws = _wa;
 		_wa = temp;
 	}
+*/
 
 	//printf ("% 10.5f\n% 10.5f\n", _ws*AU2WAVENUMBER, _wa*AU2WAVENUMBER);
 /*
@@ -253,15 +276,15 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
 */
 
 /* Now again, as per Dave's solution: */
-/*
 	_C1s = V12/(sqrt(V12*V12 + (_ws-_w1)*(_ws-_w1)));
-	_C1a = V12/(sqrt(V12*V12 + (_wa-_w1)*(_wa-_w1)));
-
 	_C2s = (_ws-_w1)/(sqrt(V12*V12 + (_ws-_w1)*(_ws-_w1)));
+
+	_C1a = V12/(sqrt(V12*V12 + (_wa-_w1)*(_wa-_w1)));
 	_C2a = (_wa-_w1)/(sqrt(V12*V12 + (_wa-_w1)*(_wa-_w1)));
 	//printf ("old =>\nc1 = % 12f\t% 12f\nc2 = % 12f\t% 12f\n", _C1s, _C1a, _C2s, _C2a);
-*/
+
 /* As per hand-calculated output */
+/*
 	double t = sqrt(4.0*V12*V12 + (_w1-_w2)*(_w1-_w2));
 
 	_C1s = -((_w2-_w1) + t)/(2.0*V12);
@@ -277,10 +300,10 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
 	norm = sqrt(_C1a*_C1a+1.0);
 	_C1a /= norm;
 	_C2a /= norm;
+	printf ("new =>\nc1 = % 12f\t% 12f\nc2 = % 12f\t% 12f\n", _C1s, _C1a, _C2s, _C2a);
 
 	//printf ("new =>\nc1 = % 12f\t% 12f\nc2 = % 12f\t% 12f\n", _C1s, _C1a, _C2s, _C2a);
 
-/*
 // before leaving, let's normalize the eigen vectors {C1x,C2x} to a magnitude of 1.0
 	double norm = sqrt(_C1s*_C1s + 1.0);
 	_C1s /= norm; _C2s /= norm;
@@ -289,7 +312,6 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
 	_C1a /= norm; _C2a /= norm;
 
 */
-	_set = true;
 	return;
 }
 
@@ -299,7 +321,7 @@ The polarization will be specified as S and P... we are dealing in molecular-fra
 
 We're going to go through both OH bonds and treat each separately.
 */
-void SFGCalculator::PolarizabilityAndDipoleDerivs (Water& water) {
+void SFGCalculator::PolarizabilityAndDipoleDerivs (Water& water, const int s1, const int s2, const int p) {
 
 	// let's find the rotation matrix for the water with which we're working
 	// this matrix takes us from the frame of the first OH bond into the lab frame
@@ -314,44 +336,34 @@ void SFGCalculator::PolarizabilityAndDipoleDerivs (Water& water) {
 // It seems like applying the scaling factor before or after rotation doesn't change much. It's just scaling, not changing direction, and so the constant multiplier gets carried throughout.
 // Also: Aren't these scaling factors supposed to be unitless? There shouldn't be any reason to convert back and forth from cm-1 or a.u. after calculating the factor as given in the M/H 2000 paper, equation (14)
 // here we need the frequency shift given as wavenumbers (cm-1).
-	//scale1 = (1.0 - 9.5138e-3 * _OH1FreqShift * AU2WAVENUMBER)/AU2WAVENUMBER;
-	//scale2 = (1.0 - 9.5138e-3 * _OH2FreqShift * AU2WAVENUMBER)/AU2WAVENUMBER;
 	scale1 = (1.0 - 9.5138e-3 * _OH1FreqShift * AU2WAVENUMBER);
 	scale2 = (1.0 - 9.5138e-3 * _OH2FreqShift * AU2WAVENUMBER);
 	//printf ("% 10.3f% 10.3f\n", scale1, scale2);
-
-/*	the old way of doing things */
-/*
-	_AlphaDerivS = _C1s * AlphaDeriv1.Index(p,q) + _C2s * AlphaDeriv2.Index(p,q);
-	_AlphaDerivA = _C1a * AlphaDeriv1.Index(p,q) + _C2a * AlphaDeriv2.Index(p,q);
-
-	_MuDerivS = _C1s * MuDeriv1[r] * scale1 + _C2s * MuDeriv2[r] * scale2;
-	_MuDerivA = _C1a * MuDeriv1[r] * scale1 + _C2a * MuDeriv2[r] * scale2;
-*/
 
 // New way of "pre-"rotating the alpha and mu tensors to avoid rotating the total Beta. a la DSW
 	// here we'll set up the dipole and alpha derivative tensors, but rotated into the lab frame from where they were in the frame of the 1st OH bond
 
 	// matrix rotation requires a unitary transformation to go into the lab frame
+	//MatR rotAlpha1 = _DCM.Transpose() * AlphaDeriv1 * _DCM;
+	//MatR rotAlpha2 = _DCM.Transpose() * AlphaDeriv2 * _DCM;
 	MatR rotAlpha1 = _DCM.Transpose() * AlphaDeriv1 * _DCM;
 	MatR rotAlpha2 = _DCM.Transpose() * AlphaDeriv2 * _DCM;
 
-	_AlphaDerivS += _C1s * rotAlpha1(0,0) + _C2s * rotAlpha2(0,0);
-	_AlphaDerivS += _C1s * rotAlpha1(0,2) + _C2s * rotAlpha2(0,2);
-	_AlphaDerivS += _C1s * rotAlpha1(2,0) + _C2s * rotAlpha2(2,0);
-	_AlphaDerivS += _C1s * rotAlpha1(2,2) + _C2s * rotAlpha2(2,2);
+	// pull together all the combinations of the derivative terms for an average value
+	_AlphaDerivS += _C1s * rotAlpha1(s1,s1) + _C2s * rotAlpha2(s1,s1);
+	_AlphaDerivS += _C1s * rotAlpha1(s2,s2) + _C2s * rotAlpha2(s2,s2);
+	_AlphaDerivS /= 2.0;
 
-	_AlphaDerivA += _C1a * rotAlpha1(0,0) + _C2a * rotAlpha2(0,0);
-	_AlphaDerivA += _C1a * rotAlpha1(0,2) + _C2a * rotAlpha2(0,2);
-	_AlphaDerivA += _C1a * rotAlpha1(2,0) + _C2a * rotAlpha2(2,0);
-	_AlphaDerivA += _C1a * rotAlpha1(2,2) + _C2a * rotAlpha2(2,2);
+	_AlphaDerivA += _C1a * rotAlpha1(s1,s1) + _C2a * rotAlpha2(s1,s1);
+	_AlphaDerivA += _C1a * rotAlpha1(s2,s2) + _C2a * rotAlpha2(s2,s2);
+	_AlphaDerivA /= 2.0;
 
 	// vector rotation into the lab frame is easy - just multiply by the rotation matrix
 	VecR rotMu1 (_DCM * (MuDeriv1 * scale1));
 	VecR rotMu2 (_DCM * (MuDeriv2 * scale2));
 
-	_MuDerivS = _C1s * rotMu1[1] * scale1 + _C2s * rotMu2[1] * scale2;
-	_MuDerivA = _C1a * rotMu1[1] * scale1 + _C2a * rotMu2[1] * scale2;
+	_MuDerivS = _C1s * rotMu1[p] + _C2s * rotMu2[p];
+	_MuDerivA = _C1a * rotMu1[p] + _C2a * rotMu2[p];
 
 	//printf ("MuDeriv = \t%f\t%f\nAlphaDeriv = \t%f\t%f\n", _MuDerivS, _MuDerivA, _AlphaDerivS, _AlphaDerivA);
 return;
@@ -359,8 +371,13 @@ return;
 
 
 /* here we calculate the hyperpolarizability spectrum for a water molecule. In the course of this, two spectra will be calculated and averaged based on the two values of the eigenfrequencies of a water molecule */
-std::vector< std::complex<double> >& SFGCalculator::Beta (Water& water) {
+std::vector< std::complex<double> >& SFGCalculator::Beta (Water& water, const int s1, const int s2, const int p) {
 //vector< complex<double> >& SFGCalculator::Beta (Water& water) {
+
+// for this step - the summation and rotation to the lab frame by use of the direction cosine matrix - see:
+// Shen - Phys. Rev. B, 59, 19 (1999), p. 12634
+// eq(7) of the paper lays out pretty simply that we use a direction cosine matrix to find all the interesting things that make up the hyperpolarizability.
+// l,m,n are the lab frame axes, and p,q,r are the molecular frame ones.
 
 	/* Now that we have all the data established for this one water molecule (i.e. coefficients for symmetric and antisymmetric modes, dipole derivatives, and polarizability derivatives for all valid polarizations) we can put it all together and calculate spectra. Two spectra will come out for the sym and anti-sym cases, and we have to include all the polarization combinations. The beta that comes out of here is still in the molecular frame and needs to be rotated.
 	*/
@@ -368,7 +385,7 @@ std::vector< std::complex<double> >& SFGCalculator::Beta (Water& water) {
 	// we've collected lots of information, so now let's construct some spectra!
 	_Beta.clear();	// clear out the previous spectrum
 
-	this->PolarizabilityAndDipoleDerivs (water);
+	this->PolarizabilityAndDipoleDerivs (water, s1, s2, p);
 
 	// let's calculate a pre-multiplier from equation (5)
 	double premultSym = 0.5 / M / _ws * _AlphaDerivS * _MuDerivS;
@@ -400,19 +417,6 @@ std::vector< std::complex<double> >& SFGCalculator::Beta (Water& water) {
 return (_Beta);
 }
 
-
-// for this step - the summation and rotation to the lab frame by use of the direction cosine matrix - see:
-// Shen - Phys. Rev. B, 59, 19 (1999), p. 12634
-// eq(7) of the paper lays out pretty simply that we use a direction cosine matrix to find all the interesting things that make up the hyperpolarizability.
-// l,m,n are the lab frame axes, and p,q,r are the molecular frame ones.
-//
-std::vector< std::complex<double> >& SFGCalculator::Chi (Water& water) {
-
-	this->Beta (water);	// this calculates the beta spectrum
-
-return (_Beta);
-}
-
 // calculates the dipole-dipole interaction potential for two dipoles separated by a distance R.
 double SFGCalculator::DipolePotential (const VecR& muA, const VecR& muB, const VecR& R) {
 
@@ -428,13 +432,13 @@ double SFGCalculator::CouplingConstant (Water& water) const {
 
 	double V12 = COUPLING_CONST;
 
-	int N = static_cast<int>(_matrix->WaterCoordination(&water));
+	//int coord = static_cast<int>(_matrix->WaterCoordination(&water));
+	int N = _matrix->NumHBonds(&water);
 
-	if (N >= 10) {
-		N = _matrix->NumHBonds(&water);
-		V12 *= sqrt(double(N));
+	if (N > 1) {
+		V12 = V12 / sqrt(double(N));
 	}
-	//printf ("% 10.3f\n", V12*AU2WAVENUMBER);
+	//printf ("coordination = %d% 10.3f\n", N, V12*AU2WAVENUMBER);
 
 return (V12);
 }

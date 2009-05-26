@@ -58,6 +58,13 @@ int main (int argc, char **argv) {
 
 	MatR dcm = wat->DCMToLabMorita(z);
 
+	const VecR * oh1 = wat->OH1();
+	const VecR * oh2 = wat->OH2();
+
+	oh1->Print();
+	oh2->Print();
+
+	printf ("% 12.5f% 12.5f% 12.5f\n", oh1->Magnitude(), oh2->Magnitude(), acos((*oh1) < (*oh2))*180/M_PI);
 	//wat->CalcEulerAngles(y);
 
 	//VecR oh1 = *(wat->OH1());
@@ -71,9 +78,7 @@ int main (int argc, char **argv) {
 	double d[9] = {0.333, 0.0, 0.9428, 0.0, -1.0, 0.0, 0.9428, 0.0, -0.3333};
 	MatR D(d);
 
-	MatR a = D.Transpose()*alpha*D;
-	a.Print();
-
+	(dcm*alpha*dcm.Transpose()).Print();
 	double sum=0.0;
 
 	for (int i=0; i<3; i++) {
@@ -83,12 +88,12 @@ int main (int argc, char **argv) {
 
 	for (int l=0; l<3; l++) {
 	for (int m=0; m<3; m++) {
-		sum += D(l,i)*D(m,j)*alpha(l,m);
+		sum += dcm(i,l)*dcm(j,m)*alpha(l,m);
 	}}
 
-	std::cout << sum << "\t";
+	printf ("% 12.5f", sum);
 	}
-	cout << std::endl;
+	printf ("\n");
 	}
 	//double phi = wat->EulerAngles[0] * 180.0/M_PI;
 	//double theta = wat->EulerAngles[1] * 180.0/M_PI;
