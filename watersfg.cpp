@@ -44,13 +44,13 @@ void SFGCalculator::FreqShift (Water& water) {
 	// the forces on the hydrogens are scaled by the distance from the center of mass to the hydrogen and are taken as the dot product of the force vector with that scaled bond vector.
 	double Hscale = (OH_LENGTH - OH_COM_LENGTH)/ANG2BOHR;
 	//double Hscale = 1.0;
-	double ForceH1 = (vForceH1 * oh1->Unit()) * Hscale;
-	double ForceH2 = (vForceH2 * oh2->Unit()) * Hscale;
+	double ForceH1 = vForceH1 * (oh1->Unit() * Hscale);
+	double ForceH2 = vForceH2 * (oh2->Unit() * Hscale);
 
 	// here are the angles between the oxygen force vectors and the vectors pointing from the oxygens to the center of masses
 	// these below are the cosines of the angles
-	double cos1 = fabs(vForceO < oh1->Unit());
-	double cos2 = fabs(vForceO < oh2->Unit());
+	double cos1 = (vForceO < oh1->Unit());
+	double cos2 = (vForceO < oh2->Unit());
 
 	// to get the oxygen force distributed we do a few things:
 	// 	first we need to determine the amount of the oxygen force that goes into each bond. One way is to find some ratio of angles between the force vector and the bonds. if we have theta1 as the angle between the force and OH bond1, and theta2 for the other, then we should be able to work a way to distribute the force completely.
@@ -58,8 +58,10 @@ void SFGCalculator::FreqShift (Water& water) {
 	// 		The angle ratio is tempramental... still working that out
 	double Oscale = OH_COM_LENGTH/ANG2BOHR;
 	//double Oscale = 1.0;
-	double ForceO1 = (vForceO * (oh1->Unit() * Oscale)) * cos1/(cos1+cos2);
-	double ForceO2 = (vForceO * (oh2->Unit() * Oscale)) * cos2/(cos1+cos2);
+	double ForceO1 = (vForceO * (oh1->Unit() * Oscale)) * fabs(cos1)/(fabs(cos1)+fabs(cos2));
+	double ForceO2 = (vForceO * (oh2->Unit() * Oscale)) * fabs(cos2)/(fabs(cos1)+fabs(cos2));
+	//double ForceO1 = (vForceO * (oh1->Unit() * Oscale)) * cos1/(cos1+cos2);
+	//double ForceO2 = (vForceO * (oh2->Unit() * Oscale)) * cos2/(cos1+cos2);
 
 	double ForceOH1 = ForceH1 - ForceO1;
 	double ForceOH2 = ForceH2 - ForceO2;
