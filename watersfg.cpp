@@ -43,6 +43,7 @@ void SFGCalculator::FreqShift (Water& water) {
 
 	// the forces on the hydrogens are scaled by the distance from the center of mass to the hydrogen and are taken as the dot product of the force vector with that scaled bond vector.
 	double Hscale = (OH_LENGTH - OH_COM_LENGTH)/ANG2BOHR;
+	//double Hscale = 1.0;
 	double ForceH1 = (vForceH1 * oh1->Unit()) * Hscale;
 	double ForceH2 = (vForceH2 * oh2->Unit()) * Hscale;
 
@@ -56,6 +57,7 @@ void SFGCalculator::FreqShift (Water& water) {
 	// 		cos1/fabs(cos1) gives us a sense of the direction of the force - is it compressing or stretching the bond. Negative values imply that the bond is being stretched. Because we're interested in the "stretching" force on the bond, we take the negative of this ratio.
 	// 		The angle ratio is tempramental... still working that out
 	double Oscale = OH_COM_LENGTH/ANG2BOHR;
+	//double Oscale = 1.0;
 	double ForceO1 = (vForceO * (oh1->Unit() * Oscale)) * cos1/(cos1+cos2);
 	double ForceO2 = (vForceO * (oh2->Unit() * Oscale)) * cos2/(cos1+cos2);
 
@@ -100,7 +102,7 @@ void SFGCalculator::FreqShift (Water& water) {
 
 	// Now we go through the calculation of each neighboring H-bonded water (the "source" waters, acting as the "source" of the dipole-dipole interactions) and find the contribution from each OH dipole. First we'll start with source OH's that are bound through the target oxygen. (I'll use the nomenclature of sH to mean source-hydrogen, and tO to mean target oxygen, etc.)
 
-	Atom * tO = water["O"];
+	Atom * tO = water.GetAtom("O");
 	Atom_ptr_vec hbonds = _matrix->BondedAtoms(tO, hbond);
 	RUN (hbonds) {
 
@@ -217,15 +219,7 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
  * Solving for symmetric and antisymmetric frequency of the normal modes
  * ******************/
 
-	/* now we have to solve the determinant equation - a polynomial as follows:
-		w^2 - w*(w1+w2) + (w1*w2 - V12^2) = 0
-	*/
-
-	/* We solve this with the quadratic equation: (-b +/- sqrt(b^2-4ac)) / 2a... first grab the values of a, b, and c...
-		i.e. a = 1, b = -(w1+w2), c = (w1*w2 - V12^2) */
-
 	double V12 = this->CouplingConstant (water);
-	//double V12 = COUPLING_CONST;
 
 /* As per Dave's code in inter.f: */
 	double wt = sqrt(_w1*_w1 + _w2*_w2 - 2.0*_w1*_w2 + 4.0*V12*V12);
@@ -240,40 +234,7 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
 		_wa = temp;
 	}
 */
-
 	//printf ("% 10.5f\n% 10.5f\n", _ws*AU2WAVENUMBER, _wa*AU2WAVENUMBER);
-/*
-	double b = -_w1 - _w2;		// atomic units
-	double c = (_w1 * _w2) - V12*V12;
-	// The discriminant b^2 - 4*a*c
-	double D = b*b - 4.0*c;
-
-	// if D > 0 - two real roots - i.e. normal mode frequencies!
-	if (D >= 0.0) {
-		_ws = (-b - sqrt(D)) / 2.0;		// we'll call the first one the symmetric frequency	(units = cm-1)
-		_wa = (-b + sqrt(D)) / 2.0;		// and the second the anti-symmetric
-	}
-	// D < 0 means there are two complex roots - something that isn't physical (to me, right now)
-	else if (D < 0.0) printf ("Complex eigenfrequencies calculated for the OH bonds. This doesn't seem right!\n");
-	// otherwise, if D = 0, then there is only one root - b^2/2a
-	else {
-		printf ("Only found 1 root to the eigenfrequency equations! Check to see if this is right or not\n");
-	}
-
-
-*/
-
-/* continuing the solution of Eq. 8 - let's calculate the coefficients C1 and C2. We begin with 2 values of the eigenfrequencies. Thus we will have two sets of equations, and two values of C1 and C2 (one for symmetric, and one for antisymmetric). Both are kept and used in the calculation and averaged over later on.
-   Solving the eigenvector equation results in a value for the ratio of C1/C2. If we first assume that C1 = 1.0, then we can get values of C2.
-*/
-
-// C1/C2 = -V12/(w1-w) AND C1/C2 = -(w2-w)/V12 - both methods should be the same!
-/*
-	_C2s = 1.0;
-	_C2a = 1.0;
-	_C1s = -V12/(_w1-_ws);
-	_C1a = -V12/(_w1-_wa);
-*/
 
 /* Now again, as per Dave's solution: */
 	_C1s = V12/(sqrt(V12*V12 + (_ws-_w1)*(_ws-_w1)));
@@ -283,28 +244,8 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
 	_C2a = (_wa-_w1)/(sqrt(V12*V12 + (_wa-_w1)*(_wa-_w1)));
 	//printf ("old =>\nc1 = % 12f\t% 12f\nc2 = % 12f\t% 12f\n", _C1s, _C1a, _C2s, _C2a);
 
-/* As per hand-calculated output */
-/*
-	double t = sqrt(4.0*V12*V12 + (_w1-_w2)*(_w1-_w2));
-
-	_C1s = -((_w2-_w1) + t)/(2.0*V12);
-	_C2s = 1.0;
-
-	double norm = sqrt(_C1s*_C1s+1.0);
-	_C1s /= norm;
-	_C2s /= norm;
-
-	_C1a = -((_w2-_w1) - t)/(2.0*V12);
-	_C2a = 1.0;
-
-	norm = sqrt(_C1a*_C1a+1.0);
-	_C1a /= norm;
-	_C2a /= norm;
-	printf ("new =>\nc1 = % 12f\t% 12f\nc2 = % 12f\t% 12f\n", _C1s, _C1a, _C2s, _C2a);
-
-	//printf ("new =>\nc1 = % 12f\t% 12f\nc2 = % 12f\t% 12f\n", _C1s, _C1a, _C2s, _C2a);
-
 // before leaving, let's normalize the eigen vectors {C1x,C2x} to a magnitude of 1.0
+/*
 	double norm = sqrt(_C1s*_C1s + 1.0);
 	_C1s /= norm; _C2s /= norm;
 
@@ -344,8 +285,6 @@ void SFGCalculator::PolarizabilityAndDipoleDerivs (Water& water, const int s1, c
 	// here we'll set up the dipole and alpha derivative tensors, but rotated into the lab frame from where they were in the frame of the 1st OH bond
 
 	// matrix rotation requires a unitary transformation to go into the lab frame
-	//MatR rotAlpha1 = _DCM.Transpose() * AlphaDeriv1 * _DCM;
-	//MatR rotAlpha2 = _DCM.Transpose() * AlphaDeriv2 * _DCM;
 	MatR rotAlpha1 = _DCM.Transpose() * AlphaDeriv1 * _DCM;
 	MatR rotAlpha2 = _DCM.Transpose() * AlphaDeriv2 * _DCM;
 

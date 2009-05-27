@@ -50,10 +50,13 @@ class MoritaSFG:
 		# first we'll plot the water data for each figure
 		ax2.plot(self.x, self.real, 'g', linewidth=1, label=r'Real')
 		ax2.plot(self.x, self.imag, 'r', linewidth=1, label=r'Imag')
-		#ax2.plot(self.x, self.real_mag, 'g:', linewidth=1, label=r'real magnitude')
-		#ax2.plot(self.x, self.imag_mag, 'r:', linewidth=1, label=r'Imag magnitude')
+		ax1.plot(self.x, self.real_mag, 'g', linewidth=1, label=r'real magnitude')
+		ax1.plot(self.x, self.imag_mag, 'r', linewidth=1, label=r'Imag magnitude')
 		ax1.plot(self.x, self.mag, 'b', linewidth=1, label=r'Complex')
 		ax1.set_axis_bgcolor('w')
+
+		ax1.yaxis.grid(True, which='major')
+		ax2.yaxis.grid(True)
 
 		# set some legend properties.  All the code below is optional.  The
 		# defaults are usually sensible but if you need more control, this

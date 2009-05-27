@@ -29,12 +29,12 @@ void SFGAnalyzer::Analyze () {
 
 		// first let's find all the molecules in the interface
 		this->FindWaters ();
-		this->SliceWaters (50.0, 70.0);
+		this->SliceWaters (50.0, 75.0);
 
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
 		UpdateMatrix ();
 		// only grab the OH-waters for now
-		this->SliceWaterCoordination (OH);
+		//this->SliceWaterCoordination (OH);
 
 		for (int mol = 0; mol < int_mols.size(); mol++) {
 
