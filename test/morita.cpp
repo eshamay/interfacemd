@@ -29,12 +29,12 @@ void SFGAnalyzer::Analyze () {
 
 		// first let's find all the molecules in the interface
 		this->FindWaters ();
-		this->SliceWaters (50.0, 75.0);
+		this->SliceWaters (70.0, 90.0);
 
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
 		UpdateMatrix ();
 		// only grab the OH-waters for now
-		//this->SliceWaterCoordination (OH);
+		//this->SliceWaterCoordination (OOH);
 
 		for (int mol = 0; mol < int_mols.size(); mol++) {
 
@@ -77,8 +77,6 @@ void SFGAnalyzer::Analyze () {
 
 	// final output of the data to the file
 	OutputData ();
-
-	fclose(output);
 
 return;
 }
@@ -144,7 +142,7 @@ int main (const int argc, const char **argv) {
 		params.avg = false;
 		params.posmin = -5.0;
 		params.posmax = 150.0;
-		params.output = "sfg.morita.dat";
+		params.output = "sfg.set2.0.8-0.6.70.dat";
 	#endif
 	params.posres = 0.100;
 	params.pbcflip = 15.0;

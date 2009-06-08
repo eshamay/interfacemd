@@ -42,8 +42,8 @@ void SFGCalculator::FreqShift (Water& water) {
 	VecR o = water.GetAtom("O")->Position();
 
 	// the forces on the hydrogens are scaled by the distance from the center of mass to the hydrogen and are taken as the dot product of the force vector with that scaled bond vector.
-	double Hscale = (OH_LENGTH - OH_COM_LENGTH)/ANG2BOHR;
-	//double Hscale = 1.0;
+	double Hscale = 0.6;
+	//double Hscale = (OH_LENGTH-OH_COM_LENGTH)/ANG2BOHR;
 	double ForceH1 = vForceH1 * (oh1->Unit() * Hscale);
 	double ForceH2 = vForceH2 * (oh2->Unit() * Hscale);
 
@@ -56,12 +56,10 @@ void SFGCalculator::FreqShift (Water& water) {
 	// 	first we need to determine the amount of the oxygen force that goes into each bond. One way is to find some ratio of angles between the force vector and the bonds. if we have theta1 as the angle between the force and OH bond1, and theta2 for the other, then we should be able to work a way to distribute the force completely.
 	// 		cos1/fabs(cos1) gives us a sense of the direction of the force - is it compressing or stretching the bond. Negative values imply that the bond is being stretched. Because we're interested in the "stretching" force on the bond, we take the negative of this ratio.
 	// 		The angle ratio is tempramental... still working that out
-	double Oscale = OH_COM_LENGTH/ANG2BOHR;
-	//double Oscale = 1.0;
+	//double Oscale = OH_COM_LENGTH/ANG2BOHR;
+	double Oscale = 0.8;
 	double ForceO1 = (vForceO * (oh1->Unit() * Oscale)) * fabs(cos1)/(fabs(cos1)+fabs(cos2));
 	double ForceO2 = (vForceO * (oh2->Unit() * Oscale)) * fabs(cos2)/(fabs(cos1)+fabs(cos2));
-	//double ForceO1 = (vForceO * (oh1->Unit() * Oscale)) * cos1/(cos1+cos2);
-	//double ForceO2 = (vForceO * (oh2->Unit() * Oscale)) * cos2/(cos1+cos2);
 
 	double ForceOH1 = ForceH1 - ForceO1;
 	double ForceOH2 = ForceH2 - ForceO2;
@@ -86,16 +84,18 @@ void SFGCalculator::FreqShift (Water& water) {
  * Calculation of the frequency shift due to dipole-dipole interaction with neighboring waters
  *********************************************************************************************/
 
-  int coord = static_cast<int>(_matrix->WaterCoordination(&water));
-  if (coord >= 10) {
+  //int coord = static_cast<int>(_matrix->WaterCoordination(&water));
+  //int N = _matrix->NumHBonds(&water);
+  //if (N > 3) {
 	// two OH bonds on the target water, so we will have two sets of shifts from dipole-dipole interactions
 	double dipolePotential[2] = {0.0, 0.0};
 
 	// the dipole moment derivatives for each OH bond are calculated along the O->H vector, and have a magnitude of the same vector as in the MH paper.
 	// For the dipole moment derivative, we can just take the one from the molecular frame and rotate it out to the lab frame
 	// Originally the dipole moment derivative was assumed to be along the OH bond... as per DSW below:
-	VecR mu1 = oh1->Unit() * MU_DERIV_LENGTH * OH_COM_LENGTH;	// these are in atomic units
-	VecR mu2 = oh2->Unit() * MU_DERIV_LENGTH * OH_COM_LENGTH;
+	double mu_scale = MU_DERIV_LENGTH;
+	VecR mu1 = oh1->Unit() * mu_scale;	// these are in atomic units
+	VecR mu2 = oh2->Unit() * mu_scale;
 	// But perhaps another idea, if taking the actual dipole deriv. doesn't work, is to take the dot product of the actual one with the OH bond unit vector. (?)
 
 	// find the center of mass locations for both target OH bonds
@@ -116,7 +116,7 @@ void SFGCalculator::FreqShift (Water& water) {
 		VecR sCOM = sO->Position() + (sOH.Unit() * (OH_COM_LENGTH/ANG2BOHR));		// in angstroms
 
 		// now we have to find the center of mass separation vectors, and also the dipole moment derivatives for each of the source OHs
-		VecR sMu = sOH.Unit() * MU_DERIV_LENGTH;		// in atomic units
+		VecR sMu = sOH.Unit() * mu_scale;		// in atomic units
 		// The R vectors point from the source to the target
 		VecR R1 = sCOM.MinVector (com1, Atom::Size());
 		VecR R2 = sCOM.MinVector (com2, Atom::Size());
@@ -128,6 +128,7 @@ void SFGCalculator::FreqShift (Water& water) {
 		dipolePotential[0] += this->DipolePotential (mu1, sMu, R1);		// the result is in atomic units
 		dipolePotential[1] += this->DipolePotential (mu2, sMu, R2);
 	}
+
 
 	// next we go through both of the other target hydrogens and find their H-bonding partners
 	Atom * tH = water["H1"];
@@ -145,8 +146,8 @@ void SFGCalculator::FreqShift (Water& water) {
 		VecR sCOM2 = sO->Position() + (sOH2.Unit() * (OH_COM_LENGTH/ANG2BOHR));
 
 		// now we have to find the center of mass separation vectors, and also the dipole moment derivatives for each of the source OHs
-		VecR sMu1 = sOH1.Unit() * MU_DERIV_LENGTH;		// atomic units
-		VecR sMu2 = sOH2.Unit() * MU_DERIV_LENGTH;
+		VecR sMu1 = sOH1.Unit() * mu_scale;		// atomic units
+		VecR sMu2 = sOH2.Unit() * mu_scale;
 
 		// The R vectors point from the source to the target
 		VecR R1 = sCOM1.MinVector (com1, Atom::Size());		// angstroms
@@ -157,7 +158,7 @@ void SFGCalculator::FreqShift (Water& water) {
 		R2 *= ANG2BOHR;
 
 		dipolePotential[0] += this->DipolePotential (mu1, sMu1, R1);
-		dipolePotential[1] += this->DipolePotential (mu1, sMu2, R2);
+		dipolePotential[0] += this->DipolePotential (mu1, sMu2, R2);
 	}
 
 	// and now the 2nd target hydrogen
@@ -175,8 +176,8 @@ void SFGCalculator::FreqShift (Water& water) {
 		VecR sCOM2 = sO->Position() + (sOH2.Unit() * (OH_COM_LENGTH/ANG2BOHR));		// in angstroms
 
 		// now we have to find the center of mass separation vectors, and also the dipole moment derivatives for each of the source OHs
-		VecR sMu1 = sOH1.Unit() * MU_DERIV_LENGTH;		// a.u.
-		VecR sMu2 = sOH2.Unit() * MU_DERIV_LENGTH;
+		VecR sMu1 = sOH1.Unit() * mu_scale;		// a.u.
+		VecR sMu2 = sOH2.Unit() * mu_scale;
 
 		// The R vectors point from the source to the target
 		VecR R1 = sCOM1.MinVector (com2, Atom::Size());		// angstroms
@@ -186,7 +187,7 @@ void SFGCalculator::FreqShift (Water& water) {
 		R1 *= ANG2BOHR;		// converting to a.u.
 		R2 *= ANG2BOHR;
 
-		dipolePotential[0] += this->DipolePotential (mu2, sMu1, R1);	// in atomic units
+		dipolePotential[1] += this->DipolePotential (mu2, sMu1, R1);	// in atomic units
 		dipolePotential[1] += this->DipolePotential (mu2, sMu2, R2);
 	}
 
@@ -197,7 +198,7 @@ void SFGCalculator::FreqShift (Water& water) {
 	_OH2FreqShift += dipolePotential[1];
 
 	//printf ("% 10.3f\t% 10.3f\n", dipolePotential[0]*AU2WAVENUMBER, dipolePotential[1]*AU2WAVENUMBER);
-  }
+  //}
 #endif
 
 /*********************************************
@@ -225,8 +226,8 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
 
 /* As per Dave's code in inter.f: */
 	double wt = sqrt(_w1*_w1 + _w2*_w2 - 2.0*_w1*_w2 + 4.0*V12*V12);
-	_ws = 0.5*(_w1+_w2 + wt);
-	_wa = 0.5*(_w1+_w2 - wt);
+	_ws = 0.5*(_w1+_w2 - wt);
+	_wa = 0.5*(_w1+_w2 + wt);
 
 // let's set the symmetric frequency to be lower than the anti-symmetric
 /*
@@ -361,9 +362,7 @@ return (_Beta);
 // calculates the dipole-dipole interaction potential for two dipoles separated by a distance R.
 double SFGCalculator::DipolePotential (const VecR& muA, const VecR& muB, const VecR& R) {
 
-	double potential;
-
-	potential = 1.0/pow(R.Magnitude(), 3.0) * (muA * muB - 3.0/pow(R.Magnitude(), 2.0) * (muA * R) * (muB * R));
+	double potential = 1.0/pow(R.Magnitude(), 3.0) * (muA * muB - 3.0/pow(R.Magnitude(), 2.0) * (muA * R) * (muB * R));
 
 return (potential);
 }
@@ -373,10 +372,11 @@ double SFGCalculator::CouplingConstant (Water& water) const {
 
 	double V12 = COUPLING_CONST;
 
-	//int coord = static_cast<int>(_matrix->WaterCoordination(&water));
+//	int coord = static_cast<int>(_matrix->WaterCoordination(&water));
 	int N = _matrix->NumHBonds(&water);
 
 	if (N > 1) {
+		//int N = _matrix->NumHBonds(&water);
 		V12 = V12 / sqrt(double(N));
 	}
 	//printf ("coordination = %d% 10.3f\n", N, V12*AU2WAVENUMBER);

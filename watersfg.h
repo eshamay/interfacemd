@@ -57,8 +57,8 @@ const double GAMMA				= 2.0/AU2WAVENUMBER;				// the "damping parameter" first s
 const double GAMMA_SQ			= GAMMA*GAMMA;				// ...squared
 
 // frequency limits for calculating the spectra (given in cm-1)
-const double START_FREQ			= 2500.0/AU2WAVENUMBER;
-const double END_FREQ			= 4000.0/AU2WAVENUMBER;
+const double START_FREQ			= 2800.0/AU2WAVENUMBER;
+const double END_FREQ			= 3800.0/AU2WAVENUMBER;
 const double FREQ_STEP			= 1.0/AU2WAVENUMBER;		// step size when calculating the spectra
 const double NUM_STEP			= (END_FREQ-START_FREQ)/FREQ_STEP;
 
