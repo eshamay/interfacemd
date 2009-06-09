@@ -13,7 +13,7 @@ MDCRD2PDB = $(AMBERFILES) ../pdbfile.o mdcrd2pdb.o
 FILLBOX = $(AMBERFILES) ../pdbfile.o ../boxfiller.o
 MPIFILES	=	$(AMBERFILES) ../mpi/mpisys.o mpitest.o
 ORDERPARAMS = $(WATERSYSTEM) orderparams.o
-TEMPFILES	= temp.cpp $(AMBERFILES) ../pdbfile.o
+TEMPFILES	= temp.cpp $(XYZSYSTEM) ../moritasfg2002.o
 COORDINATION	= $(WATERSYSTEM) coordination.o
 ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
 

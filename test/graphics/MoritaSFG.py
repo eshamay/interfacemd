@@ -65,9 +65,9 @@ class MoritaSFG:
 			self.comp.append([])
 
 			if i == 1:
-				scale = -25.0
+				scale = 5.0
 			if i == 2:
-				scale = -45.0
+				scale = -35.0
 			if i == 3:
 				scale = 45.0
 			for j in range(len(self.real[i])):
@@ -99,10 +99,21 @@ class MoritaSFG:
 		# Set up the plot parameters (labels, size, limits, etc)
 		self.fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
 
-		ax1 = self.fig.add_subplot(1,1,1)
+		extra_axes = True
+
+		if extra_axes == True:
+			ax1 = self.fig.add_subplot(3,1,1)
+		else:
+			ax1 = self.fig.add_subplot(1,1,1)
+
 		ax1.set_title('SFG Spectrum', size='x-large')
-		#ax2 = self.fig.add_subplot(3,1,2)
-		#ax3 = self.fig.add_subplot(3,1,3)
+		ax1.set_ylabel(r'$\left|\chi^{(2)}\right|^2$', size='xx-large')
+
+		if extra_axes == True:
+			ax2 = self.fig.add_subplot(3,1,2)
+			ax2.set_ylabel(r'Re $\chi^{(2)}$', size='xx-large')
+			ax3 = self.fig.add_subplot(3,1,3)
+			ax3.set_ylabel(r'Im $\chi^{(2)}$', size='xx-large')
 
 
 		'''
@@ -118,10 +129,12 @@ class MoritaSFG:
 		for i in range(len(self.files)):
 			#ax1.plot(self.x[i], self.chi[i], linewidth=2, label=r'$\left|\chi^{(2)}\right|^2$')
 			ax1.plot(self.x[i], self.chi[i], linewidth=1, label=self.names[i])
-			#ax2.plot(self.x[i], self.real[i], linewidth=1, label=self.names[i])
-			#ax3.plot(self.x[i], self.imag[i], linewidth=1, label=self.names[i])
+			if extra_axes == True:
+				ax2.plot(self.x[i], self.real[i], linewidth=1, label=self.names[i])
+				ax3.plot(self.x[i], self.imag[i], linewidth=1, label=self.names[i])
 
-		#ax1.set_axis_bgcolor('w')
+		ax1.set_axis_bgcolor('w')
+		ax1.set_yticklabels([])
 		#ax2.plot(self.x, self.real, 'g', linewidth=1, label=r'Re$\left(\chi^{(2)}\right)$')
 		#ax2.plot(self.x, self.imag, 'r', linewidth=1, label=r'Im$\left(\chi^{(2)}\right)$')
 

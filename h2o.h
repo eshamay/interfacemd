@@ -11,11 +11,6 @@
 #include "matrixr.h"
 #include "utility.h"
 
-#define R_eq	0.9575		// equilibrium OH bond length
-#define Theta_eq	104.51	// equilibrium H-O-H angle
-#define qO_eq	-0.6750		// equilibrium partial charges of the oxygen
-#define qH_eq	 0.3285		// 		and the hydrogens
-
 // A water class to add a few functions for dealing with water molecules specifically.
 class Water: public Molecule {
 

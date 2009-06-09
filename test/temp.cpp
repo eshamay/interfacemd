@@ -1,16 +1,22 @@
 #include <iostream>
-#include "../utility.h"
-#include "../ambersystem.h"
+//#include "../utility.h"
+//#include "../ambersystem.h"
+#include "../xyzsystem.h"
+#include "../moritasfg2002.h"
 //#include "../pdbfile.h"
 
 using namespace std;
 
+/*
 void movetoorigin (Molecule * wat);
 MatR r_matrix (double alpha, double beta, double gamma, int fwd);
 void rotate (MatR R, Molecule * mol);
 
+*/
 int main (int argc, char **argv) {
-	AmberSystem sys ("prmtop", "mdcrd", "mdvel");
+	//AmberSystem sys ("prmtop", "mdcrd", "mdvel");
+	XYZSystem sys ("pos.xyz", VecR(12.0,12.0,20.0), "wanniers");
+	MoritaSFG sfg;
 
 /*
 	// original water in molecular frame
@@ -46,16 +52,18 @@ int main (int argc, char **argv) {
 */
 	//for (int step = 0; step < 20; step++) {
 	Water * wat;
+	VecR p;
 	RUN (sys.Molecules()) {
 		//Molecule * mol = sys.Molecules(atof(argv[1]));
 		Molecule * mol = sys.Molecules(i);
 		if (mol->Name() != "h2o") continue;
 
 		wat =  static_cast<Water *>(mol);
-		break;
+		p = sfg.CalcDipole(wat);
 	}
 	//wat->Print();
 
+/*
 	MatR dcm = wat->DCMToLabMorita(z);
 
 	const VecR * oh1 = wat->OH1();
@@ -104,6 +112,7 @@ int main (int argc, char **argv) {
 	//sys.LoadNext();
 	//}
 
+*/
 		//printf ("% 8.3f\t% 8.3f\n", cos(2.0*atan2(1.2,1.4)), cos(2.0*atan2(1.4,1.2)));
 /*
 		for (int i = 0; i < 3; i++) {

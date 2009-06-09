@@ -17,7 +17,7 @@ private:
 	XYZFile				_atoms;			// Atomlist parsed from an xyz file
 	vector<Molecule *> 	_mols;			// once we have atoms defined, we form them into molecules
 	WannierFile 		_wanniers;		// The wannier centers
-	BondGraph 			_bondgraph;		// a really useful graph of bonding in the system
+	//BondGraph 			_bondgraph;		// a really useful graph of bonding in the system
 
 	bool _parsed;
 
@@ -51,11 +51,9 @@ public:
 	vector<Molecule *>& Molecules () { return _mols; }
 	Molecule * Molecules (int mol) { return _mols[mol]; }
 	Atom * Atoms (int atom) { 
-		Atom * pa;
-		pa = _atoms[atom];
-		return pa; 
+		return (_atoms[atom]);
 	}
-	const vector<VecR>& Wanniers () const { return _wanniers.Coords(); }
+	const std::vector<VecR>& Wanniers () const { return _wanniers.Coords(); }
 	int size ()	const { return _atoms.size(); }
 
 	// returns the distance between two atoms in the system
