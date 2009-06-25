@@ -8,7 +8,7 @@
 #include "utility.h"
 
 class CRDFile {
-	
+
 	FILE 			*_file;
 	std::vector<VecR>	_coords;	// atomic coordinates
 	int 			_size;		// number of atoms in the system
@@ -18,7 +18,7 @@ class CRDFile {
 	bool			_eof;		// end of file marker for the coord file
 
 public:
-	
+
 	CRDFile (std::string crdpath, int size);
 	~CRDFile ();
 

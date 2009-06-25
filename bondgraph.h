@@ -50,7 +50,7 @@ protected:
 	Bond_ptr_list		_edges;
 
 public:
-	
+
 	coord_map _coord_names;
 
 	BondGraph (Atom_ptr_vec& atoms);
@@ -72,9 +72,9 @@ public:
 	int NumBonds (const Atom * atom, const bondtype bond) const {
 		return (AdjacentAtoms (atom, bond).size());
 	}
-	
+
 	coordination WaterCoordination (const Water * wat) const;
-	
+
 	string CoordName (const coordination coord) {
 		return _coord_names[coord];
 	}

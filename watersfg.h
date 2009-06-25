@@ -4,10 +4,10 @@
 /* This class performs various calculations in order to produce SFG spectra. The calculations all derive from the Morita and Hynes paper:
 
 		A. Morita, J.T. Hynes, Chemical Physics 258 (2000) pp. 371-390
-	
+
 	The overall idea is that given a system trajectory for an aqueous surface, and the accompanying forces on each particle in the system, it is possible to produce SFG spectra for each timeframe. Various detailed calculations take place to find the shift in frequency of each OH-oscillator on each water molecule due to the forces it experiences from its environment. These shifts in frequency give rise to hyperpolarizabilities of the molecules, and the second-order susceptibility of the total (macroscopic) system. The intensity at each frequency is then calculated based on the chi-2 (second order susceptibility) magnitude. Review the paper above for further information on the procedure coded here.
 */
-   
+
 
 #include <complex>
 #include <math.h>
@@ -47,7 +47,7 @@ const double COUPLING_CONST		= 49.5/AU2WAVENUMBER;				// Coupling const taken fr
 
 // Value of the magnitude of the dipole moment derivative (square root of the sum of the squares)
 const double MU_DERIV_MAGNITUDE = sqrt(-0.058*-0.058 + 0.157*0.157);
-// Length of a rigid SPC/E OH-bond 
+// Length of a rigid SPC/E OH-bond
 const double OH_LENGTH = 1.000*ANG2BOHR;	// in atomic units
 const double OH_COM_LENGTH = MHYD*OH_LENGTH/(MHYD+MOXY);	// distance to the center of mass of the OH bond from the oxygen (atomic units of length)
 const double MU_DERIV_LENGTH = MU_DERIV_MAGNITUDE * OH_COM_LENGTH;		// length of the differential dipole moment element used in calculating the dipole-dipole interaction energy (in atomic units)

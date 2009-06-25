@@ -9,7 +9,7 @@
 
 
 class WaterDipoleParms {
-	
+
 	FILE 			*_file;
 	int 			_num_bins[3];		// number of bins for each of the three parameters
 	double			_min[3];			// min and max values of the bins for the three parameters
@@ -21,7 +21,7 @@ class WaterDipoleParms {
 	double *		_Data (double r1, double r2, double theta);
 
 public:
-	
+
 	WaterDipoleParms (string parmpath);
 
 	double Magnitude (double r1, double r2, double theta) { return _Data(r1, r2, theta)[3]; }

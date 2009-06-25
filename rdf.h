@@ -16,12 +16,12 @@ vector<double> RDF (string atomName1, string atomName2, AmberSystem& sys) {
 	//for (int step = 0; step < 1; step++) {
 
 		int num = 0;	// number of particle-pairs processed
-		
+
 		vector<int> histogram ((maxdistance/DR)+1, 0);
 		// find each occurence of the first particle by name
 		RUN (sys) {
 			if (sys[i]->Name().find(atomName1) == string::npos) continue;
-			
+
 			// and also every occurence of the 2nd particle by name		- note that we don't cover particles twice!
 			RUN2 (sys) {
 				if (sys[j]->Name().find(atomName2) == string::npos) continue;
@@ -38,29 +38,29 @@ vector<double> RDF (string atomName1, string atomName2, AmberSystem& sys) {
 			}
 		}
 
-		// That wraps up the number density calculations where the interparticle pair distances were binned. 
+		// That wraps up the number density calculations where the interparticle pair distances were binned.
 		// Now we calculate the g(r) function for each differential distance based on the number of
 		// particles in each differential shell.
-	
+
 		/* the following normalization treatment was pulled from "Essentials of Computational Chemistry (2nd Ed.) - Theories
 		   and Models", Christopher J Cramer. Wiley 2004. pp. 84-86.
 		*/
 		double norm;		// the normalization constant for each distance (r)
 		vector<double> RDF (histogram.size(), 0.0);		// an output histogram with normalization applied to each bin
-			  
+
 		for (int i = 1; i < histogram.size(); i++) {
 			norm = volume / (4 * M_PI * pow(i*DR,2) * DR) / num ;		// here's our scaling constant
 			// and then normalize g(r)
 			RDF[i] = histogram[i] * norm;
 		}
-	
+
 		results.push_back (RDF);
 
 		sys.LoadNext();
 	}
 	// lastly, let's average through all the RDFs we've collected
-	vector<double> output; 
-	
+	vector<double> output;
+
 	RUN (results[0]) {
 		output.push_back(0.0);
 		RUN2 (results) {
@@ -68,6 +68,6 @@ vector<double> RDF (string atomName1, string atomName2, AmberSystem& sys) {
 		}
 		output[i] = output[i] / results.size();
 	}
-	
+
 	return (output);
 }

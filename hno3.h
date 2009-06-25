@@ -14,7 +14,7 @@ protected:
 	// Nitric acid molecules have a molecular plane formed by the three oxygen molecules. This vector defines that plane
 	VecR _molPlane;
 	VecR _no2dipole;
-	
+
 	std::vector<VecR> _no2wanniers;
 
 	bool _set;								// to let us know if the atom have been set in the molecule
@@ -47,11 +47,11 @@ public:
 class Nitrate: public Molecule {
 protected:
 	VecR _molPlane;
-	
+
 	bool _set;								// to let us know if the atom have been set in the molecule
 	Atom *_n, *_o1, *_o2, *_o3;		// Pointers to the various atoms in the nitric acid. These are static for no
 											// meaning that they're set at the the first formation of the molecule
-	
+
 	VecR	_no1, _no2, _no3;		// vectors of the N-O bonds
 
 public:

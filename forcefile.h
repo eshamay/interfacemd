@@ -10,7 +10,7 @@
 
 
 class ForceFile {
-	
+
 	FILE 			*_file;
 	std::vector<VecR>	_forces;	// atomic coordinates
 	int 			_size;		// number of atoms in the system
@@ -20,7 +20,7 @@ class ForceFile {
 	bool			_loaded;
 
 public:
-	
+
 	ForceFile (std::string forcepath, int size);
 	~ForceFile ();
 

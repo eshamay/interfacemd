@@ -3,22 +3,23 @@
 
 #include <algorithm>
 #include "xyzfile.h"
-#include "bondgraph.h"
+#include "adjacencymatrix.h"
 #include "molecule.h"
 #include "h2o.h"
 #include "hno3.h"
 #include "wannier.h"
 #include "utility.h"
 
+#define DEBUG 1
 
 class XYZSystem {
-	
+
 private:
 	XYZFile				_atoms;			// Atomlist parsed from an xyz file
 	vector<Molecule *> 	_mols;			// once we have atoms defined, we form them into molecules
 	WannierFile 		_wanniers;		// The wannier centers
 	//BondGraph 			_bondgraph;		// a really useful graph of bonding in the system
-
+	AdjacencyMatrix		_matrix;
 	bool _parsed;
 
 	VecR	_dims;			// A vector holding the system size (dimensions)
@@ -35,9 +36,9 @@ public:
 	// constructors
 	XYZSystem (string filepath, VecR size, string wannierpath);
 	~XYZSystem ();
-	
+
 	// Controller & Calculation methods
-	void LoadNext ();	 					// Update the system to the next timestep 
+	void LoadNext ();	 					// Update the system to the next timestep
 	void LoadFirst ();
 	void Seek (int step);
 	int NumSteps () const { return _atoms.NumSteps(); }		// number of timesteps in the xyzfile
@@ -50,29 +51,29 @@ public:
 	//vector<Atom *>& Atoms () { return _atoms.Atoms(); }	// is this necessary?
 	vector<Molecule *>& Molecules () { return _mols; }
 	Molecule * Molecules (int mol) { return _mols[mol]; }
-	Atom * Atoms (int atom) { 
+	Atom * Atoms (int atom) {
 		return (_atoms[atom]);
 	}
 	const std::vector<VecR>& Wanniers () const { return _wanniers.Coords(); }
 	int size ()	const { return _atoms.size(); }
 
 	// returns the distance between two atoms in the system
-	double Distance (const Atom * atom1, const Atom * atom2) const { return _bondgraph.Distance (atom1, atom2); }
-	
+	//double Distance (const Atom * atom1, const Atom * atom2) { return _matrix.Distance (atom1, atom2); }
+
 	// calculates (and sets the _centerofmass) the center of mass of the system. For now it only calculates based on waters
 	//VecR UpdateCenterOfMass ();
 	//VecR CenterOfMass () const { return _centerofmass; }
 	//void FindHBonds();	// locates all the H-bonds in a system
-	vector<Atom *> CovalentBonds (const Atom * atom) { return _bondgraph.CovalentBonds(atom); }
-	std::vector<Atom *> AdjacentAtoms (const Atom * atom) const { return _bondgraph.AdjacentAtoms (atom); }
-	std::vector<Atom *> AdjacentAtoms (const Atom * atom, const string name) const { return _bondgraph.AdjacentAtoms (atom, name); }
+	//vector<Atom *> CovalentBonds (const Atom * atom) { return _matrix.BondedAtoms(atom, covalent); }
+	//std::vector<Atom *> BondedAtoms (const Atom * atom) const { return _matrix.BondedAtoms (atom); }
+	//std::vector<Atom *> BondedAtoms (const Atom * atom, const string name) const { return _matrix.BondedAtoms (atom, covalent, name); }
 
 	VecR SystemDipole ();	// calculate the total system dipole and return it
 
 	int Current ()		const { return _atoms.Current(); }
 
 	// operators
-	Atom * operator[] (int index) { 
+	Atom * operator[] (int index) {
 		Atom * pa;
 		pa = _atoms[index];
 		return pa;

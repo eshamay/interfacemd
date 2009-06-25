@@ -51,27 +51,77 @@ int main (int argc, char **argv) {
 	}
 */
 	//for (int step = 0; step < 20; step++) {
-	Water * wat;
-	VecR p;
-	RUN (sys.Molecules()) {
-		//Molecule * mol = sys.Molecules(atof(argv[1]));
-		Molecule * mol = sys.Molecules(i);
-		if (mol->Name() != "h2o") continue;
+	int steps = 25000;
+	VecR M;
+	std::vector<MatR> A (steps, MatR());
+	MatR a;
 
-		wat =  static_cast<Water *>(mol);
-		p = sfg.CalcDipole(wat);
+	for (int step = 0; step < steps; step++) {
+		cout << "step = " << step << endl;
+
+		std::vector<Water *> wats;
+
+		RUN (sys.Molecules()) {
+			Molecule * mol = sys.Molecules(i);
+			//if (mol->Name() != "h2o")
+				//mol->Print();
+			if (mol->Name() != "h2o") continue;
+			Water * wat = static_cast<Water *>(mol);
+
+			wats.push_back(wat);
+		}
+
+		if (!step)
+			M = sfg.CalcTotalPolarization(wats);
+
+		a = sfg.CalcTotalPolarizability(wats);
+
+		A[step] = a;
+
+		sys.LoadNext();
 	}
-	//wat->Print();
+
+	RUN (A) {
+		double val = 0.0;
+		val += A[i].Index(0,0);
+		val += A[i].Index(1,1);
+		val /= 2.0;
+
+		printf ("% 15.8f% 15.8f% 15.8f\n", val*M[x], val*M[y], val*M[z]);
+	}
+
+	//sfg.AT(5,5).Print();
+		//printf ("\n\nwater #%d\n", i);
+		// calculate the local-mode polarizability matrix for each OH bond
+		//alpha = sfg.CalcPolarizability(wat);
+
+
 
 /*
-	MatR dcm = wat->DCMToLabMorita(z);
+		const VecR * oh1 = wat->OH1();
+		const VecR * oh2 = wat->OH2();
 
-	const VecR * oh1 = wat->OH1();
-	const VecR * oh2 = wat->OH2();
+		printf ("oh1 (% 8.5f) = \n", oh1->Magnitude());
+		oh1->Print();
+		printf ("oh2 (% 8.5f) = \n", oh2->Magnitude());
+		oh2->Print();
 
-	oh1->Print();
-	oh2->Print();
+		VecR z1 (0.0,0.0,oh1->Magnitude());
+		VecR z2 (0.0,0.0,oh2->Magnitude());
 
+		printf ("moving (0,0,1) from oh1 frame to lab\n");
+		(DCM * z1).Print();
+		printf ("moving oh1 from lab to local frame\n");
+		(DCM.Transpose() * (*oh1)).Print();
+
+		DCM = wat->DCMToLabMorita(z,2);
+		printf ("moving (0,0,1) from oh2 frame to lab\n");
+		(DCM * z2).Print();
+		printf ("moving oh2 from lab to local frame\n");
+		(DCM.Transpose() * (*oh2)).Print();
+*/
+
+/*
 	printf ("% 12.5f% 12.5f% 12.5f\n", oh1->Magnitude(), oh2->Magnitude(), acos((*oh1) < (*oh2))*180/M_PI);
 	//wat->CalcEulerAngles(y);
 

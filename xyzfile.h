@@ -10,15 +10,15 @@
 
 
 class XYZFile {
-	
+
 	std::vector<Atom *> _atoms;		// The listing of the atoms in the file
 
 	FILE *_file;				// the XYZ file listing all the atom coordinates
-	string _path;
+	std::string _path;
 
 	int _currentstep, _firstStep, _lastStep, _numSteps,
 		_numatoms;				// total number of centers to process from the file for the frame
-	
+
 	bool _initialized;				// To tell wether or not a file has been loaded
 
 	void _FindSteps ();			// assuming that each timestep is headed by an "i = ..." line, then we can load info on the first, last, and total timesteps
@@ -27,15 +27,15 @@ class XYZFile {
 	//Atom _ParseAtom (Atom * pAtom);
 
 public:
-	
-	XYZFile (string path);
+
+	XYZFile (std::string path);
 	XYZFile ();
 	~XYZFile ();
 
 	// Various control functions
 	// see LoadFirst for the init arg
 	void LoadNext ();
-	
+
 	// If the atomlist has been initialized already, then send true, otherwise to form a new list, send false.
 	void LoadFirst ();
 	void Seek (int step);

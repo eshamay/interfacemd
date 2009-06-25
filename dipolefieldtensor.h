@@ -8,7 +8,7 @@ private:
 	double _distance;	// scalar distance between the two molecules
 
 public:
-	
+
 	DipoleFieldTensor (double const * const r);		// the dipole field tensor only depends on the distance vector
 	~DipoleFieldTensor ();
 

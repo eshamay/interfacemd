@@ -29,6 +29,8 @@ Water::Water (const Molecule& molecule) : Molecule(molecule) {
 
 void Water::SetAtoms () {
 
+	//this->Print();
+
 	if (!_set) {
 		// first let's grab pointers to the three atoms and give them reasonable names
 		_h1 = (Atom *)NULL; _h2 = (Atom *)NULL;
@@ -184,8 +186,8 @@ return DCM;
 }
 
 // The molecular axes are defined as per Morita&Hynes (2000) where they set one of the OH bonds (oh1) as the molecular z-axis, and the other bond points in the positive x-axis direction. The result is setting DCM as the direction cosine matrix, that, when operating on a vector in the molecular frame will rotate it into lab-frame coordinates
-MatR const & Water::DCMToLabMorita (const coord axis) {
-    this->SetMoritaAxes ();
+MatR const & Water::DCMToLabMorita (const coord axis, const int bond) {
+    this->SetMoritaAxes (bond);
 
 	this->DCMToLab (axis);
 

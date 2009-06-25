@@ -3,7 +3,7 @@ vector<double> FindInterfaces (string atomName, string residue) {
 
 if (_master) {
 	// the technique here will be to first construct the number-density function for the residue given. This is something that the master node can do on its own.
-	
+
 	double MIN		-100.0		// minimum of the histogram
 	double MAX		200.0		// maximum of the histogram
 	double	DZ		0.10		// bin size
@@ -12,9 +12,9 @@ if (_master) {
 	vector<int> histo (numbins, 0);
 
 	for (int atom = 0; atom < _numAtoms; atom++) {
-		
+
 		// find the atom/residue
-		if (!((*sys)[atom]->Name() == atomName && (*sys)[atom]->Residue() == residue)) continue;	
+		if (!((*sys)[atom]->Name() == atomName && (*sys)[atom]->Residue() == residue)) continue;
 
 		int bin = (int) (((*sys)[atom]->Y() - MIN) / DZ);
 
@@ -25,7 +25,7 @@ if (_master) {
 	// 		1) The system lies within the boundaries of the box and so there are 2 interfaces
 	// 		2) The system is split over the boundaries of the box, and so there will be 4 interfaces (virtually)
 	// Finding the maximum, and then including all values within a certain statistical width (let's just say +/- 10%) should give us a good average value for the bulk. At that point we should be able to then find the 50% marks of the bulk values.
-	
+
 	double maxDensity = *max_element(histo.begin(), histo.end());
 
 	double avgBulkDensity = 0.0;
@@ -36,7 +36,7 @@ if (_master) {
 			num++;
 			avgBulkDensity += histo[i];
 		}
-	}	
+	}
 
 	avgBulkDensity /= num;
 
@@ -47,6 +47,6 @@ if (_master) {
 	}
 
 }
-		
+
 return interfaces;
 }

@@ -12,7 +12,7 @@
 using namespace std;
 
 class Molecule {
-	
+
 protected:
 	Atom_ptr_vec 		_atoms;				// the list of the atoms in the molecule
 	std::vector<VecR>	_wanniers;			// the wannier centers in the molecule
@@ -43,13 +43,13 @@ public:
 	// Input functions
 	void Name (string name) { _name = name; }	// set the molecule's name
 	void MolID (int ID) { _ID = ID; }
-	
+
 	bool Set () { _set = true; return (_set); }
 	bool Unset () { _set = false; return (_set); }
 
 	// Controls
 	void Shift (VecR shift);				// Shift the origin of the entire molecule
-	void clear ();							// Erases the molecule data 
+	void clear ();							// Erases the molecule data
 	VecR UpdateCenterOfMass ();				// recalculates the center of mass when coordinates are updated
 
 	//void Invert (VecR origin);							// Inversion of the molecule through a point in space
@@ -57,7 +57,7 @@ public:
 	//void Reflect (VecR base, VecR normal);				// reflect each atom through a plane
 
 	// Output Functions
-	VecR CenterOfMass () const		{ return _centerofmass; }	
+	VecR CenterOfMass () const		{ return _centerofmass; }
 	Atom_ptr_vec Atoms () const			{ return _atoms; }			// returns the molecule's atom list
 	Atom * Atoms (int index) const		{ return _atoms[index]; }
 	const std::vector<VecR>& Wanniers ()		const { return _wanniers; }
@@ -82,8 +82,8 @@ public:
 
 	double MinDistance (Molecule& mol);	// calculates the minimum distance between this molecule and another (2 closest atoms)
 
-	void CalcDipole ();	// calculate the dipole
-	VecR Dipole () { return _dipole; }		// return the dipole of the molecule
+	VecR CalcDipole ();	// calculate the dipole
+	VecR Dipole () const { return _dipole; }		// return the dipole of the molecule
 
 	// Operators
 	Atom * operator[] (int index) const { return _atoms[index]; }	// retrieve an atom by array index
@@ -94,7 +94,7 @@ public:
 	void AddAtom (Atom * newAtom);					// same as the operator
 	void RemoveAtom (const Atom * atom);
 	void Rename (const string name);
-	
+
 	Molecule * Merge (Molecule * mol);				// merges two molecules
 	//int operator+= (Molecule& mol);					// Joins two molecules
 
@@ -110,7 +110,7 @@ public:
 	// some functions to manipulate the molecule's position/orientation (symmetry operations)
 	void Reflect (coord const axis, double const plane = 0.0);
 	void Rotate (VecR origin, VecR axis, double angle);
-	
+
 	// A couple cool things used to manipulate matrices and vectors (don't know why this is in here, but hell, it works for now)
 	// Constructs a rotation matrix (direction cosince matrix) from given euler angles to rotate *FROM THE LAB FRAME* to the molecule frame
 	void RotateToLab (double vector[3]) const;

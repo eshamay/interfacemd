@@ -37,7 +37,7 @@ Because we'll be working with water, a hydrogen bond is any bond less than 2.4 a
 
 As for the diagonal elements - instead of writing a routine that will count the number of h-bonds by looking over the rows and columns, as distances are calculated the diagonal elements for each atom will be updated to reflect the number of H-bonds formed. Thus at any time we can look at the diagonal and know immediately the number of H-bonds an atom is involved in.
 
-This leaves the bottom-diagonal free to store more information. If two atoms are covalently bound, then the bottom diagonal element will mark this with a 1.0. 
+This leaves the bottom-diagonal free to store more information. If two atoms are covalently bound, then the bottom diagonal element will mark this with a 1.0.
 */
 
 class AdjacencyMatrix {
@@ -46,7 +46,7 @@ private:
 	double **	_matrix;		// the actual data structure for storing connection data
 	Atom **		_atoms;			// the atoms in the system
 
-public: 
+public:
 
 	// constructor builds the matrix based on number of atoms to analyze
 	AdjacencyMatrix (const Atom_ptr_vec& atoms);
@@ -69,27 +69,27 @@ public:
 	void UpdateMatrix ();
 
 	// returns the number of H-bonds that an atom is involved in (i.e. the diagonal element)
-	int HBonds (const Atom * atom) const { 
-		return (int)(_matrix[atom->ID()][atom->ID()]); 
-	}	
-	
+	int HBonds (const Atom * atom) const {
+		return (int)(_matrix[atom->ID()][atom->ID()]);
+	}
+
 	coordination FindWaterCoordination (const Water& water) const;	// returns the coordination number (defined above) of a water
 
 	// return a list of all the atoms that are covalently bound to a given atom
 	std::vector<Atom *> CovalentBonds (const Atom * atom) const;
-	
+
 	// returns the distance between two atoms
-	double Distance (const Atom * atom1, const Atom * atom2) const;		
+	double Distance (const Atom * atom1, const Atom * atom2) const;
 	int    size() const { return _atoms.size(); }
 
 	// returns the closest atoms of a given name to a given atom
 	// input is the target atom's id, atomname is the name of the other atoms in the system we want returned,
-	// and number is the number of nearest atoms 
+	// and number is the number of nearest atoms
 	// i.e. ClosestAtoms (5, O, 3) - returns the three closest O's to the atom with ID 5
 	std::vector<Atom *> ClosestAtoms (const int input, const string atomname, const int number) const;
 
 */
 };
-	
+
 
 #endif

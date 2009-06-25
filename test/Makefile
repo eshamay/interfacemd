@@ -6,7 +6,7 @@ WATERSYSTEM	= $(AMBERFILES) ../watersystem.o ../adjacencymatrix.o ../bond.o
 MORITAFILES	= morita.o ../watersfg.o $(WATERSYSTEM)
 MPIMORITAFILES	= $(MORITAFILES) ../mpi/mpisys.o
 DENSITYFILES = $(WATERSYSTEM) densitytest.o
-XYZSYSTEM = ../xyzsystem.o ../xyzfile.o ../atom.o ../h2o.o ../hno3.o ../molecule.o ../vecr.o ../wannier.o ../bondgraph.o ../matrixr.o
+XYZSYSTEM = ../xyzsystem.o ../xyzfile.o ../atom.o ../h2o.o ../hno3.o ../molecule.o ../vecr.o ../wannier.o ../adjacencymatrix.o ../matrixr.o ../bond.o
 DIPOLETCF = $(XYZSYSTEM) dipoletcf.o ../hno3analysis.o
 QPT = $(XYZSYSTEM) ../hno3analysis.o Qpt.o
 MDCRD2PDB = $(AMBERFILES) ../pdbfile.o mdcrd2pdb.o
@@ -57,7 +57,7 @@ fillbox : $(FILLBOX) fillbox.o
 	$(CXX) $(CPPFLAGS) fillbox.o $(FILLBOX) -o fillbox
 
 temp: $(TEMPFILES)
-	$(CXX) $(TEMPFLAGS) -g -o temp $(TEMPFILES)
+	$(CXX) $(CPPFLAGS) -llapack -g3 -o temp $(TEMPFILES)
 
 mpitest: $(MPIFILES)
 	mpiCC $(CPPFLAGS) $(MPILIBS) -o mpitest $(MPIFILES)

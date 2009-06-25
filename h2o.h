@@ -39,14 +39,14 @@ public:
 	VecR Bisector ();		// calculates the bisector (unit vector) of the water
 	VecR Normal () const { return _y; }
 
-	void CalcDipole ();
+	//void CalcDipole ();
 	VecR const & Dipole () const { return _dipole; }			// calculates the dipole (from a parameterized source)
-	
+
 	void SetMoritaAxes (const int bond = 1);		// Determines the molecular-frame axes (a la Morita&Hynes2000) with one bond on the Z-axis, the other in the positive X direction.
 	void SetOrderAxes ();		// sets the molecular axes such that the z-axis is along the C2V axis point from the H's to the O, and the x-axis is in the plane of the molecule
 
 	MatR const & DCMToLab (const coord axis = z);							// get the direction cosine matrix for rotations to the lab frame
-	MatR const & DCMToLabMorita (const coord axis = z);	// get the direction cosine matrix for rotations to the lab frame from the morita-hynes one
+	MatR const & DCMToLabMorita (const coord axis = z, const int bond = 1);	// get the direction cosine matrix for rotations to the lab frame from the morita-hynes one
 	MatR const & DCMToLabOrder ();						// direction cosine matrix using the bisector as the molecular z-axis
 	MatR DCM;											// the direction cosine matrix for rotating the molecule to the lab frame
 
@@ -59,11 +59,11 @@ public:
 	void CalcAlpha ();		// calculate the molecular polarizability tensor (as per morita+hynes 2002 method)
 	MatR const & Alpha () const { return _alpha; }
 	#endif
-	
+
 	VecR const * OH1 () const { return &_oh1; }
 	VecR const * OH2 () const { return &_oh2; }
 	double Angle () const { return acos(_oh1 < _oh2) * 180.0/M_PI; }
-	
+
 };
 
 typedef std::vector<Water *> Water_ptr_vec;

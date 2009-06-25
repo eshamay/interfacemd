@@ -10,7 +10,7 @@ using namespace std;
 class Histogram {
 
 private:
-	
+
 	double _min;
 	double _max;
 	double _numBins;
@@ -19,7 +19,7 @@ private:
 	vector<int> _histogram;
 
 public:
-	
+
 	Histogram (double const min, double const max, int numbins);
 	Histogram (double const min, double const max, double binsize);
 

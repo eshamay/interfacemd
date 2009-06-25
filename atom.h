@@ -11,15 +11,15 @@ class Molecule;
 class Atom {
 
 protected:
-	std::string _name, 
+	std::string _name,
 		   _residue;
-	
+
 	int    _ID;				// some numerical identifier in case the atom is in an ordered list
 	int	   _molid;		// the molecule that contains this atom
 
 	Molecule * _pmolecule;
 
-	double _mass, 
+	double _mass,
 		   _charge;
 
 	VecR _position;			// Particle position
@@ -68,7 +68,7 @@ public:
 	static const VecR& Size ()	{ return _size; }
 
 	void Shift (VecR shift);			// shift the atom's position
-	
+
 	// Output
 	std::string Name () const 	{ return (_name); }
 	double Mass () const 	{ return _mass; }

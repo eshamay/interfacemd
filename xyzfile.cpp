@@ -1,6 +1,6 @@
 #include "xyzfile.h"
 
-XYZFile::XYZFile (string path) {
+XYZFile::XYZFile (std::string path) {
 	_initialized = false;
 
 	_path = path;
@@ -59,7 +59,7 @@ void XYZFile::LoadNext () {
 
 		// if we haven't already done so, let's create all the atoms we'll need
 		if (!_initialized) {
-			_atoms[atom]->Name (string(name));
+			_atoms[atom]->Name (std::string(name));
 			_atoms[atom]->ID (atom);
 			_atoms[atom]->SetMass();
 			_atoms[atom]->SetCharge();
@@ -97,8 +97,8 @@ void XYZFile::_FindSteps () {
 
 
 	// form the command that will get us our number of timesteps using shell commands (should be a lot faster)
-	string string1 = "cat ";	// Here we'll grab the first timestep
-	string string2 = " | grep i | head -n 1 | awk '{print $3}'";
+	std::string string1 = "cat ";	// Here we'll grab the first timestep
+	std::string string2 = " | grep i | head -n 1 | awk '{print $3}'";
 	//cout << string1 + _path + string2 << endl;
 	FILE * fp = popen((string1 + _path + string2).c_str(), "r");
 

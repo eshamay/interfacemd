@@ -11,10 +11,10 @@
 #include "molecule.h"
 #include "h2o.h"
 #include "hno3.h"
-	
+
 class AmberSystem {
 
-private:	
+private:
 	TOPFile		_topfile;
 	CRDFile		_coords;
 	ForceFile	_forces;
@@ -31,9 +31,9 @@ public:
 	// constructors
 	AmberSystem (string prmtop, string mdcrd, string mdvel);
 	~AmberSystem ();
-	
+
 	// Controller & Calculation methods
-	void LoadNext ();	 					// Update the system to the next timestep 
+	void LoadNext ();	 					// Update the system to the next timestep
 	void LoadFirst ();
 
 	bool eof () { return _coords.eof(); }

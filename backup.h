@@ -9,7 +9,7 @@ void Water::FindEulerAngles () {
    names and rotation directions is taken from "Angular Momentum: Understanding Spatial Aspects in Chemistry and Physics",
    Zare, Richard N; Wiley-Interscience 1988 (pp 77-81). This is sometimes referred to as the ZYZ ("y-") convention, with angles
    theta, phi, and chi.
-   
+
    The procedure for determining the angles makes direct use of the direction cosine (rotation) matrix. The three angles are
    isolated by simple trigonometric and algebraic manipulation of the elements of the rotated vectors.
 
@@ -42,11 +42,11 @@ void Water::FindEulerAngles () {
 	/* Now we have the theta and phi so we set up a rotation cosine matrix to transform from the lab-frame to the molecular frame.
 	 * We still don't have psi, and can't have it quite yet, so we just rotate the theta and phi of both OH bonds, and then find psi from the rotated vectors
 	 */
-	
+
 	// first we setup a rotation matrix from the lab from
 	double rotate1[3][3];	// the rotation matrix
 	double rotate2[3][3];	// the rotation matrix
-	
+
 	// we set up the angles initially only with the phi and theta we calculated, and leave psi as 0.0 - we calculate that later
 	double angles1[3] = {_eulerAngles[0][0], _eulerAngles[0][1], 0.0};
 	double angles2[3] = {_eulerAngles[1][0], _eulerAngles[1][1], 0.0};

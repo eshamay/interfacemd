@@ -1,6 +1,8 @@
 #include "adjacencymatrix.h"
 
-AdjacencyMatrix::AdjacencyMatrix () : _size(0) {
+AdjacencyMatrix::AdjacencyMatrix () :
+	_size(0)
+{
 
 return;
 }
@@ -15,17 +17,16 @@ return;
 
 AdjacencyMatrix::~AdjacencyMatrix () {
 
-	DeleteMatrix();
+	//DeleteMatrix();
 
 return;
 }
 
 void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {
 
-
 	// Clear out the old matrix
-	if (_size)
-		DeleteMatrix ();
+	//if (_size)
+		//DeleteMatrix ();
 
 	// Form the atom list
 	_size = atoms.size();
@@ -46,58 +47,72 @@ void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {
 
 			ai = _atoms[i];
 			aj = _atoms[j];
+			std::string ai_name = ai->Name();
+			std::string aj_name = aj->Name();
 
 			// Don't connect oxygens to oxygens, and hydrogen to hydrogen...
-			if (
-				(ai->Name().find("H") != string::npos and aj->Name().find("H") != string::npos)
-				or
-				(ai->Name().find("O") != string::npos and aj->Name().find("O") != string::npos)
-			)
-				continue;
+			if (ai_name == aj_name) continue;
 
 			// calculate the distance between the two atoms
-			//double distance = *_atoms[i] - *_atoms[j];
-			//double distance = _atoms[i]->MinDistance(_atoms[j]);
 			double bondlength = ai->Position().MinDistance(aj->Position(), Atom::_size);
-
-			// check that the distance is at least an H-bond
-			if (bondlength > HBONDLENGTH) continue;
 
 			// now set the actual bondtype by checking distance criteria
 			bondtype btype = unbonded;
 
-			// one type of bond is the O-H covalent
-			if (bondlength <= OHBONDLENGTH) {
-				btype = ohbond;
-			}
+			// first look at bonds between O and H
+			if ( (ai_name.find("O") != std::string::npos || aj_name.find("O") != std::string::npos)
+				&&
+				 (ai_name.find("H") != std::string::npos || aj_name.find("H") != std::string::npos)
+			   )
+			{
 
-			// Or an H-bond is formed!
-			if (bondlength <= HBONDLENGTH && bondlength > OHBONDLENGTH) {
-				// additionally, let's check the angle-criteria for an H-bond. This is done by looking at the angle formed from
-				Atom *o1, *h, *o2;	// o1 is covalently bound to h, and o2 is h-bound to h
-				Water * wat;
-
-				if (ai->Name().find("O") != string::npos) {		// ai is the O, and aj is the H
-					o2 = ai;
-					h = aj;
+				// one type of bond is the O-H covalent
+				if (bondlength <= OHBONDLENGTH) {
+					btype = ohbond;
 				}
-				else if (aj->Name().find("O") != string::npos) {
-					h = ai;
-					o2 = aj;
-				}
-				wat = static_cast<Water *>(h->ParentMolecule());
-				o1 = wat->GetAtom("O");
 
-				VecR oh1 = o1->Position().MinVector(h->Position(), Atom::Size());	// the covalent bond
-				VecR oh2 = h->Position().MinVector(o2->Position(), Atom::Size());	// the H-bond
+				// Or an H-bond is formed!
+				if (bondlength <= HBONDLENGTH && bondlength > OHBONDLENGTH) {
+					// additionally, let's check the angle-criteria for an H-bond.
+					// This is done by looking at the angle formed from
+					#ifdef ANGLE_CRITERIA
+					Atom *o1, *h, *o2;	// o1 is covalently bound to h, and o2 is h-bound to h
+					Water * wat;
 
-				double angle = acos(oh1 < oh2);
-				//printf ("% 10.3f\n", angle * 180.0/M_PI);
+					if (ai->Name().find("O") != std::string::npos) {		// ai is the O, and aj is the H
+						o2 = ai;
+						h = aj;
+					}
+					else if (aj->Name().find("O") != std::string::npos) {
+						h = ai;
+						o2 = aj;
+					}
+					wat = static_cast<Water *>(h->ParentMolecule());
+					o1 = wat->GetAtom("O");
 
-				if (angle < HBONDANGLE)
+					VecR oh1 = o1->Position().MinVector(h->Position(), Atom::Size());	// the covalent bond
+					VecR oh2 = h->Position().MinVector(o2->Position(), Atom::Size());	// the H-bond
+
+					double angle = acos(oh1 < oh2);
+					//printf ("% 10.3f\n", angle * 180.0/M_PI);
+
+					if (angle < HBONDANGLE)
+					#endif
+
 					btype = hbond;
+				}
 			}
 
+			// now connect Os to Ns
+			if ( (ai_name.find("O") != std::string::npos || aj_name.find("O") != std::string::npos)
+				&&
+				 (ai_name.find("N") != std::string::npos || aj_name.find("N") != std::string::npos)
+			   )
+			{
+				if (bondlength <= NOBONDLENGTH) {
+					btype = nobond;
+				}
+			}
 			// add in the bond between two atoms
 			SetBond (i, j, bondlength, btype);
 		}
@@ -115,15 +130,17 @@ void AdjacencyMatrix::BuildMatrix () {
 		exit(1);
 	}
 
-	_matrix.resize (_size, Bond_ptr_vec(_size, (Bond *)NULL));
+	//_matrix.clear();
+	_matrix.resize (_size, Bond_vec(_size, Bond()));
 
 	// only set up the upper-triangle of the matrix (don't include the diagonal)
+/*
 	for (int i = 0; i < _size - 1; i++) {
 		for (int j = i + 1; j < _size; j++) {
-			_matrix[i][j] = new Bond;
-			_matrix[i][j]->bond = unbonded;
+			_matrix[i][j].bond = unbonded;
 		}
 	}
+*/
 
 return;
 }
@@ -134,7 +151,7 @@ void AdjacencyMatrix::ClearBonds () {
 	Bond * b;
 	for (int i = 0; i < _size - 1; i++) {
 		for (int j = i + 1; j < _size; j++) {
-			b = _matrix[i][j];
+			b = &_matrix[i][j];
 			b->bond = unbonded;
 		}
 	}
@@ -142,12 +159,19 @@ void AdjacencyMatrix::ClearBonds () {
 return;
 }
 
+/*
 // deletes all the bonds from memory - clean up
 void AdjacencyMatrix::DeleteMatrix () {
 
 	Bond * b;
+
 	for (int i = 0; i < _size - 1; i++) {
 		for (int j = i + 1; j < _size; j++) {
+			if (b == (Bond *)NULL) {
+				cout << "\nFound a null bond pointer in the adjacency matrix during AdjacencyMatrix::DeleteMatrix()\n" << endl;
+				cout << "i = " << i << " ; j = " << j << endl;
+				exit(1);
+			}
 			b = _matrix[i][j];
 			delete b;
 		}
@@ -159,8 +183,9 @@ void AdjacencyMatrix::DeleteMatrix () {
 
 return;
 }
+*/
 
-void AdjacencyMatrix::SetBond (int x, int y, const double blength, const bondtype btype) const {
+void AdjacencyMatrix::SetBond (int x, int y, const double blength, const bondtype btype) {
 
 	// to work with the upper half of the matrix (upper triangle) - fix the indices
 	if (x > y) {
@@ -169,7 +194,7 @@ void AdjacencyMatrix::SetBond (int x, int y, const double blength, const bondtyp
 		y = tmp;
 	}
 
-	Bond * b = _matrix[x][y];
+	Bond * b = &_matrix[x][y];
 
 	b->bondlength = blength;
 	b->SetBondType (btype);
@@ -195,14 +220,14 @@ int AdjacencyMatrix::ID (Atom const * const ap) const {
 return (id);
 }
 
-Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap) const {
+Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap) {
 
 	Atom_ptr_vec atoms;
 
 	int id = ID (ap);
 
 	for (int row = 0; row < id; row++) {
-		if (_matrix[row][id]->bond == unbonded) continue;
+		if (_matrix[row][id].bond == unbonded) continue;
 
 		atoms.push_back (_atoms[row]);
 //		if (_matrix[row][id]->bond == hbond)
@@ -211,7 +236,7 @@ Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap) const {
 	}
 
 	for (int col = id + 1; col < _size; col++) {
-		if (_matrix[id][col]->bond == unbonded) continue;
+		if (_matrix[id][col].bond == unbonded) continue;
 
 		atoms.push_back (_atoms[col]);
 //		if (_matrix[id][col]->bond == hbond)
@@ -220,28 +245,46 @@ Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap) const {
 	}
 
 return (atoms);
+}
+
+// check if a bond is a covalent bond
+bool AdjacencyMatrix::CovalentBond (bondtype const b) const {
+
+	bool cov = false;
+
+	if (b != hbond && b != unbonded)
+		cov = true;
+
+	return (cov);
 }
 
 // This should return a list of all the atoms hbonded to a given atom (pointer[s])
-Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap, bondtype const b) const {
+Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap, bondtype const b) {
 
 	Atom_ptr_vec atoms;
 
 	int id = ID (ap);
 
 	for (int row = 0; row < id; row++) {
-		if (_matrix[row][id]->bond != b) continue;
+		Bond * b_tmp = &_matrix[row][id];
+		bondtype b_type = b_tmp->bond;
 
-		atoms.push_back (_atoms[row]);
+		if ( (b == covalent && this->CovalentBond(b_type))
+			|| b_type == b)
+			atoms.push_back (_atoms[row]);
+
 //		if (_matrix[row][id]->bond == hbond)
 //			printf ("-- %4.3f -->%s) %d\n|",
 //				_matrix[row][id]->bondlength, _atoms[row]->Name().c_str(), _atoms[row]->ID());
 	}
 
 	for (int col = id + 1; col < _size; col++) {
-		if (_matrix[id][col]->bond != b) continue;
+		Bond * b_tmp = &_matrix[id][col];
+		bondtype b_type = b_tmp->bond;
 
-		atoms.push_back (_atoms[col]);
+		if ( (b == covalent && this->CovalentBond(b_type))
+			|| b_type == b)
+			atoms.push_back (_atoms[col]);
 //		if (_matrix[id][col]->bond == hbond)
 //			/printf ("-- %4.3f -- >%s) %d\n|",
 //				_matrix[id][col]->bondlength, _atoms[col]->Name().c_str(), _atoms[col]->ID());
@@ -250,25 +293,66 @@ Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap, bondtype const
 return (atoms);
 }
 
-Bond_ptr_vec AdjacencyMatrix::Bonds (Atom const * const ap) const {
+// returns the bound atoms that are named 'name' and bound by a bondtype 'b'.
+Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap, bondtype const b, const std::string name) {
+
+	Atom_ptr_vec atoms;
+
+	int id = ID (ap);
+
+	for (int row = 0; row < id; row++) {
+		Bond * b_tmp = &_matrix[row][id];
+		bondtype b_type = b_tmp->bond;
+
+		if ( (b == covalent && this->CovalentBond(b_type))
+			|| b_type == b) {
+			if (_atoms[row]->Name().find(name) != std::string::npos) {
+				atoms.push_back (_atoms[row]);
+			}
+		}
+
+//		if (_matrix[row][id]->bond == hbond)
+//			printf ("-- %4.3f -->%s) %d\n|",
+//				_matrix[row][id]->bondlength, _atoms[row]->Name().c_str(), _atoms[row]->ID());
+	}
+
+	for (int col = id + 1; col < _size; col++) {
+		Bond * b_tmp = &_matrix[id][col];
+		bondtype b_type = b_tmp->bond;
+
+		if ( (b == covalent && this->CovalentBond(b_type))
+			|| b_type == b) {
+			if (_atoms[col]->Name().find(name) != std::string::npos) {
+				atoms.push_back (_atoms[col]);
+			}
+		}
+//		if (_matrix[id][col]->bond == hbond)
+//			/printf ("-- %4.3f -- >%s) %d\n|",
+//				_matrix[id][col]->bondlength, _atoms[col]->Name().c_str(), _atoms[col]->ID());
+	}
+
+return (atoms);
+}
+
+Bond_ptr_vec AdjacencyMatrix::Bonds (Atom const * const ap) {
 
 	Bond_ptr_vec vb;
 
 	int id = ID (ap);
 
 	for (int row = 0; row < id; row++) {
-		if (_matrix[row][id]->bond == unbonded) continue;
+		if (_matrix[row][id].bond == unbonded) continue;
 
-		vb.push_back (_matrix[row][id]);
+		vb.push_back (&_matrix[row][id]);
 //		if (_matrix[row][id]->bond == hbond)
 //			printf ("-- %4.3f -->%s) %d\n|",
 //				_matrix[row][id]->bondlength, _atoms[row]->Name().c_str(), _atoms[row]->ID());
 	}
 
 	for (int col = id + 1; col < _size; col++) {
-		if (_matrix[id][col]->bond == unbonded) continue;
+		if (_matrix[id][col].bond == unbonded) continue;
 
-		vb.push_back (_matrix[id][col]);
+		vb.push_back (&_matrix[id][col]);
 //		if (_matrix[id][col]->bond == hbond)
 //			/printf ("-- %4.3f -- >%s) %d\n|",
 //				_matrix[id][col]->bondlength, _atoms[col]->Name().c_str(), _atoms[col]->ID());
@@ -277,7 +361,23 @@ Bond_ptr_vec AdjacencyMatrix::Bonds (Atom const * const ap) const {
 return (vb);
 }
 
-Bond_ptr_vec AdjacencyMatrix::HBonds (Atom const * const ap) const {
+// find the bond between two atoms
+Bond * AdjacencyMatrix::GetBond (Atom const * const a1, Atom const * const a2) {
+
+	int id1 = ID (a1);
+	int id2 = ID (a2);
+
+	// we search the upper triangle of the matrix...
+	int temp = id2;
+	if (id1 > id2) {
+		id2 = id1;
+		id1 = temp;
+	}
+
+return (&_matrix[id1][id2]);
+}
+
+Bond_ptr_vec AdjacencyMatrix::HBonds (Atom const * const ap) {
 
 	Bond_ptr_vec vb = Bonds(ap);
 	Bond_ptr_vec hbonds;
@@ -290,7 +390,7 @@ Bond_ptr_vec AdjacencyMatrix::HBonds (Atom const * const ap) const {
 return (hbonds);
 }
 
-int AdjacencyMatrix::NumHBonds (Water const * const wat) const {
+int AdjacencyMatrix::NumHBonds (Water const * const wat) {
 
 	int num = 0;
 	RUN (wat->Atoms()) {
@@ -301,7 +401,7 @@ return (num);
 }
 
 // calculates the water bonding coordination of a given water molecule
-coordination AdjacencyMatrix::WaterCoordination (Water const * const wat) const {
+coordination AdjacencyMatrix::WaterCoordination (Water const * const wat) {
 
 	int c = 0;
 	Atom * ap;
@@ -310,10 +410,10 @@ coordination AdjacencyMatrix::WaterCoordination (Water const * const wat) const 
 		int bonds = NumHBonds (ap);
 
 
-		if (ap->Name().find("H") != string::npos) {
+		if (ap->Name().find("H") != std::string::npos) {
 			c += 10 * bonds;
 		}
-		if (ap->Name().find("O") != string::npos) {
+		if (ap->Name().find("O") != std::string::npos) {
 			c += bonds;
 		}
 	}

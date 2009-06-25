@@ -15,9 +15,9 @@ class WaterAnalyzer {
 	WaterSystem&			_sys;		// the water system that will be used for calculations
 
 public:
-	
+
 	WaterAnalyzer (WaterSystem& system) : _sys(system) {}		// Constructor that grabs the system and loads it up
-	
+
 	WaterSystem&	System() { return _sys; }
 
 	vector< vector<int> > ZCoordHistogram ( double DZ );	// Create a 2D histogram of Z-axis position and h-bond coordination for waters
@@ -30,10 +30,10 @@ public:
 };
 
 
-/* 
+/*
 Here we create a 2D histogram that gives intensities for the z-axis position of a water molecule, and the coordination of that
 same molecule. The vector created has 2 indices: [z-position][coordination]. The value stored is the intensity (particle density) over
-the entire timespan of the system. 
+the entire timespan of the system.
 */
 vector< vector<int> > WaterAnalyzer::ZCoordHistogram ( double DZ ) {
 
@@ -58,7 +58,7 @@ vector< vector<int> > WaterAnalyzer::ZCoordHistogram ( double DZ ) {
 
 			histogram[zbin][coord]++;		// update the correct bin
 		}
-	
+
 		// and lastly move to the next timestep
 		_sys.LoadNext();
 	}
@@ -66,14 +66,14 @@ vector< vector<int> > WaterAnalyzer::ZCoordHistogram ( double DZ ) {
 return (histogram);
 }
 
-/* 
+/*
 A routine for calculating the dipole-dipole autocorrelation function for a given trajectory.
 As per Meuwly (2003), a slice of the trajectory, N timesteps, is used. N is chosen such that 2^N comprises 1/3 to 1/2 of the total timesteps.
 A vector with N elements of the trajectory is then produced beginning with the first timestep and the correlation function is calculated.
 Then the trajectory is shifted to i+1 and so on until all the trajectory has been used. At this point the correlations are averaged and shipped off as a result.
 */
 trajectory WaterAnalyzer::DipoleCorrelation () {
-	
+
 	// First, instead of having to recalculate the system dipoles EACH time we load a new timestep... and since the dipoles are the only
 	// quantity we're interested in, let's make a 2D vector that will hold the dipole of each molecule at each timestep.
 	// This means running through the entire trajectory once in order to grab all the dipole vectors of each molecule at each timestep.
@@ -87,7 +87,7 @@ trajectory WaterAnalyzer::DipoleCorrelation () {
 
 	// okay, the bulky time-consuming stuff is mostly done. Let's get on with the TCF calculations
 	bool first = true;		// are we in the first timestep of each running-chunk of the trajectory?
-	
+
 	int N  = (int)((_sys.Last() - _sys.First()) / 4);		// the number of steps in the moving correlation queue for processing
 
 	int start = 0, 							// the starting timestep of each TCF chunk
@@ -100,15 +100,15 @@ trajectory WaterAnalyzer::DipoleCorrelation () {
 
 		// this will hold all the TCF's of the individual waters for a given trajectory chunk
 		// TCFstack [water][timestep]
-		vector<trajectory> TCFstack (dipoles[0].size(), trajectory());	
+		vector<trajectory> TCFstack (dipoles[0].size(), trajectory());
 
 		// then run through each timestep from (start) to (start + N) and load the correlation for each molecule
 		// i.e. go through each timestep in the trajectory chunk
 		for (step = start; step < start+N; step++) {
-		
+
 			// for each timestep we'll calculate the correlation (dot-product) of each water's dipole with that of time t=0
 			RUN (dipoles[step]) {
-				
+
 				if (step == start) {		// for the first step in each trajectory chunk, just record the dipole for time = 0
 					TCFstack[i].clear();	// just in case there's some residue in our vector
 					VecR vZeroDipole = dipoles[start][i];
@@ -121,12 +121,12 @@ trajectory WaterAnalyzer::DipoleCorrelation () {
 					// note - normalizing to the t(0) dipole magnitude stored in zeroT
 					VecR vZeroDipole = dipoles[start][i];
 					//TCFstack[i].push_back( (dipoles[step][i] * vZeroDipole) / vZeroDipole.Magnitude() / vZeroDipole.Magnitude() );
-					TCFstack[i].push_back( (dipoles[step][i][z] * vZeroDipole[z]) );		
+					TCFstack[i].push_back( (dipoles[step][i][z] * vZeroDipole[z]) );
 				}
 			}
 		}
 
-		/* 
+		/*
 		At this point we have a 2D vector (TCFstack) that represents our trajectory chunk (indexed as [molecule][timestep]). Now we should try one of two things depending on our mood - we can average all the individual molecular TCFs into a single TCF that represents our TCF chunk, or we can fourier-transform each TCF and then average the spectra... For now, I'll write the code to average the TCFs, and then fourier transform the output somewhere outside, as I believe that ultimately the two methods are equivalent (but I'm 100% sure on that point!) :)
 		so here goes - average all the TCF into a single chunk-TCF
 		*/
@@ -150,7 +150,7 @@ trajectory WaterAnalyzer::DipoleCorrelation () {
 		start++;
 	}
 
-	/* 
+	/*
 	Just like before, we have a 2D stack of TCF's, so let's average all of those like before.
 	*/
 	trajectory output;
@@ -171,7 +171,7 @@ return output;
 		// Now we've got a 2D vector (TCF) that holds a lot of correlation information. Each element of TCF is a new timestep, and holds
 		// the correlation of each molecule at that timestep. Thus the indices are TCF[timestep][molecule], and the value is what was
 		// computed above (normalized correlation to the t(0) dipole of the molecule).
-		// Let's compress all the molecular correlations into a 
+		// Let's compress all the molecular correlations into a
 		// single value as the average molecular correlation for each timestep. The resulting 1D vector will be our "queue" that
 		// represents a single correlationg function of length N pulled from somewhere in the trajectory.
 		// In conclusion - compress the 2D vector of molecular correlations to a 1D of average TCF
@@ -211,7 +211,7 @@ return (output);
 */
 
 trajectory WaterAnalyzer::SysDipoleCorrelation () {
-	
+
 	// the output time-correlation function vector
 	trajectory TCF;		// A TCF pulled from some part of the total trajectory. The length of this is determined by N (below)
 	vector<trajectory> TCFStack;		// all the TCFs from over the trajectory
@@ -219,7 +219,7 @@ trajectory WaterAnalyzer::SysDipoleCorrelation () {
 	VecR vStep;				// the system dipole at time t
 
 	bool first = true;		// are we in the first timestep of each running-chunk of the trajectory?
-	
+
 	int N  = (int)((double)(_sys.Last() - _sys.First()) / 2.5);		// the number of steps in the moving correlation queue for processing
 	//cout << N << " steps per correlation\n";
 
@@ -244,10 +244,10 @@ trajectory WaterAnalyzer::SysDipoleCorrelation () {
 	while (start < last - N) {
 		first = true;		// reset the first-step marker to grab the t(0) molecular dipoles (loaded into the zeroT vector)
 		TCF.clear();
-		
+
 		// run through each timestep from (start) to (start + N) and load the total system dipole correlation
 		for (step = start; step < start+N; step++) {
-			
+
 			vStep.Zero();
 			// sum all the dipoles in the system for the total system polarization
 			RUN (dipoles[step]) {
@@ -290,7 +290,7 @@ return (output);
 
 /* Produce a plot of the bond-length between two atom species. i.e. if "O" and "H" are chosen, then all bonds between an O and an H that are shorter than the max length (bondlengthmax) are added together for each time-step, and then output. */
 vector<double> WaterAnalyzer::BondTrajectory (string atomName1, string atomName2, double bondlengthmax) {
-	
+
 	vector<double> results;
 	double stepSum;			// a running total for the current timestep
 	double distance;		// caclculated bond distance between particles
@@ -302,10 +302,10 @@ vector<double> WaterAnalyzer::BondTrajectory (string atomName1, string atomName2
 		bonds = 0;
 
 		RUN (_sys) {
-			
+
 			// Find the occurence of each atom1
 			if (_sys[i].Name() != atomName1) continue;
-				
+
 			// and then each atom2 for measuring the distance
 			RUN2 (_sys) {
 				if (_sys[j].Name() != atomName2) continue;
@@ -319,7 +319,7 @@ vector<double> WaterAnalyzer::BondTrajectory (string atomName1, string atomName2
 				}
 			}
 		}
-		
+
 		if (bonds) stepSum = stepSum / (double)bonds;
 		results.push_back (stepSum);
 
@@ -346,12 +346,12 @@ vector<double> WaterAnalyzer::RDF (string atomName1, string atomName2) {
 	while (_sys.Current() != _sys.Last()) {
 
 		int num = 0;	// number of particle-pairs processed
-		
+
 		vector<int> histogram ((maxdistance/DR)+1, 0);
 		// find each occurence of the first particle by name
 		RUN (_sys) {
 			if (_sys[i].Name() != atomName1) continue;
-			
+
 			// and also every occurence of the 2nd particle by name		- note that we don't cover particles twice!
 			RUN2 (_sys) {
 				if (_sys[j].Name() != atomName2) continue;
@@ -368,29 +368,29 @@ vector<double> WaterAnalyzer::RDF (string atomName1, string atomName2) {
 			}
 		}
 
-		// That wraps up the number density calculations where the interparticle pair distances were binned. 
+		// That wraps up the number density calculations where the interparticle pair distances were binned.
 		// Now we calculate the g(r) function for each differential distance based on the number of
 		// particles in each differential shell.
-	
+
 		/* the following normalization treatment was pulled from "Essentials of Computational Chemistry (2nd Ed.) - Theories
 		   and Models", Christopher J Cramer. Wiley 2004. pp. 84-86.
 		*/
 		double norm;		// the normalization constant for each distance (r)
 		vector<double> RDF (histogram.size(), 0.0);		// an output histogram with normalization applied to each bin
-			  
+
 		for (int i = 1; i < histogram.size(); i++) {
 			norm = volume / (4 * M_PI * pow(i*DR,2) * DR) / num ;		// here's our scaling constant
 			// and then normalize g(r)
 			RDF[i] = histogram[i] * norm;
 		}
-	
+
 		results.push_back (RDF);
 
 		_sys.LoadNext();
 	}
 	// lastly, let's average through all the RDFs we've collected
-	vector<double> output; 
-	
+	vector<double> output;
+
 	RUN (results[0]) {
 		output.push_back(0.0);
 		RUN2 (results) {
@@ -398,7 +398,7 @@ vector<double> WaterAnalyzer::RDF (string atomName1, string atomName2) {
 		}
 		output[i] = output[i] / results.size();
 	}
-	
+
 	return (output);
 }
 
@@ -412,13 +412,13 @@ vector<double> WaterAnalyzer::RDF (string atomName1, string atomName2) {
 vector< vector<trajectory> > WaterAnalyzer::CoordTrajectories () {
 
 	vector< vector<trajectory> > pile (12, vector<trajectory>());	// a pile to hold all the trajectory-chunks for each coordination
-	
+
 	vector< trajectory > assembly (_sys.size(), trajectory());	// where the trajectory-chunks will be built for each molecule
-	
+
 	/* the markers vector is sized according to the system-size because the sys.Oxygens().size() may change, because in any given frame it's possible that the # waters will change (to OH- or H3O+)
-	the markers keep track of the current and previous coordination-type of each water molecule. This is how we know when the coordination changes and when we need to toss the gathered trajectory-chunk on the growin pile for processing, or trash it because it's too short. 
+	the markers keep track of the current and previous coordination-type of each water molecule. This is how we know when the coordination changes and when we need to toss the gathered trajectory-chunk on the growin pile for processing, or trash it because it's too short.
 	*/
-	vector <coordination> markers (_sys.size(), UNBOUND);	
+	vector <coordination> markers (_sys.size(), UNBOUND);
 
 	// let's set the first coordination settings/initial conditions
 	_sys.LoadFirst();
@@ -426,13 +426,13 @@ vector< vector<trajectory> > WaterAnalyzer::CoordTrajectories () {
 	RUN (_sys.Oxygens()) {
 		markers[_sys.Oxygens()[i]] = _sys.Coordinations()[i];
 	}
-	
+
 	while (_sys.Current() != _sys.Last()) {		// for each timestep...
-		
+
 		RUN (_sys.Oxygens()) {								// for each water...
 			int oxy = _sys.Oxygens()[i];					// find the water's index in the system
 			coordination coord = _sys.Coordinations()[i];	// and its coordination
-	
+
 			// If the coordination is not the same as the previous timestep then the water has changed coordination. At this point we have to check to see if the trajectory-chunk has built to a large enough size and whether it should be processed or not. If it is big enough to be useful, then do a little magic with finishing off the trajectory chunk and putting it on the growing pile (sorted by coordination)
 			if (coord != markers[oxy]) {
 				// check to see that it is long enough for a decent spectrum (# of timesteps??)
@@ -452,11 +452,11 @@ vector< vector<trajectory> > WaterAnalyzer::CoordTrajectories () {
 				}
 			}
 			assembly[oxy].push_back(bondsum/2.0);	// then add it to the assembly line and average between the two bonds
-	
+
 			// and update the coordination marker for the next frame
 			markers[oxy] = coord;
 		}
-	
+
 		// lastly, update to the next frame of the trajectory, and find all the new coordinations
 		_sys.LoadNext();
 		_sys.FindCoordinations();
@@ -467,13 +467,13 @@ return (pile);
 
 /* find the nitric acid molecule by locating the Nitrogen and 3 closest oxygens (within an NO bond-length). Then calculate the rotation wrt the z-axis. */
 trajectory WaterAnalyzer::NO3Rotation () {
-	
+
 	trajectory output;
 
 	// indices for the atoms in the xyz file
-	int N = 0, 
-		O1 = 0, 
-		O2 = 0, 
+	int N = 0,
+		O1 = 0,
+		O2 = 0,
 		O3 = 0;
 
 	// find the index of each atom in the nitric acid

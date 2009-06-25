@@ -11,7 +11,7 @@
 using namespace std;
 
 class PDBFile {
-	
+
 	vector<Molecule *> _molecules;		// The listing of the molecules in the file
 	vector<Atom *> _atoms;
 
@@ -24,14 +24,14 @@ class PDBFile {
 
 	int	_numAtoms;				// total number of atoms in the system
 	int _numMols;
-	
+
 	int _loaded;				// To tell wether or not a file has been loaded
 
 	int _FindLastStep();		// run through the file and find the last frame available
 	Atom *_ParseAtom (const char *line);
 
 public:
-	
+
 	PDBFile (string path);
 	PDBFile ();
 	~PDBFile ();

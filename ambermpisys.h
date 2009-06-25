@@ -54,7 +54,7 @@ private:
 	vector<Molecule> _mols;
 
 public:
-	
+
 	MPIMolSystem (int *argc, char ***argv, string prmtop, string mdcrd, string mdvel);
 	~MPIMolSystem ();
 
@@ -64,7 +64,7 @@ public:
 	MPI_Comm WorldComm () const { return _worldcomm; }
 	MPI_Status * Stat () 		{ return &_stat; }
 
-	
+
 	// functions to divide up workloads
 	int BlockLow (int n) { return BLOCK_LOW(_id, _p, n); }
 	int BlockHigh (int n) { return BLOCK_HIGH(_id, _p, n); }
@@ -86,7 +86,7 @@ public:
 };
 
 MPIMolSystem::MPIMolSystem (int *argc, char ***argv, string prmtop, string mdcrd, string mdvel) {
-	
+
 	// First we set up the internal MPI data for each node
 	_MPISystemInit(argc, argv);
 
@@ -102,7 +102,7 @@ MPIMolSystem::MPIMolSystem (int *argc, char ***argv, string prmtop, string mdcrd
 	// update the coords on the other nodes
 	_UpdateCoords ();
 
-}	
+}
 
 MPIMolSystem::~MPIMolSystem () {
 	// before ending, let's do all the clean up we need!
@@ -193,7 +193,7 @@ void MPIMolSystem::_InitAtoms () {
 			}
 			molNames[molNamesOffset] = (char)NULL;
 			molNamesOffset++;
-		}	
+		}
 	}
 
 	// broadcast lotsa stuff for names...
@@ -239,7 +239,7 @@ void MPIMolSystem::_InitAtoms () {
 
 		// while we're at it, let's set the mol-ID, too
 		_mols[mol].MolID(mol);
-	}		
+	}
 
 return;
 }
@@ -249,7 +249,7 @@ void MPIMolSystem::_ParseMols () {
 	// we need to set up the number of atoms in each molecule, so first the master node has to find that out
 	int numAtoms[_numMols];
 	if (_master) {
-		for (int mol = 0; mol < _numMols; mol++) 
+		for (int mol = 0; mol < _numMols; mol++)
 			numAtoms[mol] = _sys->Molecules(mol)->size();
 	}
 
@@ -264,12 +264,12 @@ void MPIMolSystem::_ParseMols () {
 			offset++;
 		}
 	}
-		
+
 return;
 }
 
 void MPIMolSystem::_UpdateCoords () {
-	
+
 	// let's have the master grab all the updated positions and such
 	if (_master) {
 		for (int atom = 0; atom < _numAtoms; atom++) {
@@ -300,7 +300,7 @@ return;
 void MPIMolSystem::LoadNext () {
 
 	if (_master) _sys->LoadNext();
-	
+
 	this->_UpdateCoords();
 
 return;
@@ -312,7 +312,7 @@ vector<double> MPIMolSystem::FindInterfaces (string atomName, string residue) {
 
 if (_master) {
 	// the technique here will be to first construct the number-density function for the residue given. This is something that the master node can do on its own.
-	
+
 	double MIN =	-100.0;		// minimum of the histogram
 	double MAX =	200.0;		// maximum of the histogram
 	double	DZ =	0.10;		// bin size
@@ -321,9 +321,9 @@ if (_master) {
 	vector<int> histo (numbins, 0);
 
 	for (int atom = 0; atom < _numAtoms; atom++) {
-		
+
 		// find the atom/residue
-		if (!((*_sys)[atom]->Name() == atomName && (*_sys)[atom]->Residue() == residue)) continue;	
+		if (!((*_sys)[atom]->Name() == atomName && (*_sys)[atom]->Residue() == residue)) continue;
 
 		int bin = (int) (((*_sys)[atom]->Y() - MIN) / DZ);
 
@@ -334,7 +334,7 @@ if (_master) {
 	// 		1) The system lies within the boundaries of the box and so there are 2 interfaces
 	// 		2) The system is split over the boundaries of the box, and so there will be 4 interfaces (virtually)
 	// Finding the maximum, and then including all values within a certain statistical width (let's just say +/- 10%) should give us a good average value for the bulk. At that point we should be able to then find the 50% marks of the bulk values.
-	
+
 	double maxDensity = *max_element(histo.begin(), histo.end());
 
 	double avgBulkDensity = 0.0;
@@ -345,7 +345,7 @@ if (_master) {
 			num++;
 			avgBulkDensity += histo[i];
 		}
-	}	
+	}
 
 	avgBulkDensity /= num;
 
@@ -353,7 +353,7 @@ if (_master) {
 	// now we have to find the closest position to the 50% mark on the number-density histogram.
 	vector<double> bulk;
 	for (int i = 0; i < numbins; i++) {
-		if (histo[i] > avgBulkDensity * 0.5) 
+		if (histo[i] > avgBulkDensity * 0.5)
 			bulk.push_back (DZ*i+MIN);
 	}
 	sort(bulk.begin(), bulk.end());

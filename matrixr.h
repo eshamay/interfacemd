@@ -17,13 +17,13 @@ enum element {xx=0, yx=1, zx=2, xy=3, yy=4, zy=5, xz=6, yz=7, zz=8};
 // pulling in C-style code from lapack to use in this c++ program
 
 // Calculate the eigen values & vectors of a system
-extern "C" { 
+extern "C" {
 	int dgeev_(char const *jobvl, char const *jobvr, int const *n, double const *a,  int const *lda, double *wr, double *wi, double *vl, int const *ldvl, double *vr, int const *ldvr, double *work, int const *lwork, int *info);
 }
 
 // Calculate the inverse of a matrix
 extern "C" {
-	int	dgetri_ (int const *n, double *A, int const *lda, int const *ipiv, double *work, int *lwork, int *info);
+	int	dgetri_ (int *n, double *A, int *lda, int *ipiv, double *work, int *lwork, int *info);
 }
 
 // Calculate the L and U factorization of a matrix
@@ -56,7 +56,7 @@ private:
 	bool _eigenset;
 
 public:
-	MatR () : _eigenset(false), _matrix(Double_matrix(0,0,0,0,0,0,0,0,0)) {
+	MatR () : _eigenset(false), _matrix(Double_matrix(0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0)) {
 	}
 
 	// constructor from a pre-built array (column-major)
@@ -67,7 +67,7 @@ public:
 	// constructor from a pre-built vector (column-major)
 	MatR (const Double_matrix elements) : _eigenset(false), _matrix(elements) {
 	}
-	
+
 	// A copy constructor
 	MatR (const MatR& oldMat) : _matrix(oldMat._matrix), _eigenset(false) {
 	}
@@ -79,7 +79,7 @@ public:
 	VecR 	operator* (const VecR& input) const;		// Vector rotation
 	MatR 	operator* (const MatR& input) const;		// Matrix rotation
 	//MatR 	operator*= (const MatR& input);				// Matrix rotation
-	
+
 	void 	operator= (const MatR& input) {				// assignment
 		_matrix = input._matrix;
 	}
@@ -87,9 +87,9 @@ public:
 	//double	operator[] (element const index) const;	// Return the coordinate
 	//double	operator[] (int const index) const;	// Return the coordinate
 	double	operator() (int const row, int const col) const;
-	
+
 	Double_matrix Matrix() const { return _matrix; }
-	
+
 	//MatR RotateToFrame (VecR const * const frame) const;
 
 	double	Index (int const row, int const col) const;	// Return the element
@@ -103,9 +103,9 @@ public:
 			}
 		}
 	}
-	void	Set (const MatR& input) 
+	void	Set (const MatR& input)
 		{ _matrix = input._matrix; }
-		
+
 	MatR	Transpose () 	const;
 
 #ifdef _LINALG_

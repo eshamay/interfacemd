@@ -4,7 +4,7 @@
 #include <fstream>
 
 class ComplexDataFile {
-	
+
 private:
 
 	std::ifstream				_file;
@@ -14,9 +14,9 @@ private:
 	void _ParseFile ();
 
 public:
-	
+
 	ComplexDataFile (const char * path);
-	
+
 	std::complex<double> DataPoint (const double conc);
 
 };

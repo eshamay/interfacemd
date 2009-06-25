@@ -27,7 +27,7 @@ protected:
 	int _numMols;
 
 public:
-	
+
 	TOPFile (std::string path);
 	TOPFile (const TOPFile& topfile);
 	TOPFile ();

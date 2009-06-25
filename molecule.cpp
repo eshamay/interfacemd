@@ -104,14 +104,25 @@ return;
 
 void Molecule::RemoveAtom (const Atom * atom) {
 
+	std::vector<Atom *> newatoms;
+	RUN (_atoms) {
+		if (_atoms[i] != atom)
+			newatoms.push_back(_atoms[i]);
+	}
+
+	_atoms.clear();
+	RUN (newatoms)
+		_atoms.push_back(newatoms[i]);
+
+/*
 	std::vector<Atom *>::iterator ai;
 	for (ai = _atoms.begin(); ai != _atoms.end(); ai++) {
 		if (*ai == atom) {
-			_atoms.erase(ai);
 			break;
 		}
 	}
-
+	_atoms.erase(ai);
+*/
 	this->UpdateCenterOfMass();
 
 	// if we happen to be taking off a hydrogen from a molecule... rename it accordingly
@@ -142,20 +153,19 @@ VecR Molecule::UpdateCenterOfMass () {
 	_mass = 0.0;
 
 	// then run through each atom's coords and add in its contribution.
-	// But, we'll calculate the center of mass with the origin set at the first atom in the molecule
-	VecR r1 = _atoms[0]->Position();
+	VecR origin (0.0,0.0,0.0);
+	//VecR origin (_atoms[0]->Position());
 
 	RUN (_atoms) {
 		VecR ri = _atoms[i]->Position();
 		double mi = _atoms[i]->Mass();
 
-		_centerofmass += (r1.MinVector (ri, Atom::Size()) * mi);
+		_centerofmass += (origin.MinVector (ri, Atom::Size()) * mi);
 
 		_mass += mi;
 	}
 	_centerofmass = _centerofmass * (1.0/_mass);
-	_centerofmass += r1;
-
+	//_centerofmass += origin;
 
 return(_centerofmass);
 }
@@ -287,7 +297,7 @@ return (forces);
 
 void Molecule::Print () const {
 
-	printf ("Residue = %s\tmass = % .3f\n", _name.c_str(), _mass);
+	printf ("Residue = %s  (%d)\tmass = % .3f\n", _name.c_str(), _ID, _mass);
 
 	RUN (_atoms) {
 		_atoms[i]->Print();
@@ -308,7 +318,7 @@ void Molecule::clear () {
 }
 
 // This should calculate the dipole of a molecule given that we've already generated the wannier centers
-void Molecule::CalcDipole () {
+VecR Molecule::CalcDipole () {
 
 	this->UpdateCenterOfMass();
 
@@ -325,7 +335,7 @@ void Molecule::CalcDipole () {
 		_dipole -= _centerofmass.MinVector(_wanniers[i], Atom::Size()) * 2.0;
 	}
 
-return;
+return (_dipole);
 }
 
 double Molecule::MinDistance (Molecule& mol) {

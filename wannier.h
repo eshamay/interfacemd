@@ -10,7 +10,7 @@
 
 
 class WannierFile {
-	
+
 protected:
 
 	FILE *			_file;
@@ -23,7 +23,7 @@ protected:
 	bool			_loaded;	// tells wether or not the wannier file is being used or not (or if it exists)
 
 public:
-	
+
 	WannierFile (std::string wannierpath);
 	~WannierFile ();
 
