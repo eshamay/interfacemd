@@ -87,9 +87,9 @@ void XYZSystem::_ParseMolecules () {
 				double s_distance = _matrix.Distance(H, s_O);	// distance to source O ("other" O)
 				// now, if the distance between the H and the other molecule's atom is smaller, then we change a few things. Namely, we have to set the bond between the H and this current O to hydrogen, instead of covalent...
 				if (s_distance < t_distance) {
-					//_matrix.SetBond(H, O, hbond);
+					_matrix.SetBond(H, O, hbond);
 				#ifdef DEBUG
-					cout << "XYZSystem::_ParseMolecules() - Found a shared H!" << endl;
+					cout << endl << "XYZSystem::_ParseMolecules() - Found a shared H!" << endl;
 					H->Print();
 					cout << "it's closer to:" << endl;
 					s_mol->Print();
@@ -99,12 +99,12 @@ void XYZSystem::_ParseMolecules () {
 				}
 				// otherwise, if the distance to the target O (the current one) is smaller, then we have to set the other bond to an H-bond, remove the H from that molecule, and add it into the current one
 				else {
-					//_matrix.SetBond(H, s_O, hbond);
+					_matrix.SetBond(H, s_O, hbond);
 					s_mol->RemoveAtom (H);
 					atoms.push_back(H);
 
 				#ifdef DEBUG
-					cout << "XYZSystem::_ParseMolecules() - Found a shared H!" << endl;
+					cout << endl << "XYZSystem::_ParseMolecules() - Found a shared H!" << endl;
 					H->Print();
 					cout << "it's closer to:" << endl;
 					O->Print();
@@ -115,22 +115,23 @@ void XYZSystem::_ParseMolecules () {
 			}
 		}
 
+		int num_H = atoms.size();
 	  	// we may be dealing with a hydroxide ion
-	  	if (atoms.size() == 1) {
+		if (num_H == 1) {
 	  		_mols.push_back (new Hydroxide ());
 	  	}
 
 	  	// otherwise we have a full molecule
-	  	else if (atoms.size() == 2) {
+		else if (num_H == 2) {
 			_mols.push_back (new Water ());
 	  	}
 
 		// or even a hydronium!
-		else if (atoms.size() == 3) {
+		else if (num_H == 3) {
 			_mols.push_back (new Hydronium ());
 		}
 
-		else if (atoms.size() == 0) {
+		else if (num_H == 0) {
 			printf ("XYZSystem::_ParseMolecules() - found water with %d H's\n", atoms.size());
 			exit(1);
 		}
@@ -220,8 +221,8 @@ void XYZSystem::_ParseMolecules () {
 			// first, is the H even attached to another molecule?
 			if (s_mol != (Molecule *)NULL) {
 				#ifdef DEBUG
-					cout << "Parsing an NO3 and Found an H shared with:" << endl;
-					s_mol->Print();
+					cout << "Found a shared H while parsing an NO3:" << endl;
+					no3H->Print();
 				#endif
 				// if it is shared, then we have to find which it is closer to.
 				// here we ***assume*** that the H is bound to an oxygen
@@ -230,17 +231,29 @@ void XYZSystem::_ParseMolecules () {
 
 				// If the H is closer to the no3, then:
 				if (no3OHdistance < s_distance) {
+				#ifdef DEBUG
+					cout << "it's closer to:" << endl;
+					no3O->Print();
+					cout << "and shared with:" << endl;
+					s_mol->Print();
+				#endif
 				// 		1) fix the source bond to be an H-bond instead of covalent
-					//_matrix.SetBond(s_O, no3H, hbond);
+					_matrix.SetBond(s_O, no3H, hbond);
 				// 		2) remove the H from the other molecule
 					s_mol->RemoveAtom (no3H);
 				// 		3) add the H into this one
 					fullNA = true;
 				}
-				// otherwise :
+				// otherwise it's closer to the other oxygen
 				else {
+				#ifdef DEBUG
+					cout << "it's closer to:" << endl;
+					s_mol->Print();
+					cout << "and shared with:" << endl;
+					no3O->Print();
+				#endif
 				// 		1) fix the bondtype in the adjacency matrix to make it an H-bond
-					//_matrix.SetBond(no3H, no3O, hbond);
+					_matrix.SetBond(no3H, no3O, hbond);
 				// 		2) turn this current molecule into a nitrate
 					fullNA = false;
 				}

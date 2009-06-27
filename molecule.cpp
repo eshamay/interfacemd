@@ -27,18 +27,15 @@ Molecule::Molecule (const Molecule& oldMol) :
 	// now run through and make copies of all the atoms (but this preserves the pointers to the atoms (not really a new molecule!))
 	_atoms.clear();
 	RUN (oldMol.Atoms()) {
-		_atoms.push_back (new Atom(*oldMol[i]));
-		_atoms[i]->ParentMolecule(this);
+		_atoms.push_back(oldMol.Atoms(i));
 	}
 	++numMolecules;
 }
 
 Molecule::~Molecule () {
+	_atoms.clear();
+	_wanniers.clear();
 	--numMolecules;
-	if (_copy) {
-		RUN (_atoms)
-			delete _atoms[i];
-	}
 }
 
 // Invert the molecule through a point in space. The point is specified by a VecR.
@@ -104,17 +101,8 @@ return;
 
 void Molecule::RemoveAtom (const Atom * atom) {
 
-	std::vector<Atom *> newatoms;
-	RUN (_atoms) {
-		if (_atoms[i] != atom)
-			newatoms.push_back(_atoms[i]);
-	}
-
-	_atoms.clear();
-	RUN (newatoms)
-		_atoms.push_back(newatoms[i]);
-
-/*
+// Iterator way of doing things - I find this a bit odd to work with, for now...
+// This will remove the atom from the molecule's atom-list
 	std::vector<Atom *>::iterator ai;
 	for (ai = _atoms.begin(); ai != _atoms.end(); ai++) {
 		if (*ai == atom) {
@@ -122,7 +110,7 @@ void Molecule::RemoveAtom (const Atom * atom) {
 		}
 	}
 	_atoms.erase(ai);
-*/
+
 	this->UpdateCenterOfMass();
 
 	// if we happen to be taking off a hydrogen from a molecule... rename it accordingly

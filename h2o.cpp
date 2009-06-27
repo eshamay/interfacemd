@@ -19,11 +19,13 @@ Water::~Water () {
 Water::Water (const Molecule& molecule) : Molecule(molecule) {
 
 	// now run through and make copies of all the atoms
+	/*
 	RUN (molecule.Atoms()) {
 		// this calls up the copy constructor and forms a real copy of the template atom
 		Atom *newatom = new Atom(*molecule[i]);
 		_atoms.push_back (newatom);
 	}
+	*/
 	++numWaters;
 }
 
