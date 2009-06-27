@@ -5,7 +5,7 @@ CINCLUDE	= -I$(SRCLIB) -I$(FTENSOR)
 CLIBS		= -L$(MKL) -lmkl_lapack -lmkl -lguide -lpthread
 CPPFLAGS	= $(CINCLUDE)
 #CXX			= mpiCC -g
-CXXOPTIMIZE = -finline-functions -finline-limit-1000 -funroll-loops
+CXXOPTIMIZE = -O0 -g3 -finline-functions -finline-limit-1000 -funroll-loops
 CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CXXOPTIMIZE) $(CINCLUDE)
 #CXXFLAGS    = -ftemplate-depth-100 -Drestrict= $(CINCLUDE)
 #CXXFLAGS	= -Drestrict= $(CINCLUDE)
@@ -26,7 +26,7 @@ cleanall:
 	( cd mpi ; make clean )
 
 %.o: %.cpp %.h
-	$(CXX) $(CPPFLAGS) -g3 -c -o $@ $<
+	$(CXX) $(CPPFLAGS) -c -o $@ $<
 
 #molecule.o: molecule.cpp molecule.h
 #forcefile.o: forcefile.cpp forcefile.h

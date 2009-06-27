@@ -1,6 +1,5 @@
 #include "h2o.h"
 
-
 int Water::numWaters = 0;
 
 #ifdef H2O_DIPOLE_PARM
@@ -267,11 +266,12 @@ return;
 
 int Hydroxide::numHydroxides = 0;
 
-Hydroxide::Hydroxide () {
-	_centerofmass = VecR ();
-	_mass = 0.0;
-	_name = "oh";
-	_set = false;
+Hydroxide::Hydroxide () : Molecule(),
+	_centerofmass(VecR()),
+	_mass(0.0),
+	_name("oh"),
+	_set(false)
+{
 	++numHydroxides;
 }
 
@@ -280,8 +280,8 @@ Hydroxide::~Hydroxide () {
 }
 
 void Hydroxide::SetAtoms () {
-	_o = (*this)["O"];
-	_h = (*this)["H"];
+	_o = this->GetAtom("O");
+	_h = this->GetAtom("H");
 
 	_oh = _h->Position().MinVector(_o->Position(), Atom::Size());
 	_set = true;
@@ -291,12 +291,12 @@ return;
 
 int Hydronium::numHydroniums = 0;
 
-Hydronium::Hydronium () {
-	_centerofmass = VecR ();
-	_mass = 0.0;
-	_name = "h3o";
-
-	_set = false;
+Hydronium::Hydronium () : Molecule(),
+	_centerofmass(VecR()),
+	_mass(0.0),
+	_name("h3o"),
+	_set(false)
+{
 	++numHydroniums;
 }
 

@@ -96,7 +96,7 @@ public:
 
 	void	Set (int const row, int const col, double const val);	// Set the element
 
-	void	Set (double const * const data) {
+	void	Set (double * const data) {
 		for (unsigned int row = 0; row < 3; row++) {
 			for (unsigned int col = 0; col < 3; col++) {
 				_matrix(row,col) = data[row*3+col];
