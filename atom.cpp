@@ -72,6 +72,9 @@ Atom::Atom (VecR position) :
 	_force(VecR()) {
 }
 
+Atom::~Atom () {
+}
+
 double Atom::operator[] (const coord index) const {
 	double pos;
 

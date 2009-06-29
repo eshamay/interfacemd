@@ -19,9 +19,6 @@ XYZFile::XYZFile (std::string path) {
 	this->LoadFirst();
 }
 
-XYZFile::XYZFile () {
-}
-
 XYZFile::~XYZFile () {
 	fclose (_file);
 	RUN(_atoms)

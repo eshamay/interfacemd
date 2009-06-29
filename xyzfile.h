@@ -29,7 +29,6 @@ class XYZFile {
 public:
 
 	XYZFile (std::string path);
-	XYZFile ();
 	~XYZFile ();
 
 	// Various control functions

@@ -20,13 +20,13 @@ int main (int argc, char **argv) {
 	MoritaSFG sfg;
 
 	//for (int step = 0; step < 20; step++) {
-	int steps = 10;
+	int steps = 25000;
 	VecR M;
 	std::vector<MatR> A (steps, MatR());
 	MatR a;
 
 	for (int step = 0; step < steps; step++) {
-		//cout << "step = " << step << endl;
+		cout << "step = " << step << endl;
 
 		std::vector<Water *> wats;
 

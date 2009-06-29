@@ -35,6 +35,7 @@ public:
 	Atom (std::string name, VecR position, VecR force);
 	Atom (VecR position);
 	Atom (const Atom& oldAtom);				// copy constructor for deep copies
+	~Atom ();
 
 	double operator- (const Atom& input) const;		// operator usage to determine the distance between two atoms
 	double operator[] (const coord index) const;	// get the atom's position by coordinate

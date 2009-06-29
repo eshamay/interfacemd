@@ -12,7 +12,7 @@
 #include "wannier.h"
 #include "utility.h"
 
-//#define DEBUG 1
+#define DEBUG 1
 
 class XYZSystem {
 

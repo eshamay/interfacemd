@@ -101,10 +101,10 @@ void Molecule::RemoveAtom (const Atom * atom) {
 	std::vector<Atom *>::iterator ai;
 	for (ai = _atoms.begin(); ai != _atoms.end(); ai++) {
 		if (*ai == atom) {
+			_atoms.erase(ai);
 			break;
 		}
 	}
-	_atoms.erase(ai);
 
 	this->UpdateCenterOfMass();
 

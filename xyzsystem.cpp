@@ -40,8 +40,10 @@ void XYZSystem::_ParseMolecules () {
 		_atoms[i]->MolID (-1);
 	}
 
+#ifdef DEBUG
 	/* For debugging (and other useful things?) this will keep a list of all the atoms that have been processed into molecules. Any atoms left over at the end of the parsing routine are not included and ... can potentially cause problems */
-	std::vector<Atom *> atom_tracking_list (_atoms.Atoms());
+	std::vector<Atom *> atom_tracking_list(_atoms.Atoms());
+#endif
 
 /*******************
  * Processing Waters
@@ -69,6 +71,7 @@ void XYZSystem::_ParseMolecules () {
 		atoms.clear();	// we'll add in all the non-contentious hydrogens here
 
 		Molecule * s_mol = (Molecule *)NULL;
+		cout << Hs.size() << endl;
 		RUN (Hs) {
 			Atom * H = Hs[i];
 			s_mol = H->ParentMolecule();
@@ -87,9 +90,9 @@ void XYZSystem::_ParseMolecules () {
 				#ifdef DEBUG
 					cout << endl << "XYZSystem::_ParseMolecules() - Found a shared H!" << endl;
 					H->Print();
-					cout << "it's closer to:" << endl;
+					cout << "it's closer to this molecule:" << endl;
 					s_mol->Print();
-					cout << "and shared with:" << endl;
+					cout << "but we were checking out this O:" << endl;
 					O->Print();
 				#endif
 				}
@@ -98,18 +101,21 @@ void XYZSystem::_ParseMolecules () {
 				// 		2) remove the H from that molecule - changing the molecule altogether
 				// 		3) add the H into the current one
 				else {
-					_matrix.SetBond(H, s_O, hbond);
-					s_mol->RemoveAtom (H);
-					atoms.push_back(H);
 
 				#ifdef DEBUG
 					cout << endl << "XYZSystem::_ParseMolecules() - Found a shared H!" << endl;
 					H->Print();
-					cout << "it's closer to:" << endl;
+					cout << "it's closer to this O:" << endl;
 					O->Print();
-					cout << "and shared with:" << endl;
+					cout << "but currently on this molecule:" << endl;
 					s_mol->Print();
 				#endif
+					_matrix.SetBond(H, s_O, hbond);
+					H->Print();
+					s_mol->RemoveAtom (H);
+					atoms.push_back(H);
+					cout << "we pulled the H off of the molecule, and here's what it now looks like:" << endl;
+					s_mol->Print();
 				}
 			}
 		}
@@ -145,13 +151,10 @@ void XYZSystem::_ParseMolecules () {
 			newmol->AddAtom (atoms[i]);
 		}
 
+#ifdef DEBUG
 		// fix up the tracking list
 		RUN (atom_tracking_list) {
 			Atom * a1 = atom_tracking_list[i];
-			if (a1 == O) {
-				atom_tracking_list[i] = (Atom *)NULL;
-				continue;
-			}
 			RUN2 (atoms) {
 				if (a1 == atoms[j]) {
 					atom_tracking_list[i] = (Atom *)NULL;
@@ -159,6 +162,7 @@ void XYZSystem::_ParseMolecules () {
 				}
 			}
 		}
+#endif
 
 /*
 		// now, from before, if one of the hydrogens is shared between two molecules making a contact-ion pair, then we will merge the two molecule to make one, and also update our ever-growing list of molecules to reflect it.
@@ -286,6 +290,7 @@ void XYZSystem::_ParseMolecules () {
 			_mols[molIndex]->AddAtom (NAatoms[i]);
 		}
 
+#ifdef DEBUG
 		// fix up the tracking list
 		RUN (atom_tracking_list) {
 			Atom * a1 = atom_tracking_list[i];
@@ -296,9 +301,11 @@ void XYZSystem::_ParseMolecules () {
 				}
 			}
 		}
+#endif
 
 	}
 
+#ifdef DEBUG
 	bool leave = false;
 	RUN (atom_tracking_list) {
 		Atom * a1 = atom_tracking_list[i];
@@ -318,6 +325,7 @@ void XYZSystem::_ParseMolecules () {
 		cout << "Found the above atoms unaccounted for in the system! Fix up the parsing routine" << endl;
 		exit(1);
 	}
+#endif
 
 return;
 }
@@ -446,4 +454,9 @@ VecR XYZSystem::SystemDipole () {
 	}
 
 return (dipole);
+}
+
+void XYZSystem::FixedSharedAtoms () {
+
+return;
 }
