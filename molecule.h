@@ -5,6 +5,7 @@
 #include <vector>
 #include <math.h>
 #include "vecr.h"
+#include "matrixr.h"
 #include "atom.h"
 #include "wannier.h"
 #include "utility.h"
@@ -20,7 +21,7 @@ protected:
 	VecR			_x, _y, _z;			// molecular frame axes
 
 	bool			_set;				// just a little helper to see if the atoms of the molecule have been set or for any other special purpose
-	bool			_copy;				// this gets set if the molecule is a copy of a previous molecule
+	//bool			_copy;				// this gets set if the molecule is a copy of a previous molecule
 
 	// this is broken last I checked - not updated with coordinate updates
 	VecR			_centerofmass;		// calculate by 1/M * Sum(m[i]*r[i])	where M = total mass, m[i] and r[i] are atom mass and pos
@@ -31,12 +32,13 @@ protected:
 	int				_ID;				// A numerical ID for the molecule
 
 	double			_eulerangles[3];	// the three euler angles theta, phi, chi
+	MatR			_DCM;				// the direction cosine matrix for rotating the molecule to the lab frame
 	void 			_FindEulerAngles ();// Calculates the Euler angles between the molecular axes and the fixed axes
 public:
 
-	Molecule ();						// an empty molecule
+	Molecule ();								// an empty molecule
 	Molecule (const Molecule& oldMol);			// A copy constructor for performing deep copies of a molecule
-	~Molecule ();
+	virtual ~Molecule ();
 
 	static int numMolecules;
 

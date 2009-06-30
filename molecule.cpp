@@ -4,37 +4,32 @@ int Molecule::numMolecules = 0;
 
 // A constructor for an empty molecule
 Molecule::Molecule () :
-	_centerofmass (VecR (0.0, 0.0, 0.0)),
-	_mass(0.0),
-	_name(""),
 	_set(false),
-	_copy(false) {
-
-	_atoms.clear();
-	_wanniers.clear();
-
+	_mass(0.0),
+	_name("")
+{
 	++numMolecules;
 }
 
 // a copy constructor to do a deep copy of a molecule instead of just referencing a pre-existing one.
 Molecule::Molecule (const Molecule& oldMol) :
+	_atoms(oldMol.Atoms()),
+	_set(false),
 	_centerofmass(oldMol.CenterOfMass()),
 	_mass(oldMol.Mass()),
 	_name(oldMol.Name()),
-	_set(false),
-	_copy(true) {
-
+	_DCM()
+{
 	// now run through and make copies of all the atoms (but this preserves the pointers to the atoms (not really a new molecule!))
-	_atoms.clear();
-	RUN (oldMol.Atoms()) {
-		_atoms.push_back(oldMol.Atoms(i));
-	}
+	//RUN (oldMol.Atoms()) {
+		//_atoms.push_back(oldMol.Atoms(i));
+	//}
 	++numMolecules;
 }
 
 Molecule::~Molecule () {
-	_atoms.clear();
-	_wanniers.clear();
+	//_atoms.clear();
+	//_wanniers.clear();
 	--numMolecules;
 }
 

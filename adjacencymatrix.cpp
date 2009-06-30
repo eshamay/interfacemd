@@ -31,7 +31,7 @@ void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {
 	// Form the atom list
 	_size = atoms.size();
 	_atoms.resize (_size, (Atom *)NULL);
-	for (int i = 0; i < _size; i++) {
+	for (unsigned int i = 0; i < _size; i++) {
 		_atoms[i] = atoms[i];
 	}
 
@@ -149,8 +149,8 @@ return;
 void AdjacencyMatrix::ClearBonds () {
 
 	Bond * b;
-	for (int i = 0; i < _size - 1; i++) {
-		for (int j = i + 1; j < _size; j++) {
+	for (unsigned int i = 0; i < _size - 1; i++) {
+		for (unsigned int j = i + 1; j < _size; j++) {
 			b = &_matrix[i][j];
 			b->bond = unbonded;
 		}
@@ -235,7 +235,7 @@ Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap) {
 //				_matrix[row][id]->bondlength, _atoms[row]->Name().c_str(), _atoms[row]->ID());
 	}
 
-	for (int col = id + 1; col < _size; col++) {
+	for (unsigned int col = id + 1; col < _size; col++) {
 		if (_matrix[id][col].bond == unbonded) continue;
 
 		atoms.push_back (_atoms[col]);
@@ -278,7 +278,7 @@ Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap, bondtype const
 //				_matrix[row][id]->bondlength, _atoms[row]->Name().c_str(), _atoms[row]->ID());
 	}
 
-	for (int col = id + 1; col < _size; col++) {
+	for (unsigned int col = id + 1; col < _size; col++) {
 		Bond * b_tmp = &_matrix[id][col];
 		bondtype b_type = b_tmp->bond;
 
@@ -316,7 +316,7 @@ Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap, bondtype const
 //				_matrix[row][id]->bondlength, _atoms[row]->Name().c_str(), _atoms[row]->ID());
 	}
 
-	for (int col = id + 1; col < _size; col++) {
+	for (unsigned int col = id + 1; col < _size; col++) {
 		Bond * b_tmp = &_matrix[id][col];
 		bondtype b_type = b_tmp->bond;
 
@@ -349,7 +349,7 @@ Bond_ptr_vec AdjacencyMatrix::Bonds (Atom const * const ap) {
 //				_matrix[row][id]->bondlength, _atoms[row]->Name().c_str(), _atoms[row]->ID());
 	}
 
-	for (int col = id + 1; col < _size; col++) {
+	for (unsigned int col = id + 1; col < _size; col++) {
 		if (_matrix[id][col].bond == unbonded) continue;
 
 		vb.push_back (&_matrix[id][col]);

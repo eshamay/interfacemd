@@ -6,7 +6,7 @@ int Water::numWaters = 0;
 WaterDipoleParms Water::_dipparms ("dipoleparm.dat");
 #endif
 
-Water::Water () : Molecule() {
+Water::Water () {
 	_name = "h2o";
 	++numWaters;
 }
@@ -181,9 +181,9 @@ MatR const & Water::DCMToLab (const coord axis) {
     double rotation_data[9] = {	_x<X, _y<X, _z<X,
 								_x<Y, _y<Y, _z<Y,
 								_x<Z, _y<Z, _z<Z   };
-    DCM.Set(rotation_data);
+    _DCM.Set(rotation_data);
 
-return DCM;
+return _DCM;
 }
 
 // The molecular axes are defined as per Morita&Hynes (2000) where they set one of the OH bonds (oh1) as the molecular z-axis, and the other bond points in the positive x-axis direction. The result is setting DCM as the direction cosine matrix, that, when operating on a vector in the molecular frame will rotate it into lab-frame coordinates
@@ -192,7 +192,7 @@ MatR const & Water::DCMToLabMorita (const coord axis, const int bond) {
 
 	this->DCMToLab (axis);
 
-return DCM;
+return _DCM;
 }
 
 // the alternative is to use the axes definition based on the molecular z-axis lying on the H2O bisector
@@ -201,7 +201,7 @@ MatR const & Water::DCMToLabOrder () {
 
 	this->DCMToLab ();
 
-return DCM;
+return _DCM;
 }
 
 // this should calculate the Euler Angles to get from the molecular frame to the lab frame
@@ -212,11 +212,11 @@ void Water::CalcEulerAngles (const coord axis) {
 	this->DCMToLab (axis);
 
 	// here is the direct calculation of the euler angles from the direction cosine matrix. This method comes from wikipedia of all places :)
-	double x3 = DCM.Index(0,2);
-	double y3 = DCM.Index(1,2);
-	double z1 = DCM.Index(2,0);
-	double z2 = DCM.Index(2,1);
-	double z3 = DCM.Index(2,2);
+	double x3 = _DCM.Index(0,2);
+	double y3 = _DCM.Index(1,2);
+	double z1 = _DCM.Index(2,0);
+	double z2 = _DCM.Index(2,1);
+	double z3 = _DCM.Index(2,2);
 
 	/* If all three axes in the molecular (xyz) and lab (XYZ) frames are aligned, then the euler rotations work by rotating about the body-fixed
 	 * axes as follows based on the ZXZ convention:
@@ -264,68 +264,3 @@ void Water::CalcEulerAngles (const coord axis) {
 return;
 }
 
-int Hydroxide::numHydroxides = 0;
-
-Hydroxide::Hydroxide () : Molecule(),
-	_centerofmass(VecR()),
-	_mass(0.0),
-	_name("oh"),
-	_set(false)
-{
-	++numHydroxides;
-}
-
-Hydroxide::~Hydroxide () {
-	--numHydroxides;
-}
-
-void Hydroxide::SetAtoms () {
-	_o = this->GetAtom("O");
-	_h = this->GetAtom("H");
-
-	_oh = _h->Position().MinVector(_o->Position(), Atom::Size());
-	_set = true;
-
-return;
-}
-
-int Hydronium::numHydroniums = 0;
-
-Hydronium::Hydronium () : Molecule(),
-	_centerofmass(VecR()),
-	_mass(0.0),
-	_name("h3o"),
-	_set(false)
-{
-	++numHydroniums;
-}
-
-Hydronium::~Hydronium () {
-	--numHydroniums;
-}
-
-void Hydronium::SetAtoms () {
-
-		// here's the hydrogen and nitrogen atoms
-		_o = (*this)["O"];
-
-		// now set the 3 hydrogens
-		std::vector<Atom *> hydrogens;
-		RUN (_atoms) {
-			if (_atoms[i]->Name() != "H") continue;
-			hydrogens.push_back (_atoms[i]);
-		}
-
-		_h1 = hydrogens[0];
-		_h2 = hydrogens[1];
-		_h3 = hydrogens[2];
-
-		// while we're here we may as well also find the N-O bond vectors
-		_oh1 = _h1->Position().MinVector(_o->Position(), Atom::Size());
-		_oh2 = _h2->Position().MinVector(_o->Position(), Atom::Size());
-		_oh3 = _h3->Position().MinVector(_o->Position(), Atom::Size());
-
-		_set = true;
-
-return;
-}

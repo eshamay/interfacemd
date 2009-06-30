@@ -5,7 +5,7 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.7	//
 AMAX	angledistro.h	22;"	d
-AMBERFILES	Makefile	/^AMBERFILES	= ..\/vecr.o ..\/atom.o ..\/ambersystem.o ..\/crdfile.o ..\/forcefile.o ..\/h2o.o ..\/hno3.o ..\/molecule.o ..\/topfile.o ..\/matrixr.o$/;"	m
+AMBERFILES	Makefile	/^AMBERFILES	= ..\/vecr.o ..\/atom.o ..\/ambersystem.o ..\/crdfile.o ..\/forcefile.o ..\/h2o.o ..\/hno3.o ..\/molecule.o ..\/topfile.o ..\/matrixr.o ..\/h2o.o ..\/oh.o ..\/h3o.o$/;"	m
 AMBERTEST_H_	ambertest.h	2;"	d
 AMIN	angledistro.h	23;"	d
 ANGLEDISTRO_H_	angledistro.h	2;"	d
@@ -89,6 +89,7 @@ PRMTOP	angledistro.h	10;"	d
 PRMTOP	freqtest.h	10;"	d
 PRMTOP	mpitest.h	3;"	d
 PRMTOP	toptest.h	11;"	d
+PlotData	traj2fft.py	/^def PlotData():$/;"	f
 QPT	Makefile	/^QPT = $(XYZSYSTEM) ..\/hno3analysis.o Qpt.o$/;"	m
 QPT_H_	Qpt.h	2;"	d
 RESTART	densitytest.h	9;"	d
@@ -99,76 +100,22 @@ S2_num	ordercoords.h	/^	Double_histo S2_num;$/;"	m	class:CoordOrderParams
 SFGAnalyzer	morita.cpp	/^SFGAnalyzer::SFGAnalyzer (int const argc, const char **argv, const WaterSystemParams& params)$/;"	f	class:SFGAnalyzer
 SFGAnalyzer	morita.h	/^class SFGAnalyzer : public WaterSystem {$/;"	c
 SetHistograms	ordercoords.cpp	/^void CoordOrderParams::SetHistograms (const int argc, const char **argv) {$/;"	f	class:CoordOrderParams
-SetMass	../atom.cpp	/^void Atom::SetMass () {$/;"	f	class:Atom
-SetMoritaAxes	../h2o.cpp	/^void Water::SetMoritaAxes (const int Zbond) {$/;"	f	class:Water
-SetOrderAxes	../h2o.cpp	/^void Water::SetOrderAxes () {$/;"	f	class:Water
-Shift	../atom.cpp	/^void Atom::Shift (VecR shift) {$/;"	f	class:Atom
-Shift	../molecule.cpp	/^void Molecule::Shift (VecR shift) {$/;"	f	class:Molecule
-SliceWaters	../watersystem.cpp	/^void WaterSystem::SliceWaters (const double low, const double high) {$/;"	f	class:WaterSystem
 SystemDensities	densitytest.cpp	/^void DensityAnalyzer::SystemDensities () {$/;"	f	class:DensityAnalyzer
-SystemDipole	../xyzsystem.cpp	/^VecR XYZSystem::SystemDipole () {$/;"	f	class:XYZSystem
 TCF_RUN	xyzdipole_analysis.h	20;"	d
-TEMPFILES	Makefile	/^TEMPFILES	= temp.cpp $(AMBERFILES) ..\/pdbfile.o ..\/moritasfg2002.o$/;"	m
+TEMPFILES	Makefile	/^TEMPFILES	= temp.cpp $(XYZSYSTEM) ..\/moritasfg2002.o$/;"	m
 TIMESTEPS	mpitest.h	14;"	d
-TOPFile	../topfile.cpp	/^TOPFile::TOPFile () {$/;"	f	class:TOPFile
-TOPFile	../topfile.cpp	/^TOPFile::TOPFile (const TOPFile& topfile) :$/;"	f	class:TOPFile
-TOPFile	../topfile.cpp	/^TOPFile::TOPFile (std::string path) :$/;"	f	class:TOPFile
 TOPTEST_H_	toptest.h	2;"	d
 TimestepChi	morita.h	/^	Complex_vec TimestepChi;	\/\/ chi spectrum of several different molecules collected over an entire timestep$/;"	m	class:SFGAnalyzer
 TotalChi	morita.h	/^	Complex_vec TotalChi;		\/\/ Running total of all the data for several timesteps$/;"	m	class:SFGAnalyzer
-Trace	../matrixr.cpp	/^double MatR::Trace () const {$/;"	f	class:MatR
-Transpose	../matrixr.cpp	/^MatR MatR::Transpose () const {$/;"	f	class:MatR
-Unit	../vecr.cpp	/^VecR VecR::Unit () const {$/;"	f	class:VecR
-UpdateCenterOfMass	../molecule.cpp	/^VecR Molecule::UpdateCenterOfMass () {$/;"	f	class:Molecule
-UpdateGraph	../bondgraph.cpp	/^void BondGraph::UpdateGraph (Atom_ptr_vec& atoms) {$/;"	f	class:BondGraph
-UpdateMatrix	../adjacencymatrix.cpp	/^void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {$/;"	f	class:AdjacencyMatrix
-UpdateMatrix	../connectmatrix.cpp	/^void ConnectivityMatrix::UpdateMatrix () {$/;"	f	class:ConnectivityMatrix
-VecR	../vecr.cpp	/^VecR::VecR () : _coords(d_vector(0.0,0.0,0.0)) {$/;"	f	class:VecR
-VecR	../vecr.cpp	/^VecR::VecR (const VecR& oldVec) : _coords(oldVec._coords) {$/;"	f	class:VecR
-VecR	../vecr.cpp	/^VecR::VecR (const d_vector& oldVec) : _coords(oldVec) {$/;"	f	class:VecR
-VecR	../vecr.cpp	/^VecR::VecR (const double * vec) : _coords(d_vector(vec[0],vec[1],vec[2])) {$/;"	f	class:VecR
-VecR	../vecr.cpp	/^VecR::VecR (const double X, const double Y, const double Z) : _coords(d_vector(X,Y,Z)) {$/;"	f	class:VecR
 WATERSYSTEM	Makefile	/^WATERSYSTEM	= $(AMBERFILES) ..\/watersystem.o ..\/adjacencymatrix.o ..\/bond.o$/;"	m
-WannierFile	../wannier.cpp	/^WannierFile::WannierFile (std::string wannierpath) {$/;"	f	class:WannierFile
-Water	../h2o.cpp	/^Water::Water () : Molecule() {$/;"	f	class:Water
-Water	../h2o.cpp	/^Water::Water (const Molecule& molecule) : Molecule(molecule) {$/;"	f	class:Water
-WaterCoordination	../adjacencymatrix.cpp	/^coordination AdjacencyMatrix::WaterCoordination (Water const * const wat) const {$/;"	f	class:AdjacencyMatrix
-WaterDipoleParms	../dipoleparm.cpp	/^WaterDipoleParms::WaterDipoleParms (string parmpath="dipoleparm.dat") {$/;"	f	class:WaterDipoleParms
-WaterEigenSystem	../watersfg.cpp	/^void SFGCalculator::WaterEigenSystem (Water& water) {$/;"	f	class:SFGCalculator
 WaterHistogram	angledistro.cpp	/^std::vector< std::vector<int> >& AngleDistro::WaterHistogram (int const timesteps) {$/;"	f	class:AngleDistro
-WaterSystem	../watersystem.cpp	/^WaterSystem::WaterSystem (const WaterSystemParams& params) :$/;"	f	class:WaterSystem
-WaterSystem	../watersystem.cpp	/^WaterSystem::WaterSystem (const int argc, const char **argv, const WaterSystemParams& params) :$/;"	f	class:WaterSystem
-Wrap	../atom.cpp	/^void Atom::Wrap (VecR origin = VecR(0.0, 0.0, 0.0)) {$/;"	f	class:Atom
-Wrap	../vecr.cpp	/^VecR VecR::Wrap (VecR size, VecR origin) {$/;"	f	class:VecR
-WritePDB	../pdbfile.cpp	/^void PDBFile::WritePDB (vector<Molecule *> sys) {$/;"	f	class:PDBFile
-XYZFile	../xyzfile.cpp	/^XYZFile::XYZFile () {$/;"	f	class:XYZFile
-XYZFile	../xyzfile.cpp	/^XYZFile::XYZFile (string path) {$/;"	f	class:XYZFile
-XYZSYSTEM	Makefile	/^XYZSYSTEM = ..\/xyzsystem.o ..\/xyzfile.o ..\/atom.o ..\/h2o.o ..\/hno3.o ..\/molecule.o ..\/vecr.o ..\/wannier.o ..\/bondgraph.o ..\/matrixr.o$/;"	m
-XYZSystem	../xyzsystem.cpp	/^XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath)$/;"	f	class:XYZSystem
+XYZSYSTEM	Makefile	/^XYZSYSTEM = ..\/xyzsystem.o ..\/xyzfile.o ..\/atom.o ..\/h2o.o ..\/hno3.o ..\/molecule.o ..\/vecr.o ..\/wannier.o ..\/adjacencymatrix.o ..\/matrixr.o ..\/bond.o ..\/oh.o ..\/h3o.o$/;"	m
 ZMAX	angledistro.h	18;"	d
 ZMIN	angledistro.h	19;"	d
 ZRES	angledistro.h	20;"	d
-Zero	../vecr.cpp	/^void VecR::Zero () {$/;"	f	class:VecR
 _ClearHisto	angledistro.cpp	/^void AngleDistro::_ClearHisto () {$/;"	f	class:AngleDistro
 _DENSITYTEST_H_	densitytest.h	2;"	d
 _DIPOLETCF_H_	dipoletcf.h	2;"	d
-_Data	../dipoleparm.cpp	/^double * WaterDipoleParms::_Data (double r1, double r2, double theta) {$/;"	f	class:WaterDipoleParms
-_FillBoxLattice	../boxfiller.cpp	/^void BoxFiller::_FillBoxLattice () {$/;"	f	class:BoxFiller
-_FillBoxRandom	../boxfiller.cpp	/^void BoxFiller::_FillBoxRandom () {$/;"	f	class:BoxFiller
-_FindBonds	../connectmatrix.cpp	/^void ConnectivityMatrix::_FindBonds (Atom * atom1, Atom * atom2) {$/;"	f	class:ConnectivityMatrix
-_FindEulerAngles	../molecule.cpp	/^void Molecule::_FindEulerAngles () {$/;"	f	class:Molecule
-_FindLastStep	../pdbfile.cpp	/^int PDBFile::_FindLastStep () {$/;"	f	class:PDBFile
-_FindSteps	../xyzfile.cpp	/^void XYZFile::_FindSteps () {$/;"	f	class:XYZFile
-_FormCovalentBond	../connectmatrix.cpp	/^void ConnectivityMatrix::_FormCovalentBond (const Atom * atom1, const Atom * atom2) {$/;"	f	class:ConnectivityMatrix
-_FormHBond	../connectmatrix.cpp	/^void ConnectivityMatrix::_FormHBond (Atom * atom1, Atom * atom2) {$/;"	f	class:ConnectivityMatrix
-_InitParams	../boxfiller.cpp	/^void BoxFiller::_InitParams () {$/;"	f	class:BoxFiller
-_ParseAtom	../pdbfile.cpp	/^Atom *PDBFile::_ParseAtom (const char *atomEntry) {$/;"	f	class:PDBFile
-_ParseAtomInformation	../ambersystem.cpp	/^void AmberSystem::_ParseAtomInformation () {$/;"	f	class:AmberSystem
-_ParseAtomVectors	../ambersystem.cpp	/^void AmberSystem::_ParseAtomVectors () {$/;"	f	class:AmberSystem
-_ParseFile	../complexdatafile.cpp	/^void ComplexDataFile::_ParseFile () {$/;"	f	class:ComplexDataFile
-_ParseMolecules	../ambersystem.cpp	/^void AmberSystem::_ParseMolecules () {$/;"	f	class:AmberSystem
-_ParseMolecules	../xyzsystem.cpp	/^void XYZSystem::_ParseMolecules () {$/;"	f	class:XYZSystem
-_ParseWanniers	../xyzsystem.cpp	/^void XYZSystem::_ParseWanniers () {$/;"	f	class:XYZSystem
 _PrintOutput	angledistro.cpp	/^void AngleDistro::_PrintOutput () const {$/;"	f	class:AngleDistro
 _PrintStatus	angledistro.cpp	/^void AngleDistro::_PrintStatus () const {$/;"	f	class:AngleDistro
 _WaterStepHistogram	angledistro.cpp	/^std::vector< std::vector<int> > AngleDistro::_WaterStepHistogram () {$/;"	f	class:AngleDistro
@@ -197,14 +144,11 @@ angres	ordercoords.h	/^	double	angres;$/;"	m	class:CoordOrderParams
 angres	orderparams.h	/^	double	angres;$/;"	m	class:OrderParameters
 atomNames	densitytest.h	/^	vector<string> atomNames;$/;"	m	class:DensityAnalyzer
 axis	mpitest.h	/^const coord axis = y;$/;"	v
-class:Atom
-clear	../molecule.cpp	/^void Molecule::clear () {$/;"	f	class:Molecule
 filename	Qpt.h	15;"	d
 filename	dipoletcf.h	38;"	d
 filename	xyzdipole_analysis.h	54;"	d
 histo	coordination.h	/^	Int_histo histo;$/;"	m	class:CoordinationTest
 histo	densitytest.h	/^	vector< vector<int> > histo;	\/\/ histogram for atom particle numbers arranged by atom names$/;"	m	class:DensityAnalyzer
-main	../complexdatafile.cpp	/^int main (int argc, char **argv) {$/;"	f
 main	Qpt.cpp	/^int main () {$/;"	f
 main	ambertest.cpp	/^int main (int argc, char *argv) {$/;"	f
 main	angledistro.cpp	/^int main () {$/;"	f
@@ -222,57 +166,21 @@ main	morita.mpi.cpp	/^int main (int argc, char **argv) {$/;"	f
 main	mpitest.cpp	/^int main (int argc, char **argv) {$/;"	f
 main	ordercoords.cpp	/^int main (const int argc, const char **argv) {$/;"	f
 main	orderparams.cpp	/^int main (int argc, const char **argv) {$/;"	f
-main	temp.cpp	/^int main (int argc, char **argv) {$/;"	f
+main	temp.cpp	/^int main () {$/;"	f
 main	toptest.cpp	/^int main (int argc, char *argv) {$/;"	f
 main	wanniertest.cpp	/^int main () {$/;"	f
 main	xyzdipole_analysis.cpp	/^int main (int *argc, char **argv) {$/;"	f
-movetoorigin	temp.cpp	/^void movetoorigin (Molecule * wat) {$/;"	f
 name_map	coordination.h	/^	coord_map name_map;$/;"	m	class:CoordinationTest
 name_map	ordercoords.h	/^	coord_map name_map;$/;"	m	class:CoordOrderParams
-numHydroniums	../h2o.cpp	/^int Hydronium::numHydroniums = 0;$/;"	m	class:Hydronium	file:
-numHydroxides	../h2o.cpp	/^int Hydroxide::numHydroxides = 0;$/;"	m	class:Hydroxide	file:
-numMolecules	../molecule.cpp	/^int Molecule::numMolecules = 0;$/;"	m	class:Molecule	file:
 numMolsProcessed	morita.h	/^	unsigned long numMolsProcessed;$/;"	m	class:SFGAnalyzer
-numNitrates	../hno3.cpp	/^int Nitrate::numNitrates = 0;$/;"	m	class:Nitrate	file:
-numNitricAcids	../hno3.cpp	/^int NitricAcid::numNitricAcids = 0;$/;"	m	class:NitricAcid	file:
 numSteps	Qpt.h	18;"	d
-numWaters	../h2o.cpp	/^int Water::numWaters = 0;$/;"	m	class:Water	file:
-num_bonds	../bond.cpp	/^int Bond::num_bonds = 0;$/;"	m	class:Bond	file:
-num_edges	../edge.cpp	/^int Edge::num_edges = 0;$/;"	m	class:Edge	file:
-num_nodes	../node.cpp	/^int Node::num_nodes = 0;$/;"	m	class:Node	file:
 number_density	ordercoords.h	/^	Int_histo number_density;$/;"	m	class:CoordOrderParams
 number_density	orderparams.h	/^	vector<unsigned long int> number_density;$/;"	m	class:OrderParameters
-operator %	../vecr.cpp	/^VecR VecR::operator% (const VecR& input) const {$/;"	f	class:VecR
-operator ()	../matrixr.cpp	/^double MatR::operator() (int const row, int const col) const {$/;"	f	class:MatR
-operator ()	../vecr.cpp	/^double VecR::operator() (const coord index) const {$/;"	f	class:VecR
-operator ()	../vecr.cpp	/^double VecR::operator() (const int index) const {$/;"	f	class:VecR
-operator *	../matrixr.cpp	/^MatR MatR::operator* (const MatR& input) const {		\/\/ Matrix rotation\/multiplication$/;"	f	class:MatR
-operator *	../matrixr.cpp	/^VecR MatR::operator* (const VecR& input) const {		\/\/ Vector rotation\/matrix-vector inner product$/;"	f	class:MatR
-operator *	../vecr.cpp	/^VecR VecR::operator* (const double input) const {$/;"	f	class:VecR
-operator *	../vecr.cpp	/^double VecR::operator* (const VecR& input) const {$/;"	f	class:VecR
-operator *=	../vecr.cpp	/^void VecR::operator*= (const double input) {$/;"	f	class:VecR
-operator +	../matrixr.cpp	/^MatR MatR::operator+ (const MatR& input) const {$/;"	f	class:MatR
-operator +	../vecr.cpp	/^VecR VecR::operator+ (const VecR& input) const {$/;"	f	class:VecR
-operator +=	../vecr.cpp	/^void VecR::operator+= (const VecR& input) {$/;"	f	class:VecR
-operator +=	../vecr.cpp	/^void VecR::operator+= (const double input) {$/;"	f	class:VecR
-operator -	../atom.cpp	/^double Atom::operator- (const Atom& input) const {$/;"	f	class:Atom
-operator -	../vecr.cpp	/^VecR VecR::operator- (const VecR& input) const {$/;"	f	class:VecR
-operator -=	../vecr.cpp	/^void VecR::operator-= (const VecR& input) {$/;"	f	class:VecR
-operator -=	../vecr.cpp	/^void VecR::operator-= (const double input) {$/;"	f	class:VecR
-operator <	../vecr.cpp	/^double VecR::operator< (const VecR& input) const {$/;"	f	class:VecR
-operator ==	../vecr.cpp	/^bool VecR::operator== (const VecR& input) const {$/;"	f	class:VecR
-operator []	../atom.cpp	/^double Atom::operator[] (const coord index) const {$/;"	f	class:Atom
-operator []	../molecule.cpp	/^Atom * Molecule::operator[] (const string atomname) const {$/;"	f	class:Molecule
-operator []	../vecr.cpp	/^double VecR::operator[] (const coord index) const {$/;"	f	class:VecR
-operator []	../vecr.cpp	/^double VecR::operator[] (const int index) const {$/;"	f	class:VecR
 outputfilename	dipoletcf.h	/^	const string outputfilename	 = "tcf.dat";$/;"	v
 outputfilename	xyzdipole_analysis.h	/^	const string outputfilename	 = "power.dat";$/;"	v
 outputfilename	xyzdipole_analysis.h	/^	const string outputfilename	 = "tcf.dat";$/;"	v
 outputfilename	xyzdipole_analysis.h	/^	const string outputfilename	 = "test.dat";$/;"	v
 pdb	closest.cpp	6;"	d	file:
-q_pt	../hno3analysis.cpp	/^double q_pt (XYZSystem& sys, Molecule * hno3) {$/;"	f
-r_matrix	temp.cpp	/^MatR r_matrix (double alpha, double beta, double gamma, int fwd) {$/;"	f
-rotate	temp.cpp	/^void rotate (MatR R, Molecule * mol) {$/;"	f
 set_unitcell	set_unitcell.tcl	/^proc set_unitcell {a b c {molid top} {alpha 90.0} {beta 90.0} {gamma 90.0}} {$/;"	p
 sfg	morita.h	/^	SFGCalculator	sfg;$/;"	m	class:SFGAnalyzer
 slab35	dipoletcf.h	15;"	d
@@ -303,27 +211,4 @@ zSize	dipoletcf.h	/^	const double zSize	= 30.0000;$/;"	v
 zSize	xyzdipole_analysis.h	/^	const double zSize	= 12.4138;$/;"	v
 zSize	xyzdipole_analysis.h	/^	const double zSize	= 20.0;$/;"	v
 zSize	xyzdipole_analysis.h	/^	const double zSize	= 30.0000;$/;"	v
-~AdjacencyMatrix	../adjacencymatrix.cpp	/^AdjacencyMatrix::~AdjacencyMatrix () {$/;"	f	class:AdjacencyMatrix
-~AmberSystem	../ambersystem.cpp	/^AmberSystem::~AmberSystem () {$/;"	f	class:AmberSystem
 ~AngleDistro	angledistro.cpp	/^AngleDistro::~AngleDistro () {$/;"	f	class:AngleDistro
-~Bond	../bond.cpp	/^Bond::~Bond () {$/;"	f	class:Bond
-~BoxFiller	../boxfiller.cpp	/^BoxFiller::~BoxFiller() { };$/;"	f	class:BoxFiller
-~CRDFile	../crdfile.cpp	/^CRDFile::~CRDFile () {$/;"	f	class:CRDFile
-~DipoleFieldTensor	../dipolefieldtensor.cpp	/^DipoleFieldTensor::~DipoleFieldTensor () {$/;"	f	class:DipoleFieldTensor
-~Edge	../edge.cpp	/^Edge::~Edge () {$/;"	f	class:Edge
-~ForceFile	../forcefile.cpp	/^ForceFile::~ForceFile () {$/;"	f	class:ForceFile
-~Graph	../graph.cpp	/^Graph::~Graph () {$/;"	f	class:Graph
-~Hydronium	../h2o.cpp	/^Hydronium::~Hydronium () {$/;"	f	class:Hydronium
-~Hydroxide	../h2o.cpp	/^Hydroxide::~Hydroxide () {$/;"	f	class:Hydroxide
-~Molecule	../molecule.cpp	/^Molecule::~Molecule () {$/;"	f	class:Molecule
-~Nitrate	../hno3.cpp	/^Nitrate::~Nitrate () {$/;"	f	class:Nitrate
-~NitricAcid	../hno3.cpp	/^NitricAcid::~NitricAcid () {$/;"	f	class:NitricAcid
-~Node	../node.cpp	/^Node::~Node () {$/;"	f	class:Node
-~PDBFile	../pdbfile.cpp	/^PDBFile::~PDBFile () {$/;"	f	class:PDBFile
-~TOPFile	../topfile.cpp	/^TOPFile::~TOPFile () {$/;"	f	class:TOPFile
-~VecR	../vecr.cpp	/^VecR::~VecR () {$/;"	f	class:VecR
-~WannierFile	../wannier.cpp	/^WannierFile::~WannierFile () {$/;"	f	class:WannierFile
-~Water	../h2o.cpp	/^Water::~Water () {$/;"	f	class:Water
-~WaterSystem	../watersystem.cpp	/^WaterSystem::~WaterSystem () {$/;"	f	class:WaterSystem
-~XYZFile	../xyzfile.cpp	/^XYZFile::~XYZFile () {$/;"	f	class:XYZFile
-~XYZSystem	../xyzsystem.cpp	/^XYZSystem::~XYZSystem () {$/;"	f	class:XYZSystem

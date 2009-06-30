@@ -1,7 +1,9 @@
 #include "xyzsystem.h"
 
-XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath)
-	: _atoms(XYZFile(filepath)), _dims(size), _wanniers(WannierFile(wannierpath))
+XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath) :
+	_atoms(filepath),
+	_wanniers(wannierpath),
+	_dims(size)
 {
 
 	// set the system size
@@ -11,13 +13,8 @@ XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath)
 }
 
 XYZSystem::~XYZSystem () {
-
 	RUN (_mols) {
 		delete _mols[i];
-	}
-
-	RUN (_atoms) {
-		delete _atoms[i];
 	}
 }
 
@@ -31,9 +28,8 @@ void XYZSystem::_ParseMolecules () {
 	_matrix.UpdateMatrix (_atoms.Atoms());
 
 	// Now let's do some house-cleaning to set us up for working with new molecules
-	RUN (_mols) {
+	RUN (_mols)
 		delete _mols[i];		// get rid of all the molecules in memory
-	}
 	_mols.clear();				// then clear out the molecule list
 
 	// we also have to go through and clear out some info on all the atoms
@@ -97,7 +93,10 @@ void XYZSystem::_ParseMolecules () {
 					O->Print();
 				#endif
 				}
-				// otherwise, if the distance to the target O (the current one) is smaller, then we have to set the other bond to an H-bond, remove the H from that molecule, and add it into the current one
+				// otherwise, if the distance to the target O (the current one) is smaller, then we have to:
+				// 		1) set the other bond to an H-bond
+				// 		2) remove the H from that molecule - changing the molecule altogether
+				// 		3) add the H into the current one
 				else {
 					_matrix.SetBond(H, s_O, hbond);
 					s_mol->RemoveAtom (H);
@@ -132,7 +131,7 @@ void XYZSystem::_ParseMolecules () {
 		}
 
 		else if (num_H == 0) {
-			printf ("XYZSystem::_ParseMolecules() - found water with %d H's\n", atoms.size());
+			printf ("XYZSystem::_ParseMolecules() - found water with %d H's\n", (int)atoms.size());
 			exit(1);
 		}
 
@@ -177,7 +176,7 @@ void XYZSystem::_ParseMolecules () {
  * **********************/
 
 	// The easiest thing to spot for nitric acid is, of course, the nitrogen! Only one of those, so let's grab it
-	for (int N = 0; N < _atoms.size(); N++) {
+	for (size_t N = 0; N < _atoms.size(); N++) {
 		if (_atoms[N]->Name().find("N") == string::npos) continue;
 
 		// analogous to water, let's grab all the (covalently) bound O's of the molecule
@@ -401,8 +400,7 @@ return;
 }
 
 void XYZSystem::LoadFirst () {
-	_atoms.LoadFirst();
-
+	//_atoms.LoadFirst();
 	this->_ParseMolecules();
 
 	if (_wanniers.Loaded()) {
@@ -433,7 +431,7 @@ void XYZSystem::LoadNext () {
 VecR XYZSystem::SystemDipole () {
 
 	VecR dipole;
-	VecR center = Atom::Size() * 0.5;	// center of the system
+	//VecR center = Atom::Size() * 0.5;	// center of the system
 
 	RUN (_atoms) {
 		//VecR ri = center.MinVector(_atoms[i]->Position(), Atom::Size());

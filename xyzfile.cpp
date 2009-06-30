@@ -24,10 +24,8 @@ XYZFile::XYZFile () {
 
 XYZFile::~XYZFile () {
 	fclose (_file);
-	for (int i = 0; i , _atoms.size(); i++) {
+	RUN(_atoms)
 		delete _atoms[i];
-	}
-	_initialized = false;
 }
 
 void XYZFile::LoadNext () {

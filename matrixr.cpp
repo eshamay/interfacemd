@@ -1,76 +1,88 @@
 #include "matrixr.h"
 
 MatR MatR::operator+ (const MatR& input) const {
-	FTensor::Index<'i',3> i;
-	FTensor::Index<'j',3> j;
 	MatR m;
+	double val;
+	for (int i = 0; i < 3; i++) {
+	for (int j = 0; j < 3; j++) {
+		val = _matrix[i][j] + input._matrix[i][j];
+		m.Set(i,j,val);
+	}}
 
-	m._matrix(i,j) = _matrix(i,j) + input._matrix(i,j);
 	return (m);
 }
 
+// multiply a vector by a matrix
 VecR MatR::operator* (const VecR& input) const {		// Vector rotation/matrix-vector inner product
 	VecR v;
-	FTensor::Index<'i',3> i;
-	FTensor::Index<'j',3> j;
-
-	v._coords(i) = _matrix(i,j)*input._coords(j);
+	for (int i = 0; i < 3; i++) {
+		double val = 0.0;
+		for (int j = 0; j < 3; j++) {
+			val += _matrix[i][j] * input[j];
+		}
+		v._coords[i] = val;
+	}
 
 	return (v);
 }
 
+// multiply a matrix by a matrix
 MatR MatR::operator* (const MatR& input) const {		// Matrix rotation/multiplication
 	MatR m;
-	FTensor::Index<'i',3> i;
-	FTensor::Index<'j',3> j;
-	FTensor::Index<'k',3> k;
-
-	m._matrix(i,j) = _matrix(i,k) * input._matrix(k,j);
-
-return (m);
-}
-
-/*
-double	MatR::operator[] (element const index) const {	// Return the coordinate
-	if (index < 0 || index > 8) {
-		std::cout << "Trying to access illegal index in MatrixR::operator[] (int const index)\nFix This\nMatrix:" << std::endl;
-		this->Print();
-		exit(1);
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			double val = 0.0;
+			for (int k = 0; k < 3; k++) {
+				val += _matrix[i][k] * input.Index(k,j);
+			}
+			m.Set(i,j,val);
+		}
 	}
-	return _elements[index];
+
+	return (m);
 }
 
-double	MatR::operator[] (int const index) const {	// Return the coordinate
-	if (index > 8) {
-		std::cout << "Trying to access illegal index in MatrixR::operator[] (int const index)\nFix This\nMatrix:" << std::endl;
-		this->Print();
-		exit(1);
-	}
-	return _elements[index];
-}
-*/
 double MatR::operator() (int const row, int const col) const {
-	return (_matrix(row,col));
+	return (_matrix[row][col]);
 }
 
+double MatR::operator() (coord const row, coord const col) const {
+	return (_matrix[row][col]);
+}
 double MatR::Index (int const row, int const col) const {	// Return the element
-	return (_matrix(row, col));
+	return (_matrix[row][col]);
+}
+double MatR::Index (coord const row, coord const col) const {	// Return the element
+	return (_matrix[row][col]);
 }
 
 void MatR::Set (int const row, int const col, double const val) {	// Set the element
-	_matrix(row,col) = val;
-	return;
+	_matrix[row][col] = val;
+}
+
+void MatR::Set (coord const row, coord const col, double const val) {	// Set the element
+	_matrix[row][col] = val;
+}
+
+// set the matrix using a pre-built array of data
+void MatR::Set (double * const data) {
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			_matrix[i][j] = data[i*3+j];
+		}
+	}
 }
 
 void MatR::Print () const {
 	for (int row=0; row < 3; row++) {
 		for (int col=0; col<3; col++)
-			printf ("% 8.4f\t", this->Index(row, col));
+			printf ("% 8.4f\t", _matrix[row][col]);
 		printf("\n");
 	}
 }
 
 #ifdef _LINALG_
+/*
 void MatR::CalcEigenSystem () {
 
 	double A[9];
@@ -116,18 +128,61 @@ vector< complex<double> > MatR::EigenValues () {
 
 	return (out);
 }
+*/
 #endif
 
 MatR MatR::Transpose () const {
 	MatR m;
-	FTensor::Index<'i',3> i;
-	FTensor::Index<'j',3> j;
-
-	m._matrix(i,j) = _matrix(j,i);
+	for (unsigned int i = 0; i < 3; i++) {
+		for (unsigned int j = 0; j < 3; j++) {
+			m.Set(i,j,_matrix[j][i]);
+		}
+	}
 	return (m);
 }
 
+MatR MatR::Inverse () const {
+
+	double G[9];
+
+	// load up the elements of the array to be factored
+	for (int i=0; i<3; i++) {
+	for (int j=0; j<3; j++) {
+		G[i*3+j] = _matrix[i][j];
+	}}
+
+	int n = 3;
+	int ipiv[n];
+	int info;
+	/*---------Call Cell LAPACK library---------*/
+	dgetrf_(&n, &n, G, &n, ipiv, &info);
+	if( info != 0 )
+		std::cout << "hey! dgetrf didn't work :( - matrix factorization is dubious" << std::endl;
+
+	/*---------Query workspace-------*/
+	// find out how much space we need to do this thing
+	double workspace;
+	int tmp=-1;
+	int lwork;
+	dgetri_(&n, G, &n, ipiv, &workspace, &tmp, &info);
+
+	lwork = (int)workspace;
+	double work[lwork];
+	//work = (double * ) malloc (sizeof(double)*lwork);
+	/*---------Call Cell LAPACK library---------*/
+	dgetri_(&n, G, &n, ipiv, work, &lwork, &info);
+	if (info != 0)
+		std::cout << "matrix inverse died after 2nd dgetri_ call" << std::endl;
+
+	// G now holds the inverse
+
+	MatR out (G);
+
+	return(out);
+}
+
 #ifdef _LINALG_
+/*
 MatR MatR::Quaternion () {
 
 	if (!_eigenset) this->CalcEigenSystem();
@@ -136,32 +191,9 @@ MatR MatR::Quaternion () {
 
 	return(out);
 }
+*/
 
-MatR MatR::Inverse () const {
-
-	int m = 3;
-	int n = 3;
-	int lda = 3;
-	double A[9];
-	double work[100];
-	int lwork = 100;
-	int info;
-	int ipiv[9];
-
-	// load up the elements of the array to be factored
-	for (int i=0; i<9; i++)
-		A[i] = _elements[i];
-
-	// now call the L & U factorization routine from lapack
-	dgetrf_ (&m, &n, A, &lda, ipiv, &info);
-
-	dgetri_ (&n, A, &lda, ipiv, work, &lwork, &info);
-
-	MatR out (A);
-
-	return(out);
-}
-
+/*
 MatR MatR::Diagonalize () {
 
 	if (!_eigenset) this->CalcEigenSystem();
@@ -171,11 +203,12 @@ MatR MatR::Diagonalize () {
 
 	return (out);
 }
+*/
 #endif
 
 double MatR::Trace () const {
 
-	double out = (_matrix(0,0) + _matrix(1,1) + _matrix(2,2));
+	double out = _matrix[0][0] + _matrix[1][1] + _matrix[2][2];
 
 	return(out);
 }
@@ -183,12 +216,12 @@ double MatR::Trace () const {
 double MatR::Determinant () const {
 
 	double det = 0.0;
-	det += _matrix(0,0)*_matrix(1,1)*_matrix(2,2);
-	det -= _matrix(0,0)*_matrix(1,2)*_matrix(2,1);
-	det += _matrix(0,1)*_matrix(1,2)*_matrix(2,0);
-	det -= _matrix(0,1)*_matrix(1,0)*_matrix(2,2);
-	det += _matrix(0,2)*_matrix(1,0)*_matrix(2,1);
-	det -= _matrix(0,2)*_matrix(1,1)*_matrix(2,0);
+	det += _matrix[0][0]*_matrix[1][1]*_matrix[2][2];
+	det -= _matrix[0][0]*_matrix[1][2]*_matrix[2][1];
+	det += _matrix[0][1]*_matrix[1][2]*_matrix[2][0];
+	det -= _matrix[0][1]*_matrix[1][0]*_matrix[2][2];
+	det += _matrix[0][2]*_matrix[1][0]*_matrix[2][1];
+	det -= _matrix[0][2]*_matrix[1][1]*_matrix[2][0];
 
 	return (det);
 }

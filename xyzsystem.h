@@ -6,11 +6,13 @@
 #include "adjacencymatrix.h"
 #include "molecule.h"
 #include "h2o.h"
+#include "oh.h"
+#include "h3o.h"
 #include "hno3.h"
 #include "wannier.h"
 #include "utility.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 
 class XYZSystem {
 

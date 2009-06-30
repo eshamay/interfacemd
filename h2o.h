@@ -27,6 +27,7 @@ protected:
 	static WaterDipoleParms _dipparms;		// The water dipole parameter file
 	#endif
 
+
 public:
 	Water ();	// a default constructor
 	~Water ();	// a destructor
@@ -48,7 +49,6 @@ public:
 	MatR const & DCMToLab (const coord axis = z);							// get the direction cosine matrix for rotations to the lab frame
 	MatR const & DCMToLabMorita (const coord axis = z, const int bond = 1);	// get the direction cosine matrix for rotations to the lab frame from the morita-hynes one
 	MatR const & DCMToLabOrder ();						// direction cosine matrix using the bisector as the molecular z-axis
-	MatR DCM;											// the direction cosine matrix for rotating the molecule to the lab frame
 
 	MatR EulerMatrix;					// The euler rotation matrix
 	double EulerAngles[3];				// euler angles as defined in "The Raman Effect" Appendix A5 (theta, phi, chi)
@@ -64,53 +64,6 @@ public:
 	VecR const * OH2 () const { return &_oh2; }
 	double Angle () const { return acos(_oh1 < _oh2) * 180.0/M_PI; }
 
-};
-
-typedef std::vector<Water *> Water_ptr_vec;
-typedef std::vector<Water> Water_vec;
-
-
-
-/******************************
- * Hydroxide (H3O+)
- * ****************************/
-class Hydroxide: public Molecule {
-
-protected:
-	VecR _oh;				// The OH bond vector
-	Atom *_o, *_h;			// pointers to the atoms for easy access
-
-public:
-	Hydroxide ();
-	~Hydroxide ();
-	Hydroxide (const Molecule& molecule);	// copy constructor for casting from a molecule
-
-	static int numHydroxides;			// total number of waters in the system
-
-	void SetAtoms ();					// set the _oh bond vector
-	VecR const * OH () const { return &_oh; }
-};
-
-/******************************
- * Hydronium (H3O+)
- * ****************************/
-class Hydronium: public Molecule {
-
-protected:
-	VecR _oh1, _oh2, _oh3;				// Both of the OH vectors
-	Atom *_o, *_h1, *_h2, *_h3;			// pointers to the atoms for easy access
-
-public:
-	Hydronium ();
-	~Hydronium ();
-	Hydronium (const Molecule& molecule);	// copy constructor for casting from a molecule
-
-	static int numHydroniums;			// total number of waters in the system
-
-	void SetAtoms ();
-	VecR const * OH1 () const { return &_oh1; }
-	VecR const * OH2 () const { return &_oh2; }
-	VecR const * OH3 () const { return &_oh3; }
 };
 
 typedef std::vector<Water *> Water_ptr_vec;

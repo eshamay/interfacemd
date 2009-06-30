@@ -24,7 +24,7 @@ VecR MoritaSFG::CalcDipole (Water * water) {
 	double f = C7*X2 + C8*X1*X2 + C9*X2*X3;		// originally delta q1 - delta q2
 
 	// and calculating the partial atomic charges...
-	double qO = Q_O_eq + dqO;		// partial charge on the oxygen
+	//double qO = Q_O_eq + dqO;		// partial charge on the oxygen
 	double q1 = -Q_O_eq/2.0 - f/2.0 - dqO/2.0;	// partial charge of the 2 hydrogens
 	double q2 = -Q_O_eq/2.0 + f/2.0 - dqO/2.0;
 

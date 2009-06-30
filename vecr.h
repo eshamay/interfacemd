@@ -5,26 +5,27 @@
 #include <math.h>
 //#include "matrixr.h"
 #include "utility.h"
-#include "FTensor.h"
+//#include "FTensor.h"
 
 enum coord {x=0, y=1, z=2};
 
 class MatR;
 
-typedef FTensor::Tensor1<double,3>	d_vector;
+//typedef FTensor::Tensor1<double,3>	d_vector;
+typedef std::vector<double>	Double_vector;
 
 class VecR {
 
 friend class MatR;
 
 protected:
-	d_vector		_coords;
+	Double_vector	_coords;
 
 public:
 	VecR ();
 	VecR (const double x, const double y, const double z);
 	VecR (const VecR& oldVec);						// A copy constructor
-	VecR (const d_vector& oldVec);
+	VecR (const Double_vector& oldVec);
 	VecR (const double * vec);
 	~VecR ();
 
@@ -45,17 +46,17 @@ public:
 	double	operator[] (const int index) const;		// Return the coordinate
 	double operator() (const coord index) const;
 	double operator() (const int index) const;
-	//void	operator= (VecR input);					// Set one vector equal to another
+	VecR&	operator= (const VecR& input);					// Set one vector equal to another
 	bool	operator== (const VecR& input) const;	// Check identity
 
 // Input & vector manipulation
 	void Set (double X, double Y, double Z) {
 		//printf ("_coords in (%d)\n", _coords);
-		_coords(0) = X; // set all elements of a vector
-		_coords(1) = Y;
-		_coords(2) = Z;
+		_coords[0] = X; // set all elements of a vector
+		_coords[1] = Y;
+		_coords[2] = Z;
 	}
-	void Set (const coord axis, const double val) { _coords(axis) = val; }
+	void Set (const coord axis, const double val) { _coords[axis] = val; }
 
 	void Zero ();								// Zero all elements of a vector
 	void Scale (double val);					// scale the entire vector's magnitude
@@ -63,11 +64,11 @@ public:
 	VecR MinVector (const VecR& input, const VecR& size) const;	// Find the min offset vector between two points in periodic bounds
 	double MinDistance (const VecR& input, const VecR& size) const;
 	//VecR RotateToFrame (VecR const * const frame) const;
-	VecR Wrap (VecR size, VecR origin = VecR ());						// Used to wrap a vector into a central periodic cell of the given size
+	VecR& Wrap (VecR& size, VecR origin = VecR ());						// Used to wrap a vector into a central periodic cell of the given size
 
-	void X (const double val) { _coords(x) = val; }
-	void Y (const double val) { _coords(y) = val; }
-	void Z (const double val) { _coords(z) = val; }
+	void X (const double val) { _coords[x] = val; }
+	void Y (const double val) { _coords[y] = val; }
+	void Z (const double val) { _coords[z] = val; }
 
 // Output
 	double Magnitude () const;

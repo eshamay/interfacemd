@@ -33,7 +33,7 @@ public:
 
 	// output functions
 	const std::vector<VecR>& Coords () const { return _coords; }
-	int size () 	const { return _size; }
+	unsigned int size () 	const { return _size; }
 
 	bool eof () 	const { return _eof; }		// have we reached the end of the file?
 	bool Loaded ()	const { return _loaded; }	// find out if the file is loaded/exists

@@ -44,7 +44,7 @@ public:
 	std::vector<Atom *>& Atoms () { return _atoms; }
 	int Current () const { return _currentstep; }
 	int NumSteps () const { return _numSteps; }
-	int size () const { return _atoms.size(); }
+	size_t size () const { return _atoms.size(); }
 
 	Atom * operator[] (int index) { return _atoms[index]; }
 

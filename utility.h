@@ -6,14 +6,14 @@
 #ifndef RUN
 
 #define RUN(list)   \
-   	for (unsigned int i = 0; i < list.size(); i++)
+	for (size_t i = 0; i < list.size(); i++)
 
 #endif
 
 #ifndef RUN2
 
 #define RUN2(list)  \
-   	for (unsigned int j = 0; j < list.size(); j++)
+	for (size_t j = 0; j < list.size(); j++)
 
 #endif
 
