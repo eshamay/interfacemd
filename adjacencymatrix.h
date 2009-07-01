@@ -28,7 +28,7 @@ class AdjacencyMatrix {
 private:
 	Bond_matrix		_matrix;	// the actual data structure for storing connection data
 	Atom_ptr_vec	_atoms;		// the atoms in the system
-	unsigned int 			_size;
+	unsigned int 	_size;
 	bool 			_built;		// has the matrix been built to the current size?
 
 public:
@@ -41,6 +41,7 @@ public:
 	void BuildMatrix ();
 	void DeleteMatrix ();
 	void UpdateMatrix (const Atom_ptr_vec& atoms);
+	void _FixSharedAtoms ();
 	void ClearBonds ();
 
 	void SetBond (int x, int y, const double blength, const bondtype btype);

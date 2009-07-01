@@ -17,8 +17,7 @@ Molecule::Molecule (const Molecule& oldMol) :
 	_set(false),
 	_centerofmass(oldMol.CenterOfMass()),
 	_mass(oldMol.Mass()),
-	_name(oldMol.Name()),
-	_DCM()
+	_name(oldMol.Name())
 {
 	// now run through and make copies of all the atoms (but this preserves the pointers to the atoms (not really a new molecule!))
 	//RUN (oldMol.Atoms()) {
@@ -80,8 +79,15 @@ return(patom);
 }
 
 // same as the operator, but without the syntax
-void Molecule::AddAtom (Atom * atom) {
+void Molecule::AddAtom (Atom * const atom) {
 	_atoms.push_back (atom);            // add the central-periodic image of the atom
+	this->FixAtom (atom);
+
+return;
+}
+
+// Instead of adding an atom to a molecule - fix an atom's info in case it was somehow messed up
+void Molecule::FixAtom (Atom * const atom) {
 
 	// now adjust the center of mass to accomodate for the new atom. Also, adjust the total molecular mass.
 	this->UpdateCenterOfMass ();
@@ -94,19 +100,40 @@ void Molecule::AddAtom (Atom * atom) {
 return;
 }
 
-void Molecule::RemoveAtom (const Atom * atom) {
+void Molecule::AddHydrogen (Atom * const atom) {
 
-// Iterator way of doing things - I find this a bit odd to work with, for now...
+	this->AddAtom (atom);
+
+	if (atom->Name().find("H") == string::npos) {
+		std::cout << "Molecule::AddHydrogen() - Tried adding a hydrogen with a non-hydrogen atom:" << std::endl;
+		atom->Print();
+		exit(1);
+	}
+
+	// now rename the molecule accordingly
+	if (_name == "no3") this->Rename ("hno3");
+	else if (_name == "h2o") this->Rename ("h3o");
+	else if (_name == "oh") this->Rename ("h2o");
+
+return;
+}
+
+void Molecule::RemoveAtom (Atom * const atom) {
+
 // This will remove the atom from the molecule's atom-list
-	std::vector<Atom *>::iterator ai;
-	for (ai = _atoms.begin(); ai != _atoms.end(); ai++) {
-		if (*ai == atom) {
-			_atoms.erase(ai);
+	RUN (_atoms) {
+		if (atom == _atoms[i]) {
+			_atoms.erase(_atoms.begin() + i);
 			break;
 		}
 	}
 
 	this->UpdateCenterOfMass();
+
+	// note on the atom that it is no longer part of a molecule
+	atom->ParentMolecule ((Molecule *)NULL);
+	atom->Residue ("");
+	atom->MolID (-1);
 
 	// if we happen to be taking off a hydrogen from a molecule... rename it accordingly
 	if (atom->Name() == "H") {

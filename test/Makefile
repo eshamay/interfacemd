@@ -16,6 +16,7 @@ ORDERPARAMS = $(WATERSYSTEM) orderparams.o
 TEMPFILES	= temp.cpp $(XYZSYSTEM) ../moritasfg2002.o
 COORDINATION	= $(WATERSYSTEM) coordination.o
 ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
+MORITA2002	= $(XYZSYSTEM) ../moritasfg2002.o morita2002.o
 
 ambertest : ambertest.o $(AMBERFILES)
 	$(CXX) $(CPPFLAGS) ambertest.o $(AMBERFILES) -o ambertest
@@ -67,6 +68,9 @@ coordination: $(COORDINATION)
 
 ordercoords: $(ORDERCOORDS)
 	$(CXX) $(CPPFLAGS) $(ORDERCOORDS) -o ordercoords
+
+morita2002: $(MORITA2002)
+	$(CXX) $(CPPFLAGS) $(MORITA2002) -llapack -o morita2002
 
 cleantest :
 	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams ordercoords

@@ -40,284 +40,23 @@ void XYZSystem::_ParseMolecules () {
 		_atoms[i]->MolID (-1);
 	}
 
-#ifdef DEBUG
-	/* For debugging (and other useful things?) this will keep a list of all the atoms that have been processed into molecules. Any atoms left over at the end of the parsing routine are not included and ... can potentially cause problems */
-	std::vector<Atom *> atom_tracking_list(_atoms.Atoms());
-#endif
+	// track which atoms have already been parsed in the system
+	_unparsed.clear();
+	_unparsed = _atoms.Atoms();
 
-/*******************
- * Processing Waters
- *******************/
+	this->_ParseWaters ();
+	this->_ParseNitrates ();
 
-	// let's go through the system and find all the waters and form molecules out of them
-	RUN (_atoms) {
-
-		// every water has an oxygen atom, right? So let's find those
-		Atom * O = _atoms[i];
-		if (O->Name().find("O") == string::npos) continue;
-
-		// The bondgraph provides us with all the covalently bound H's
-		vector<Atom *> atoms = _matrix.BondedAtoms (O, covalent);
-		vector<Atom *> Hs = _matrix.BondedAtoms (O, covalent, "H");
-
-		// if we pick up an OH group that is part of a larger molecule (i.e. nitric acid) then it will be processed as a hydroxide...
-		// So if the only type of atom attached is a hydrogen, we have some form of water (OH, H2O, H3O)
-		if (Hs.size() != atoms.size()) continue;
-
-		int molIndex = _mols.size();	// set the molecule index
-
-		// if any of the Hs are being shared between two molecules (i.e. a contact-ion pair) then we have to resolve which molecule gets the atom.
-		// A simple solution is to decide that the molecule with the oxygen closer to the hydrogen is the one that wins out
-		atoms.clear();	// we'll add in all the non-contentious hydrogens here
-
-		Molecule * s_mol = (Molecule *)NULL;
-		cout << Hs.size() << endl;
-		RUN (Hs) {
-			Atom * H = Hs[i];
-			s_mol = H->ParentMolecule();
-			// if the hydrogen hasn't yet been assigned, then there is no contention - add it into the current molecule
-			if (s_mol == (Molecule *)NULL) {		// atom is still available - not connected
-				atoms.push_back(H);
-			}
-			// otherwise we have to find the molecule that it's closer to, and remove it from the other
-			else {
-				Atom * s_O = s_mol->GetAtom("O");		// **assuming** that it's bound to an O
-				double t_distance = _matrix.Distance(H, O);		// distance to target O ("this" O)
-				double s_distance = _matrix.Distance(H, s_O);	// distance to source O ("other" O)
-				// now, if the distance between the H and the other molecule's atom is smaller, then we change a few things. Namely, we have to set the bond between the H and this current O to hydrogen, instead of covalent...
-				if (s_distance < t_distance) {
-					_matrix.SetBond(H, O, hbond);
-				#ifdef DEBUG
-					cout << endl << "XYZSystem::_ParseMolecules() - Found a shared H!" << endl;
-					H->Print();
-					cout << "it's closer to this molecule:" << endl;
-					s_mol->Print();
-					cout << "but we were checking out this O:" << endl;
-					O->Print();
-				#endif
-				}
-				// otherwise, if the distance to the target O (the current one) is smaller, then we have to:
-				// 		1) set the other bond to an H-bond
-				// 		2) remove the H from that molecule - changing the molecule altogether
-				// 		3) add the H into the current one
-				else {
-
-				#ifdef DEBUG
-					cout << endl << "XYZSystem::_ParseMolecules() - Found a shared H!" << endl;
-					H->Print();
-					cout << "it's closer to this O:" << endl;
-					O->Print();
-					cout << "but currently on this molecule:" << endl;
-					s_mol->Print();
-				#endif
-					_matrix.SetBond(H, s_O, hbond);
-					H->Print();
-					s_mol->RemoveAtom (H);
-					atoms.push_back(H);
-					cout << "we pulled the H off of the molecule, and here's what it now looks like:" << endl;
-					s_mol->Print();
-				}
-			}
-		}
-
-		int num_H = atoms.size();
-	  	// we may be dealing with a hydroxide ion
-		if (num_H == 1) {
-	  		_mols.push_back (new Hydroxide ());
-	  	}
-
-	  	// otherwise we have a full molecule
-		else if (num_H == 2) {
-			_mols.push_back (new Water ());
-	  	}
-
-		// or even a hydronium!
-		else if (num_H == 3) {
-			_mols.push_back (new Hydronium ());
-		}
-
-		else if (num_H == 0) {
-			printf ("XYZSystem::_ParseMolecules() - found water with %d H's\n", (int)atoms.size());
-			exit(1);
-		}
-
-		Molecule * newmol = _mols[molIndex];
-		newmol->MolID (molIndex);
-
-		// let's set all the atom properties that we can, and add them into the molecule
-		// and we also add in the hydrogens that are covalently bound - note, this can be more than 2 in the case of H3O+
-		atoms.push_back(O);		// Don't forget to tack in the oxygen!
-		RUN (atoms) {
-			newmol->AddAtom (atoms[i]);
-		}
-
-#ifdef DEBUG
-		// fix up the tracking list
-		RUN (atom_tracking_list) {
-			Atom * a1 = atom_tracking_list[i];
-			RUN2 (atoms) {
-				if (a1 == atoms[j]) {
-					atom_tracking_list[i] = (Atom *)NULL;
-					break;
-				}
-			}
-		}
-#endif
-
-/*
-		// now, from before, if one of the hydrogens is shared between two molecules making a contact-ion pair, then we will merge the two molecule to make one, and also update our ever-growing list of molecules to reflect it.
-		if (s_mol != (Molecule *)NULL) {
-			s_mol->Merge (newmol);		// this will swallow the new molecule into the contact ion pair
-			delete newmol;				// get rid of the newmol
-			vector<Molecule *>::iterator imol = _mols.end() - 1;	// fixes the _mols to get rid of the newmol we just made so it's not double-counted
-			_mols.erase(imol);
-		}
-*/
-	}
-
-/************************
- * Processing Nitric Acid
- * **********************/
-
-	// The easiest thing to spot for nitric acid is, of course, the nitrogen! Only one of those, so let's grab it
-	for (size_t N = 0; N < _atoms.size(); N++) {
-		if (_atoms[N]->Name().find("N") == string::npos) continue;
-
-		// analogous to water, let's grab all the (covalently) bound O's of the molecule
-		std::vector<Atom *> NAatoms (_matrix.BondedAtoms (_atoms[N], nobond, "O"));
-
-		// at least 3 oxygens for a nitrate/nitric acid
-		if (NAatoms.size() != 3) continue;
-		bool fullNA = false;	// let's us know if the molecule is an hno3 or an no3
-		Atom * no3H = (Atom *)NULL;				// this is the H bonded to an NO3 (we use it down below)
-		Atom * no3O = (Atom *)NULL;				// this is the oxgen of the no3 that is closest to the H
-		double no3OHdistance = 1000.0;				// the distance of the H to the nearest O
-
-		// let's do a quick check to look at the oxygens of the molecule and see if it's a proper HNO3 or an NO3.
-		RUN (NAatoms) {
-
-			Atom * O = NAatoms[i];
-
-			// these are all the Hs bound to the O
-			std::vector<Atom *> Hs (_matrix.BondedAtoms (O, covalent, "H"));
-			if (!Hs.size()) continue;
-			// if an H is attached to one of the oxygens then we have a bonafide nitric acid
-			fullNA = true;
-
-			// here we'll run through all the Hs that are covalently bound and find which is the closest to an no3 oxygen.
-			RUN (Hs) {
-				double distance = _matrix.Distance (O, Hs[i]);
-				no3OHdistance = (distance < no3OHdistance) ? distance : no3OHdistance;
-				if (distance == no3OHdistance) {
-					no3H = Hs[i];
-					no3O = O;
-				}
-			}
-		}
-
-
-		// now... there are situations where the no3 and its closest water are actually sharing the hydrogen. We have to check here to see if it is closer to the water or closer to the no3 group to assign it either way.
-		if (fullNA) {
-			// if there is an H, let's check to see if it's already assigned to another molecule from before:
-			Molecule * s_mol = no3H->ParentMolecule();
-
-			// first, is the H even attached to another molecule?
-			if (s_mol != (Molecule *)NULL) {
-				#ifdef DEBUG
-					cout << "Found a shared H while parsing an NO3:" << endl;
-					no3H->Print();
-				#endif
-				// if it is shared, then we have to find which it is closer to.
-				// here we ***assume*** that the H is bound to an oxygen
-				Atom * s_O = s_mol->GetAtom("O");
-				double s_distance = _matrix.Distance (no3H, s_O);
-
-				// If the H is closer to the no3, then:
-				if (no3OHdistance < s_distance) {
-				#ifdef DEBUG
-					cout << "it's closer to:" << endl;
-					no3O->Print();
-					cout << "and shared with:" << endl;
-					s_mol->Print();
-				#endif
-				// 		1) fix the source bond to be an H-bond instead of covalent
-					_matrix.SetBond(s_O, no3H, hbond);
-				// 		2) remove the H from the other molecule
-					s_mol->RemoveAtom (no3H);
-				// 		3) add the H into this one
-					fullNA = true;
-				}
-				// otherwise it's closer to the other oxygen
-				else {
-				#ifdef DEBUG
-					cout << "it's closer to:" << endl;
-					s_mol->Print();
-					cout << "and shared with:" << endl;
-					no3O->Print();
-				#endif
-				// 		1) fix the bondtype in the adjacency matrix to make it an H-bond
-					_matrix.SetBond(no3H, no3O, hbond);
-				// 		2) turn this current molecule into a nitrate
-					fullNA = false;
-				}
-			}
-			// if the H is not contended between two molecules, then the "current" no3 gets it!
-			else {
-				fullNA = true;
-			}
-		}
-
-		unsigned int molIndex = _mols.size();
-
-		// if the molecule doesn't have a hydrogen - it's not an NA - it's a nitrate
-		if (!fullNA) {
-			_mols.push_back (new Nitrate ());
-		}
-
-		// if it's a full nitric acid with proton:
-		if (fullNA) {
-			_mols.push_back (new NitricAcid());
-			NAatoms.push_back (no3H);
-		}
-
-		// and let's not forget to add the nitrogen
-		NAatoms.push_back (_atoms[N]);
-
-		_mols[molIndex]->MolID (molIndex);
-
-		// let's set all the atom properties that we can, and add them into the molecule
-		RUN (NAatoms) {
-			_mols[molIndex]->AddAtom (NAatoms[i]);
-		}
-
-#ifdef DEBUG
-		// fix up the tracking list
-		RUN (atom_tracking_list) {
-			Atom * a1 = atom_tracking_list[i];
-			RUN2 (NAatoms) {
-				if (a1 == NAatoms[j]) {
-					atom_tracking_list[i] = (Atom *)NULL;
-					break;
-				}
-			}
-		}
-#endif
-
-	}
-
-#ifdef DEBUG
 	bool leave = false;
-	RUN (atom_tracking_list) {
-		Atom * a1 = atom_tracking_list[i];
+	RUN (_unparsed) {
+		Atom * a1 = _unparsed[i];
 		if (a1 != (Atom *)NULL) {
 			a1->Print();		// show all remaining atoms
-		#ifdef DEBUG
 			std::vector<Atom *> bound (_matrix.BondedAtoms(a1));
 			RUN2(bound) {		// and all the atoms to which it is bound (and the distance)
 				cout << "^--~ (" << _matrix.Distance(bound[j], a1) << ")  ";
 				bound[j]->Print();
 			}
-		#endif
 			leave = true;
 		}
 	}
@@ -325,7 +64,6 @@ void XYZSystem::_ParseMolecules () {
 		cout << "Found the above atoms unaccounted for in the system! Fix up the parsing routine" << endl;
 		exit(1);
 	}
-#endif
 
 return;
 }
@@ -369,8 +107,6 @@ void XYZSystem::_ParseWanniers () {
 
 		}
 	}
-
-
 
 /*
 	//bool home = false;
@@ -456,7 +192,164 @@ VecR XYZSystem::SystemDipole () {
 return (dipole);
 }
 
-void XYZSystem::FixedSharedAtoms () {
+void XYZSystem::_ParseWaters () {
+
+/*******************
+ * Processing Waters
+ *******************/
+
+	// let's go through the system and find all the waters and form molecules out of them
+	RUN (_atoms) {
+
+		// every water has an oxygen atom, right? So let's find those
+		Atom * O = _atoms[i];
+		if (O->Name().find("O") == string::npos) continue;
+
+		// The bondgraph provides us with all the covalently bound H's
+		vector<Atom *> atoms = _matrix.BondedAtoms (O, covalent);
+		vector<Atom *> Hs = _matrix.BondedAtoms (O, covalent, "H");
+
+		// if we pick up an OH group that is part of a larger molecule (i.e. nitric acid) then it will be processed as a hydroxide...
+		// So if the only type of atom attached is a hydrogen, we have some form of water (OH, H2O, H3O)
+		if (Hs.size() != atoms.size()) continue;
+
+		int molIndex = (int)_mols.size();	// set the molecule index
+
+		int num_H = (int)atoms.size();
+		// we may be dealing with a hydroxide ion
+		if (num_H == 1) {
+			_mols.push_back (new Hydroxide ());
+		}
+
+		// otherwise we have a full molecule
+		else if (num_H == 2) {
+			_mols.push_back (new Water ());
+		}
+
+		// or even a hydronium!
+		else if (num_H == 3) {
+			_mols.push_back (new Hydronium ());
+		}
+
+		else if (num_H == 0 || num_H > 3) {
+			printf ("XYZSystem::_ParseMolecules() - found water with %d H's\n", (int)atoms.size());
+			exit(1);
+		}
+
+		Molecule * newmol = _mols[molIndex];
+		newmol->MolID (molIndex);
+
+		// let's set all the atom properties that we can, and add them into the molecule
+		// and we also add in the hydrogens that are covalently bound - note, this can be more than 2 in the case of H3O+
+		atoms.push_back(O);		// Don't forget to tack in the oxygen!
+		RUN (atoms) {
+			newmol->AddAtom (atoms[i]);
+		}
+
+#ifdef DEBUG
+		// fix up the tracking list
+		RUN (_unparsed) {
+			Atom * a1 = _unparsed[i];
+			RUN2 (atoms) {
+				if (a1 == atoms[j]) {
+					_unparsed[i] = (Atom *)NULL;
+					break;
+				}
+			}
+		}
+#endif
+
+/*
+		// now, from before, if one of the hydrogens is shared between two molecules making a contact-ion pair, then we will merge the two molecule to make one, and also update our ever-growing list of molecules to reflect it.
+		if (s_mol != (Molecule *)NULL) {
+			s_mol->Merge (newmol);		// this will swallow the new molecule into the contact ion pair
+			delete newmol;				// get rid of the newmol
+			vector<Molecule *>::iterator imol = _mols.end() - 1;	// fixes the _mols to get rid of the newmol we just made so it's not double-counted
+			_mols.erase(imol);
+		}
+*/
+	}
+
+return;
+}
+
+void XYZSystem::_ParseNitrates () {
+
+/************************
+ * Processing Nitric Acid
+ * **********************/
+
+	// The easiest thing to spot for nitric acid is, of course, the nitrogen! Only one of those, so let's grab it
+	for (size_t N = 0; N < _atoms.size(); N++) {
+		if (_atoms[N]->Name().find("N") == string::npos) continue;
+
+		// analogous to water, let's grab all the (covalently) bound O's of the molecule
+		std::vector<Atom *> NAatoms (_matrix.BondedAtoms (_atoms[N], nobond, "O"));
+
+		// at least 3 oxygens for a nitrate/nitric acid
+		if (NAatoms.size() != 3) continue;
+		bool fullNA = false;	// let's us know if the molecule is an hno3 or an no3
+		Atom * no3H = (Atom *)NULL;				// this is the H bonded to an NO3 (we use it down below)
+		Atom * no3O = (Atom *)NULL;				// this is the oxgen of the no3 that is closest to the H
+		double no3OHdistance = 1000.0;				// the distance of the H to the nearest O
+
+		// let's do a quick check to look at the oxygens of the molecule and see if it's a proper HNO3 or an NO3.
+		RUN (NAatoms) {
+
+			Atom * O = NAatoms[i];
+
+			// these are all the Hs bound to the O
+			std::vector<Atom *> Hs (_matrix.BondedAtoms (O, covalent, "H"));
+			if (!Hs.size()) continue;
+			// if an H is attached to one of the oxygens then we have a bonafide nitric acid
+			fullNA = true;
+
+			// here we'll run through all the Hs that are covalently bound and find which is the closest to an no3 oxygen.
+			RUN (Hs) {
+				double distance = _matrix.Distance (O, Hs[i]);
+				no3OHdistance = (distance < no3OHdistance) ? distance : no3OHdistance;
+				if (distance == no3OHdistance) {
+					no3H = Hs[i];
+					no3O = O;
+				}
+			}
+		}
+
+		int molIndex = (int)_mols.size();
+
+		// and let's not forget to add the nitrogen
+		NAatoms.push_back (_atoms[N]);
+
+		// if the molecule doesn't have a hydrogen - it's not an NA - it's a nitrate
+		if (!fullNA) {
+			_mols.push_back (new Nitrate ());
+		}
+
+		// if it's a full nitric acid with proton:
+		if (fullNA) {
+			NAatoms.push_back (no3H);
+			_mols.push_back (new NitricAcid());
+		}
+
+		_mols[molIndex]->MolID (molIndex);
+
+		// let's set all the atom properties that we can, and add them into the molecule
+		RUN (NAatoms) {
+			_mols[molIndex]->AddAtom (NAatoms[i]);
+		}
+
+		// fix up the tracking list
+		RUN (_unparsed) {
+			Atom * a1 = _unparsed[i];
+			RUN2 (NAatoms) {
+				if (a1 == NAatoms[j]) {
+					_unparsed[i] = (Atom *)NULL;
+					break;
+				}
+			}
+		}
+
+	}
 
 return;
 }

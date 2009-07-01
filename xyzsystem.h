@@ -28,8 +28,13 @@ private:
 
 	//VecR	_centerofmass;	// The total system center of mass
 
+	/* For debugging (and other useful things?) this will keep a list of all the atoms that have been processed into molecules. Any atoms left over at the end of the parsing routine are not included and ... can potentially cause problems */
+	std::vector<Atom *> _unparsed;
+
 	/* some internal methods */
 	void _ParseMolecules ();		// take the atoms we have and stick them into molecules
+	void _ParseWaters ();
+	void _ParseNitrates ();
 	void _ParseWanniers ();
 	// Check if an atom pair (O & H) pass the hbond angle criteria
 	//bool _HBondAngle (const Atom *H, const Atom *O);
@@ -66,8 +71,8 @@ public:
 	//VecR UpdateCenterOfMass ();
 	//VecR CenterOfMass () const { return _centerofmass; }
 	//void FindHBonds();	// locates all the H-bonds in a system
-	//vector<Atom *> CovalentBonds (const Atom * atom) { return _matrix.BondedAtoms(atom, covalent); }
-	//std::vector<Atom *> BondedAtoms (const Atom * atom) const { return _matrix.BondedAtoms (atom); }
+	std::vector<Atom *> CovalentBonds (Atom const * const atom) { return _matrix.BondedAtoms(atom, covalent); }
+	std::vector<Atom *> BondedAtoms (Atom const * const atom) { return _matrix.BondedAtoms (atom); }
 	//std::vector<Atom *> BondedAtoms (const Atom * atom, const string name) const { return _matrix.BondedAtoms (atom, covalent, name); }
 
 	VecR SystemDipole ();	// calculate the total system dipole and return it

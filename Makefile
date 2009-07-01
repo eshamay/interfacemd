@@ -3,9 +3,9 @@ MPILIBS		= $(MPI)/lib/libmpi.so $(MPI)/lib/libmpi_cxx.so
 FTENSOR		= $(SRCLIB)/include/FTensor-1.1pre25
 CINCLUDE	= -I$(SRCLIB) -I$(FTENSOR)
 CLIBS		= -L$(MKL) -lmkl_lapack -lmkl -lguide -lpthread
-CPPFLAGS	= $(CINCLUDE)
+CPPFLAGS	= $(CINCLUDE) -D_GLIBCXX_DEBUG
 #CXX			= mpiCC -g
-CXXDEBUG	= -g3 -Wall #-wd981 -wd383 -wd1599
+CXXDEBUG	= -g3 -ggdb -Wall -Wextra #-wd981 -wd383 -wd1599
 CXXOPTIMIZE = -O0 -finline-functions -finline-limit-1000 -funroll-loops
 CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CXXOPTIMIZE) $(CINCLUDE)
 #CXXFLAGS    = -ftemplate-depth-100 -Drestrict= $(CINCLUDE)

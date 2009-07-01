@@ -93,8 +93,10 @@ public:
 	Atom * GetAtom (const string atomname) const;
 	//int operator+= (Atom * newAtom);					// adds an atom into the molecule
 
-	void AddAtom (Atom * newAtom);					// same as the operator
-	void RemoveAtom (const Atom * atom);
+	void AddAtom (Atom * const newAtom);					// same as the operator
+	void AddHydrogen (Atom * const atom);					// same as adding an atom but renames accordingly
+	void RemoveAtom (Atom * const atom);
+	void FixAtom (Atom * const atom);
 	void Rename (const string name);
 
 	Molecule * Merge (Molecule * mol);				// merges two molecules

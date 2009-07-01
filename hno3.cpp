@@ -1,7 +1,7 @@
 #include "hno3.h"
 int NitricAcid::numNitricAcids = 0;
 
-NitricAcid::NitricAcid () {
+NitricAcid::NitricAcid () : Molecule () {
 	_centerofmass.Zero();
 	_mass = 0.0;
 	_name = "hno3";
@@ -154,7 +154,7 @@ return (bisector);
 
 int Nitrate::numNitrates = 0;
 
-Nitrate::Nitrate () {
+Nitrate::Nitrate () : Molecule () {
 	_centerofmass.Zero();
 	_mass = 0.0;
 	_name = "no3";

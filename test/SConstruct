@@ -3,7 +3,7 @@ ftensor_path = '../include/FTensor-1.1pre25'
 cpppath = ['.', '../include', ftensor_path]
 cxxoptimize = '-O2 -finline-functions -finline-limit-1000 -funroll-loops'
 #cxxflags = '-g -ftemplate-depth-100 -Drestrict= ' + cxxoptimize
-cxxflags = '-g -ftemplate-depth-100 -Drestrict= '
+cxxflags = '-g -ftemplate-depth-100 -Drestrict= -llapack'
 
 env = Environment()
 env.Append(CXXFLAGS = cxxflags)
@@ -15,10 +15,30 @@ amber_files = Split("""../vecr.cpp
 						  ../crdfile.cpp
 						  ../forcefile.cpp
 						  ../h2o.cpp
+						  ../oh.cpp
+						  ../h3o.cpp
 						  ../hno3.cpp
 						  ../molecule.cpp
 						  ../topfile.cpp
 						  ../matrixr.cpp""")
+
+xyz_files = Split("""../vecr.cpp
+					../adjacencymatrix.cpp
+					../bond.cpp
+					../atom.cpp
+					../xyzsystem.cpp
+					../xyzfile.cpp
+					../wannier.cpp
+					../crdfile.cpp
+					../forcefile.cpp
+					../h2o.cpp
+					../oh.cpp
+					../h3o.cpp
+					../hno3.cpp
+					../molecule.cpp
+					../topfile.cpp
+					../matrixr.cpp
+					../moritasfg2002.cpp""")
 
 watersystem_files = Split("""../watersystem.cpp
 							../adjacencymatrix.cpp
@@ -28,3 +48,4 @@ coordination = env.Program('coordination', ['coordination.cpp'] + watersystem_fi
 densitytest = env.Program('densitytest', ['densitytest.cpp'] + watersystem_files)
 ordercoords = env.Program('ordercoords', ['ordercoords.cpp'] + watersystem_files)
 morita = env.Program('morita', watersystem_files + ['../watersfg.cpp', 'morita.cpp'])
+morita2002 = env.Program('morita2002', xyz_files)
