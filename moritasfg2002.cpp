@@ -54,7 +54,7 @@ MatR MoritaSFG::CalcPolarizability (Water * water) {
 	// first we calculate the displacements of the OH bond lengths and the water angle
 	double dR1 = water->OH1()->Magnitude() - R_eq;
 	double dR2 = water->OH2()->Magnitude() - R_eq;
-	double dTheta = acos(*water->OH1() < *water->OH2()) * 180.0 / M_PI - Theta_eq;
+	//double dTheta = acos(*water->OH1() < *water->OH2()) * 180.0 / M_PI - Theta_eq;
 
 	//printf ("%f\t%f\t%f\n", dR1, dR2, dTheta);
 	//printf ("%f\t%f\t%f\n", _oh1.Magnitude(), _oh2.Magnitude(), acos(_oh1 < _oh2) * 180.0/M_PI);
@@ -120,6 +120,7 @@ return;
 void MoritaSFG::UpdateDipoleFieldTensor () {
 
 	// first clear out the dipole field tensor elements
+	_T.clear();
 	_T.resize(3*_N, std::vector<double> (3*_N, 0.0));
 
 	VecR r;
