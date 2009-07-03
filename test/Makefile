@@ -1,6 +1,6 @@
 include ../Makefile
 
-AMBERFILES	= ../vecr.o ../atom.o ../ambersystem.o ../crdfile.o ../forcefile.o ../h2o.o ../hno3.o ../molecule.o ../topfile.o ../matrixr.o ../h2o.o ../oh.o ../h3o.o
+AMBERFILES	= ../vecr.o ../atom.o ../ambersystem.o ../crdfile.o ../forcefile.o ../hno3.o ../molecule.o ../topfile.o ../matrixr.o ../h2o.o ../oh.o ../h3o.o
 WATERSYSTEM	= $(AMBERFILES) ../watersystem.o ../adjacencymatrix.o ../bond.o
 
 MORITAFILES	= morita.o ../watersfg.o $(WATERSYSTEM)
@@ -25,7 +25,7 @@ densitytest : $(DENSITYFILES)
 	$(CXX) $(CPPFLAGS) $(DENSITYFILES) -o densitytest
 
 morita : $(MORITAFILES)
-	$(CXX) $(CPPFLAGS) $(MORITAFILES) -o morita
+	$(CXX) $(CPPFLAGS) $(MORITAFILES) -llapack -o morita
 
 mpimorita : $(MPIMORITAFILES)
 	$(MPICXX) $(CPPFLAGS) $(MPILIBS) $(MPIMORITAFILES) -o mpi-morita
@@ -73,7 +73,7 @@ morita2002: $(MORITA2002)
 	$(CXX) $(CPPFLAGS) $(MORITA2002) -llapack -o morita2002
 
 cleantest :
-	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams ordercoords
+	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams ordercoords morita2002
 
 #densitytest.o: densitytest.cpp densitytest.h
 #toptest.o: toptest.cpp toptest.h

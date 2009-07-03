@@ -46,7 +46,7 @@ public:
 
 	int 	Current ()		const 	{ return _coords.Current(); }
 
-	void PrintCRDFile (string filepath);						// to output a frame of the system in .crd format
+	void PrintCRDFile () const;						// to output a frame of the system in .crd format
 
 	Molecule * Molecules (int index) { return _mols[index]; }
 	std::vector<Molecule *>& Molecules () { return _mols; }

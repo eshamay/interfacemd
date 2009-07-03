@@ -2,10 +2,10 @@
 
 AmberSystem::AmberSystem (string prmtop, string mdcrd, string mdvel = "")
 	// some initialization needs to happen here
-	: 	_topfile(TOPFile(prmtop)),
-		_coords(CRDFile(mdcrd, _topfile.NumAtoms())),
-		_forces(ForceFile (mdvel, _topfile.NumAtoms())),
-		_atoms(Atom_ptr_vec(_topfile.NumAtoms(), (Atom *)NULL))
+	: 	_topfile(prmtop),
+		_coords(mdcrd, _topfile.NumAtoms()),
+		_forces(mdvel, _topfile.NumAtoms()),
+		_atoms(_topfile.NumAtoms(), (Atom *)NULL)
 {
 
 	// because some really useful functionality comes out of the Atom class if the Atom::Size() is set, we'll do that here
@@ -27,6 +27,9 @@ return;
 }
 
 AmberSystem::~AmberSystem () {
+	RUN (_mols) {
+		delete _mols[i];
+	}
 	RUN (_atoms) {
 		delete _atoms[i];
 	}
@@ -105,7 +108,6 @@ void AmberSystem::LoadFirst () {
 	_coords.LoadFirst();
 	if (_forces.Loaded()) _forces.LoadFirst();
 	this->_ParseAtomVectors ();
-
 return;
 }
 
@@ -113,13 +115,13 @@ void AmberSystem::LoadNext () {
 	_coords.LoadNext ();							// load up coordinate information from the file
 	if (_forces.Loaded()) _forces.LoadNext ();		// also load the force information while we're at it
 	this->_ParseAtomVectors ();
-	RUN (_atoms)
-		_atoms[i]->ParentMolecule()->Unset ();
+	RUN (_mols)
+		_mols[i]->Unset();							// this sets a particular flag on a molecule
 
 return;
 }
 
-void AmberSystem::PrintCRDFile (string filepath) {
+void AmberSystem::PrintCRDFile () const {
 
 	RUN (_atoms) {
 		printf ("  % 4.7f  % 4.7f  % 4.7f", _atoms[i]->Position()[x], _atoms[i]->Position()[y], _atoms[i]->Position()[z]);

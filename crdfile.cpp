@@ -1,11 +1,11 @@
 #include "crdfile.h"
 
-CRDFile::CRDFile (std::string crdpath, int size) :
-	_size(size),
+CRDFile::CRDFile (std::string const crdpath, int const c_size) :
 	_file((FILE *)NULL),
-	_eof(true),
-	_dims(VecR()),
-	_frame(0)
+	_size(c_size),
+	_dims(),
+	_frame(0),
+	_eof(true)
 {
 
 	// first load up the file given the path

@@ -22,7 +22,9 @@ class MoritaSFG:
 				#file = file.strip("sfg.1-")
 				#self.names.append(file)
 				#print file
-		self.files.append('../sfg.0.8-0.6.dat')
+		#self.files.append('../sfg.0.8-0.6.dat')
+		#self.files.append('../sfg.dsw-1.dat')
+		self.files.append('/raid1/Analysis/H2O+CTC/sfg.dsw-2.dat')
 		#self.files.append('../sfg.set1-cos-term.dat')
 		#self.files.append('../sfg.set2.dat')
 		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.set2.dat')
@@ -36,9 +38,12 @@ class MoritaSFG:
 		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.70.dat')
 		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set1.70.dat')
 		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.70.dat')
-		self.files.append('/raid1/Analysis/NaCl+CTC/sfg.set2.0.8-0.6.70.dat')
-		self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.set2.0.8-0.6.60.dat')
-		self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.0.8-0.6.70.dat')
+		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.set2.0.8-0.6.70.dat')
+		#self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.set2.0.8-0.6.60.dat')
+		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.0.8-0.6.70.dat')
+		self.files.append('/raid1/Analysis/NaCl+CTC/sfg.dsw-1.dat')
+		self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.dsw-1.dat')
+		self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.dsw-1.dat')
 
 		#self.files.append('../sfg.DSW6.dat')
 		#self.files.append('../sfg.DSW7-OHH.dat')
@@ -64,12 +69,14 @@ class MoritaSFG:
 		for i in range(len(self.files)):
 			self.comp.append([])
 
+			'''
 			if i == 1:
-				scale = -10.0
+				scale = 0.0
+			'''
 			if i == 2:
-				scale = -55.0
+				scale = -45.0
 			if i == 3:
-				scale = 45.0
+				scale = 65.0
 			for j in range(len(self.real[i])):
 				c = complex(self.real[i][j]+scale,self.imag[i][j])
 				self.comp[i].append(c)
@@ -128,20 +135,23 @@ class MoritaSFG:
 
 		axs = []
 		colors = ['r-','g-','b-']
-		titles = [r'CCl$_4$-NaCl', r'CCl$_4$-NaNO$_3$', r'CCl$_4$-Na$_2$SO$_4$']
-		for i in range(3):
+		titles = [r'CCl$_4$-NaCl', r'CCl$_4$-NaNO$_3$', r'CCl$_4$-Na$_2$SO$_4$', r'Salt Comparison']
+		for i in range(4):
 			axs.append(self.fig.add_subplot(2,2,i+1))
-			# first the water plot
-			axs[i].plot(self.x[0], self.chi[0], 'k-', linewidth=3)
-			# now the salt plots
-			axs[i].plot(self.x[i+1], self.chi[i+1], colors[i], linewidth=3)
+			if i == 3:
+				for j in range(3):
+					axs[i].plot(self.x[j+1], self.chi[j+1], colors[j], linewidth=3, label=titles[j])
+			else:
+				# first the water plot
+				axs[i].plot(self.x[0], self.chi[0], 'k-', linewidth=3)
+				# now the salt plots
+				axs[i].plot(self.x[i+1], self.chi[i+1], colors[i], linewidth=3)
 			axs[i].set_yticklabels([])
 			labels = axs[i].get_xticklabels() + axs[i].get_yticklabels()
 			for label in labels:
 				label.set_size('x-large')
 			plt.title(titles[i], size='xx-large')
 
-		'''
 		# set some legend properties.  All the code below is optional.  The
 		# defaults are usually sensible but if you need more control, this
 		# shows you how
@@ -149,15 +159,14 @@ class MoritaSFG:
 
 		# the matplotlib.patches.Rectangle instance surrounding the legend
 		frame = leg.get_frame()
-		frame.set_facecolor('0.80')    # set the frame face color to light gray
+		frame.set_facecolor('1.00')    # set the frame face color to light gray
 
 		# matplotlib.text.Text instances
 		for t in leg.get_texts():
-			t.set_fontsize('small')    # the legend text fontsize
+			t.set_fontsize('x-large')    # the legend text fontsize
 
 		# matplotlib.lines.Line2D instances
 		for l in leg.get_lines():
-			l.set_linewidth(2.0)  # the legend line width
+			l.set_linewidth(4.0)  # the legend line width
 
-		'''
 		plt.show()

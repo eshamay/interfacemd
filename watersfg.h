@@ -12,13 +12,13 @@
 #include <complex>
 #include <math.h>
 //#include "ambersystem.h"
-#include "h2o.h"			// defines the Water class - derived from Molecule class
+#include "h2o.h"
 #include "matrixr.h"
 #include "utility.h"
 #include "adjacencymatrix.h"
 
 /***** Set this if using the dipole-dipole correction term *****/
-//#define DIPOLE_DIPOLE
+#define DIPOLE_DIPOLE
 
 
 /* system constants as defined in the morita-hynes paper */

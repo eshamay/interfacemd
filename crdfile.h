@@ -19,7 +19,7 @@ class CRDFile {
 
 public:
 
-	CRDFile (std::string crdpath, int size);
+	CRDFile (std::string const crdpath, int const c_size);
 	~CRDFile ();
 
 	// Various control functions

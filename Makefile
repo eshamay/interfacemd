@@ -1,16 +1,16 @@
 SRCLIB	 	= $(HOME)/work/src
 MPILIBS		= $(MPI)/lib/libmpi.so $(MPI)/lib/libmpi_cxx.so
 FTENSOR		= $(SRCLIB)/include/FTensor-1.1pre25
-CINCLUDE	= -I$(SRCLIB) -I$(FTENSOR)
+CINCLUDE	= -I$(SRCLIB)
 CLIBS		= -L$(MKL) -lmkl_lapack -lmkl -lguide -lpthread
 CPPFLAGS	= $(CINCLUDE) -D_GLIBCXX_DEBUG
 #CXX			= mpiCC -g
-CXXDEBUG	= -g3 -ggdb -Wall -Wextra #-wd981 -wd383 -wd1599
-CXXOPTIMIZE = -O0 -finline-functions -finline-limit-1000 -funroll-loops
+CXXDEBUG	= -g3 -ggdb -Wall -wd981 -wd383 -wd1599
+CXXOPTIMIZE = -O2 -finline-functions -finline-limit-1000 -funroll-loops
 CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CXXOPTIMIZE) $(CINCLUDE)
 #CXXFLAGS    = -ftemplate-depth-100 -Drestrict= $(CINCLUDE)
 #CXXFLAGS	= -Drestrict= $(CINCLUDE)
-CXX			= g++ $(CXXFLAGS) $(CXXDEBUG)
+CXX			= g++ $(CXXFLAGS)
 MPICXX		= mpiCC -g -I$(MPI)/include
 
 ANALYSISFILES	=	analysis.o xyzsystem.o connectmatrix.o dipoleparm.o h2o.o hno3.o matrixr.o molecule.o atom.o vecr.o wannier.o xyzfile.o

@@ -5,22 +5,20 @@
 #include "ambersystem.h"
 #include "adjacencymatrix.h"
 
-typedef struct WaterSystemParams {
+typedef struct {
 	bool avg;
 
 	string prmtop, mdcrd, mdvel;
+	string output;
 
 	coord axis;
 
+	int output_freq;
 	int timesteps, restart;
 
 	double posmin, posmax, posres;
 	double pbcflip;
-
-	string output;
-	int output_freq;
-
-};
+} WaterSystemParams;
 
 /***** DEFINITIONS *****/
 /* These need to be defined in order to set several of the system parameters and data files for output */
@@ -57,7 +55,7 @@ public:
 
 	WaterSystem (const WaterSystemParams& params);
 	WaterSystem (const int argc, const char **argv, const WaterSystemParams& params);
-	~WaterSystem ();
+	virtual ~WaterSystem ();
 
 	void OpenFile ();
 	void OutputHeader(const WaterSystemParams& params) const;
@@ -70,30 +68,28 @@ public:
 	void SliceWaterCoordination (const coordination coord);
 	void FindInterfacialWaters ();
 
-	void UpdateMatrix () { matrix.UpdateMatrix (int_atoms); }
+	void UpdateMatrix () { matrix.UpdateMatrix (int_atoms, "sys"); }
 
 protected:
 
 	AmberSystem sys;
-	AdjacencyMatrix	matrix;
-
 	FILE * output;
+
+	AdjacencyMatrix	matrix;
 
 	coord axis;
 
 	int	output_freq;
+
+	// position boundaries and bin width
+	double	posmin, posmax, posres;
+	int		posbins;
+	double	pbcflip;
 	unsigned int timesteps;
 	unsigned int timestep, restart;
 
-	// position boundaries and bin width
-	double	posmin;
-	double	posmax;
-	double	posres;
-	int		posbins;
-
-	double	pbcflip;
-
 	double int_low, int_high, middle;		// the positions of analysis cutoffs
+
 
 	Water_ptr_vec	int_mols;		// interfacial waters, or just all the waters in the system depending on the function call
 	Atom_ptr_vec	int_atoms;		// interfacial water atoms (or as above)

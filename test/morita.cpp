@@ -27,16 +27,21 @@ void SFGAnalyzer::Analyze () {
 		TimestepChi.clear();	// it's a new timestep
 		firstmol = true;		// every timestep we will have to go through all the molecules again
 
+		RUN (sys.Molecules()) {
+			//Molecule * mol = sys.Molecules(i);
+			//mol->Print();
+		}
+
 		// first let's find all the molecules in the interface
 		this->FindWaters ();
-		this->SliceWaters (70.0, 90.0);
+		this->SliceWaters (45.0, 75.0);
 
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
-		UpdateMatrix ();
+		this->UpdateMatrix ();
 		// only grab the OH-waters for now
 		//this->SliceWaterCoordination (OOH);
 
-		for (int mol = 0; mol < int_mols.size(); mol++) {
+		for (int mol = 0; mol < (int)int_mols.size(); mol++) {
 
 			water = static_cast<Water *>(int_mols[mol]);
 
@@ -102,10 +107,10 @@ void SFGAnalyzer::OutputData () {
 		//}
 		RUN (TotalChi) {
 			double freq = (double(i)*FREQ_STEP+START_FREQ)*AU2WAVENUMBER;
-			double scale = numMolsProcessed;
+			double scale = (double)numMolsProcessed;
 			double r = real(TotalChi[i]) / scale;
 			double im = imag(TotalChi[i]) / scale;
-			fprintf (output, "% 12.8e\t% 12.8e\t% 12.8e\n", freq, r, im);
+			fprintf (output, "% 20.8e\t% 20.8e\t% 20.8e\n", freq, r, im);
 		}
 
 		fflush (output);
@@ -142,7 +147,7 @@ int main (const int argc, const char **argv) {
 		params.avg = false;
 		params.posmin = -5.0;
 		params.posmax = 150.0;
-		params.output = "sfg.set2.0.8-0.6.70.dat";
+		params.output = "sfg.dsw-2.dat";
 	#endif
 	params.posres = 0.100;
 	params.pbcflip = 15.0;

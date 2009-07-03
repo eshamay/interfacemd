@@ -1,12 +1,12 @@
 #include "watersystem.h"
 
 WaterSystem::WaterSystem (const WaterSystemParams& params) :
-	sys(AmberSystem(params.prmtop, params.mdcrd, params.mdvel)),
+	sys(params.prmtop, params.mdcrd, params.mdvel),
 	output(fopen(params.output.c_str(), "w")),
-	posmin(params.posmin), posmax(params.posmax), posres(params.posres), pbcflip(params.pbcflip),
-	posbins(int ((posmax - posmin)/posres) + 1),
 	axis(params.axis),
 	output_freq(params.output_freq),
+	posmin(params.posmin), posmax(params.posmax), posres(params.posres),
+	posbins(int ((posmax - posmin)/posres) + 1), pbcflip(params.pbcflip),
 	timesteps(params.timesteps), restart(params.restart)
 {
 
@@ -27,12 +27,12 @@ WaterSystem::WaterSystem (const WaterSystemParams& params) :
 }
 
 WaterSystem::WaterSystem (const int argc, const char **argv, const WaterSystemParams& params) :
-	sys(AmberSystem(params.prmtop, params.mdcrd, params.mdvel)),
+	sys(params.prmtop, params.mdcrd, params.mdvel),
 	output(fopen(params.output.c_str(), "w")),
-	posmin(params.posmin), posmax(params.posmax), posres(params.posres), pbcflip(params.pbcflip),
-	posbins(int ((posmax - posmin)/posres) + 1),
 	axis(params.axis),
 	output_freq(params.output_freq),
+	posmin(params.posmin), posmax(params.posmax), posres(params.posres),
+	posbins(int ((posmax - posmin)/posres) + 1), pbcflip(params.pbcflip),
 	timesteps(params.timesteps), restart(params.restart)
 
 {

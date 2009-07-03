@@ -1,10 +1,10 @@
 #include "forcefile.h"
 
-ForceFile::ForceFile (std::string forcepath, int size) :
-	_size(size),
+ForceFile::ForceFile (std::string const forcepath, int const c_size) :
 	_file((FILE *)NULL),
-	_loaded(false),
-	_eof(true)
+	_size(c_size),
+	_eof(true),
+	_loaded(false)
 	{
 
 	// first load up the file given the path

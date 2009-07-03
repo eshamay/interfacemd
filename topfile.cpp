@@ -2,13 +2,12 @@
 
 TOPFile::TOPFile (std::string path) :
 	_topfile((FILE *)NULL)
-	{
-
+{
 	// Before anything, let's load the file!
 	_topfile = fopen(path.c_str(), "r");
 	if (_topfile == (FILE *)NULL) {
 		std::cout << "Error opening the topfile " << path << std::endl;
-		return;
+		exit(1);
 	}
 
 	// First thing is to go through the topology file and parse out all the atom information associated with it.

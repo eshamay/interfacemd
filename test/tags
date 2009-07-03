@@ -5,7 +5,7 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.7	//
 AMAX	angledistro.h	22;"	d
-AMBERFILES	Makefile	/^AMBERFILES	= ..\/vecr.o ..\/atom.o ..\/ambersystem.o ..\/crdfile.o ..\/forcefile.o ..\/h2o.o ..\/hno3.o ..\/molecule.o ..\/topfile.o ..\/matrixr.o ..\/h2o.o ..\/oh.o ..\/h3o.o$/;"	m
+AMBERFILES	Makefile	/^AMBERFILES	= ..\/vecr.o ..\/atom.o ..\/ambersystem.o ..\/crdfile.o ..\/forcefile.o ..\/hno3.o ..\/molecule.o ..\/topfile.o ..\/matrixr.o ..\/h2o.o ..\/oh.o ..\/h3o.o$/;"	m
 AMBERTEST_H_	ambertest.h	2;"	d
 AMIN	angledistro.h	23;"	d
 ANGLEDISTRO_H_	angledistro.h	2;"	d
@@ -58,6 +58,8 @@ MDCRD	angledistro.h	11;"	d
 MDCRD	freqtest.h	11;"	d
 MDCRD	mpitest.h	4;"	d
 MDCRD2PDB	Makefile	/^MDCRD2PDB = $(AMBERFILES) ..\/pdbfile.o mdcrd2pdb.o$/;"	m
+MORITA2002	Makefile	/^MORITA2002	= $(XYZSYSTEM) ..\/moritasfg2002.o morita2002.o$/;"	m
+MORITA2002_H_	morita2002.h	2;"	d
 MORITAFILES	Makefile	/^MORITAFILES	= morita.o ..\/watersfg.o $(WATERSYSTEM)$/;"	m
 MORITA_H_	morita.h	2;"	d
 MPIFILES	Makefile	/^MPIFILES	=	$(AMBERFILES) ..\/mpi\/mpisys.o mpitest.o$/;"	m
@@ -163,10 +165,10 @@ main	matrixtest.cpp	/^int main (int argc, char*argv) {$/;"	f
 main	mdcrd2pdb.cpp	/^int main (int argc, char **argv) {$/;"	f
 main	morita.cpp	/^int main (const int argc, const char **argv) {$/;"	f
 main	morita.mpi.cpp	/^int main (int argc, char **argv) {$/;"	f
+main	morita2002.cpp	/^int main (int argc, char **argv) {$/;"	f
 main	mpitest.cpp	/^int main (int argc, char **argv) {$/;"	f
 main	ordercoords.cpp	/^int main (const int argc, const char **argv) {$/;"	f
 main	orderparams.cpp	/^int main (int argc, const char **argv) {$/;"	f
-main	temp.cpp	/^int main () {$/;"	f
 main	toptest.cpp	/^int main (int argc, char *argv) {$/;"	f
 main	wanniertest.cpp	/^int main () {$/;"	f
 main	xyzdipole_analysis.cpp	/^int main (int *argc, char **argv) {$/;"	f

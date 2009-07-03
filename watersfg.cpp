@@ -24,9 +24,9 @@ SFGCalculator::SFGCalculator (AdjacencyMatrix * matrix) : _matrix(matrix) {
 void SFGCalculator::FreqShift (Water& water) {
 
 	// first we grab the force vectors on each of the atoms	(Units = kcal/mol/Angstrom)
-	VecR vForceO = water["O"]->Force();
-	VecR vForceH1 = water["H1"]->Force();
-	VecR vForceH2 = water["H2"]->Force();
+	VecR vForceO = water.GetAtom("O")->Force();
+	VecR vForceH1 = water.GetAtom("H1")->Force();
+	VecR vForceH2 = water.GetAtom("H2")->Force();
 
 /******************************
  * Calculate the forces on the two bonds
@@ -42,8 +42,8 @@ void SFGCalculator::FreqShift (Water& water) {
 	VecR o = water.GetAtom("O")->Position();
 
 	// the forces on the hydrogens are scaled by the distance from the center of mass to the hydrogen and are taken as the dot product of the force vector with that scaled bond vector.
-	double Hscale = 0.6;
-	//double Hscale = (OH_LENGTH-OH_COM_LENGTH)/ANG2BOHR;
+	//double Hscale = 0.6;
+	double Hscale = (OH_LENGTH-OH_COM_LENGTH)/ANG2BOHR;
 	double ForceH1 = vForceH1 * (oh1->Unit() * Hscale);
 	double ForceH2 = vForceH2 * (oh2->Unit() * Hscale);
 
@@ -56,8 +56,8 @@ void SFGCalculator::FreqShift (Water& water) {
 	// 	first we need to determine the amount of the oxygen force that goes into each bond. One way is to find some ratio of angles between the force vector and the bonds. if we have theta1 as the angle between the force and OH bond1, and theta2 for the other, then we should be able to work a way to distribute the force completely.
 	// 		cos1/fabs(cos1) gives us a sense of the direction of the force - is it compressing or stretching the bond. Negative values imply that the bond is being stretched. Because we're interested in the "stretching" force on the bond, we take the negative of this ratio.
 	// 		The angle ratio is tempramental... still working that out
-	//double Oscale = OH_COM_LENGTH/ANG2BOHR;
-	double Oscale = 0.8;
+	double Oscale = OH_COM_LENGTH/ANG2BOHR;
+	//double Oscale = 0.8;
 	double ForceO1 = (vForceO * (oh1->Unit() * Oscale)) * fabs(cos1)/(fabs(cos1)+fabs(cos2));
 	double ForceO2 = (vForceO * (oh2->Unit() * Oscale)) * fabs(cos2)/(fabs(cos1)+fabs(cos2));
 
@@ -131,7 +131,7 @@ void SFGCalculator::FreqShift (Water& water) {
 
 
 	// next we go through both of the other target hydrogens and find their H-bonding partners
-	Atom * tH = water["H1"];
+	Atom * tH = water.GetAtom("H1");
 	// first the partners of H1
 	hbonds = _matrix->BondedAtoms(tH, hbond);
 	RUN (hbonds) {
@@ -162,14 +162,14 @@ void SFGCalculator::FreqShift (Water& water) {
 	}
 
 	// and now the 2nd target hydrogen
-	tH = water["H2"];
+	tH = water.GetAtom("H2");
 	hbonds = _matrix->BondedAtoms(tH, hbond);
 	RUN (hbonds) {
 		// find the source hydrogen, oxygen, center of mass, oh vector, etc.
 		Atom * sO = hbonds[i];
 		Water * sH2O = static_cast<Water *>(sO->ParentMolecule());
-		Atom * sH1 = (*sH2O)["H1"];
-		Atom * sH2 = (*sH2O)["H2"];
+		Atom * sH1 = sH2O->GetAtom("H1");
+		Atom * sH2 = sH2O->GetAtom("H2");
 		VecR sOH1 = sO->Position().MinVector (sH1->Position(), Atom::Size());		// angstroms
 		VecR sOH2 = sO->Position().MinVector (sH2->Position(), Atom::Size());
 		VecR sCOM1 = sO->Position() + (sOH1.Unit() * (OH_COM_LENGTH/ANG2BOHR));		// in angstroms

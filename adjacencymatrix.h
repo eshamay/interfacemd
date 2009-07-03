@@ -40,7 +40,7 @@ public:
 
 	void BuildMatrix ();
 	void DeleteMatrix ();
-	void UpdateMatrix (const Atom_ptr_vec& atoms);
+	void UpdateMatrix (const Atom_ptr_vec& atoms, std::string const sys="xyz");
 	void _FixSharedAtoms ();
 	void ClearBonds ();
 

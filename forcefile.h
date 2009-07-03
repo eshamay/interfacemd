@@ -21,7 +21,7 @@ class ForceFile {
 
 public:
 
-	ForceFile (std::string forcepath, int size);
+	ForceFile (std::string const forcepath, int const c_size);
 	~ForceFile ();
 
 	// Various control functions

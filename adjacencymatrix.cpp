@@ -17,19 +17,14 @@ return;
 
 AdjacencyMatrix::~AdjacencyMatrix () {
 
-	//DeleteMatrix();
-
 return;
 }
 
-void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {
-
-	// Clear out the old matrix
-	//if (_size)
-		//DeleteMatrix ();
+void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms, std::string const sys) {
 
 	// Form the atom list
-	_size = atoms.size();
+	_size = (int)atoms.size();
+	_atoms.clear();
 	_atoms.resize (_size, (Atom *)NULL);
 	for (unsigned int i = 0; i < _size; i++) {
 		_atoms[i] = atoms[i];
@@ -50,8 +45,12 @@ void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {
 			std::string ai_name = ai->Name();
 			std::string aj_name = aj->Name();
 
-			// Don't connect oxygens to oxygens, and hydrogen to hydrogen...
+			// Don't connect oxygens to oxygens, and hydrogen to hydrogen...etc.
 			if (ai_name == aj_name) continue;
+
+			// when processing through Amber data, the molecule members (atoms) are predefined and do not change. We already know the layout and (static) distances of all the covalent bonds in the system, so we don't need to waste our time processing those here. So we'll skip all atom pairs that are in the same molecules.
+			if (sys == "sys")
+				if (ai->ParentMolecule() == aj->ParentMolecule()) continue;
 
 			// calculate the distance between the two atoms
 			double bondlength = ai->Position().MinDistance(aj->Position(), Atom::_size);
@@ -119,7 +118,8 @@ void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms) {
 	}
 
 	// Now fix up any weird atom-sharing between molecules. At this point we have to consider if we want to divide the system into separate molecules, or if we're interested in other phenomena, such as contact-ion pairs, etc.
-	this->_FixSharedAtoms ();
+	if (sys == "xyz")
+		this->_FixSharedAtoms ();
 
 return;
 }
@@ -133,7 +133,7 @@ void AdjacencyMatrix::BuildMatrix () {
 		exit(1);
 	}
 
-	//_matrix.clear();
+	_matrix.clear();
 	_matrix.resize (_size, Bond_vec(_size, Bond()));
 
 	// only set up the upper-triangle of the matrix (don't include the diagonal)
@@ -162,32 +162,6 @@ void AdjacencyMatrix::ClearBonds () {
 return;
 }
 
-/*
-// deletes all the bonds from memory - clean up
-void AdjacencyMatrix::DeleteMatrix () {
-
-	Bond * b;
-
-	for (int i = 0; i < _size - 1; i++) {
-		for (int j = i + 1; j < _size; j++) {
-			if (b == (Bond *)NULL) {
-				cout << "\nFound a null bond pointer in the adjacency matrix during AdjacencyMatrix::DeleteMatrix()\n" << endl;
-				cout << "i = " << i << " ; j = " << j << endl;
-				exit(1);
-			}
-			b = _matrix[i][j];
-			delete b;
-		}
-	}
-
-	_matrix.clear();
-	_atoms.clear();
-	_size = 0;
-
-return;
-}
-*/
-
 void AdjacencyMatrix::SetBond (int x, int y, const double blength, const bondtype btype) {
 
 	// to work with the upper half of the matrix (upper triangle) - fix the indices
@@ -197,7 +171,7 @@ void AdjacencyMatrix::SetBond (int x, int y, const double blength, const bondtyp
 		y = tmp;
 	}
 
-	Bond * b = &_matrix[x][y];
+	Bond * b = &(_matrix[x][y]);
 
 	b->bondlength = blength;
 	b->SetBondType (btype);
@@ -456,12 +430,13 @@ void AdjacencyMatrix::_FixSharedAtoms () {
 			exit(1);
 		}
 
-		int closer, further;
+		//int closer, further;
+		int further;
 		// now we do a comparison of distances between the two oxygens and the hydrogen - which is closer?
 		double distance_0 = this->Distance(H, atoms[0]);
 		double distance_1 = this->Distance(H, atoms[1]);
 
-		closer = (distance_0 < distance_1) ? 0 : 1;
+		//closer = (distance_0 < distance_1) ? 0 : 1;
 		further = (distance_0 < distance_1) ? 1 : 0;
 
 		Atom * Of = atoms[further];
