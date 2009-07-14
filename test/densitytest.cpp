@@ -82,7 +82,7 @@ vector<int> DensityAnalyzer::AtomDensity (string const atomname) {
 
 // **********
 // Used for Na2SO4 + NaNO3
-		if (position > 50.0) continue;
+//		if (position > 50.0) continue;
 // **********
 
 		#ifdef AVG
@@ -159,7 +159,7 @@ int main (const int argc, const char **argv) {
 	params.mdcrd = "mdcrd";
 	params.mdvel = "";
 	params.axis = y;
-	params.timesteps = 200000;
+	params.timesteps = 50000;
 	#ifdef RESTART
 		params.restart = 100000;
 	#endif
@@ -175,7 +175,7 @@ int main (const int argc, const char **argv) {
 		params.output = "density.100+.dat";
 	#endif
 	params.posres = 0.100;
-	params.pbcflip = 20.0;
+	params.pbcflip = 15.0;
 	params.output_freq = 100;
 
 

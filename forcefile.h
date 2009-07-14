@@ -21,6 +21,7 @@ class ForceFile {
 
 public:
 
+	ForceFile ();
 	ForceFile (std::string const forcepath, int const c_size);
 	~ForceFile ();
 

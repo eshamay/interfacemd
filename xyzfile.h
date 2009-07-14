@@ -28,6 +28,7 @@ class XYZFile {
 
 public:
 
+	XYZFile () {}
 	XYZFile (std::string path);
 	~XYZFile ();
 

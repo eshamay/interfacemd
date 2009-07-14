@@ -5,13 +5,13 @@
 
 using namespace std;
 
-#define AVG
-#define RESTART
+//#define AVG
+//#define RESTART
 
 class DensityAnalyzer : public WaterSystem {
 
 protected:
-	
+
 	vector< vector<int> > histo;	// histogram for atom particle numbers arranged by atom names
 	vector<string> atomNames;
 

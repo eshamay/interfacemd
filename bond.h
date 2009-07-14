@@ -26,7 +26,7 @@ typedef enum {
 typedef std::map<coordination, std::string> coord_map;
 
 // bond types
-typedef enum {ohbond, nobond, nhbond, hbond, unbonded, covalent} bondtype;
+typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;
 
 
 /********** bond ************/

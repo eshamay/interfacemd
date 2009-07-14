@@ -42,7 +42,7 @@ private:
 	AmberSystem * _sys;			// the amber system object for the master node
 	#endif
 	#ifdef	SYSTEM_XYZ
-	XYZSystem * _sys;			// The XYZ system, if we're working with one of those 
+	XYZSystem * _sys;			// The XYZ system, if we're working with one of those
 	#endif
 	int			_numAtoms;			// number of atoms in the system - for all the nodes to know
 	int			_numMols;		// number of molecules in the system
@@ -86,7 +86,7 @@ private:
 	std::vector<Molecule> _mols;
 
 public:
-	
+
 	#ifdef	SYSTEM_XYZ
 	MPIMolSystem (int *argc, char ***argv, string xyzfile, VecR& syssize, string wannierpath);
 	#endif
@@ -99,7 +99,7 @@ public:
 	int ID () const { return _id; }
 	int Procs () const { return _p; }
 	MPI_Comm WorldComm () const { return _worldcomm; }
-	
+
 	// functions to divide up workloads
 	int BlockLow (int n) { return BLOCK_LOW(_id, _p, n); }
 	int BlockHigh (int n) { return BLOCK_HIGH(_id, _p, n); }
@@ -117,12 +117,12 @@ public:
 	void LoadNext ();
 	#ifdef SYSTEM_AMBER
 	void UpdateHBonds (vector<Atom *>& int_atoms);
-	void UpdateGraph (vector<Atom *> int_atoms) { 
+	void UpdateGraph (vector<Atom *> int_atoms) {
 		_sys->UpdateGraph(int_atoms); 						// update the bonding data
 		this->UpdateHBonds (int_atoms);						// and the Hbond data on each node
 	}
 	#endif
-	
+
 	std::vector<Molecule *>& Molecules () const { return _sys->Molecules(); }
 
 	void BroadcastVector (vector<int>& vec);

@@ -82,6 +82,7 @@ return (alpha_lab);
 void MoritaSFG::UpdateAlphaTensor () {
 
 	// first clear out the old elements and set up the big matrix
+	_alpha.clear();
 	_alpha.resize(3*_N, std::vector<double> (3*_N, 0.0));
 	MatR alpha;
 

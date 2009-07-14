@@ -1,7 +1,7 @@
 #ifndef ANGLEDISTRO_H_
 #define ANGLEDISTRO_H_
 
-#include <stdio.h>  
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "../utility.h"
@@ -47,7 +47,7 @@ private:
 	vector< vector<int> > _WaterStepHistogram ();
 
 public:
-	
+
 	AngleDistro ();
 	~AngleDistro ();
 

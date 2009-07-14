@@ -24,6 +24,7 @@ protected:
 
 public:
 
+	WannierFile () { }
 	WannierFile (std::string wannierpath);
 	~WannierFile ();
 

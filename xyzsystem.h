@@ -2,34 +2,23 @@
 #define XYZSYSTEM_H_
 
 #include <algorithm>
+#include "mdsystem.h"
 #include "xyzfile.h"
-#include "adjacencymatrix.h"
-#include "molecule.h"
-#include "h2o.h"
-#include "oh.h"
-#include "h3o.h"
-#include "hno3.h"
+#include "graph.h"
 #include "wannier.h"
-#include "utility.h"
 
 #define DEBUG 1
 
-class XYZSystem {
+class XYZSystem : public MDSystem {
 
 private:
-	XYZFile				_atoms;			// Atomlist parsed from an xyz file
-	vector<Molecule *> 	_mols;			// once we have atoms defined, we form them into molecules
+	XYZFile				_coords;			// Atomlist parsed from an xyz file
 	WannierFile 		_wanniers;		// The wannier centers
-	//BondGraph 			_bondgraph;		// a really useful graph of bonding in the system
-	AdjacencyMatrix		_matrix;
+	BondGraph			_graph;			// a really useful graph for playing with atoms and bonds
 	bool _parsed;
 
-	VecR	_dims;			// A vector holding the system size (dimensions)
-
-	//VecR	_centerofmass;	// The total system center of mass
-
 	/* For debugging (and other useful things?) this will keep a list of all the atoms that have been processed into molecules. Any atoms left over at the end of the parsing routine are not included and ... can potentially cause problems */
-	std::vector<Atom *> _unparsed;
+	Atom_ptr_vec _unparsed;
 
 	/* some internal methods */
 	void _ParseMolecules ();		// take the atoms we have and stick them into molecules
@@ -41,6 +30,7 @@ private:
 
 public:
 	// constructors
+	XYZSystem () { }
 	XYZSystem (string filepath, VecR size, string wannierpath);
 	~XYZSystem ();
 
@@ -48,36 +38,16 @@ public:
 	void LoadNext ();	 					// Update the system to the next timestep
 	void LoadFirst ();
 	void Seek (int step);
-	int NumSteps () const { return _atoms.NumSteps(); }		// number of timesteps in the xyzfile
+	const int NumSteps () const { return _coords.NumSteps(); }		// number of timesteps in the xyzfile
+	int Current ()		const { return _coords.Current(); }
 
-	// Input
-	//void Dims (VecR size) { _dims = size; }		// Set the system size
-	//VecR Dims () const { return _dims; }		// returns the system size. Not the uppercase S to distinguish from the number of atoms
-
-	// Output
-	//vector<Atom *>& Atoms () { return _atoms.Atoms(); }	// is this necessary?
-	vector<Molecule *>& Molecules () { return _mols; }
-	Molecule * Molecules (int mol) { return _mols[mol]; }
-	Atom * Atoms (int atom) {
-		return (_atoms[atom]);
-	}
 	const std::vector<VecR>& Wanniers () const { return _wanniers.Coords(); }
-	int size ()	const { return _atoms.size(); }
 
-	// returns the distance between two atoms in the system
-	//double Distance (const Atom * atom1, const Atom * atom2) { return _matrix.Distance (atom1, atom2); }
-
-	// calculates (and sets the _centerofmass) the center of mass of the system. For now it only calculates based on waters
-	//VecR UpdateCenterOfMass ();
-	//VecR CenterOfMass () const { return _centerofmass; }
-	//void FindHBonds();	// locates all the H-bonds in a system
-	std::vector<Atom *> CovalentBonds (Atom const * const atom) { return _matrix.BondedAtoms(atom, covalent); }
-	std::vector<Atom *> BondedAtoms (Atom const * const atom) { return _matrix.BondedAtoms (atom); }
-	//std::vector<Atom *> BondedAtoms (const Atom * atom, const string name) const { return _matrix.BondedAtoms (atom, covalent, name); }
+	Atom_ptr_vec CovalentBonds (Atom const * const atom) const { return _graph.BondedAtoms(atom, covalent); }
+	Atom_ptr_vec BondedAtoms (Atom const * const atom) const { return _graph.BondedAtoms (atom); }
 
 	VecR SystemDipole ();	// calculate the total system dipole and return it
 
-	int Current ()		const { return _atoms.Current(); }
 
 	// operators
 	Atom * operator[] (int index) {

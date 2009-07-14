@@ -15,8 +15,8 @@ using namespace std;
 #define filename		"pos.xyz"
 
 // number of steps to process
-#define numSteps	25800	
-//#define numSteps	25	
+#define numSteps	25800
+//#define numSteps	25
 
 //#define wannierfile		"/common/work/NitricAcid/cp2k/bulk-h2o/WANNIERS-HOMO_centers_s1-1.data"
 #define wannierfile		"wanniers"

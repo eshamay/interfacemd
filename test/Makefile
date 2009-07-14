@@ -1,28 +1,30 @@
 include ../Makefile
 
-AMBERFILES	= ../vecr.o ../atom.o ../ambersystem.o ../crdfile.o ../forcefile.o ../hno3.o ../molecule.o ../topfile.o ../matrixr.o ../h2o.o ../oh.o ../h3o.o
-WATERSYSTEM	= $(AMBERFILES) ../watersystem.o ../adjacencymatrix.o ../bond.o
+MDSYSTEM = ../atom.o ../h2o.o ../hno3.o ../molecule.o ../vecr.o ../matrixr.o ../bond.o ../oh.o ../h3o.o
+XYZSYSTEM = ../xyzsystem.o ../xyzfile.o ../wannier.o ../graph.o
+AMBERFILES	= ../ambersystem.o ../crdfile.o ../forcefile.o ../topfile.o
 
+WATERSYSTEM	= $(MDSYSTEM) $(XYZSYSTEM) $(AMBERSYSTEM)
 MORITAFILES	= morita.o ../watersfg.o $(WATERSYSTEM)
 MPIMORITAFILES	= $(MORITAFILES) ../mpi/mpisys.o
+MORITA2002	= $(WATERSYSTEM) ../moritasfg2002.o morita2002.o
+
 DENSITYFILES = $(WATERSYSTEM) densitytest.o
-XYZSYSTEM = ../xyzsystem.o ../xyzfile.o ../atom.o ../h2o.o ../hno3.o ../molecule.o ../vecr.o ../wannier.o ../adjacencymatrix.o ../matrixr.o ../bond.o ../oh.o ../h3o.o
 DIPOLETCF = $(XYZSYSTEM) dipoletcf.o ../hno3analysis.o
 QPT = $(XYZSYSTEM) ../hno3analysis.o Qpt.o
 MDCRD2PDB = $(AMBERFILES) ../pdbfile.o mdcrd2pdb.o
 FILLBOX = $(AMBERFILES) ../pdbfile.o ../boxfiller.o
 MPIFILES	=	$(AMBERFILES) ../mpi/mpisys.o mpitest.o
 ORDERPARAMS = $(WATERSYSTEM) orderparams.o
-TEMPFILES	= temp.cpp $(AMBERFILES) ../bondgraph.o
+TEMPFILES	= $(AMBERFILES) ../graph.o temp.cpp
 COORDINATION	= $(WATERSYSTEM) coordination.o
 ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
-MORITA2002	= $(XYZSYSTEM) ../moritasfg2002.o morita2002.o
 
 ambertest : ambertest.o $(AMBERFILES)
 	$(CXX) $(CPPFLAGS) ambertest.o $(AMBERFILES) -o ambertest
 
 densitytest : $(DENSITYFILES)
-	$(CXX) $(CPPFLAGS) $(DENSITYFILES) -o densitytest
+	$(CXX) $(CPPFLAGS) $(DENSITYFILES) -llapack -o densitytest
 
 morita : $(MORITAFILES)
 	$(CXX) $(CPPFLAGS) $(MORITAFILES) -llapack -o morita
@@ -70,7 +72,7 @@ ordercoords: $(ORDERCOORDS)
 	$(CXX) $(CPPFLAGS) $(ORDERCOORDS) -o ordercoords
 
 morita2002: $(MORITA2002)
-	$(CXX) $(CPPFLAGS) $(MORITA2002) -llapack -o morita2002
+	$(CXX) $(CPPFLAGS) $(MORITA2002) -g3 -llapack -o morita2002
 
 cleantest :
 	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams ordercoords morita2002

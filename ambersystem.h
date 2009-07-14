@@ -1,27 +1,18 @@
 #ifndef AMBERSYSTEM_H_
 #define AMBERSYSTEM_H_
 
-#include <vector>
-#include <math.h>
-#include <string>
+#include "mdsystem.h"
 #include "crdfile.h"
 #include "forcefile.h"
 #include "topfile.h"
-#include "atom.h"
-#include "molecule.h"
-#include "h2o.h"
-#include "hno3.h"
 
-class AmberSystem {
+class AmberSystem : public MDSystem {
 
 private:
+	Atom_ptr_vec	_atoms;
 	TOPFile		_topfile;
 	CRDFile		_coords;
 	ForceFile	_forces;
-
-	Atom_ptr_vec _atoms;			// A listing of all the atoms in the system with information parsed from the topfile and crdfile
-	Mol_ptr_vec _mols;		// The molecules within a system - defined by the residues in the topology files
-
 
 	void _ParseAtomInformation ();
 	void _ParseAtomVectors ();
@@ -29,6 +20,7 @@ private:
 
 public:
 	// constructors
+	AmberSystem () { }
 	AmberSystem (string prmtop, string mdcrd, string mdvel);
 	~AmberSystem ();
 
@@ -39,24 +31,14 @@ public:
 	bool eof () { return _coords.eof(); }
 
 	// Output
-	int	 	NumAtoms ()		const 	{ return _atoms.size(); }		// return the number of atoms.
-	int		size ()			const 	{ return _atoms.size(); }
-	int		NumMols ()		const 	{ return _mols.size(); }		// returns the number of residues
 	VecR	Dims () 		const 	{ return _coords.Dims(); }		// returns the system size.
 
 	int 	Current ()		const 	{ return _coords.Current(); }
 
 	void PrintCRDFile () const;						// to output a frame of the system in .crd format
 
-	Molecule * Molecules (int index) { return _mols[index]; }
-	std::vector<Molecule *>& Molecules () { return _mols; }
-	Atom * Atoms (int index) 	{ return _atoms[index]; }
-	std::vector<Atom *>& Atoms () { return _atoms; }
 	VecR& Forces (int index)	{ return _forces[index]; }
 	VecR& Coords (int index)	{ return _coords[index]; }
-
-	// operators
-	Atom * operator[] (int index) { return _atoms[index]; }
 
 };
 

@@ -4,9 +4,9 @@ AmberSystem::AmberSystem (string prmtop, string mdcrd, string mdvel = "")
 	// some initialization needs to happen here
 	: 	_topfile(prmtop),
 		_coords(mdcrd, _topfile.NumAtoms()),
-		_forces(mdvel, _topfile.NumAtoms()),
-		_atoms(_topfile.NumAtoms(), (Atom *)NULL)
+		_forces(mdvel, _topfile.NumAtoms())
 {
+	_atoms = Atom_ptr_vec(_topfile.NumAtoms(), (Atom *)NULL);
 
 	// because some really useful functionality comes out of the Atom class if the Atom::Size() is set, we'll do that here
 	Atom::Size (_coords.Dims());

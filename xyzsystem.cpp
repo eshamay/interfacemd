@@ -1,13 +1,14 @@
 #include "xyzsystem.h"
 
 XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath) :
-	_atoms(filepath),
-	_wanniers(wannierpath),
-	_dims(size)
+	MDSystem (),
+	_coords(filepath),
+	_wanniers(wannierpath)
 {
 
 	// set the system size
 	Atom::Size (size);
+	_dims = size;
 
 	this->LoadFirst();
 }
@@ -25,7 +26,7 @@ void XYZSystem::_ParseMolecules () {
  * *********************************************************************************/
 
 	// first things first - we need the interatomic distances!
-	_matrix.UpdateMatrix (_atoms.Atoms());
+	_graph.UpdateGraph (_atoms);
 
 	// Now let's do some house-cleaning to set us up for working with new molecules
 	RUN (_mols)
@@ -42,7 +43,7 @@ void XYZSystem::_ParseMolecules () {
 
 	// track which atoms have already been parsed in the system
 	_unparsed.clear();
-	_unparsed = _atoms.Atoms();
+	_unparsed = _atoms;
 
 	this->_ParseWaters ();
 	this->_ParseNitrates ();
@@ -52,9 +53,9 @@ void XYZSystem::_ParseMolecules () {
 		Atom * a1 = _unparsed[i];
 		if (a1 != (Atom *)NULL) {
 			a1->Print();		// show all remaining atoms
-			std::vector<Atom *> bound (_matrix.BondedAtoms(a1));
+			std::vector<Atom *> bound (_graph.BondedAtoms(a1));
 			RUN2(bound) {		// and all the atoms to which it is bound (and the distance)
-				cout << "^--~ (" << _matrix.Distance(bound[j], a1) << ")  ";
+				cout << "^--~ (" << _graph.Distance(bound[j], a1) << ")  ";
 				bound[j]->Print();
 			}
 			leave = true;
@@ -145,6 +146,8 @@ return;
 
 void XYZSystem::LoadFirst () {
 	//_atoms.LoadFirst();
+	_atoms.clear();
+	_atoms = _coords.Atoms();
 	this->_ParseMolecules();
 
 	if (_wanniers.Loaded()) {
@@ -156,12 +159,16 @@ void XYZSystem::LoadFirst () {
 
 // watch out - no functionality for wannier centers here (yet)
 void XYZSystem::Seek (int step) {
-	_atoms.Seek (step);
+	_coords.Seek (step);
+	_atoms.clear();
+	_atoms = _coords.Atoms();
 	this->_ParseMolecules();
 }
 
 void XYZSystem::LoadNext () {
-	_atoms.LoadNext();
+	_coords.LoadNext();
+	_atoms.clear();
+	_atoms = _coords.Atoms();
 	this->_ParseMolecules();
 
 	if (_wanniers.Loaded()) {
@@ -206,8 +213,8 @@ void XYZSystem::_ParseWaters () {
 		if (O->Name().find("O") == string::npos) continue;
 
 		// The bondgraph provides us with all the covalently bound H's
-		vector<Atom *> atoms = _matrix.BondedAtoms (O, covalent);
-		vector<Atom *> Hs = _matrix.BondedAtoms (O, covalent, "H");
+		vector<Atom *> atoms = _graph.BondedAtoms (O, covalent);
+		vector<Atom *> Hs = _graph.BondedAtoms (O, covalent, "H");
 
 		// if we pick up an OH group that is part of a larger molecule (i.e. nitric acid) then it will be processed as a hydroxide...
 		// So if the only type of atom attached is a hydrogen, we have some form of water (OH, H2O, H3O)
@@ -284,7 +291,7 @@ void XYZSystem::_ParseNitrates () {
 		if (_atoms[N]->Name().find("N") == string::npos) continue;
 
 		// analogous to water, let's grab all the (covalently) bound O's of the molecule
-		std::vector<Atom *> NAatoms (_matrix.BondedAtoms (_atoms[N], nobond, "O"));
+		std::vector<Atom *> NAatoms (_graph.BondedAtoms (_atoms[N], nobond, "O"));
 
 		// at least 3 oxygens for a nitrate/nitric acid
 		if (NAatoms.size() != 3) continue;
@@ -299,14 +306,14 @@ void XYZSystem::_ParseNitrates () {
 			Atom * O = NAatoms[i];
 
 			// these are all the Hs bound to the O
-			std::vector<Atom *> Hs (_matrix.BondedAtoms (O, covalent, "H"));
+			std::vector<Atom *> Hs (_graph.BondedAtoms (O, covalent, "H"));
 			if (!Hs.size()) continue;
 			// if an H is attached to one of the oxygens then we have a bonafide nitric acid
 			fullNA = true;
 
 			// here we'll run through all the Hs that are covalently bound and find which is the closest to an no3 oxygen.
 			RUN (Hs) {
-				double distance = _matrix.Distance (O, Hs[i]);
+				double distance = _graph.Distance (O, Hs[i]);
 				no3OHdistance = (distance < no3OHdistance) ? distance : no3OHdistance;
 				if (distance == no3OHdistance) {
 					no3H = Hs[i];
