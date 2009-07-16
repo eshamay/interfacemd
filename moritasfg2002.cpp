@@ -10,7 +10,7 @@ VecR MoritaSFG::CalcDipole (Water * water) {
 	// first we calculate the displacements of the OH bond lengths and the water angle
 	double dR1 = water->OH1()->Magnitude() - R_eq;
 	double dR2 = water->OH2()->Magnitude() - R_eq;
-	double dTheta = acos(*water->OH1() < *water->OH2()) * 180.0 / M_PI - Theta_eq;
+	double dTheta = acos(*water->OH1() < *water->OH2()) - Theta_eq*M_PI/180.0;
 
 	//printf ("%f\t%f\t%f\n", dR1, dR2, dTheta);
 	//printf ("%f\t%f\t%f\n", _oh1.Magnitude(), _oh2.Magnitude(), acos(_oh1 < _oh2) * 180.0/M_PI);
@@ -33,13 +33,21 @@ VecR MoritaSFG::CalcDipole (Water * water) {
 	// 		the oxygen sits at the origin, H1 sits on the positive Z-axis,
 	// 		and H2 is in the xz-plane on the positive x-side
 	// 		To find H2 in the molecular frame we need the rotation matrix to move it in from the lab-fram from the lab-frame
-	VecR z (0.0,0.0,1.0);
-	VecR p1 = z * water->OH1()->Magnitude() * q1;		// these are in atomic units?
-	VecR p2 = water->DCMToLabMorita().Transpose() * (*water->OH2()) * q2;
+	VecR Z (0.0,0.0,1.0);
+	MatR dcm1 = water->DCMToLabMorita(z,1);
+	VecR p1 = Z * water->OH1()->Magnitude() * q1;		// these are in atomic units?
+	VecR p2 = dcm1.Transpose() * (*water->OH2()) * q2;
 	VecR dipole = p1 + p2;		// this is still in the molecular OH1 frame
 	// note the oxygen doesn't contribute because it's set at the origin
+	/*
+	printf ("% 8.3f% 8.3f% 8.3f% 8.3f% 8.3f% 8.3f\n",
+		dipole.Magnitude(),
+		dR1, dR2, dTheta,
+		q1, q2
+	);
+	*/
 
-return dipole;
+return (dcm1 * dipole);
 }
 
 
@@ -73,7 +81,21 @@ MatR MoritaSFG::CalcPolarizability (Water * water) {
 	alpha2.Set(2,2, D3+D6*dR2+D7*dR2*dR2);
 
 	// last thing to do is to rotate both the local polarizabilities into the local oh1 frame
-	MatR alpha_lab = (dcm1.Transpose()*alpha1*dcm1) + (dcm2.Transpose()*alpha2*dcm2);
+	MatR alpha_lab = (dcm1*alpha1*dcm1.Transpose()) + (dcm2*alpha2*dcm2.Transpose());
+
+	// print out the polarizability in the oh1 frame for comparison.
+	printf ("Water #%d\n", water->MolID());
+	alpha_lab.Print();
+	/*
+	printf ("alpha1\n");
+	alpha1.Print();
+	printf ("alpha2\n");
+	alpha2.Print();
+	printf ("the dcm1\n");
+	dcm1.Print();
+	printf ("the dcm2\n");
+	dcm2.Print();
+	*/
 
 return (alpha_lab);
 }
@@ -84,10 +106,13 @@ void MoritaSFG::UpdateAlphaTensor () {
 	// first clear out the old elements and set up the big matrix
 	_alpha.clear();
 	_alpha.resize(3*_N, std::vector<double> (3*_N, 0.0));
-	MatR alpha;
+
 
 	for (int block_i = 0; block_i < _N; block_i++) {
 	for (int block_j = 0; block_j < _N; block_j++) {
+
+		MatR alpha;		// individual molecular alpha
+
 		if (block_i == block_j) {
 			alpha.Set(this->CalcPolarizability(_wats[block_i]));
 		}
@@ -307,8 +332,9 @@ VecR& MoritaSFG::CalcTotalPolarization (std::vector<Water *>& wats) {
 	_p.Zero();
 
 	RUN (wats) {
-		wats[i]->CalcDipole();
-		_p += wats[i]->Dipole();
+		//wats[i]->CalcDipole();
+		//_p += wats[i]->Dipole();
+		_p += this->CalcDipole(wats[i]);
 	}
 
 return _p;

@@ -21,7 +21,7 @@ private:
 public:
 	// constructors
 	AmberSystem () { }
-	AmberSystem (string prmtop, string mdcrd, string mdvel);
+	AmberSystem (const std::string prmtop, const std::string mdcrd, const std::string mdvel);
 	~AmberSystem ();
 
 	// Controller & Calculation methods

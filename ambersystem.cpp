@@ -1,6 +1,6 @@
 #include "ambersystem.h"
 
-AmberSystem::AmberSystem (string prmtop, string mdcrd, string mdvel = "")
+AmberSystem::AmberSystem (const std::string prmtop, const std::string mdcrd, const std::string mdvel = "")
 	// some initialization needs to happen here
 	: 	_topfile(prmtop),
 		_coords(mdcrd, _topfile.NumAtoms()),

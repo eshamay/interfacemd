@@ -1,7 +1,7 @@
 #include "watersfg.h"
 
 //SFGCalculator::SFGCalculator (string const polarization, coord const axis) {
-SFGCalculator::SFGCalculator (AdjacencyMatrix * matrix) : _matrix(matrix) {
+SFGCalculator::SFGCalculator (BondGraph * graph) : _graph(graph) {
 
 	MuDeriv1.Set(-0.058, 0.000, 0.157);	// dipole derivative vector from the paper
 	MuDeriv2.Set(0.1287, 0.0, -0.1070);	// dipole derivative of the 2nd OH bond, in the frame of the first (found by direction cosine rotation)
@@ -84,8 +84,8 @@ void SFGCalculator::FreqShift (Water& water) {
  * Calculation of the frequency shift due to dipole-dipole interaction with neighboring waters
  *********************************************************************************************/
 
-  //int coord = static_cast<int>(_matrix->WaterCoordination(&water));
-  //int N = _matrix->NumHBonds(&water);
+  //int coord = static_cast<int>(_graph->WaterCoordination(&water));
+  //int N = _graph->NumHBonds(&water);
   //if (N > 3) {
 	// two OH bonds on the target water, so we will have two sets of shifts from dipole-dipole interactions
 	double dipolePotential[2] = {0.0, 0.0};
@@ -105,7 +105,7 @@ void SFGCalculator::FreqShift (Water& water) {
 	// Now we go through the calculation of each neighboring H-bonded water (the "source" waters, acting as the "source" of the dipole-dipole interactions) and find the contribution from each OH dipole. First we'll start with source OH's that are bound through the target oxygen. (I'll use the nomenclature of sH to mean source-hydrogen, and tO to mean target oxygen, etc.)
 
 	Atom * tO = water.GetAtom("O");
-	Atom_ptr_vec hbonds = _matrix->BondedAtoms(tO, hbond);
+	Atom_ptr_vec hbonds = _graph->BondedAtoms(tO, hbond);
 	RUN (hbonds) {
 
 		// find the source hydrogen, oxygen, center of mass, oh vector, etc.
@@ -133,7 +133,7 @@ void SFGCalculator::FreqShift (Water& water) {
 	// next we go through both of the other target hydrogens and find their H-bonding partners
 	Atom * tH = water.GetAtom("H1");
 	// first the partners of H1
-	hbonds = _matrix->BondedAtoms(tH, hbond);
+	hbonds = _graph->BondedAtoms(tH, hbond);
 	RUN (hbonds) {
 		// find the source hydrogen, oxygen, center of mass, oh vector, etc.
 		Atom * sO = hbonds[i];
@@ -163,7 +163,7 @@ void SFGCalculator::FreqShift (Water& water) {
 
 	// and now the 2nd target hydrogen
 	tH = water.GetAtom("H2");
-	hbonds = _matrix->BondedAtoms(tH, hbond);
+	hbonds = _graph->BondedAtoms(tH, hbond);
 	RUN (hbonds) {
 		// find the source hydrogen, oxygen, center of mass, oh vector, etc.
 		Atom * sO = hbonds[i];
@@ -288,8 +288,10 @@ void SFGCalculator::PolarizabilityAndDipoleDerivs (Water& water, const int s1, c
 	// here we'll set up the dipole and alpha derivative tensors, but rotated into the lab frame from where they were in the frame of the 1st OH bond
 
 	// matrix rotation requires a unitary transformation to go into the lab frame
-	MatR rotAlpha1 = _DCM.Transpose() * AlphaDeriv1 * _DCM;
-	MatR rotAlpha2 = _DCM.Transpose() * AlphaDeriv2 * _DCM;
+	//MatR rotAlpha1 = _DCM.Transpose() * AlphaDeriv1 * _DCM;
+	//MatR rotAlpha2 = _DCM.Transpose() * AlphaDeriv2 * _DCM;
+	MatR rotAlpha1 = _DCM * AlphaDeriv1 * _DCM.Transpose();
+	MatR rotAlpha2 = _DCM * AlphaDeriv2 * _DCM.Transpose();
 
 	// pull together all the combinations of the derivative terms for an average value
 	_AlphaDerivS += _C1s * rotAlpha1(s1,s1) + _C2s * rotAlpha2(s1,s1);
@@ -373,10 +375,10 @@ double SFGCalculator::CouplingConstant (Water& water) const {
 	double V12 = COUPLING_CONST;
 
 //	int coord = static_cast<int>(_matrix->WaterCoordination(&water));
-	int N = _matrix->NumHBonds(&water);
+	int N = _graph->NumHBonds(&water);
 
 	if (N > 1) {
-		//int N = _matrix->NumHBonds(&water);
+		//int N = _graph->NumHBonds(&water);
 		V12 = V12 / sqrt(double(N));
 	}
 	//printf ("coordination = %d% 10.3f\n", N, V12*AU2WAVENUMBER);

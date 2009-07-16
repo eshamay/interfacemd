@@ -95,6 +95,10 @@ private:
 	void _FixSharedAtoms ();
 
 	void _SetBond (const Vertex& vi, const Vertex& vj, const double bondlength, const bondtype btype);
+	Edge _GetBond (const Vertex& vi, const Vertex& vj) const;
+	Edge _GetBond (Atom const * const a1, Atom const * const a2) const;
+	void _RemoveBond (const Vertex& vi, const Vertex& vj);
+	void _RemoveBond (Atom const * const a1, Atom const * const a2);
 	Vertex_it _FindVertex (Atom const * const ap) const;
 
 public:
@@ -104,6 +108,7 @@ public:
 	BondGraph (const Atom_ptr_vec& atoms, std::string sys = "xyz");
 	~BondGraph ();
 
+	void SysType (std::string sys_type) { _sys_type = sys_type; }
 	void UpdateGraph (const Atom_ptr_vec& atoms);
 
 	Atom_ptr_vec BondedAtoms (

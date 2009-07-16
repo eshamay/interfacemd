@@ -2,7 +2,7 @@ include ../Makefile
 
 MDSYSTEM = ../atom.o ../h2o.o ../hno3.o ../molecule.o ../vecr.o ../matrixr.o ../bond.o ../oh.o ../h3o.o
 XYZSYSTEM = ../xyzsystem.o ../xyzfile.o ../wannier.o ../graph.o
-AMBERFILES	= ../ambersystem.o ../crdfile.o ../forcefile.o ../topfile.o
+AMBERSYSTEM	= ../ambersystem.o ../crdfile.o ../forcefile.o ../topfile.o
 
 WATERSYSTEM	= $(MDSYSTEM) $(XYZSYSTEM) $(AMBERSYSTEM)
 MORITAFILES	= morita.o ../watersfg.o $(WATERSYSTEM)
@@ -12,16 +12,16 @@ MORITA2002	= $(WATERSYSTEM) ../moritasfg2002.o morita2002.o
 DENSITYFILES = $(WATERSYSTEM) densitytest.o
 DIPOLETCF = $(XYZSYSTEM) dipoletcf.o ../hno3analysis.o
 QPT = $(XYZSYSTEM) ../hno3analysis.o Qpt.o
-MDCRD2PDB = $(AMBERFILES) ../pdbfile.o mdcrd2pdb.o
-FILLBOX = $(AMBERFILES) ../pdbfile.o ../boxfiller.o
-MPIFILES	=	$(AMBERFILES) ../mpi/mpisys.o mpitest.o
+MDCRD2PDB = $(AMBERSYSTEM) ../pdbfile.o mdcrd2pdb.o
+FILLBOX = $(AMBERSYSTEM) ../pdbfile.o ../boxfiller.o
+MPIFILES	=	$(AMBERSYSTEM) ../mpi/mpisys.o mpitest.o
 ORDERPARAMS = $(WATERSYSTEM) orderparams.o
-TEMPFILES	= $(AMBERFILES) ../graph.o temp.cpp
+TEMPFILES	= $(AMBERSYSTEM) ../graph.o temp.cpp
 COORDINATION	= $(WATERSYSTEM) coordination.o
 ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
 
-ambertest : ambertest.o $(AMBERFILES)
-	$(CXX) $(CPPFLAGS) ambertest.o $(AMBERFILES) -o ambertest
+ambertest : ambertest.o $(AMBERSYSTEM)
+	$(CXX) $(CPPFLAGS) ambertest.o $(AMBERSYSTEM) -o ambertest
 
 densitytest : $(DENSITYFILES)
 	$(CXX) $(CPPFLAGS) $(DENSITYFILES) -llapack -o densitytest
@@ -38,8 +38,8 @@ matrixtest : matrixtest.o ../vecr.o ../matrixr.o
 toptest : toptest.o ../topfile.o
 	$(CXX) $(CPPFLAGS) toptest.o ../topfile.o -o toptest
 
-angledistro: angledistro.o $(AMBERFILES)
-	$(CXX) $(CPPFLAGS) angledistro.o $(AMBERFILES) -o angledistro
+angledistro: angledistro.o $(AMBERSYSTEM)
+	$(CXX) $(CPPFLAGS) angledistro.o $(AMBERSYSTEM) -o angledistro
 
 orderparams:  $(ORDERPARAMS)
 	$(CXX) $(CPPFLAGS) $(ORDERPARAMS) -o orderparams
@@ -50,8 +50,8 @@ dipoletcf : $(DIPOLETCF)
 qpt : $(QPT)
 	$(CXX) $(CPPFLAGS) -o qpt_test $(QPT)
 
-closest : $(AMBERFILES) closest.o ../pdbfile.o
-	$(CXX) $(CPPFLAGS) closest.o ../pdbfile.o $(AMBERFILES) -o closest
+closest : $(AMBERSYSTEM) closest.o ../pdbfile.o
+	$(CXX) $(CPPFLAGS) closest.o ../pdbfile.o $(AMBERSYSTEM) -o closest
 
 mdcrd2pdb : $(MDCRD2PDB)
 	$(CXX) $(CPPFLAGS) $(MDCRD2PDB) -o mdcrd2pdb
@@ -61,6 +61,9 @@ fillbox : $(FILLBOX) fillbox.o
 
 temp: $(TEMPFILES)
 	$(CXX) $(CPPFLAGS) -llapack -g3 -O0 -o temp $(TEMPFILES)
+
+sandbox: $(MDSYSTEM) $(AMBERSYSTEM)
+	$(CXX) $(CPPFLAGS) -g3 -O0 -llapack -o matrix-sandbox $(MDSYSTEM) $(AMBERSYSTEM) matrix-sandbox.cpp
 
 mpitest: $(MPIFILES)
 	mpiCC $(CPPFLAGS) $(MPILIBS) -o mpitest $(MPIFILES)

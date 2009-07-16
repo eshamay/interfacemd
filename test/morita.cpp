@@ -1,12 +1,14 @@
 #include "morita.h"
 
 SFGAnalyzer::SFGAnalyzer (int const argc, const char **argv, const WaterSystemParams& params)
-	:	WaterSystem (argc, argv, params),
-		sfg (SFGCalculator(&matrix)),
+	:	WaterSystem<AmberSystem> (params),
+		sfg (SFGCalculator(&this->graph)),
 		MolChi (Complex_vec (0, complex<double>(0.0,0.0))),
 		TimestepChi (Complex_vec (0, complex<double>(0.0,0.0))),
 		TotalChi (Complex_vec (0, complex<double>(0.0,0.0)))
 {
+
+	this->sys = new AmberSystem("prmtop", "mdcrd", "mdvel");
 
 	printf ("\n*** Performing an SFG analysis of the system ***\n");
 
@@ -27,17 +29,17 @@ void SFGAnalyzer::Analyze () {
 		TimestepChi.clear();	// it's a new timestep
 		firstmol = true;		// every timestep we will have to go through all the molecules again
 
-		RUN (sys.Molecules()) {
+		RUN (sys->Molecules()) {
 			//Molecule * mol = sys.Molecules(i);
 			//mol->Print();
 		}
 
 		// first let's find all the molecules in the interface
 		this->FindWaters ();
-		this->SliceWaters (45.0, 75.0);
+		this->SliceWaters (55.0, 75.0);
 
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
-		this->UpdateMatrix ();
+		UpdateGraph ();
 		// only grab the OH-waters for now
 		//this->SliceWaterCoordination (OOH);
 
@@ -77,7 +79,7 @@ void SFGAnalyzer::Analyze () {
 		// and once in a while, also output the data to a file for reading
 		OutputData ();
 
-		sys.LoadNext();
+		sys->LoadNext();
 	}
 
 	// final output of the data to the file
@@ -130,9 +132,6 @@ int main (const int argc, const char **argv) {
 
 	WaterSystemParams params;
 
-	params.prmtop = "prmtop";
-	params.mdcrd = "mdcrd";
-	params.mdvel = "mdvel";
 	params.axis = y;
 	params.timesteps = 200000;
 	#ifdef RESTART
@@ -147,7 +146,7 @@ int main (const int argc, const char **argv) {
 		params.avg = false;
 		params.posmin = -5.0;
 		params.posmax = 150.0;
-		params.output = "sfg.dsw-2.dat";
+		params.output = "sfg.alpha-switch.dat";
 	#endif
 	params.posres = 0.100;
 	params.pbcflip = 15.0;

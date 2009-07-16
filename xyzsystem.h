@@ -30,7 +30,7 @@ private:
 
 public:
 	// constructors
-	XYZSystem () { }
+	XYZSystem () { _graph.SysType("xyz"); }
 	XYZSystem (string filepath, VecR size, string wannierpath);
 	~XYZSystem ();
 

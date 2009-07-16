@@ -11,11 +11,8 @@
 
 #include <complex>
 #include <math.h>
-//#include "ambersystem.h"
 #include "h2o.h"
-#include "matrixr.h"
-#include "utility.h"
-#include "adjacencymatrix.h"
+#include "graph.h"
 
 /***** Set this if using the dipole-dipole correction term *****/
 #define DIPOLE_DIPOLE
@@ -89,7 +86,7 @@ private:
 
 	MatR _DCM;				// rotation matrix for moving from the water molecular frame to the lab frame
 
-	AdjacencyMatrix * _matrix;		// a connectivity matrix for analyzing water-bonding
+	BondGraph * _graph;		// a connectivity matrix for analyzing water-bonding
 
 	// calculate the dipole-dipole interaction potential between two dipoles (muA and muB) separated a distance R
 	double DipolePotential (const VecR& muA, const VecR& muB, const VecR& R);
@@ -108,7 +105,7 @@ private:
 public:
 
 	//SFGCalculator (string polarization, coord axis);		// For loading up the entire system
-	SFGCalculator (AdjacencyMatrix * matrix);		// For loading up the entire system
+	SFGCalculator (BondGraph * graph);		// For loading up the entire system
 
 	void Reset () { _set = false; }
 	// returns the summed beta rotated into the lab frame

@@ -9,6 +9,7 @@ XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath) :
 	// set the system size
 	Atom::Size (size);
 	_dims = size;
+	_graph.SysType("xyz");
 
 	this->LoadFirst();
 }
@@ -240,6 +241,10 @@ void XYZSystem::_ParseWaters () {
 
 		else if (num_H == 0 || num_H > 3) {
 			printf ("XYZSystem::_ParseMolecules() - found water with %d H's\n", (int)atoms.size());
+			O->Print();
+			RUN (atoms) {
+				atoms[i]->Print();
+			}
 			exit(1);
 		}
 

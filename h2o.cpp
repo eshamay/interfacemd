@@ -33,7 +33,7 @@ void Water::SetAtoms () {
 
 	//this->Print();
 
-	if (!_set) {
+	//if (!_set) {
 		// first let's grab pointers to the three atoms and give them reasonable names
 		_h1 = (Atom *)NULL; _h2 = (Atom *)NULL;
 
@@ -54,7 +54,7 @@ void Water::SetAtoms () {
 		_oh2 = _o->Position().MinVector(_h2->Position(), Atom::Size());
 
 		_set = true;
-	}
+	//}
 return;
 }
 
@@ -86,6 +86,7 @@ void Water::SetMoritaAxes (const int Zbond) {
 		_z = _oh2.Unit();
 		_y = (_oh2 % _oh1).Unit();
 	}
+
 
 	// the X-axis is just the cross product of the other two
 	_x = (_y % _z).Unit();

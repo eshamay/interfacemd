@@ -24,7 +24,8 @@ class MoritaSFG:
 				#print file
 		#self.files.append('../sfg.0.8-0.6.dat')
 		#self.files.append('../sfg.dsw-1.dat')
-		self.files.append('/raid1/Analysis/H2O+CTC/sfg.dsw-2.dat')
+		#self.files.append('/raid1/Analysis/H2O+CTC/sfg.dsw-2.dat')
+		self.files.append('/raid1/Analysis/H2O+CTC/sfg.alpha-switch.dat')
 		#self.files.append('../sfg.set1-cos-term.dat')
 		#self.files.append('../sfg.set2.dat')
 		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.set2.dat')
@@ -89,6 +90,7 @@ class MoritaSFG:
 				#self.chi[i].append(abs(c)*abs(c))
 				self.chi[i].append(real(c*c.conjugate()))
 
+		'''
 		# normalizing by one method or another
 		for i in range(len(self.files)):
 			# find the area of the curve:
@@ -100,6 +102,7 @@ class MoritaSFG:
 				#self.chi[i][j] = self.chi[i][j] / area
 				# normalize by free-oh peak
 				self.chi[i][j] = self.chi[i][j] / max_peak
+		'''
 
 	def PlotData(self):
 

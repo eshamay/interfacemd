@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../watersfg.h"
 #include "../watersystem.h"
+#include "../watersfg.h"
 
 // if we're running this on an MPI system to do some parallel work:
 //#define MPI_SYS
@@ -14,7 +14,7 @@
 
 typedef std::vector< complex<double> > Complex_vec;
 
-class SFGAnalyzer : public WaterSystem {
+class SFGAnalyzer : public WaterSystem<AmberSystem> {
 
 public:
 	SFGAnalyzer (const int argc, const char **argv, const WaterSystemParams& params);

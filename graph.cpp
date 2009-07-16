@@ -141,8 +141,8 @@ void BondGraph::_ParseBonds () {
 	}}
 
 	// Now fix up any weird atom-sharing between molecules. At this point we have to consider if we want to divide the system into separate molecules, or if we're interested in other phenomena, such as contact-ion pairs, etc.
-	//if (_sys_type == "xyz")
-		//this->_FixSharedAtoms ();
+	if (_sys_type == "xyz")
+		this->_FixSharedAtoms ();
 return;
 }
 
@@ -184,6 +184,7 @@ void BondGraph::UpdateGraph (const Atom_ptr_vec& atoms) {
 
 return;
 }
+
 void BondGraph::_SetBond (const Vertex& vi, const Vertex& vj, const double bondlength, const bondtype btype) {
 
 	bool b;
@@ -302,17 +303,20 @@ void BondGraph::_FixSharedAtoms () {
 
 		if (H->Name().find("H") == string::npos) continue;
 
-		// here we check to see if it's bound to multiple molecules
-		std::vector<Atom *> atoms = this->BondedAtoms (H, covalent, "O");
-		// great - the H is only bound to one molecule
+		// here we check to see if it's bound to multiple atoms
+		std::vector<Atom *> atoms = this->BondedAtoms (H, covalent);
+
+		// great ... if the H is only bound to one molecule
 		if (atoms.size() == 1) continue;
-		// hey - we shouldn't have any free-floating hydrogens
+
+		// we shouldn't have any free-floating hydrogens!
 		if (atoms.size() < 1) {
 			std::cout << "BondGraph::_FixSharedAtoms()" << std::endl;
 			std::cout << "Found an unbound H!" << std::endl;
 			H->Print();
 			exit(1);
 		}
+
 		// this is totally bizarre - since when do we see an H bound to 3 molecules
 		if (atoms.size() > 2) {
 			std::cout << "BondGraph::_FixSharedAtoms()" << std::endl;
@@ -321,17 +325,17 @@ void BondGraph::_FixSharedAtoms () {
 			exit(1);
 		}
 
-		//int closer, further;
+		// now we do a comparison of distances between the two covalently bound atoms and the hydrogen - which is further away?
 		int further;
-		// now we do a comparison of distances between the two oxygens and the hydrogen - which is closer?
 		double distance[2] = { this->Distance(H, atoms[0]), this->Distance(H, atoms[1]) };
 
 		further = (distance[0] < distance[1]) ? 1 : 0;
 
-		Atom * Of = atoms[further];
+		Vertex_it vO = this->_FindVertex(atoms[further]);
 
 		// the further bond is now changed from covalent to hbonded just to show that it's not the primary bond to the hydrogen
-		this->_SetBond(H, Of, distance[further], hbond);
+		this->_RemoveBond (*vi, *vO);
+		this->_SetBond(*vi, *vO, distance[further], hbond);
 	}
 
 return;
@@ -346,4 +350,43 @@ double BondGraph::Distance (Atom const * const a1, Atom const * const a2) const 
 	Edge e = edge(*vi, *vj, _graph).first;
 
 return (b_length[e]);
+}
+
+Edge BondGraph::_GetBond (const Vertex& vi, const Vertex& vj) const {
+
+	Edge e;
+	bool b;
+	tie (e,b) = edge(vi, vj, _graph);
+
+	if (!b) {
+		printf ("BondGraph::_GetBond - Couldn't find the requested Bond");
+		exit(1);
+	}
+
+return (e);
+}
+
+Edge BondGraph::_GetBond (Atom const * const a1, Atom const * const a2) const {
+
+	Vertex_it v1 = this->_FindVertex(a1);
+	Vertex_it v2 = this->_FindVertex(a2);
+	Edge e = this->_GetBond(*v1, *v2);
+
+return (e);
+}
+
+void BondGraph::_RemoveBond (const Vertex& vi, const Vertex& vj) {
+
+	Edge e = this->_GetBond(vi, vj);
+	remove_edge(e, _graph);
+
+return;
+}
+
+void BondGraph::_RemoveBond (Atom const * const a1, Atom const * const a2) {
+
+	Edge e = this->_GetBond (a1, a2);
+	remove_edge(e, _graph);
+
+return;
 }
