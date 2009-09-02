@@ -1,7 +1,7 @@
 #include "orderparams.h"
 
 OrderParameters::OrderParameters (int argc, const char **argv, const WaterSystemParams& params)
-	:	WaterSystem(argc, argv, params),
+	:	WaterSystem<AmberSystem>(params),
 	angmax (1.0), angmin (-1.0), angres (0.01), angbins ((angmax-angmin)/angres),
 	_data (std::vector< std::vector<double> > (25, std::vector<double> (posbins, 0.0))),
 	number_density (std::vector<unsigned long int> (posbins, 0))
@@ -18,12 +18,19 @@ OrderParameters::OrderParameters (int argc, const char **argv, const WaterSystem
 
 	printf ("Running an order parameter analysis with the following options:\n");
 
+	#ifdef AVG
 	if (argc < 3) {
 		printf ("Rerun with the two interface locations:\norderparams <int_low> <int_high>\n");
 		exit(1);
 	}
+	#endif
 
 	printf ("\tAngle cosines will range from:\n\t\tMax = % 8.3f\n\t\tMin = % 8.3f\n\t\tResolution = % 8.3f\n", angmin, angmax, angres);
+
+	this->sys = new AmberSystem("prmtop", "mdcrd", "mdvel");
+
+	// some info before starting
+	printf ("The AMBER system loaded contains %d atoms\n", sys->size());
 
 	// The histogram looks like histo[y-position][S1][S2 numerator][S2 denominator]
 
@@ -36,7 +43,7 @@ void OrderParameters::OutputData () {
 	rewind (output);
 
 	if (!(timestep % (output_freq * 10))) {
-		for (unsigned int pos = 0; pos < posbins; pos++) {
+		for (int pos = 0; pos < posbins; pos++) {
 
 			double position = double(pos) * this->posres + this->posmin;
 			unsigned long int N = number_density[pos];
@@ -55,12 +62,12 @@ void OrderParameters::OutputData () {
 			fprintf (output, "% 12.5f", position);
 
 			// then each bit of compiled data
-			for (int i = 0; i < _data.size(); i++) {
+			for (int i = 0; i < (int)_data.size(); i++) {
 				fprintf (output, "% 15.5f", _data[i][pos]);
 			}
 
 			// and lastly the number density for that location in the slab
-			fprintf (output, "% 15d\n", N);
+			fprintf (output, "% 15d\n", (int)N);
 		}
 	}
 
@@ -89,7 +96,7 @@ void OrderParameters::Analysis () {
 	#ifdef RESTART
 	printf ("\n\n*** Restart Run ***\n\tNow skipping %d steps before beginning analysis\n", restart);
 	for (timestep = 0; timestep < restart; timestep++) {
-		sys.LoadNext();
+		sys->LoadNext();
 	}
 
 	printf ("\n*** Begin Analysis ***\n\tStarting analysis at timestep %d\n\n", timestep);
@@ -104,10 +111,13 @@ void OrderParameters::Analysis () {
 
 // ***********************************
 // used for testing on so4 + no3
-		this->SliceWaters (0.0, 50.0);
+		//this->SliceWaters (0.0, 50.0);
 // ***********************************
 
-		this->UpdateMatrix ();
+		/******
+		 * When doing any work involving H-bonding or bond distances...
+		 ******/
+		//this->UpdateMatrix ();
 
 		RUN (int_mols) {
 
@@ -119,12 +129,17 @@ void OrderParameters::Analysis () {
 			double position = r[axis];
 			if (position < pbcflip) position += Atom::Size()[axis];		// deal with the periodic cutoffs
 
+		#ifdef AVG
 			// we're going to do averaging of the two interfaces.
 			// First we find if the water is in the upper or lower interface and find its position relative to the gibbs dividing surface
 			double distance = (position > middle) ? position - int_high : int_low - position;
 
 			// find the position bin
 			int posbin = int ((distance - this->posmin)/this->posres);
+		#else
+			int posbin = int ((position - this->posmin)/this->posres);
+		#endif
+
 
 			// The two order parameters are calculated from the Euler angles, so let's find those
 			// first set the molecular axes up
@@ -136,8 +151,8 @@ void OrderParameters::Analysis () {
 			double phi_val = wat->EulerAngles[0];
 			double theta_val = wat->EulerAngles[1];
 			// for theta, if the molecule is on the bottom interface we need to adjust for the fact that the normal points in the opposite direction of the top interface. This is done just by adding 180 degrees (pi) to the angle value
-			if (position < middle)
-				theta_val += M_PI;
+			//if (position < middle)
+				//theta_val += M_PI;
 			double psi_val = wat->EulerAngles[2];
 
 			// calculate the S1 term
@@ -176,7 +191,7 @@ void OrderParameters::Analysis () {
 			++number_density[posbin];
 		}
 
-		this->sys.LoadNext();
+		this->sys->LoadNext();
 
 		this->OutputStatus ();
 		this->OutputData ();
@@ -191,12 +206,8 @@ int main (int argc, const char **argv) {
 
 	WaterSystemParams params;
 
-	params.prmtop = "prmtop";
-	params.mdcrd = "mdcrd";
-	params.mdvel = "";
 	params.axis = y;
 	params.timesteps = 200000;
-	params.restart = 0;
 	#ifdef RESTART
 		params.restart = 100000;
 	#endif
@@ -213,7 +224,7 @@ int main (int argc, const char **argv) {
 	#endif
 	params.posres = 0.100;
 	params.pbcflip = 15.0;
-	params.output_freq = 50;
+	params.output_freq = 100;
 
 	OrderParameters par (argc, argv, params);
 

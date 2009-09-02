@@ -16,12 +16,14 @@ MDCRD2PDB = $(AMBERSYSTEM) ../pdbfile.o mdcrd2pdb.o
 FILLBOX = $(AMBERSYSTEM) ../pdbfile.o ../boxfiller.o
 MPIFILES	=	$(AMBERSYSTEM) ../mpi/mpisys.o mpitest.o
 ORDERPARAMS = $(WATERSYSTEM) orderparams.o
-TEMPFILES	= $(AMBERSYSTEM) ../graph.o temp.cpp
+TEMPFILES	= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o temp.cpp
 COORDINATION	= $(WATERSYSTEM) coordination.o
 ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
 
+ROTATE			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o molecule-rotate.cpp
+
 ambertest : ambertest.o $(AMBERSYSTEM)
-	$(CXX) $(CPPFLAGS) ambertest.o $(AMBERSYSTEM) -o ambertest
+	$(CXX) $(CPPFLAGS) ambertest.o $(WATERSYSTEM) -llapack -o ambertest
 
 densitytest : $(DENSITYFILES)
 	$(CXX) $(CPPFLAGS) $(DENSITYFILES) -llapack -o densitytest
@@ -42,7 +44,7 @@ angledistro: angledistro.o $(AMBERSYSTEM)
 	$(CXX) $(CPPFLAGS) angledistro.o $(AMBERSYSTEM) -o angledistro
 
 orderparams:  $(ORDERPARAMS)
-	$(CXX) $(CPPFLAGS) $(ORDERPARAMS) -o orderparams
+	$(CXX) $(CPPFLAGS) $(ORDERPARAMS) -llapack -o orderparams
 
 dipoletcf : $(DIPOLETCF)
 	$(CXX) $(CPPFLAGS) $(DIPOLETCF) -o dipoletcf
@@ -61,6 +63,9 @@ fillbox : $(FILLBOX) fillbox.o
 
 temp: $(TEMPFILES)
 	$(CXX) $(CPPFLAGS) -llapack -g3 -O0 -o temp $(TEMPFILES)
+
+rotate: $(ROTATE)
+	$(CXX) $(CPPFLAGS) -llapack -g3 -O0 -o rotate $(ROTATE)
 
 sandbox: $(MDSYSTEM) $(AMBERSYSTEM)
 	$(CXX) $(CPPFLAGS) -g3 -O0 -llapack -o matrix-sandbox $(MDSYSTEM) $(AMBERSYSTEM) matrix-sandbox.cpp

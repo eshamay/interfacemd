@@ -40,8 +40,7 @@ xyz_files = Split("""../vecr.cpp
 					../matrixr.cpp
 					../moritasfg2002.cpp""")
 
-watersystem_files = Split("""../watersystem.cpp
-							../adjacencymatrix.cpp
+watersystem_files = Split("""../adjacencymatrix.cpp
 							../bond.cpp""") + amber_files
 
 coordination = env.Program('coordination', ['coordination.cpp'] + watersystem_files)

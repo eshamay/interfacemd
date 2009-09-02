@@ -202,7 +202,7 @@ class DensityProfiler:
 					xmax = width_max + width_extra
 			else:
 				xmin = -5.0
-				xmax = 100
+				xmax = 140.0
 
 			# first we'll plot the water data for each figure
 			ax.plot(x, self.data[i]['h2o'], 'k:', linewidth=4, label=r'H$_2$O')

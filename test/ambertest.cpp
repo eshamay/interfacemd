@@ -1,53 +1,41 @@
-#include <stdlib.h>
-#include <sstream>
 #include "ambertest.h"
 
-int main (int argc, char *argv) {
+// the command line arguments are the list of atom *NAMES* that are to be analyzed... exactly as they are named in the prmtop file
+// the files prmtop, mdcrd, and mdvel should point to their respective files.
+AmberTest::AmberTest (int const argc, const char **argv, const WaterSystemParams& params)
+	:	AmberSystem ("prmtop", "mdcrd", "mdvel")
+{
 
-	AmberSystem sys (PRMTOP, MDCRD, FORCE);
-
-	const int steps = 10000;
-
-	for (int step = 0; step < steps; step++) {
-
-		if (!(steps % 1000)) {
-		int prog = (int)((double)step / (double)steps * 100.0);
-		string progress (prog/2, '#');
-		string blanks (50 - prog/2, ' ');
-		ostringstream percent;
-		percent << prog;
-		string bar = "[" + progress + percent.str() + "%" + blanks + "]";
-		printf ("%s\r", bar.c_str());
+	for (int step = 0; step < params.timesteps; step++) {
+		printf ("time = %d\n", step);
+		RUN (_atoms) {
+			Atom * pa = this->Atoms(0);
+			if (pa->Name() != "O") continue;
+			if (pa->Position()[y] == 0.000)
+				pa->Print();
 		}
+		this->LoadNext();
 	}
 
+return;
+}
 
-/*
-	Molecule * mol = sys.Molecules(0);
+int main (const int argc, const char **argv) {
 
-	Atom * o = (*mol)["O"];
-	Atom * h = (*mol)["H2"];
-	//printf ("charge) O=%10.4f\tH=%10.4f\n", o->Charge(), h->Charge());
+	WaterSystemParams params;
 
-	Molecule oh;
-	oh.AddAtom (o);
-	oh.AddAtom (h);
-	oh.Print();
-	printf ("%f\n", (o->Position() - h->Position()).Magnitude());
-*/
+	params.axis = y;
+	params.timesteps = 40000;
+	params.avg = false;
+	params.posmin = -20.0;
+	params.posmax = 150.0;
+	params.posres = 0.100;
+	params.pbcflip = 15.0;
+	params.output_freq = 100;
 
-/*
-	RUN (mol->Atoms()) {
-		Atom * atom = mol->Atoms()[i];
+	AmberTest test (argc, argv, params);
 
-		RUN2 (atom->HBonds()) {
-			Atom * hbond = atom->HBonds()[j];
-
-			printf ("%5d(%s) : %5d(%s)\t%10.4f\n",
-				atom->ID(), atom->Name().c_str(), hbond->ID(), hbond->Name().c_str(), *atom - *hbond);
-		}
-	}
-*/
 
 return 0;
 }
+

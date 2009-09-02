@@ -3,8 +3,10 @@
 // the command line arguments are the list of atom *NAMES* that are to be analyzed... exactly as they are named in the prmtop file
 // the files prmtop, mdcrd, and mdvel should point to their respective files.
 DensityAnalyzer::DensityAnalyzer (int const argc, const char **argv, const WaterSystemParams& params)
-	:	WaterSystem (argc, argv, params)
+	:	WaterSystem<AmberSystem> (params)
 {
+
+	this->sys = new AmberSystem("prmtop", "mdcrd", "mdvel");
 
 	printf ("\n*** Performing a DENSITY analysis of the system ***\n");
 
@@ -19,6 +21,7 @@ DensityAnalyzer::DensityAnalyzer (int const argc, const char **argv, const Water
 	}
 
 	// some info before starting
+	printf ("The AMBER system loaded contains %d atoms\n", sys->size());
 	printf ("Analyzing densities of the atoms: ");
 	RUN (atomNames) {
 		printf ("%s  ", atomNames[i].c_str());
@@ -26,6 +29,7 @@ DensityAnalyzer::DensityAnalyzer (int const argc, const char **argv, const Water
 	printf ("\n");
 
 	// now we set up the histogram(s) such that we may bin the positions of each atom
+	histo.clear();
 	histo.resize(atomNames.size(), vector<int> (posbins, 0));
 
 return;
@@ -68,13 +72,13 @@ vector<int> DensityAnalyzer::AtomDensity (string const atomname) {
 	vector<int> density (posbins, 0);
 
 	// and now run through the actual calculations to find number densities
-	RUN (sys) {
+	for (int i = 0; i < sys->size(); i++) {
 
 		// find the atom of interest
-		Atom * patom = sys[i];
+		Atom * patom = sys->Atoms(i);
 
 		//if (_sys[i]->Name().find(atomname) == string::npos) continue;
-		if (sys[i]->Name() != atomname) continue;
+		if (patom->Name() != atomname) continue;
 		// grab the position info of the atom
 		VecR r = patom->Position();
 		double position = r[axis];
@@ -100,7 +104,6 @@ vector<int> DensityAnalyzer::AtomDensity (string const atomname) {
 		}
 		// and bin it into the density histogram
 		density[bin]++;
-
 	}
 
 return (density);
@@ -112,7 +115,7 @@ void DensityAnalyzer::SystemDensities () {
 		for (timestep = 0; timestep < restart; timestep++) {
 			if (!(timestep % 1000))
 				printf ("skipping timesteps: %d\n", timestep);
-			sys.LoadNext();
+			sys->LoadNext();
 		}
 		for (timestep = restart; timestep < timesteps; timestep++) {
 	#else
@@ -126,12 +129,11 @@ void DensityAnalyzer::SystemDensities () {
 
 			// once we have the data for each atom for each timestep, let's add it into the running total
 			for (unsigned int bin = 0; bin < posbins; ++bin) {
-				histo[atom][bin] += atomDensity[bin];
+				this->histo[atom][bin] += atomDensity[bin];
 			}
 		}
-
 		// and set up the system for the next timestep
-		sys.LoadNext();
+		this->sys->LoadNext();
 
 		// output some info
 		this->OutputStatus ();
@@ -155,11 +157,8 @@ int main (const int argc, const char **argv) {
 
 	WaterSystemParams params;
 
-	params.prmtop = "prmtop";
-	params.mdcrd = "mdcrd";
-	params.mdvel = "";
 	params.axis = y;
-	params.timesteps = 50000;
+	params.timesteps = 20000;
 	#ifdef RESTART
 		params.restart = 100000;
 	#endif
@@ -170,13 +169,13 @@ int main (const int argc, const char **argv) {
 		params.output = "density.avg.100+.dat";
 	#else
 		params.avg = false;
-		params.posmin = -5.0;
+		params.posmin = -20.0;
 		params.posmax = 150.0;
-		params.output = "density.100+.dat";
+		params.output = "density.dat";
 	#endif
 	params.posres = 0.100;
-	params.pbcflip = 15.0;
-	params.output_freq = 100;
+	params.pbcflip = 30.0;
+	params.output_freq = 500;
 
 
 	DensityAnalyzer den (argc, argv, params);

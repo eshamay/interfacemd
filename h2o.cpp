@@ -160,34 +160,6 @@ return;
 #endif
 */
 
-// returns the direction cosine matrix to the lab frame from the molecular one
-MatR const & Water::DCMToLab (const coord axis) {
-    // These are the three lab-frame axes
-	VecR X, Y, Z;
-
-	if (axis == z) {
-    	X.Set (1.,0.,0.);
-    	Y.Set (0.,1.,0.);
-    	Z.Set (0.,0.,1.);
-	}
-
-	// but if the system is funky and we want to use different lab-frame coords, perhaps treating the Y-axis as the primary axis, then this will work
-	// This is just changing the 'primary' axis used to define the 'tilt' angle when calculating Euler angles
-	if (axis == y) {
-		X.Set (0.,1.,0.);
-		Y.Set (0.,0.,1.);
-		Z.Set (1.,0.,0.);
-	}
-
-    // Here we'll create the lab-frame rotation matrix to rotate molecular properties into the lab-frame
-    double rotation_data[9] = {	_x<X, _y<X, _z<X,
-								_x<Y, _y<Y, _z<Y,
-								_x<Z, _y<Z, _z<Z   };
-    _DCM.Set(rotation_data);
-
-return _DCM;
-}
-
 // The molecular axes are defined as per Morita&Hynes (2000) where they set one of the OH bonds (oh1) as the molecular z-axis, and the other bond points in the positive x-axis direction. The result is setting DCM as the direction cosine matrix, that, when operating on a vector in the molecular frame will rotate it into lab-frame coordinates
 MatR const & Water::DCMToLabMorita (const coord axis, const int bond) {
     this->SetMoritaAxes (bond);

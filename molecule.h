@@ -72,6 +72,10 @@ public:
 	VecR X () const					{ return _x; }
 	VecR Y () const					{ return _y; }
 	VecR Z () const					{ return _z; }
+	// setting molecular axes
+	void X (VecR& x_axis) { _x = x_axis; }
+	void Y (VecR& y_axis) { _y = y_axis; }
+	void Z (VecR& z_axis) { _z = z_axis; }
 
 	// Euler angles
 	double * EulerAngles () 		{ return _eulerangles; }
@@ -111,6 +115,7 @@ public:
 	//std::vector<Atom *> HBonds () const;
 	//int NumHBonds () const { return this->HBonds().size(); }
 
+
 	// some functions to manipulate the molecule's position/orientation (symmetry operations)
 	void Reflect (coord const axis, double const plane = 0.0);
 	void Rotate (VecR origin, VecR axis, double angle);
@@ -130,12 +135,13 @@ public:
 	// Performs matrix rotation (i.e. matrix multiplication)
 	void RotateMatrix (double rotation[][3], double matrix[][3]) const;
 
+	// get the rotation matrix to rotate a molecule to lab-frame coordinates
+	MatR const & DCMToLab (const coord axis = z);
 };
 
 typedef std::vector<Molecule *>::iterator PMOL_IT;
 typedef std::vector<Molecule>::iterator MOL_IT;
 typedef std::vector<Molecule *> Mol_ptr_vec;
 typedef std::vector<Molecule> Mol_vec;
-
 
 #endif

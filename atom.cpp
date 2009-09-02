@@ -1,6 +1,6 @@
 #include "atom.h"
 
-VecR Atom::_size (0.0, 0.0, 0.0);
+VecR Atom::_size = VecR ();
 
 Atom::Atom () :
 	_name(""),
@@ -87,14 +87,17 @@ double Atom::operator[] (const coord index) const {
 }
 
 double Atom::operator- (const Atom& input) const {
+
 	return (_position.MinDistance(input.Position(), _size));
 }
 
 double Atom::MinDistance (const Atom& input) const {
+
 	return (_position.MinDistance(input.Position(), _size));
 }
 
 double Atom::MinDistance (Atom const * const input) const {
+
 	return (_position.MinDistance(input->Position(), _size));
 }
 
@@ -110,13 +113,16 @@ void Atom::SetMass () {
 	if (_name.find("H") != std::string::npos) _mass = 1.0078250321;
 	if (_name.find("D") != std::string::npos) _mass = 2.0156500641;
 	if (_name.find("C") != std::string::npos) _mass = 12.0000000;
+	if (_name.find("Si") != std::string::npos) _mass = 28.0855;
 	if (_name.find("S") != std::string::npos) _mass = 32.065;
+	if (_name.find("F") != std::string::npos) _mass = 18.9984;
 
 return;
 }
 
 // wrap the atom's position to the central periodic-image, given by the size of the system
 void Atom::Wrap (VecR origin = VecR(0.0, 0.0, 0.0)) {
+
 	_position.Wrap(_size, origin);
 return;
 }
@@ -130,6 +136,7 @@ void Atom::SetCharge () {
 	if (_name.find("O") != std::string::npos) _charge =  6.0;
 	if (_name.find("H") != std::string::npos) _charge = 1.0;
 	if (_name.find("N") != std::string::npos) _charge =  5.0;
+	if (_name.find("Si") != std::string::npos) _charge =  4.0;
 	if (_name.find("S") != std::string::npos) _charge =  6.0;
 	if (_name.find("Cl") != std::string::npos) _charge =  7.0;
 	if (_name.find("C") != std::string::npos) _charge =  4.0;

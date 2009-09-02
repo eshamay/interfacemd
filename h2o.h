@@ -46,7 +46,6 @@ public:
 	void SetMoritaAxes (const int bond = 1);		// Determines the molecular-frame axes (a la Morita&Hynes2000) with one bond on the Z-axis, the other in the positive X direction.
 	void SetOrderAxes ();		// sets the molecular axes such that the z-axis is along the C2V axis point from the H's to the O, and the x-axis is in the plane of the molecule
 
-	MatR const & DCMToLab (const coord axis = z);							// get the direction cosine matrix for rotations to the lab frame
 	MatR const & DCMToLabMorita (const coord axis = z, const int bond = 1);	// get the direction cosine matrix for rotations to the lab frame from the morita-hynes one
 	MatR const & DCMToLabOrder ();						// direction cosine matrix using the bisector as the molecular z-axis
 

@@ -42,9 +42,12 @@ class MoritaSFG:
 		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.set2.0.8-0.6.70.dat')
 		#self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.set2.0.8-0.6.60.dat')
 		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.0.8-0.6.70.dat')
-		self.files.append('/raid1/Analysis/NaCl+CTC/sfg.dsw-1.dat')
-		self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.dsw-1.dat')
-		self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.dsw-1.dat')
+		self.files.append('/raid1/Analysis/NaCl+CTC/sfg.alpha-switch.dat')
+		self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.alpha-switch.dat')
+		self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.alpha-switch.dat')
+		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.dsw-1.dat')
+		#self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.dsw-1.dat')
+		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.dsw-1.dat')
 
 		#self.files.append('../sfg.DSW6.dat')
 		#self.files.append('../sfg.DSW7-OHH.dat')
@@ -70,14 +73,13 @@ class MoritaSFG:
 		for i in range(len(self.files)):
 			self.comp.append([])
 
-			'''
 			if i == 1:
-				scale = 0.0
-			'''
+				scale = -20.0
 			if i == 2:
-				scale = -45.0
+				scale = -55.0
 			if i == 3:
-				scale = 65.0
+				scale = 35.0
+
 			for j in range(len(self.real[i])):
 				c = complex(self.real[i][j]+scale,self.imag[i][j])
 				self.comp[i].append(c)
@@ -90,7 +92,6 @@ class MoritaSFG:
 				#self.chi[i].append(abs(c)*abs(c))
 				self.chi[i].append(real(c*c.conjugate()))
 
-		'''
 		# normalizing by one method or another
 		for i in range(len(self.files)):
 			# find the area of the curve:
@@ -102,7 +103,6 @@ class MoritaSFG:
 				#self.chi[i][j] = self.chi[i][j] / area
 				# normalize by free-oh peak
 				self.chi[i][j] = self.chi[i][j] / max_peak
-		'''
 
 	def PlotData(self):
 

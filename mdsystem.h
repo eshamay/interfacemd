@@ -38,7 +38,7 @@ public:
 	Atom_ptr_vec& Atoms () { return _atoms; }
 	Atom * Atoms (const int index) { return _atoms[index]; }
 	Atom * operator[] (int index) { return _atoms[index]; }
-	const int NumAtoms ()	const { return _atoms.size(); }
+	const int NumAtoms ()	const { return (int)_atoms.size(); }
 
 	const int size () const { return (int)_atoms.size(); }
 	virtual const int NumSteps () const { return _numTimeSteps; }

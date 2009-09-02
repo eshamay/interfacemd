@@ -36,7 +36,7 @@ void SFGAnalyzer::Analyze () {
 
 		// first let's find all the molecules in the interface
 		this->FindWaters ();
-		this->SliceWaters (55.0, 75.0);
+		this->SliceWaters (75.0, 90.0);
 
 		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
 		UpdateGraph ();

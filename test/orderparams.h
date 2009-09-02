@@ -1,13 +1,12 @@
 #ifndef	ORDER_PARAMS_H_
 #define	ORDER_PARAMS_H_
 
-#define AVG
-#define RESTART
+//#define AVG
+//#define RESTART
 
 #include "../watersystem.h"
 
-
-class OrderParameters : public WaterSystem {
+class OrderParameters : public WaterSystem<AmberSystem> {
 
 public:
 
@@ -25,13 +24,14 @@ protected:
 	vector<double> S2_num;
 	vector<double> S2_den;
 */
-	vector< vector<double> >	_data;
-	vector<unsigned long int> number_density;
 
 	double	angmax;
 	double	angmin;
 	double	angres;
 	int		angbins;
+
+	vector< vector<double> >	_data;
+	vector<unsigned long int> number_density;
 
 	void OutputData ();
 	//void OutputStatus () const;

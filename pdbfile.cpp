@@ -27,6 +27,10 @@ PDBFile::PDBFile (string path) {
 PDBFile::PDBFile () {
 }
 
+PDBFile::PDBFile (vector<Molecule *>& mols) {
+	_molecules = mols;
+}
+
 PDBFile::~PDBFile () {
 	fclose(_file);
 }
@@ -150,7 +154,7 @@ void PDBFile::LoadLast () {
 	}
 }
 
-void PDBFile::WritePDB (vector<Molecule *> sys) {
+void PDBFile::WritePDB (vector<Molecule *>& sys) {
 
 	int atomCount = 1;
 	int molCount = 1;

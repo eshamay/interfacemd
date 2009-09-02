@@ -1,15 +1,16 @@
-#ifndef AMBERTEST_H_
-#define AMBERTEST_H_
+#ifndef _DENSITYTEST_H_
+#define _DENSITYTEST_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "../ambersystem.h"
-#include "../utility.h"
+#include "../watersystem.h"
 
 using namespace std;
 
-#define PRMTOP	"prmtop"
-#define MDCRD	"mdcrd"
-#define FORCE	"mdvel"
+class AmberTest : public AmberSystem {
+
+public:
+
+	AmberTest (const int argc, const char **argv, const WaterSystemParams& params);
+
+};
 
 #endif

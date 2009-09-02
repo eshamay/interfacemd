@@ -1,4 +1,4 @@
-#!/Library/Frameworks/Python.framework/Versions/Current/bin/python
+#!/usr/bin/python
 import sys
 from scipy import *
 import scipy.io.array_import
@@ -7,17 +7,12 @@ from scipy.optimize import leastsq
 import matplotlib.pyplot as plt
 import matplotlib.patches
 
-from DensityProfiler import DensityProfiler
-
 class OrderParameters:
 
-	def __init__(self, system):
+	def __init__(self, filename):
 
 
-		self.data = self.DataDict('../OrderParameters/'+system+'.orderparams.avg.dat')
-		density = DensityProfiler(['../Densities/'+system+'.density.avg.dat'])
-		self.dens = density.data[0]
-		self.fits = density.fits[0]
+		self.data = self.DataDict(filename)
 		self.names = {
 					  'x':0,
 					  'phi':1, 'theta':2, 'psi':3,
@@ -47,7 +42,7 @@ class OrderParameters:
 
 		d = self.data
 		# add a figure for each file
-		fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=False)
+		fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
 
 		# okay, setting up the figure and subplots
 		plt.subplots_adjust(wspace=0.2)
@@ -73,7 +68,7 @@ class OrderParameters:
 			s1[i] = 0.5*(3.0*s1[i]/n[i]-1.0)
 		# plot the S1 curve
 		S1ax.plot(x,s1,'k', linewidth=3)
-		S1ax.set_ylim(-0.2,0.05)
+		#S1ax.set_ylim(-0.2,0.05)
 
 		s2 = d[self.names['sinthetasqcos2psi']]
 		s2_den = d[self.names['sinsqtheta']]
@@ -82,9 +77,10 @@ class OrderParameters:
 		# plot the S2 curve
 		S2ax.plot(x,s2,'k', linewidth=3)
 
-		S2ax.set_ylim(-0.2,0.21)
+		#S2ax.set_ylim(-0.2,0.21)
 
 
+		'''
 		# shows the interface and plots vertical reference lines where the ions peak
 		for ax in fig.get_axes():
 			ax.axvspan(-self.fits['p_h2o'][3]*2.197/2, self.fits['p_h2o'][3]*2.197/2, facecolor='g', alpha=0.2)
@@ -93,9 +89,10 @@ class OrderParameters:
 				ax.axvline(self.fits['anion_max'], color='r', linestyle='dotted', linewidth=3)
 				ax.axvline(self.fits['cation_max'], color='b', linestyle='dotted', linewidth=3)
 			ax.set_xlim([xmin,xmax])
+		'''
 
 
-
+		'''
 		# setup a new axis for plotting the fits for reference
 		ref_ax = S2ax.twinx()
 		# plot the water fit for reference
@@ -106,6 +103,7 @@ class OrderParameters:
 		#	ref_ax.plot(self.fits['position'],self.fits['cation'],'b:', linewidth=3, label='Cation')
 
 		ref_ax.set_xlim([xmin,xmax])
+		'''
 
 		'''
 		# Set some legend properties

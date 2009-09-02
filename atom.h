@@ -42,6 +42,9 @@ public:
 
 	double MinDistance (const Atom& input) const;
 	double MinDistance (Atom const * const input) const;
+	VecR MinVector (const Atom * input) const {
+		return _position.MinVector(input->_position, _size);
+	}
 
 	// Input
 	void Name (const std::string name) { _name = name; }

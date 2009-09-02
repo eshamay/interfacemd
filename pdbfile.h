@@ -33,6 +33,7 @@ class PDBFile {
 public:
 
 	PDBFile (string path);
+	PDBFile (vector<Molecule *>& mols);
 	PDBFile ();
 	~PDBFile ();
 
@@ -50,7 +51,7 @@ public:
 	int numAtoms () { return _numAtoms; }
 	int numMols () { return _numMols; }
 
-	static void WritePDB (vector<Molecule *> system);		// given a vector of molecules, this will print out a PDB file
+	static void WritePDB (vector<Molecule *>& system);		// given a vector of molecules, this will print out a PDB file
 
 	vector<Molecule *>& Molecules () { return _molecules; }
 	Atom * Atoms (int index) { return _atoms[index]; }

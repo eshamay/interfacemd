@@ -61,7 +61,7 @@ public:
 	void Zero ();								// Zero all elements of a vector
 	void Scale (double val);					// scale the entire vector's magnitude
 	void Scale (VecR val);						// scale each individual element by each element of another vector
-	VecR MinVector (const VecR& input, const VecR& size) const;	// Find the min offset vector between two points in periodic bounds
+	VecR MinVector (const VecR& input, const VecR& size) const;
 	double MinDistance (const VecR& input, const VecR& size) const;
 	//VecR RotateToFrame (VecR const * const frame) const;
 	VecR& Wrap (VecR& size, VecR origin = VecR ());						// Used to wrap a vector into a central periodic cell of the given size

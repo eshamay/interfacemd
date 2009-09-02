@@ -9,7 +9,7 @@
 class AmberSystem : public MDSystem {
 
 private:
-	Atom_ptr_vec	_atoms;
+	//Atom_ptr_vec	_atoms;
 	TOPFile		_topfile;
 	CRDFile		_coords;
 	ForceFile	_forces;
