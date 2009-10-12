@@ -19,11 +19,14 @@ CarbonChain::CarbonChain (const Molecule& molecule)
 }
 
 // Returns a vector that points from the molecule's center of mass to the C10 atom - gives a rough approximation of the molecule's long-axis
-VecR CarbonChain::Vector_CoM_to_Atom (const Atom * atom) {
+VecR CarbonChain::Vector_CoM_To_End () {
 	// First we set the atoms, update the center of mass, etc.
 	this->SetAtoms ();
 	this->UpdateCenterOfMass ();
 
-	VecR axis (_centerofmass.MinVector(atom));
+	// the last carbon in the chain
+	Atom * LastCarbon = _carbons[_carbons.size() - 1];
+	// the axis between the center of mass and the last chain-carbon
+	VecR axis (_centerofmass.MinVector(LastCarbon));
 	return (axis);
 }

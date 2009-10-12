@@ -19,7 +19,7 @@ struct WaterSystemParams {
 		const double _angmin = -1.0, const double _angmax = 1.0, const double _angres = 0.01;
 		const double _pbcflip = 15.0
 	) :
-		avg(_avg), output(_output),
+		avg(_avg), output(fopen(_output.c_str, 'w')),
 		axis(_axis), output_freq(_output_freq), timesteps(_timesteps), restart(_restart),
 		posmin(_posmin), posmax(_posmax), posres(_posres), 
 		posbins ((posmax-posmin)/posres),
@@ -30,7 +30,7 @@ struct WaterSystemParams {
 
 	bool avg;
 
-	string output;
+	FILE * output;
 
 	coord axis;
 	VecR ref_axis;
@@ -85,10 +85,8 @@ public:
 	virtual ~WaterSystem ();
 
 	void OpenFile ();
-	virtual void OutputHeader(const WaterSystemParams& params) const;
 	void Debug (string msg) const;
 
-	virtual void OutputStatus () const;
 	void FindWaters ();						// Find all the waters
 	void FindMols (const string name);		// find all molecules with this name
 	void FlipWaters (const coord axis = y);
@@ -97,7 +95,6 @@ public:
 	void FindInterfacialWaters ();
 
 	void UpdateGraph () { graph.UpdateGraph (int_atoms); }
-	void Output_Orientation_Histogram_Data (vector<int> histogram);
 
 protected:
 
@@ -107,6 +104,7 @@ protected:
 	BondGraph	graph;
 
 	coord axis;
+	VecR ref_axis;
 
 	int	output_freq;
 
@@ -130,8 +128,8 @@ protected:
 template <class T>
 WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
 	:
-		output(fopen(params.output.c_str(), "w")),
-		axis(params.axis),
+		output(params.output),
+		axis(params.axis), ref_axis(params.ref_axis),
 		output_freq(params.output_freq),
 		posmin(params.posmin), posmax(params.posmax), posres(params.posres),
 		posbins(int ((posmax - posmin)/posres) + 1), pbcflip(params.pbcflip),
@@ -158,7 +156,6 @@ WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
 */
 
 	OpenFile ();
-	OutputHeader(params);
 
 	return;
 }
@@ -173,9 +170,8 @@ WaterSystem<T>::~WaterSystem () {
 template <class T>
 void WaterSystem<T>::OpenFile () {
 
-	//output = fopen (params, 'w');
 	if (output == (FILE *)NULL) {
-		printf ("WaterSystem::WaterSystem (argc, argv) - couldn't open the output file!\n");
+		printf ("WaterSystem::WaterSystem (argc, argv) - couldn't open the data output file!\n");
 		exit(1);
 	}
 
@@ -183,21 +179,7 @@ void WaterSystem<T>::OpenFile () {
 }
 
 template <class T>
-void WaterSystem<T>::OutputHeader(const WaterSystemParams& params) const {
-
-	printf ("Analysis Parameters:\n\tOutput Filename = \"%s\"\n\tScreen output frequency = 1/%d\n\n\tPosition extents for analysis:\n\t\tMin = % 8.3f\n\t\tMax = % 8.3f\n\t\tPosition Resolution = % 8.3f\n\n\tPrimary Axis = %d\nNumber of timesteps to be analyzed = %d\n",
-			params.output.c_str(), params.output_freq, params.posmin, params.posmax, params.posres, int(params.axis), params.timesteps);
-
-	if (params.avg) {
-		printf ("\n\nThe analysis is averaging about the two interfaces located as:\n\tLow  = % 8.3f\n\tHigh = % 8.3f\n\n", int_low, int_high);
-	}
-
-	return;
-}
-
-template <class T>
 void WaterSystem<T>::FindInterfacialWaters () {
-
 
 	int_wats.clear();
 	int_atoms.clear();
@@ -268,7 +250,6 @@ void WaterSystem<T>::FindMols (const string name) {
 return;
 }
 
-
 template <class T>
 void WaterSystem<T>::FindWaters () {
 
@@ -298,40 +279,6 @@ void WaterSystem<T>::FindWaters () {
 	}
 
 return;
-}
-
-template <class T>
-void WaterSystem<T>::OutputStatus () const {
-
-	if (!(timestep % (output_freq * 10)))
-		cout << endl << timestep << "/" << timesteps << " ) ";
-	if (!(timestep % output_freq))
-		cout << "*";
-
-	fflush (stdout);
-
-return;
-}
-
-// output data to a file
-template <class T>
-void WaterSystem<T>::Output_Orientation_Histogram_Data (vector<int> histogram) {
-
-	rewind (output);
-
-	if (!(timestep % (output_freq * 10))) {
-		// angle value is the row
-		double angle;
-		for (int ang = 0; ang < angbins; ang++) {
-			angle = ang*angres+angmin;
-			// print out the position for each position column
-			fprintf (output, "% 8.3f% 12d\n", angle, histogram[ang]);
-		}
-	}
-
-	fflush (output);
-
-	return;
 }
 
 
@@ -392,6 +339,5 @@ void WaterSystem<T>::SliceWaterCoordination (const coordination coord) {
 
 return;
 }
-
 
 #endif

@@ -21,7 +21,7 @@ class CarbonChain : public molecule {
 		vector<Atom *>& Carbons () { return (_carbons); }
 		Atom * Carbon (int index) { return (_carbons[index]); }
 
-		VecR Vector_CoM_to_Atom (const Atom * atom);
+		VecR Vector_CoM_To_End ();
 };
 
 typedef std::vector<CarbonChain *> CarbonChain_ptr_vec;
