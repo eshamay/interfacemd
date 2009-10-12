@@ -58,6 +58,26 @@ void Water::SetAtoms () {
 return;
 }
 
+// flip the water about a given plane (perpendicular to the given axis) running through the oxygen
+void Water::Flip (const coord axis) {
+
+	this->SetAtoms();
+
+	double center = _o->Position()[axis];
+	double distance1 = _oh1[axis];
+	double distance2 = _oh2[axis];
+
+	VecR offset1, offset2;
+
+	offset1.Set(axis, center - distance1);
+	offset2.Set(axis, center - distance2);
+
+	_h1->Position(axis, center - distance1);
+	_h2->Position(axis, center - distance2);
+
+return;
+}
+
 VecR Water::Bisector () {
 
 	this->SetAtoms();
@@ -103,7 +123,7 @@ void Water::SetOrderAxes () {
 
 	this->SetAtoms ();
 
-	// the z-axis is the negative of the C2V axis - so find the bisector and set the vector pointing towards the O
+	// the z-axis is the negative of the C2V axis - so find the bisector and set the vector pointing towards the O (just like the dipole vector)
 	_z = this->Bisector() * (-1.0);
 
 	// the y-axis points perpendicular to the plane of the molecule. This can be found from the cross product of the two OH vectors

@@ -158,7 +158,7 @@ int main (const int argc, const char **argv) {
 	WaterSystemParams params;
 
 	params.axis = y;
-	params.timesteps = 20000;
+	params.timesteps = 200000;
 	#ifdef RESTART
 		params.restart = 100000;
 	#endif

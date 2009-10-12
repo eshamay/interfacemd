@@ -32,6 +32,8 @@ private:
 	void OutputData ();
 	void CollectChi (Complex_vec& newchi, Complex_vec& totalchi);
 
+	void FlipWaters (const coord axis = y);
+
 };
 
 #endif

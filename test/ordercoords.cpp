@@ -144,9 +144,9 @@ void CoordOrderParams::Analysis () {
 		// update our adjacency matrix with connectivity and bonding data
 		this->UpdateMatrix ();
 
-		RUN (int_mols) {
+		RUN (int_wats) {
 
-			Water * wat = this->int_mols[i];
+			Water * wat = this->int_wats[i];
 
 			// Here we'll find out the water's coordination type (OH, OOH, OHH, etc.)
 			int coord = int(this->matrix.WaterCoordination (wat));

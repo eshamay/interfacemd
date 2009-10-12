@@ -40,6 +40,9 @@ public:
 	VecR Bisector ();		// calculates the bisector (unit vector) of the water
 	VecR Normal () const { return _y; }
 
+	// flip the molecule about a plane (i.e. take its mirror image about a plane) through the oxygen about a given axis
+	void Flip (const coord axis);
+
 	//void CalcDipole ();
 	VecR const & Dipole () const { return _dipole; }			// calculates the dipole (from a parameterized source)
 

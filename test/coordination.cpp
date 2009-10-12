@@ -138,8 +138,8 @@ void CoordinationTest::Analysis () {
 
 		// now, for each water, we find its coordination
 		Water * wat;
-		RUN (int_mols) {
-			wat = int_mols[i];
+		RUN (int_wats) {
+			wat = int_wats[i];
 
 			coordination coord = this->matrix.WaterCoordination (wat);
 			this->BinPosition (wat, coord);

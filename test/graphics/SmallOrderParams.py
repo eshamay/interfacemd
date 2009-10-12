@@ -12,27 +12,6 @@ class OrderParameters:
 	def __init__(self, filename):
 
 		self.data = self.DataDict(filename)
-		'''
-		self.names = {
-					  'x':0,
-					  'phi':1, 'theta':2, 'psi':3,
-					  'sinphi':4, 'sintheta':5, 'sinpsi':6,
-					  'sin2phi':7, 'sin2theta':8, 'sin2psi':9,
-					  'sinsqphi':10, 'sinsqtheta':11, 'sinsqpsi':12,
-					  'cosphi':13, 'costheta':14, 'cospsi':15,
-					  'cos2phi':16, 'cos2theta':17, 'cos2psi':18,
-					  'cossqphi':19, 'cossqtheta':20, 'cossqpsi':21,
-					  'sinthetacos2phi':22, 'sinthetacos2psi':23,
-					  'sinthetasqcos2phi':24, 'sinthetasqcos2psi':25,
-					  'n':26
-		}
-		'''
-		self.names = {
-					  'x':0,
-					  'theta-z':1, 'theta-y':2, 'theta-sq-z':3, 'theta-sq-y':4, 
-					  'oh1':5, 'oh2':6, 'oh1-sq':7, 'oh2-sq':8, 
-					  'n':9
-		}
 
 	def DataDict(self, filename):
 
@@ -61,61 +40,26 @@ class OrderParameters:
 		# some labels for the plot
 		S1ax.set_title ('Water Order Parameters', size=25)
 		S2ax.set_xlabel(r'Slab Position / $\AA$', size=20)
-		#S1ax.set_ylabel(r'S$_1=\frac{1}{2}\left<3\cos^2\theta-1\right>$', size=20)
-		#S2ax.set_ylabel(r'S$_2=\frac{\left<\sin^2\theta\cos2\psi\right>}{\left<\sin^2\theta\right>}$', size=20)
+		S1ax.set_ylabel(r'S$_1=\frac{1}{2}\left<3\cos^2\theta-1\right>$', size=20)
+		S2ax.set_ylabel(r'S$_2=\frac{\left<\sin^2\theta\cos2\psi\right>}{\left<\sin^2\theta\right>}$', size=20)
 
-		x = d[self.names['x']]
-		low_int = 59.19
-		high_int = 89.3
-		# grab the indices of the two interfaces for flipping the values for plots
-		low_int_ind = filter(lambda x: x[1] > low_int, enumerate(x))[0][0]
-		high_int_ind = filter(lambda x: x[1] > high_int, enumerate(x))[0][0]
+		xmin = -15.0
+		xmax = 15.0
+		x = d[0]
 
-		n = d[self.names['n']]
+		s1 = d[1]
+		for i in range(len(s1)):
+			s1[i] = -s1[i]
+		# plot the S1 curve
+		S1ax.plot(x,s1,'k', linewidth=3)
 
-		def plot_line (name, fn, ax, color):
-			s = d[self.names[name]]
-			s = map (fn, s, n)
-			ax.plot(x, s, color, linewidth=2, label=name)
-		
-		line_fn = lambda x,y: 1.0*x/y
-		line_sq_fn = lambda x,y: 0.5*(3.0*x/y-1.0)
-			
-		plot_line ('theta-z', line_fn, S1ax, 'k')
-		plot_line ('theta-y', line_fn, S1ax, 'b')
-		plot_line ('oh1', line_fn, S1ax, 'r')
-		plot_line ('oh2', line_fn, S1ax, 'g')
-
-		plot_line ('theta-sq-z', line_sq_fn, S2ax, 'k')
-		plot_line ('theta-sq-y', line_sq_fn, S2ax, 'b')
-		plot_line ('oh1-sq', line_sq_fn, S2ax, 'r')
-		plot_line ('oh2-sq', line_sq_fn, S2ax, 'g')
+		s2 = d[2]
+		# plot the S2 curve
+		S2ax.plot(x,s2,'k', linewidth=3)
 
 		# shows the interface and plots vertical reference lines where the ions peak
-		#for ax in fig.get_axes():
-			#ax.set_xlim([xmin,xmax])
-			#ax.set_xlim([50.0,100.0])
-		'''
-			ax.axvspan(-self.fits['p_h2o'][3]*2.197/2, self.fits['p_h2o'][3]*2.197/2, facecolor='g', alpha=0.2)
-			ax.axvspan(ax.get_xlim()[0],0.0, facecolor='b', alpha=0.2)
-			if len(self.dens['anion']) > 0:
-				ax.axvline(self.fits['anion_max'], color='r', linestyle='dotted', linewidth=3)
-				ax.axvline(self.fits['cation_max'], color='b', linestyle='dotted', linewidth=3)
-		'''
-
-
-		'''
-		# setup a new axis for plotting the fits for reference
-		ref_ax = S2ax.twinx()
-		# plot the water fit for reference
-		ref_ax.plot(self.fits['position'],self.fits['h2o'],'k:', linewidth=3, label=r'H$_2$O')
-		# plot the ion fit lines for reference
-		#if len(self.dens['anion']) > 0:
-		#	ref_ax.plot(self.fits['position'],self.fits['anion'],'r:', linewidth=3, label='Anion')
-		#	ref_ax.plot(self.fits['position'],self.fits['cation'],'b:', linewidth=3, label='Cation')
-
-		ref_ax.set_xlim([xmin,xmax])
-		'''
+		for ax in fig.get_axes():
+			ax.set_xlim([xmin,xmax])
 
 		'''
 		# Set some legend properties
@@ -136,20 +80,15 @@ class OrderParameters:
 			l.set_linewidth(2.0)  # the legend line width
 		'''
 
-		#S1ax.axvline(0.0, color='r', linestyle='dotted', linewidth=4)
+		S1ax.axvline(0.0, color='r', linestyle='dotted', linewidth=4)
 		#S1ax.axvline(90.814, color='r', linestyle='dotted', linewidth=4)
-		#S2ax.axvline(0.0, color='r', linestyle='dotted', linewidth=4)
+		S2ax.axvline(0.0, color='r', linestyle='dotted', linewidth=4)
 		#S2ax.axvline(90.814, color='r', linestyle='dotted', linewidth=4)
-		#S1ax.set_ylim([-1.0, 1.0])
-		#S2ax.set_ylim([-0.5, 1.0])
-		S1ax.set_xlim([55.0, 95.0])
-		S2ax.set_xlim([55.0, 95.0])
+		S1ax.set_ylim([-0.2, 0.25])
+		S2ax.set_ylim([-0.25, 0.2])
 
 		plt.show()
-
-
-
-		'''
+'''
 		S1ax.set_xticklabels([])
 		S2ax.set_xticklabels([])
 		S2ax.set_ylabel(r'S$_2$', size=20)
@@ -188,8 +127,8 @@ class OrderParameters:
 				connectionstyle="angle,angleA=0,angleB=-60,rad=30"
 				)
 			)
-		'''
-		'''
+
+
 		# set some legend properties.  All the code below is optional.  The
 		# defaults are usually sensible but if you need more control, this
 		# shows you how
@@ -208,4 +147,8 @@ class OrderParameters:
 			l.set_linewidth(1.5)  # the legend line width
 
 		#plt.savefig('density.dat.png', dpi=300.0, format='png' )
-		'''
+
+'''
+
+o = OrderParameters(sys.argv[1])
+o.PlotData()

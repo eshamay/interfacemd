@@ -13,13 +13,19 @@ struct WaterSystemParams {
 		const int _timesteps = 200000,
 		const bool _avg = false,
 		const coord _axis = y,
-		const int _output_freq = 50, const int _restart = 0,
-		const double _posmin = -5.0, const double _posmax = 150.0, const double _posres = 1.0,
+		const VecR ref_axis (0.0, 1.0, 0.0),
+		const int _output_freq = 500, const int _restart = 0,
+		const double _posmin = -20.0, const double _posmax = 150.0, const double _posres = 1.0,
+		const double _angmin = -1.0, const double _angmax = 1.0, const double _angres = 0.01;
 		const double _pbcflip = 15.0
 	) :
 		avg(_avg), output(_output),
 		axis(_axis), output_freq(_output_freq), timesteps(_timesteps), restart(_restart),
-		posmin(_posmin), posmax(_posmax), posres(_posres), pbcflip(_pbcflip)
+		posmin(_posmin), posmax(_posmax), posres(_posres), 
+		posbins ((posmax-posmin)/posres),
+		pbcflip(_pbcflip),
+		angmin(_angmin), angmax(_angmax), angres(_angres),
+		angbins ((angmax-angmin)/angres)
 	{ }
 
 	bool avg;
@@ -27,12 +33,16 @@ struct WaterSystemParams {
 	string output;
 
 	coord axis;
+	VecR ref_axis;
 
 	int output_freq;
 	int timesteps, restart;
 
 	double posmin, posmax, posres;
+	int posbins;
 	double pbcflip;
+	double angmin, angmax, angres;
+	int angbins;
 };
 
 /***** DEFINITIONS *****/
@@ -79,13 +89,15 @@ public:
 	void Debug (string msg) const;
 
 	virtual void OutputStatus () const;
-	//virtual void OutputData () const;
-	void FindWaters ();
+	void FindWaters ();						// Find all the waters
+	void FindMols (const string name);		// find all molecules with this name
+	void FlipWaters (const coord axis = y);
 	void SliceWaters (const double low, const double high);
 	void SliceWaterCoordination (const coordination coord);
 	void FindInterfacialWaters ();
 
 	void UpdateGraph () { graph.UpdateGraph (int_atoms); }
+	void Output_Orientation_Histogram_Data (vector<int> histogram);
 
 protected:
 
@@ -102,12 +114,15 @@ protected:
 	double	posmin, posmax, posres;
 	int		posbins;
 	double	pbcflip;
+	double 	angmin, angmax, angres;
+	int		angbins;
 	unsigned int timesteps;
 	unsigned int timestep, restart;
 
 	double int_low, int_high, middle;		// the positions of analysis cutoffs
 
-	Water_ptr_vec	int_mols;		// interfacial waters, or just all the waters in the system depending on the function call
+	Water_ptr_vec	int_wats;		// interfacial waters, or just all the waters in the system depending on the function call
+	Molecule_ptr_vec int_mols;
 	Atom_ptr_vec	int_atoms;		// interfacial water atoms (or as above)
 
 };
@@ -120,6 +135,8 @@ WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
 		output_freq(params.output_freq),
 		posmin(params.posmin), posmax(params.posmax), posres(params.posres),
 		posbins(int ((posmax - posmin)/posres) + 1), pbcflip(params.pbcflip),
+		angmin(params.angmin), angmax(params.angmax), angres(params.angres),
+		angbins(int ((angmax - angmin)/angres) + 1), 
 		timesteps(params.timesteps), restart(params.restart)
 {
 
@@ -182,7 +199,7 @@ template <class T>
 void WaterSystem<T>::FindInterfacialWaters () {
 
 
-	int_mols.clear();
+	int_wats.clear();
 	int_atoms.clear();
 
 	Molecule * pmol;
@@ -204,7 +221,7 @@ void WaterSystem<T>::FindInterfacialWaters () {
 		// these values have to be adjusted for each system
 		if (position < posmin or position > posmax) continue;				// set the interface cutoffs
 
-		int_mols.push_back (water);
+		int_wats.push_back (water);
 		RUN2(water->Atoms()) {
 			int_atoms.push_back (water->Atoms(j));
 		}
@@ -214,9 +231,48 @@ return;
 }
 
 template <class T>
-void WaterSystem<T>::FindWaters () {
+void WaterSystem<T>::FlipWaters (const coord axis) {
+
+	RUN (int_wats) {
+		int_wats[i]->Flip(axis);
+	}
+
+return;
+}
+
+template <class T>
+void WaterSystem<T>::FindMols (const string name) {
 
 	int_mols.clear();
+	int_atoms.clear();
+
+	Molecule * pmol;
+
+	// go through the system
+	for (int i = 0; i < sys->NumMols(); i++) {
+		// grab each molecule
+		pmol = sys->Molecules(i);
+
+		// we're only looking at waters for SFG analysis right now
+		if (pmol->Name() != name) continue;
+
+		// add it to the group
+		int_mols.push_back (pmol);
+
+		// and then add all of its atoms
+		RUN2(pmol->Atoms()) {
+			int_atoms.push_back (pmol->Atoms(j));
+		}
+	}
+
+return;
+}
+
+
+template <class T>
+void WaterSystem<T>::FindWaters () {
+
+	int_wats.clear();
 	int_atoms.clear();
 
 	Molecule * pmol;
@@ -233,7 +289,7 @@ void WaterSystem<T>::FindWaters () {
 		// first thing we do is grab a water molecule to work with
 		water = static_cast<Water *>(pmol);
 		// add it to the group
-		int_mols.push_back (water);
+		int_wats.push_back (water);
 
 		// and then add all of its atoms
 		RUN2(water->Atoms()) {
@@ -257,13 +313,35 @@ void WaterSystem<T>::OutputStatus () const {
 return;
 }
 
+// output data to a file
+template <class T>
+void WaterSystem<T>::Output_Orientation_Histogram_Data (vector<int> histogram) {
+
+	rewind (output);
+
+	if (!(timestep % (output_freq * 10))) {
+		// angle value is the row
+		double angle;
+		for (int ang = 0; ang < angbins; ang++) {
+			angle = ang*angres+angmin;
+			// print out the position for each position column
+			fprintf (output, "% 8.3f% 12d\n", angle, histogram[ang]);
+		}
+	}
+
+	fflush (output);
+
+	return;
+}
+
+
 // Let's the analysis only look at a particular piece of the system instead of the entire system. That is, only use waters that are between certain positions on the long-axis
 template <class T>
 void WaterSystem<T>::SliceWaters (const double low, const double high) {
 
 	std::vector<Water *> wats;
-	RUN (int_mols) {
-		Water * wat = int_mols[i];
+	RUN (int_wats) {
+		Water * wat = int_wats[i];
 		Atom * oxy = wat->GetAtom ("O");
 		VecR r = oxy->Position();
 		double position = r[axis];
@@ -276,11 +354,11 @@ void WaterSystem<T>::SliceWaters (const double low, const double high) {
 		}
 	}
 
-	int_mols.clear();
+	int_wats.clear();
 	int_atoms.clear();
 
 	RUN (wats) {
-		int_mols.push_back(wats[i]);
+		int_wats.push_back(wats[i]);
 		RUN2(wats[i]->Atoms()) {
 			int_atoms.push_back(wats[i]->Atoms(j));
 		}
@@ -294,19 +372,19 @@ void WaterSystem<T>::SliceWaterCoordination (const coordination coord) {
 
 	Water_ptr_vec wats;
 
-	RUN (int_mols) {
-		Water * wat = int_mols[i];
+	RUN (int_wats) {
+		Water * wat = int_wats[i];
 		coordination c = graph.WaterCoordination(wat);
 		if (c == coord) {
 			wats.push_back(wat);
 		}
 	}
 
-	int_mols.clear();
+	int_wats.clear();
 	int_atoms.clear();
 
 	RUN (wats) {
-		int_mols.push_back(wats[i]);
+		int_wats.push_back(wats[i]);
 		RUN2(wats[i]->Atoms()) {
 			int_atoms.push_back(wats[i]->Atoms(j));
 		}

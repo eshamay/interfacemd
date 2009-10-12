@@ -1,3 +1,4 @@
+
 import csv
 import numpy
 import sys
@@ -25,7 +26,7 @@ class MoritaSFG:
 		#self.files.append('../sfg.0.8-0.6.dat')
 		#self.files.append('../sfg.dsw-1.dat')
 		#self.files.append('/raid1/Analysis/H2O+CTC/sfg.dsw-2.dat')
-		self.files.append('/raid1/Analysis/H2O+CTC/sfg.alpha-switch.dat')
+		self.files.append('/home/eric/cl7/raid1/Analysis/pds/sfg.alpha-switch.dat')
 		#self.files.append('../sfg.set1-cos-term.dat')
 		#self.files.append('../sfg.set2.dat')
 		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.set2.dat')
@@ -42,9 +43,9 @@ class MoritaSFG:
 		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.set2.0.8-0.6.70.dat')
 		#self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.set2.0.8-0.6.60.dat')
 		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.0.8-0.6.70.dat')
-		self.files.append('/raid1/Analysis/NaCl+CTC/sfg.alpha-switch.dat')
-		self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.alpha-switch.dat')
-		self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.alpha-switch.dat')
+		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.alpha-switch.dat')
+		#self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.alpha-switch.dat')
+		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.alpha-switch.dat')
 		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.dsw-1.dat')
 		#self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.dsw-1.dat')
 		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.dsw-1.dat')

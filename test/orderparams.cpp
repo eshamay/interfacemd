@@ -3,7 +3,7 @@
 OrderParameters::OrderParameters (int argc, const char **argv, const WaterSystemParams& params)
 	:	WaterSystem<AmberSystem>(params),
 	angmax (1.0), angmin (-1.0), angres (0.01), angbins ((angmax-angmin)/angres),
-	_data (std::vector< std::vector<double> > (25, std::vector<double> (posbins, 0.0))),
+	_data (std::vector< std::vector<double> > (8, std::vector<double> (posbins, 0.0))),
 	number_density (std::vector<unsigned long int> (posbins, 0))
 	/*
 	phi (std::vector<double> (posbins, 0.0)),
@@ -118,10 +118,11 @@ void OrderParameters::Analysis () {
 		 * When doing any work involving H-bonding or bond distances...
 		 ******/
 		//this->UpdateMatrix ();
+		VecR ref_axis (0.0, 1.0, 0.0);	// reference axis normal to the interfaces
 
-		RUN (int_mols) {
+		RUN (int_wats) {
 
-			Water * wat = int_mols[i];
+			Water * wat = int_wats[i];
 
 			// calculate its position in the slab, and find the histogram bin for it
 			Atom * oxy = wat->GetAtom ("O");
@@ -145,15 +146,45 @@ void OrderParameters::Analysis () {
 			// first set the molecular axes up
 			wat->SetOrderAxes ();
 
+/*
 			// then find the Euler angles for the molecule
 			wat->CalcEulerAngles (this->axis);
-
 			double phi_val = wat->EulerAngles[0];
 			double theta_val = wat->EulerAngles[1];
 			// for theta, if the molecule is on the bottom interface we need to adjust for the fact that the normal points in the opposite direction of the top interface. This is done just by adding 180 degrees (pi) to the angle value
 			//if (position < middle)
 				//theta_val += M_PI;
 			double psi_val = wat->EulerAngles[2];
+*/			
+
+			// calculate the angles theta_z and theta_y - between the respective molecular axes and the system reference axis
+			double cos_theta_z = (wat->Z() < ref_axis);
+			double cos_theta_y = (wat->Y() < ref_axis);
+
+			VecR oh1 = *wat->OH1();
+			VecR oh2 = *wat->OH2();
+
+			double cos_oh1 = (oh1 < ref_axis);
+			double cos_oh2 = (oh2 < ref_axis);
+
+			// The oh-vectors are not considered to be equivalent... the one with the smaller angle - more perpendicular to the surface normal - is OH-A.
+			double cos_a = (cos_oh1 < cos_oh2) ? cos_oh1 : cos_oh2;
+			double cos_b = (cos_oh1 > cos_oh2) ? cos_oh1 : cos_oh2;
+
+			// the perpendicular angle has to be treated, however, because the vector may only have values between 0 and 90 degrees... thus:
+			double theta_y = acos(cos_theta_y);
+			theta_y = fmod (theta_y + M_PI, M_PI/2.0);
+			cos_theta_y = cos(theta_y);
+			//printf ("%f\n", cos_theta_y);
+
+			_data[0][posbin] += cos_theta_z;				// cos(theta)
+			_data[1][posbin] += cos_theta_y;
+			_data[2][posbin] += cos_theta_z * cos_theta_z;	// cos^2(theta)
+			_data[3][posbin] += cos_theta_y * cos_theta_y;
+			_data[4][posbin] += cos_a;
+			_data[5][posbin] += cos_b;
+			_data[6][posbin] += cos_a * cos_a;
+			_data[7][posbin] += cos_b * cos_b;
 
 			// calculate the S1 term
 			//double S1_value = cos(theta_val) * cos(theta_val);
@@ -163,6 +194,7 @@ void OrderParameters::Analysis () {
 			//double S2_den_value = sin(theta_val) * sin(theta_val);
 
 			// bin the euler angle values (cos() of...)
+/*
 			_data[0][posbin] += phi_val;							// direct angle values
 			_data[1][posbin] += theta_val;
 			_data[2][posbin] += psi_val;
@@ -188,6 +220,7 @@ void OrderParameters::Analysis () {
 			_data[22][posbin] += sin(theta_val)*cos(2.0*psi_val);					// <sin(theta)*cos(2psi)>
 			_data[23][posbin] += sin(theta_val)*sin(theta_val)*cos(2.0*phi_val);	// <sin^2(theta)*cos(2phi)>
 			_data[24][posbin] += sin(theta_val)*sin(theta_val)*cos(2.0*psi_val);	// <sin^2(theta)*cos(2psi)>
+*/
 			++number_density[posbin];
 		}
 
@@ -218,13 +251,13 @@ int main (int argc, const char **argv) {
 		params.output = "orderparams.avg.dat";
 	#else
 		params.avg = false;
-		params.posmin = -5.0;
+		params.posmin = -20.0;
 		params.posmax = 150.0;
-		params.output = "orderparams.dat";
+		params.output = "orderparams.new.dat";
 	#endif
 	params.posres = 0.100;
-	params.pbcflip = 15.0;
-	params.output_freq = 100;
+	params.pbcflip = 30.0;
+	params.output_freq = 500;
 
 	OrderParameters par (argc, argv, params);
 

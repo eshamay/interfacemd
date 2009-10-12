@@ -36,7 +36,7 @@ int main (int argc, char **argv) {
 
 
 	// just so we don't have to always iterate over the entire system, we're only going to look at interfacial molecules - the ones were interested in.
-	std::vector<Molecule *> int_mols;
+	std::vector<Molecule *> int_wats;
 	// and these are the atoms of those molecules
 	std::vector<Atom *> int_atoms;
 
@@ -50,7 +50,7 @@ int main (int argc, char **argv) {
 		firstmol = true;		// every timestep we will have to go through all the molecules again
 
 		// first let's find all the molecules in the interface
-		FindInterfacialAtoms (int_mols, int_atoms, sys);
+		FindInterfacialAtoms (int_wats, int_atoms, sys);
 
 /*
 for (int i = 0; i < 5; i++) {
@@ -63,16 +63,16 @@ for (int i = 0; i < 5; i++) {
 		sys.UpdateGraph (int_atoms);
 
 		// each node needs to know which molecules to analyze
-		int start_mol = BLOCK_LOW(sys.ID(), sys.Procs(), int_mols.size());
-		int end_mol = BLOCK_HIGH(sys.ID(), sys.Procs(), int_mols.size());
+		int start_mol = BLOCK_LOW(sys.ID(), sys.Procs(), int_wats.size());
+		int end_mol = BLOCK_HIGH(sys.ID(), sys.Procs(), int_wats.size());
 		//printf ("node %d of %d covers [%d - %d]\n", sys.ID(), sys.Procs(), start_mol, end_mol);
 
 		for (int mol = start_mol; mol <= end_mol; mol++) {
 			// we're only looking at waters for SFG analysis right now
-			if (int_mols[mol]->Name() != "h2o") continue;
+			if (int_wats[mol]->Name() != "h2o") continue;
 
 			// first thing we do is grab a water molecule to work with
-			water = static_cast<Water *>(int_mols[mol]);
+			water = static_cast<Water *>(int_wats[mol]);
 
 			sfg.Reset();		// reset the calculator for a new molecule
 			MolChi.clear();
@@ -218,9 +218,9 @@ void OutputData (FILE * fp, vector< complex<double> >& chi) {
 return;
 }
 
-void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_atoms, MPIMolSystem& sys) {
+void FindInterfacialAtoms (vector<Molecule *>& int_wats, vector<Atom *>& int_atoms, MPIMolSystem& sys) {
 
-	int_mols.clear();
+	int_wats.clear();
 	int_atoms.clear();
 
 	Molecule * pmol;
@@ -235,7 +235,7 @@ void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_ato
 		// these values have to be adjusted for each system
 		if (position < INTERFACE_LOW || position > INTERFACE_HIGH) continue;				// set the interface cutoffs
 
-		int_mols.push_back (pmol);
+		int_wats.push_back (pmol);
 		RUN2(pmol->Atoms()) {
 			int_atoms.push_back (pmol->Atoms(j));
 		}
@@ -250,8 +250,8 @@ void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_ato
 
 		RUN (int_atoms)
 			atomIDs.push_back(int_atoms[i]->ID());
-		RUN (int_mols)
-			molIDs.push_back(int_mols[i]->MolID());
+		RUN (int_wats)
+			molIDs.push_back(int_wats[i]->MolID());
 	}
 
 	// deconstruct, ship out, and reconstruct on each node
@@ -262,7 +262,7 @@ void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_ato
 	if (!sys.Master()) {
 
 		RUN (molIDs)
-			int_mols.push_back (sys.Molecules (molIDs[i]));
+			int_wats.push_back (sys.Molecules (molIDs[i]));
 		RUN (atomIDs)
 			int_atoms.push_back (sys.Atoms (atomIDs[i]));
 	}

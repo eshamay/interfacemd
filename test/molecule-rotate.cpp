@@ -5,11 +5,11 @@
 using namespace std;
 
 int main () {
-	XYZFile xyz ("pds.xyz");
+	XYZFile xyz ("decane.xyz");
 	Atom::Size (VecR(40.0, 40.0, 40.0));
 
 	Molecule mol;
-	mol.Name("pds");
+	mol.Name("dec");
 	mol.MolID(0);
 
 	RUN (xyz)
@@ -18,16 +18,13 @@ int main () {
 	Atom * c1 = mol.GetAtom("C1");
 	Atom * c10 = mol.GetAtom("C10");
 
-	double distance = 0.0;
-	double t;
-
 	// the molecular axis from the C1 to the furthest C10
-	VecR _z = c1->MinVector(c10).Unit();
+	VecR _z = c10->MinVector(c1).Unit();
 
 	// To find the x axis - take a hydrogen off the molecule, and find the minvector from the Si to the H. Then take out any z-component, and grab the unit vector.
-	Atom * h1 = mol.GetAtom("H1");
+	Atom * h1 = mol.GetAtom("H30");
 
-	VecR _x = c1->MinVector(h1);
+	VecR _x = c10->MinVector(h1);
 	_x = _x - (_z * (_x * _z));
 	_x = _x.Unit();
 

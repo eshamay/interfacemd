@@ -15,7 +15,7 @@
 #include "graph.h"
 
 /***** Set this if using the dipole-dipole correction term *****/
-#define DIPOLE_DIPOLE
+//#define DIPOLE_DIPOLE
 
 
 /* system constants as defined in the morita-hynes paper */
