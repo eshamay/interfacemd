@@ -1,216 +1,100 @@
-!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
-!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
-!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
-!_TAG_PROGRAM_NAME	Exuberant Ctags	//
-!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.7	//
-AMAX	angledistro.h	22;"	d
-AMBERFILES	Makefile	/^AMBERFILES	= ..\/vecr.o ..\/atom.o ..\/ambersystem.o ..\/crdfile.o ..\/forcefile.o ..\/hno3.o ..\/molecule.o ..\/topfile.o ..\/matrixr.o ..\/h2o.o ..\/oh.o ..\/h3o.o$/;"	m
-AMBERTEST_H_	ambertest.h	2;"	d
-AMIN	angledistro.h	23;"	d
-ANGLEDISTRO_H_	angledistro.h	2;"	d
-ARES	angledistro.h	24;"	d
-AVG	coordination.h	6;"	d
-AVG	densitytest.h	8;"	d
-AVG	ordercoords.h	6;"	d
-AVG	orderparams.h	4;"	d
-AXIS	angledistro.h	14;"	d
-Analysis	coordination.cpp	/^void CoordinationTest::Analysis () {$/;"	f	class:CoordinationTest
-Analysis	ordercoords.cpp	/^void CoordOrderParams::Analysis () {$/;"	f	class:CoordOrderParams
-Analysis	orderparams.cpp	/^void OrderParameters::Analysis () {$/;"	f	class:OrderParameters
-Analyze	morita.cpp	/^void SFGAnalyzer::Analyze () {$/;"	f	class:SFGAnalyzer
-AngleDistro	angledistro.cpp	/^AngleDistro::AngleDistro () : _sys(AmberSystem (PRMTOP, MDCRD, FORCE)){$/;"	f	class:AngleDistro
-AngleDistro	angledistro.h	/^class AngleDistro {$/;"	c
-AtomDensity	densitytest.cpp	/^vector<int> DensityAnalyzer::AtomDensity (string const atomname) {$/;"	f	class:DensityAnalyzer
-BinPosition	coordination.cpp	/^void CoordinationTest::BinPosition (Water const * const wat, coordination const coord) {$/;"	f	class:CoordinationTest
-COORDINATION	Makefile	/^COORDINATION	= $(WATERSYSTEM) coordination.o$/;"	m
-COORDINATION_H_	coordination.h	2;"	d
-CollectChi	morita.cpp	/^void SFGAnalyzer::CollectChi (Complex_vec& newchi, Complex_vec& totalchi) {$/;"	f	class:SFGAnalyzer
-CollectChi	morita.mpi.cpp	/^void CollectChi (std::vector< std::complex<double> >& Chi_step, std::vector< std::complex<double> >& Chi_total) {$/;"	f
-Complex_vec	morita.h	/^typedef std::vector< complex<double> > Complex_vec;$/;"	t
-CoordOrderParams	ordercoords.cpp	/^CoordOrderParams::CoordOrderParams (const int argc, const char **argv, const WaterSystemParams& params)$/;"	f	class:CoordOrderParams
-CoordOrderParams	ordercoords.h	/^class CoordOrderParams : public WaterSystem {$/;"	c
-CoordinationTest	coordination.cpp	/^CoordinationTest::CoordinationTest (const int argc, const char **argv, const WaterSystemParams& params) :$/;"	f	class:CoordinationTest
-CoordinationTest	coordination.h	/^class CoordinationTest : public WaterSystem {$/;"	c
-DEFINITIONS_H_	definitions.h	2;"	d
-DENSITYFILES	Makefile	/^DENSITYFILES = $(WATERSYSTEM) densitytest.o$/;"	m
-DIPOLETCF	Makefile	/^DIPOLETCF = $(XYZSYSTEM) dipoletcf.o ..\/hno3analysis.o$/;"	m
-DensityAnalyzer	densitytest.cpp	/^DensityAnalyzer::DensityAnalyzer (int const argc, const char **argv, const WaterSystemParams& params)$/;"	f	class:DensityAnalyzer
-DensityAnalyzer	densitytest.h	/^class DensityAnalyzer : public WaterSystem {$/;"	c
-Double_histo	ordercoords.h	/^typedef std::vector<Double_vec> 	Double_histo;$/;"	t
-Double_vec	ordercoords.h	/^typedef std::vector<double> 		Double_vec;$/;"	t
-FILLBOX	Makefile	/^FILLBOX = $(AMBERFILES) ..\/pdbfile.o ..\/boxfiller.o$/;"	m
-FORCE	ambertest.h	13;"	d
-FORCE	angledistro.h	12;"	d
-FORCE	freqtest.h	12;"	d
-FORCE	mpitest.h	5;"	d
-FREQTEST_H_	freqtest.h	2;"	d
-FindInterfacialAtoms	morita.mpi.cpp	/^void FindInterfacialAtoms (vector<Molecule *>& int_mols, vector<Atom *>& int_atoms, MPIMolSystem& sys) {$/;"	f
-HIGH_COORD	coordination.h	8;"	d
-INTERFACE	mpitest.h	10;"	d
-InitCoordMaps	coordination.cpp	/^void CoordinationTest::InitCoordMaps () {$/;"	f	class:CoordinationTest
-Int_histo	coordination.h	/^typedef std::vector< vector<int> > Int_histo;$/;"	t
-Int_histo	ordercoords.h	/^typedef std::vector<Int_vec> 		Int_histo;$/;"	t
-Int_vec	coordination.h	/^typedef std::vector<int> Int_vec;$/;"	t
-Int_vec	ordercoords.h	/^typedef std::vector<int>			Int_vec;$/;"	t
-MDCRD	ambertest.h	12;"	d
-MDCRD	angledistro.h	11;"	d
-MDCRD	freqtest.h	11;"	d
-MDCRD	mpitest.h	4;"	d
-MDCRD2PDB	Makefile	/^MDCRD2PDB = $(AMBERFILES) ..\/pdbfile.o mdcrd2pdb.o$/;"	m
-MORITA2002	Makefile	/^MORITA2002	= $(XYZSYSTEM) ..\/moritasfg2002.o morita2002.o$/;"	m
-MORITA2002_H_	morita2002.h	2;"	d
-MORITAFILES	Makefile	/^MORITAFILES	= morita.o ..\/watersfg.o $(WATERSYSTEM)$/;"	m
-MORITA_H_	morita.h	2;"	d
-MPIFILES	Makefile	/^MPIFILES	=	$(AMBERFILES) ..\/mpi\/mpisys.o mpitest.o$/;"	m
-MPIMORITAFILES	Makefile	/^MPIMORITAFILES	= $(MORITAFILES) ..\/mpi\/mpisys.o$/;"	m
-MPI_PackageChi	morita.mpi.cpp	/^void MPI_PackageChi (std::vector< std::complex<double> >& TimestepChi, std::vector< std::complex<double> >& TotalChi, MPIMolSystem& sys) {$/;"	f
-MPI_SYS	morita.mpi.cpp	1;"	d	file:
-MolChi	morita.h	/^	Complex_vec MolChi;			\/\/ chi for a given molecule$/;"	m	class:SFGAnalyzer
-ORDERCOORDS	Makefile	/^ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o$/;"	m
-ORDERPARAMS	Makefile	/^ORDERPARAMS = $(WATERSYSTEM) orderparams.o$/;"	m
-ORDER_PARAMS_H_	ordercoords.h	2;"	d
-ORDER_PARAMS_H_	orderparams.h	2;"	d
-OUTPUT_FILE	angledistro.h	16;"	d
-OUTPUT_FREQ	dipoletcf.h	41;"	d
-OUTPUT_FREQ	mpitest.h	13;"	d
-OUTPUT_FREQ	xyzdipole_analysis.h	57;"	d
-OrderParameters	orderparams.cpp	/^OrderParameters::OrderParameters (int argc, const char **argv, const WaterSystemParams& params)$/;"	f	class:OrderParameters
-OrderParameters	orderparams.h	/^class OrderParameters : public WaterSystem {$/;"	c
-OutputData	coordination.cpp	/^void CoordinationTest::OutputData () {$/;"	f	class:CoordinationTest
-OutputData	densitytest.cpp	/^void DensityAnalyzer::OutputData () {$/;"	f	class:DensityAnalyzer
-OutputData	morita.cpp	/^void SFGAnalyzer::OutputData () {$/;"	f	class:SFGAnalyzer
-OutputData	morita.mpi.cpp	/^void OutputData (FILE * fp, vector< complex<double> >& chi) {$/;"	f
-OutputData	ordercoords.cpp	/^void CoordOrderParams::OutputData () {$/;"	f	class:CoordOrderParams
-OutputData	orderparams.cpp	/^void OrderParameters::OutputData () {$/;"	f	class:OrderParameters
-OutputHeader	morita.mpi.cpp	/^void OutputHeader (MPIMolSystem& sys) {$/;"	f
-OutputStatus	dipoletcf.cpp	/^void OutputStatus (int step) {$/;"	f
-OutputStatus	morita.mpi.cpp	/^void OutputStatus (int const count, MPIMolSystem& sys) {$/;"	f
-PRMTOP	ambertest.h	11;"	d
-PRMTOP	angledistro.h	10;"	d
-PRMTOP	freqtest.h	10;"	d
-PRMTOP	mpitest.h	3;"	d
-PRMTOP	toptest.h	11;"	d
-PlotData	traj2fft.py	/^def PlotData():$/;"	f
-QPT	Makefile	/^QPT = $(XYZSYSTEM) ..\/hno3analysis.o Qpt.o$/;"	m
-QPT_H_	Qpt.h	2;"	d
-RESTART	densitytest.h	9;"	d
-RESTART	orderparams.h	5;"	d
-S1	ordercoords.h	/^	Double_histo S1;$/;"	m	class:CoordOrderParams
-S2_den	ordercoords.h	/^	Double_histo S2_den;$/;"	m	class:CoordOrderParams
-S2_num	ordercoords.h	/^	Double_histo S2_num;$/;"	m	class:CoordOrderParams
-SFGAnalyzer	morita.cpp	/^SFGAnalyzer::SFGAnalyzer (int const argc, const char **argv, const WaterSystemParams& params)$/;"	f	class:SFGAnalyzer
-SFGAnalyzer	morita.h	/^class SFGAnalyzer : public WaterSystem {$/;"	c
-SetHistograms	ordercoords.cpp	/^void CoordOrderParams::SetHistograms (const int argc, const char **argv) {$/;"	f	class:CoordOrderParams
-SystemDensities	densitytest.cpp	/^void DensityAnalyzer::SystemDensities () {$/;"	f	class:DensityAnalyzer
-TCF_RUN	xyzdipole_analysis.h	20;"	d
-TEMPFILES	Makefile	/^TEMPFILES	= temp.cpp $(XYZSYSTEM) ..\/moritasfg2002.o$/;"	m
-TIMESTEPS	mpitest.h	14;"	d
-TOPTEST_H_	toptest.h	2;"	d
-TimestepChi	morita.h	/^	Complex_vec TimestepChi;	\/\/ chi spectrum of several different molecules collected over an entire timestep$/;"	m	class:SFGAnalyzer
-TotalChi	morita.h	/^	Complex_vec TotalChi;		\/\/ Running total of all the data for several timesteps$/;"	m	class:SFGAnalyzer
-WATERSYSTEM	Makefile	/^WATERSYSTEM	= $(AMBERFILES) ..\/watersystem.o ..\/adjacencymatrix.o ..\/bond.o$/;"	m
-WaterHistogram	angledistro.cpp	/^std::vector< std::vector<int> >& AngleDistro::WaterHistogram (int const timesteps) {$/;"	f	class:AngleDistro
-XYZSYSTEM	Makefile	/^XYZSYSTEM = ..\/xyzsystem.o ..\/xyzfile.o ..\/atom.o ..\/h2o.o ..\/hno3.o ..\/molecule.o ..\/vecr.o ..\/wannier.o ..\/adjacencymatrix.o ..\/matrixr.o ..\/bond.o ..\/oh.o ..\/h3o.o$/;"	m
-ZMAX	angledistro.h	18;"	d
-ZMIN	angledistro.h	19;"	d
-ZRES	angledistro.h	20;"	d
-_ClearHisto	angledistro.cpp	/^void AngleDistro::_ClearHisto () {$/;"	f	class:AngleDistro
-_DENSITYTEST_H_	densitytest.h	2;"	d
-_DIPOLETCF_H_	dipoletcf.h	2;"	d
-_PrintOutput	angledistro.cpp	/^void AngleDistro::_PrintOutput () const {$/;"	f	class:AngleDistro
-_PrintStatus	angledistro.cpp	/^void AngleDistro::_PrintStatus () const {$/;"	f	class:AngleDistro
-_WaterStepHistogram	angledistro.cpp	/^std::vector< std::vector<int> > AngleDistro::_WaterStepHistogram () {$/;"	f	class:AngleDistro
-_XYZDIPOLE_ANALYSIS_H_	xyzdipole_analysis.h	2;"	d
-_anglebins	angledistro.h	/^	int _anglebins;$/;"	m	class:AngleDistro
-_anglemax	angledistro.h	/^	double _anglemin, _anglemax, _angleres;$/;"	m	class:AngleDistro
-_anglemin	angledistro.h	/^	double _anglemin, _anglemax, _angleres;$/;"	m	class:AngleDistro
-_angleres	angledistro.h	/^	double _anglemin, _anglemax, _angleres;$/;"	m	class:AngleDistro
-_axis	angledistro.h	/^	coord _axis;$/;"	m	class:AngleDistro
-_data	orderparams.h	/^	vector< vector<double> >	_data;$/;"	m	class:OrderParameters
-_histo	angledistro.h	/^	vector< vector<int> > _histo;$/;"	m	class:AngleDistro
-_output	angledistro.h	/^	FILE * _output;$/;"	m	class:AngleDistro
-_sys	angledistro.h	/^	AmberSystem _sys;$/;"	m	class:AngleDistro
-_timestep	angledistro.h	/^	int _timestep;$/;"	m	class:AngleDistro
-_zbins	angledistro.h	/^	int _zbins;$/;"	m	class:AngleDistro
-_zmax	angledistro.h	/^	double _zmin, _zmax, _zres;$/;"	m	class:AngleDistro
-_zmin	angledistro.h	/^	double _zmin, _zmax, _zres;$/;"	m	class:AngleDistro
-_zres	angledistro.h	/^	double _zmin, _zmax, _zres;$/;"	m	class:AngleDistro
-angbins	ordercoords.h	/^	int		angbins;$/;"	m	class:CoordOrderParams
-angbins	orderparams.h	/^	int		angbins;$/;"	m	class:OrderParameters
-angmax	ordercoords.h	/^	double	angmax;$/;"	m	class:CoordOrderParams
-angmax	orderparams.h	/^	double	angmax;$/;"	m	class:OrderParameters
-angmin	ordercoords.h	/^	double	angmin;$/;"	m	class:CoordOrderParams
-angmin	orderparams.h	/^	double	angmin;$/;"	m	class:OrderParameters
-angres	ordercoords.h	/^	double	angres;$/;"	m	class:CoordOrderParams
-angres	orderparams.h	/^	double	angres;$/;"	m	class:OrderParameters
-atomNames	densitytest.h	/^	vector<string> atomNames;$/;"	m	class:DensityAnalyzer
-axis	mpitest.h	/^const coord axis = y;$/;"	v
-filename	Qpt.h	15;"	d
-filename	dipoletcf.h	38;"	d
-filename	xyzdipole_analysis.h	54;"	d
-histo	coordination.h	/^	Int_histo histo;$/;"	m	class:CoordinationTest
-histo	densitytest.h	/^	vector< vector<int> > histo;	\/\/ histogram for atom particle numbers arranged by atom names$/;"	m	class:DensityAnalyzer
-main	Qpt.cpp	/^int main () {$/;"	f
-main	ambertest.cpp	/^int main (int argc, char *argv) {$/;"	f
-main	angledistro.cpp	/^int main () {$/;"	f
-main	angletest.cpp	/^int main () {$/;"	f
-main	closest.cpp	/^int main (int argc, char **argv) {$/;"	f
-main	coordination.cpp	/^int main (const int argc, const char **argv) {$/;"	f
-main	densitytest.cpp	/^int main (const int argc, const char **argv) {$/;"	f
-main	dipoletcf.cpp	/^int main (int *argc, char **argv) {$/;"	f
-main	fillbox.cpp	/^int main (int argc, char **argv) {$/;"	f
-main	forcetest.cpp	/^int main () {$/;"	f
-main	matrixtest.cpp	/^int main (int argc, char*argv) {$/;"	f
-main	mdcrd2pdb.cpp	/^int main (int argc, char **argv) {$/;"	f
-main	morita.cpp	/^int main (const int argc, const char **argv) {$/;"	f
-main	morita.mpi.cpp	/^int main (int argc, char **argv) {$/;"	f
-main	morita2002.cpp	/^int main (int argc, char **argv) {$/;"	f
-main	mpitest.cpp	/^int main (int argc, char **argv) {$/;"	f
-main	ordercoords.cpp	/^int main (const int argc, const char **argv) {$/;"	f
-main	orderparams.cpp	/^int main (int argc, const char **argv) {$/;"	f
-main	toptest.cpp	/^int main (int argc, char *argv) {$/;"	f
-main	wanniertest.cpp	/^int main () {$/;"	f
-main	xyzdipole_analysis.cpp	/^int main (int *argc, char **argv) {$/;"	f
-name_map	coordination.h	/^	coord_map name_map;$/;"	m	class:CoordinationTest
-name_map	ordercoords.h	/^	coord_map name_map;$/;"	m	class:CoordOrderParams
-numMolsProcessed	morita.h	/^	unsigned long numMolsProcessed;$/;"	m	class:SFGAnalyzer
-numSteps	Qpt.h	18;"	d
-number_density	ordercoords.h	/^	Int_histo number_density;$/;"	m	class:CoordOrderParams
-number_density	orderparams.h	/^	vector<unsigned long int> number_density;$/;"	m	class:OrderParameters
-outputfilename	dipoletcf.h	/^	const string outputfilename	 = "tcf.dat";$/;"	v
-outputfilename	xyzdipole_analysis.h	/^	const string outputfilename	 = "power.dat";$/;"	v
-outputfilename	xyzdipole_analysis.h	/^	const string outputfilename	 = "tcf.dat";$/;"	v
-outputfilename	xyzdipole_analysis.h	/^	const string outputfilename	 = "test.dat";$/;"	v
-pdb	closest.cpp	6;"	d	file:
-set_unitcell	set_unitcell.tcl	/^proc set_unitcell {a b c {molid top} {alpha 90.0} {beta 90.0} {gamma 90.0}} {$/;"	p
-sfg	morita.h	/^	SFGCalculator	sfg;$/;"	m	class:SFGAnalyzer
-slab35	dipoletcf.h	15;"	d
-slab35	xyzdipole_analysis.h	16;"	d
-vcoords	coordination.h	/^	std::vector<coordination> vcoords;$/;"	m	class:CoordinationTest
-vcoords	ordercoords.h	/^	std::vector<coordination> vcoords;$/;"	m	class:CoordOrderParams
-wannierfile	Qpt.h	22;"	d
-wannierfile	dipoletcf.h	39;"	d
-wannierfile	xyzdipole_analysis.h	55;"	d
-xSize	Qpt.h	11;"	d
-xSize	dipoletcf.h	/^	const double xSize	= 12.0;$/;"	v
-xSize	dipoletcf.h	/^	const double xSize	= 12.4138;$/;"	v
-xSize	dipoletcf.h	/^	const double xSize	= 13.4724;$/;"	v
-xSize	xyzdipole_analysis.h	/^	const double xSize	= 12.0;$/;"	v
-xSize	xyzdipole_analysis.h	/^	const double xSize	= 12.4138;$/;"	v
-xSize	xyzdipole_analysis.h	/^	const double xSize	= 13.4724;$/;"	v
-ySize	Qpt.h	12;"	d
-ySize	dipoletcf.h	/^	const double ySize	= 12.0;$/;"	v
-ySize	dipoletcf.h	/^	const double ySize	= 12.4138;$/;"	v
-ySize	dipoletcf.h	/^	const double ySize	= 15.5566;$/;"	v
-ySize	xyzdipole_analysis.h	/^	const double ySize	= 12.0;$/;"	v
-ySize	xyzdipole_analysis.h	/^	const double ySize	= 12.4138;$/;"	v
-ySize	xyzdipole_analysis.h	/^	const double ySize	= 15.5566;$/;"	v
-zSize	Qpt.h	13;"	d
-zSize	dipoletcf.h	/^	const double zSize	= 12.4138;$/;"	v
-zSize	dipoletcf.h	/^	const double zSize	= 20.0;$/;"	v
-zSize	dipoletcf.h	/^	const double zSize	= 30.0000;$/;"	v
-zSize	xyzdipole_analysis.h	/^	const double zSize	= 12.4138;$/;"	v
-zSize	xyzdipole_analysis.h	/^	const double zSize	= 20.0;$/;"	v
-zSize	xyzdipole_analysis.h	/^	const double zSize	= 30.0000;$/;"	v
-~AngleDistro	angledistro.cpp	/^AngleDistro::~AngleDistro () {$/;"	f	class:AngleDistro
+AmberTest::AmberTest	ambertest.cpp	/^AmberTest::AmberTest (int const argc, const char */
+AmberTest::DoSomething	ambertest.cpp	/^void AmberTest::DoSomething () {$/
+Analyze	morita2002.h	/^void Morita2002<T>::Analyze () {$/
+AngleDistro::AngleDistro	angledistro.cpp	/^AngleDistro::AngleDistro () : _sys(AmberSystem (PR/
+AngleDistro::WaterHistogram	angledistro.cpp	/^std::vector< std::vector<int> >& AngleDistro::Wate/
+AngleDistro::_ClearHisto	angledistro.cpp	/^void AngleDistro::_ClearHisto () {$/
+AngleDistro::_PrintOutput	angledistro.cpp	/^void AngleDistro::_PrintOutput () const {$/
+AngleDistro::_PrintStatus	angledistro.cpp	/^void AngleDistro::_PrintStatus () const {$/
+AngleDistro::_WaterStepHistogram	angledistro.cpp	/^std::vector< std::vector<int> > AngleDistro::_Wate/
+AngleDistro::~AngleDistro	angledistro.cpp	/^AngleDistro::~AngleDistro () {$/
+CarbonChainSystem::Analysis	carbonchainsystem.cpp	/^void CarbonChainSystem::Analysis () {$/
+CarbonChainSystem::CarbonChainSystem	carbonchainsystem.cpp	/^CarbonChainSystem::CarbonChainSystem$/
+CarbonChainSystem::DataOutput	carbonchainsystem.cpp	/^void CarbonChainSystem::DataOutput () {$/
+CarbonChainSystem::PostAnalysis	carbonchainsystem.cpp	/^void CarbonChainSystem::PostAnalysis () {$/
+CarbonChainSystem::Setup	carbonchainsystem.cpp	/^void CarbonChainSystem::Setup () {$/
+CollectChi	morita.mpi.cpp	/^void CollectChi (std::vector< std::complex<double>/
+CoordOrderParams::Analysis	ordercoords.cpp	/^void CoordOrderParams::Analysis () {$/
+CoordOrderParams::CoordOrderParams	ordercoords.cpp	/^CoordOrderParams::CoordOrderParams (const int argc/
+CoordOrderParams::OutputData	ordercoords.cpp	/^void CoordOrderParams::OutputData () {$/
+CoordOrderParams::SetHistograms	ordercoords.cpp	/^void CoordOrderParams::SetHistograms (const int ar/
+CoordinationTest::Analysis	coordination.cpp	/^void CoordinationTest::Analysis () {$/
+CoordinationTest::BinPosition	coordination.cpp	/^void CoordinationTest::BinPosition (Water const * /
+CoordinationTest::CoordinationTest	coordination.cpp	/^CoordinationTest::CoordinationTest (const int argc/
+CoordinationTest::InitCoordMaps	coordination.cpp	/^void CoordinationTest::InitCoordMaps () {$/
+CoordinationTest::OutputData	coordination.cpp	/^void CoordinationTest::OutputData () {$/
+DensityAnalyzer::AtomDensity	densitytest.cpp	/^vector<int> DensityAnalyzer::AtomDensity (string c/
+DensityAnalyzer::DensityAnalyzer	densitytest.cpp	/^DensityAnalyzer::DensityAnalyzer (int const argc, /
+DensityAnalyzer::OutputData	densitytest.cpp	/^void DensityAnalyzer::OutputData () {$/
+DensityAnalyzer::SystemDensities	densitytest.cpp	/^void DensityAnalyzer::SystemDensities () {$/
+FindInterfacialAtoms	morita.mpi.cpp	/^void FindInterfacialAtoms (vector<Molecule *>& int/
+MPI_PackageChi	morita.mpi.cpp	/^void MPI_PackageChi (std::vector< std::complex<dou/
+MQpt.cpp	Qpt.cpp	/^int main () {$/
+Mambertest.cpp	ambertest.cpp	/^int main (const int argc, const char **argv) {$/
+Mangledistro.cpp	angledistro.cpp	/^int main () {$/
+Mangletest.cpp	angletest.cpp	/^int main () {$/
+Mboost-sandbox.cpp	boost-sandbox.cpp	/^int main () {$/
+Mboost-threads-sandbox.cpp	boost-threads-sandbox.cpp	/^int main (int argc, char ** argv) {$/
+Mcarbonchainsystem.cpp	carbonchainsystem.cpp	/^int main (int argc, const char **argv) {$/
+Mclosest.cpp	closest.cpp	/^int main (int argc, char **argv) {$/
+Mcoordination.cpp	coordination.cpp	/^int main (const int argc, const char **argv) {$/
+Mdensitytest.cpp	densitytest.cpp	/^int main (const int argc, const char **argv) {$/
+Mdipoletcf.cpp	dipoletcf.cpp	/^int main (int *argc, char **argv) {$/
+Mfillbox.cpp	fillbox.cpp	/^int main (int argc, char **argv) {$/
+Mmatrix-sandbox.cpp	matrix-sandbox.cpp	/^int main () {$/
+Mmatrixtest.cpp	matrixtest.cpp	/^int main (int argc, char*argv) {$/
+Mmdcrd2pdb.cpp	mdcrd2pdb.cpp	/^int main (int argc, char **argv) {$/
+Mmolecule-rotate.cpp	molecule-rotate.cpp	/^int main () {$/
+Mmorita.cpp	morita.cpp	/^int main (const int argc, const char **argv) {$/
+Mmorita.mpi.cpp	morita.mpi.cpp	/^int main (int argc, char **argv) {$/
+Mmorita2002.cpp	morita2002.cpp	/^int main (int argc, char **argv) {$/
+Mmpitest.cpp	mpitest.cpp	/^int main (int argc, char **argv) {$/
+Mordercoords.cpp	ordercoords.cpp	/^int main (const int argc, const char **argv) {$/
+Morderparams-histo.cpp	orderparams-histo.cpp	/^int main (int argc, const char **argv) {$/
+Morderparams.cpp	orderparams.cpp	/^int main (int argc, const char **argv) {$/
+Mquartz.cpp	quartz.cpp	/^int main () {$/
+Mtemp.cpp	temp.cpp	/^int main (int argc, char **argv) {$/
+Mtoptest.cpp	toptest.cpp	/^int main (int argc, char *argv) {$/
+Mwanniertest.cpp	wanniertest.cpp	/^int main () {$/
+Mxyzdipole_analysis.cpp	xyzdipole_analysis.cpp	/^int main (int *argc, char **argv) {$/
+OrderParameters::Analysis	orderparams.cpp	/^void OrderParameters::Analysis () {$/
+OrderParameters::Analysis	orderparams-histo.cpp	/^void OrderParameters::Analysis () {$/
+OrderParameters::OrderParameters	orderparams.cpp	/^OrderParameters::OrderParameters (int argc, const /
+OrderParameters::OrderParameters	orderparams-histo.cpp	/^OrderParameters::OrderParameters (int argc, const /
+OrderParameters::OutputData	orderparams.cpp	/^void OrderParameters::OutputData () {$/
+OrderParameters::OutputData	orderparams-histo.cpp	/^void OrderParameters::OutputData () {$/
+OutputData	morita.mpi.cpp	/^void OutputData (FILE * fp, vector< complex<double/
+OutputHeader	morita.mpi.cpp	/^void OutputHeader (MPIMolSystem& sys) {$/
+OutputStatus	dipoletcf.cpp	/^void OutputStatus (int step) {$/
+OutputStatus	morita.mpi.cpp	/^void OutputStatus (int const count, MPIMolSystem& /
+PlotData	traj2fft.py	/^def PlotData():$/
+SFGAnalyzer::Analyze	morita.cpp	/^void SFGAnalyzer::Analyze () {$/
+SFGAnalyzer::CollectChi	morita.cpp	/^void SFGAnalyzer::CollectChi (Complex_vec& newchi,/
+SFGAnalyzer::FlipWaters	morita.cpp	/^void SFGAnalyzer::FlipWaters (const coord axis) {$/
+SFGAnalyzer::OutputData	morita.cpp	/^void SFGAnalyzer::OutputData () {$/
+SFGAnalyzer::SFGAnalyzer	morita.cpp	/^SFGAnalyzer::SFGAnalyzer (int const argc, const ch/
+WaterSystem	morita2002.h	/^class Morita2002 : public WaterSystem<T> {$/
+ambertest	Makefile	/^ambertest : $(WATERSYSTEM) ambertest.o$/
+angledistro	Makefile	/^angledistro: angledistro.o $(AMBERSYSTEM)$/
+cleantest	Makefile	/^cleantest :$/
+closest	Makefile	/^closest : $(AMBERSYSTEM) closest.o ..\/pdbfile.o$/
+coordination	Makefile	/^coordination: $(COORDINATION)$/
+densitytest	Makefile	/^densitytest : $(DENSITYFILES)$/
+dipoletcf	Makefile	/^dipoletcf : $(DIPOLETCF)$/
+fillbox	Makefile	/^fillbox : $(FILLBOX) fillbox.o$/
+matrixtest	Makefile	/^matrixtest : matrixtest.o ..\/vecr.o ..\/matrixr.o$/
+mdcrd2pdb	Makefile	/^mdcrd2pdb : $(MDCRD2PDB)$/
+morita	Makefile	/^morita : $(MORITAFILES)$/
+morita2002	Makefile	/^morita2002: $(MORITA2002)$/
+mpimorita	Makefile	/^mpimorita : $(MPIMORITAFILES)$/
+mpitest	Makefile	/^mpitest: $(MPIFILES)$/
+ordercoords	Makefile	/^ordercoords: $(ORDERCOORDS)$/
+orderparams	Makefile	/^orderparams:  $(ORDERPARAMS)$/
+orderparams-histo	Makefile	/^orderparams-histo:  $(ORDERPARAMSHISTO)$/
+qpt	Makefile	/^qpt : $(QPT)$/
+rotate	Makefile	/^rotate: $(ROTATE)$/
+sandbox	Makefile	/^sandbox: $(MDSYSTEM) $(AMBERSYSTEM)$/
+task1	boost-threads-sandbox.cpp	/^void task1(int& a) {$/
+task2	boost-threads-sandbox.cpp	/^void task2() {$/
+temp	Makefile	/^temp: $(TEMPFILES)$/
+toptest	Makefile	/^toptest : toptest.o ..\/topfile.o$/

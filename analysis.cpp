@@ -6,20 +6,19 @@ Analyzer::Analyzer (
 	)
 : WaterSystem<AmberSystem>(params), _ap(analysis_params)
 { 
-	this->sys = new AmberSystem("prmtop", "mdcrd", "mdvel");
-	this->OutputHeader();
+  this->sys = new AmberSystem("prmtop", "mdcrd", "mdvel");
+  this->OutputHeader();
 }
 
 void Analyzer::_OutputHeader () const {
 
-	printf ("Analysis Parameters:\n\tOutput Filename = \"%s\"\n\tScreen output frequency = 1/%d\n\n\tPosition extents for analysis:\n\t\tMin = % 8.3f\n\t\tMax = % 8.3f\n\t\tPosition Resolution = % 8.3f\n\n\tPrimary Axis = %d\nNumber of timesteps to be analyzed = %d\n",
-			output.c_str(), output_freq, posmin, posmax, posres, int(axis), timesteps);
+  printf ("Analysis Parameters:\n\tOutput Filename = \"%s\"\n\tScreen output frequency = 1/%d\n\n\tPosition extents for analysis:\n\t\tMin = % 8.3f\n\t\tMax = % 8.3f\n\t\tPosition Resolution = % 8.3f\n\n\tPrimary Axis = %d\nNumber of timesteps to be analyzed = %d\n",
+	  output.c_str(), output_freq, posmin, posmax, posres, int(axis), timesteps);
 
-	if (params.avg) {
-		printf ("\n\nThe analysis is averaging about the two interfaces located as:\n\tLow  = % 8.3f\n\tHigh = % 8.3f\n\n", int_low, int_high);
-	}
-
-	return;
+#ifdef AVG
+  printf ("\n\nThe analysis is averaging about the two interfaces located as:\n\tLow  = % 8.3f\n\tHigh = % 8.3f\n\n", int_low, int_high);
+#endif
+  return;
 }
 
 void Analyzer::_OutputStatus (const int timestep)
@@ -42,18 +41,19 @@ void SystemAnalysis ()
   // start the analysis - run through each timestep
   for (timestep = 0; timestep < this->timesteps; timestep++) {
 
-	// Perform the analysis
+	// Perform the main loop analysis that works on every timestep of the simulation
 	Analysis ();
-
+	
+	// load the next timestep
 	this->sys->LoadNext();
 
 	// output the status of the analysis (to the screen or somewhere useful)
 	_OutputStatus (timestep);
-	// Output the actual data being collected to a file or something
+	// Output the actual data being collected to a file or something for processing later
 	DataOutput (timestep);
   }
 
-  // do a little work after the main analysis loop
+  // do a little work after the main analysis loop (normalization of a histogram? etc.)
   PostAnalysis ();
 
   // do one final data output to push out the finalized data set
@@ -77,8 +77,8 @@ int Analyzer::PositionBin (const double position) {
 int Analyzer::PositionBin (const Atom * patom) {
 
   VecR r = patom->Position();
-  double position = r[ref_axis];
-  if (position < pbcflip) position += Atom::Size()[ref_axis];
+  double position = r[axis];
+  if (position < pbcflip) position += Atom::Size()[axis];
 
 #ifdef AVG
   // here the bin will be selected based on the distance to a given interface. Negative distances are inside the water phase, positive are in the CCl4
@@ -94,7 +94,7 @@ int Analyzer::PositionBin (const Atom * patom) {
 
 // Create a histogram of the angles formed by an axis of a molecule's given reference axis. The supplied axis function should return the molecular axis vector of the molecule.
 vector<int> Analyzer::Molecular_Axis_Orientation_Histogram (
-	const string name,
+	const string molName,
 	VecR (*axisFunc)()
 	)
 {
@@ -106,12 +106,12 @@ vector<int> Analyzer::Molecular_Axis_Orientation_Histogram (
   // Run an analysis on all the carbon-chain molecules in the system to find their orientations over the course of a simulation with respect to a given axis.
   RUN (sys->Molecules()) {
 	pmol = sys->Molecules(i);
-	// Search for the named molecules in the system
-	if (pmol->Name() != name) continue;
+	// Search for the molNamed molecules in the system
+	if (pmol->Name() != molName) continue;
 
 	// find the particular molecular-axis vector
 	VecR molAxis = pmol->axisFunc();
-	double angle = (molAxis < ref_axis);
+	double angle = (molAxis < ref_axis);	// calculates the cos(angle) between the two axes
 
 	int anglebin = AngleBin (angle);
 	histo[anglebin]++;
