@@ -13,14 +13,16 @@ struct WaterSystemParams {
 		const int _timesteps = 200000,
 		const bool _avg = false,
 		const coord _axis = y,
-		const VecR ref_axis (0.0, 1.0, 0.0),
+		const VecR _ref_axis = VecR (0.0, 1.0, 0.0),
 		const int _output_freq = 500, const int _restart = 0,
-		const double _posmin = -20.0, const double _posmax = 150.0, const double _posres = 1.0,
-		const double _angmin = -1.0, const double _angmax = 1.0, const double _angres = 0.01;
+		const double _posmin = -20.0, const double _posmax = 150.0, 
+		const double _posres = 1.0,
+		const double _angmin = -1.0, const double _angmax = 1.0, 
+		const double _angres = 0.01,
 		const double _pbcflip = 15.0
 	) :
-		avg(_avg), output(fopen(_output.c_str, 'w')),
-		axis(_axis), output_freq(_output_freq), timesteps(_timesteps), restart(_restart),
+		avg(_avg), output_filename(_output), output(fopen(_output.c_str(), "w")),
+		axis(_axis), ref_axis(_ref_axis), output_freq(_output_freq), timesteps(_timesteps), restart(_restart),
 		posmin(_posmin), posmax(_posmax), posres(_posres), 
 		posbins ((posmax-posmin)/posres),
 		pbcflip(_pbcflip),
@@ -30,6 +32,7 @@ struct WaterSystemParams {
 
 	bool avg;
 
+	std::string output_filename;
 	FILE * output;
 
 	coord axis;
@@ -99,6 +102,7 @@ public:
 protected:
 
 	T * sys;
+	std::string output_filename;
 	FILE * output;
 
 	BondGraph	graph;
@@ -115,12 +119,12 @@ protected:
 	double 	angmin, angmax, angres;
 	int		angbins;
 	unsigned int timesteps;
-	unsigned int timestep, restart;
+	unsigned int restart;
 
 	double int_low, int_high, middle;		// the positions of analysis cutoffs
 
 	Water_ptr_vec	int_wats;		// interfacial waters, or just all the waters in the system depending on the function call
-	Molecule_ptr_vec int_mols;
+	Mol_ptr_vec int_mols;
 	Atom_ptr_vec	int_atoms;		// interfacial water atoms (or as above)
 
 };
@@ -128,7 +132,7 @@ protected:
 template <class T>
 WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
 	:
-		output(params.output),
+		output_filename(params.output_filename), output(params.output),
 		axis(params.axis), ref_axis(params.ref_axis),
 		output_freq(params.output_freq),
 		posmin(params.posmin), posmax(params.posmax), posres(params.posres),

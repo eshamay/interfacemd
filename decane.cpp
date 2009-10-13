@@ -1,9 +1,9 @@
-#include "decance.h"
+#include "decane.h"
 
 int Decane::numDecanes = 0;
 
 Decane::Decane () 
-  : CarbonChain (), _carbons(vector<Atom *> (10, (Atom *)NULL))
+  : CarbonChain (10)
 {
   _name = "dec";
   ++numDecanes;
@@ -14,14 +14,12 @@ Decane::~Decane () {
 }
 
 Decane::Decane (const Molecule& molecule) 
-  : CarbonChain(molecule), _carbons(vector<Atom *> (10, (Atom *)NULL))
+  : CarbonChain(molecule)
 {
   ++numDecanes;
 }
 
 void Decane::SetAtoms () {
-  // first let's grab pointers to the three atoms and give them reasonable names
-  vector<Atom *> _carbons;
   // Go through and assign each carbon to the slot in the ordered list
   _carbons[0] = this->GetAtom("C1");
   _carbons[1] = this->GetAtom("C2");

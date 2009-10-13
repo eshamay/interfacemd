@@ -2,8 +2,8 @@
 
 int CarbonChain::numCarbonChains = 0;
 
-CarbonChain::CarbonChain () 
-  : Molecule () 
+CarbonChain::CarbonChain (int numCarbons) 
+  : Molecule (), _carbons(vector<Atom *>(numCarbons, (Atom *)NULL))
 {
   ++numCarbonChains;
 }
@@ -27,6 +27,6 @@ VecR CarbonChain::Vector_CoM_To_End () {
 	// the last carbon in the chain
 	Atom * LastCarbon = _carbons[_carbons.size() - 1];
 	// the axis between the center of mass and the last chain-carbon
-	VecR axis (_centerofmass.MinVector(LastCarbon));
+	VecR axis (_centerofmass.MinVector(LastCarbon->Position(), Atom::Size()));
 	return (axis);
 }

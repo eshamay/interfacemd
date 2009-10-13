@@ -23,14 +23,11 @@ class MoritaSFG:
 		#self.ScaleData()
 
 
-
 	def ScaleData(self):
 		for d in range(len(self.data)):
 			chi_max = max(self.data[d]['chi'])
 			scale = lambda a: a/chi_max
 			self.data[d]['chi'] = map(scale, self.data[d]['chi'])
-
-
 
 	def DataDict(self,file):
 		d = {'x':[],'real':[],'imag':[],'comp':[],'chi':[]}

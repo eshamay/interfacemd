@@ -9,6 +9,8 @@
 #include "h2o.h"
 #include "h3o.h"
 #include "hno3.h"
+#include "carbonchain.h"
+#include "decane.h"
 #include "oh.h"
 #include "utility.h"
 

@@ -14,6 +14,8 @@ class Decane: public CarbonChain {
 
 		static int numDecanes;			// total number of waters in the system
 
+		void SetAtoms ();
+
 };
 
 typedef std::vector<Decane *> Decane_ptr_vec;

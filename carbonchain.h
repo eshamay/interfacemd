@@ -4,19 +4,20 @@
 #include "molecule.h"
 #include "utility.h"
 
-class CarbonChain : public molecule {
+class CarbonChain : public Molecule {
+
 	protected:
 		vector<Atom *> _carbons;		/* An ordered listing of all the carbons in
 										   the molecule */
 	public:
-		CarbonChain ();	// a default constructor
-		virtual ~CarbonChain ();	// a destructor
+		CarbonChain (int numCarbons);	// a default constructor
+		virtual ~CarbonChain ();
 		CarbonChain (const Molecule& molecule);	// copy constructor for casting from a molecule
 
 		static int numCarbonChains;			// total number of waters in the system
 
 		// Functions for analysis
-		virtual void SetAtoms ();
+		virtual void SetAtoms () = 0;
 
 		vector<Atom *>& Carbons () { return (_carbons); }
 		Atom * Carbon (int index) { return (_carbons[index]); }
@@ -26,3 +27,5 @@ class CarbonChain : public molecule {
 
 typedef std::vector<CarbonChain *> CarbonChain_ptr_vec;
 typedef std::vector<CarbonChain> CarbonChain_vec;
+
+#endif

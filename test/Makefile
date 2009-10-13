@@ -5,6 +5,7 @@ XYZSYSTEM = ../xyzsystem.o ../xyzfile.o ../wannier.o ../graph.o
 AMBERSYSTEM	= ../ambersystem.o ../crdfile.o ../forcefile.o ../topfile.o
 
 WATERSYSTEM	= $(MDSYSTEM) $(XYZSYSTEM) $(AMBERSYSTEM)
+CARBONCHAIN	= ../carbonchain.o ../decane.o
 MORITAFILES	= morita.o ../watersfg.o $(WATERSYSTEM)
 MPIMORITAFILES	= $(MORITAFILES) ../mpi/mpisys.o
 MORITA2002	= $(WATERSYSTEM) ../moritasfg2002.o morita2002.o
@@ -20,8 +21,12 @@ ORDERPARAMSHISTO = $(WATERSYSTEM) orderparams-histo.o
 TEMPFILES	= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o temp.cpp
 COORDINATION	= $(WATERSYSTEM) coordination.o
 ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
+HCORIENTATION	= $(WATERSYSTEM) $(CARBONCHAIN) carbonchainsystem.o
 
 ROTATE			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o molecule-rotate.cpp
+
+hcorientation: $(HCORIENTATION)
+	$(CXX) $(CPPFLAGS) $(HCORIENTATION) -llapack -o carbon-orientation
 
 ambertest : $(WATERSYSTEM) ambertest.o
 	$(CXX) $(CPPFLAGS) $(WATERSYSTEM) ambertest.o -llapack -o ambertest

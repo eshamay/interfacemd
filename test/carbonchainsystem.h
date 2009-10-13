@@ -1,21 +1,32 @@
 #ifndef	CARBONCHAINSYSTEM_H_
 #define	CARBONCHAINSYSTEM_H_
 
-#include "../analysis.h"
 #include "../carbonchain.h"
 #include "../decane.h"
+#include "../analysis.h"
 #include "../utility.h"
 
-class CarbonChainSystem : public Analyzer {
+typedef struct {
+	string mol_name;
+	vector<int> histogram; 					// total running histogram
+} AnalysisParams;
 
-  public:
+typedef Decane molecule_t;
 
-	CarbonChainSystem 
-	  (
-	   const void * analysis_params,
-	   const WaterSystemParams& params
-	  );
-	virtual ~CarbonChainSystem ();
+class CarbonChainSystem : public Analyzer<AnalysisParams> {
+
+	public:
+
+		CarbonChainSystem 
+			(
+			 AnalysisParams& analysis_params,
+			 WaterSystemParams& params
+			);
+
+		void Setup ();
+		void Analysis ();
+		void DataOutput (const int timestep);
+		void PostAnalysis ();
 
 };
 
