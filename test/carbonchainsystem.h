@@ -6,14 +6,24 @@
 #include "../analysis.h"
 #include "../utility.h"
 
+typedef VecR (CarbonChain::*Axis_Vector_Fn) ();	// a pointer to an axis vector function to find carbon-chain axes
+typedef void (CarbonChain::*FnPtr) ();
+typedef void (CarbonChain::*OutputPtr) (const int timestep);
+
 typedef struct {
-	string mol_name;
-	vector<int> histogram; 					// total running histogram
+	string 			mol_name;
+	string			atom_name;
+	vector<double> 	histogram;
+	vector<int>		int_histogram;
+	vector< vector<double> >	histogram_2;
+	vector< vector<int> >		density_histo_2;
+	// A function that returns the long-axis tilt vector for a given molecule
+	Axis_Vector_Fn	axisFn;
 } AnalysisParams;
 
-typedef Decane molecule_t;
+typedef Decane mol_t;
 
-class CarbonChainSystem : public Analyzer<AnalysisParams> {
+class CarbonChainSystem : public Analyzer<CarbonChainSystem, AnalysisParams> {
 
 	public:
 
@@ -23,11 +33,16 @@ class CarbonChainSystem : public Analyzer<AnalysisParams> {
 			 WaterSystemParams& params
 			);
 
-		void Setup ();
-		void Analysis ();
-		void DataOutput (const int timestep);
-		void PostAnalysis ();
 
+		void EmptyFn ();
+		void ClearHistogram_FindMols ();
+		void MolecularAxisDirection ();
+		void AngleHistogramOutput (const int timestep);
+		void Histogram_2_Output (const int timestep);
+		void Histogram_2_Output_2 (const int timestep);
+		void HistogramAveraging ();
+		void HistogramAveraging_2 ();
+		void MolecularPlane ();
 };
 
 #endif

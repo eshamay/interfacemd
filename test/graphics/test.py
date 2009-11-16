@@ -8,52 +8,40 @@ from pylab import *
 
 
 # Load up three different files
-data = []
-for arg in sys.argv[1:]:
-	file = scipy.io.array_import.read_array(arg)
-	datum = []
-	for i in range(len(file[0])):
-		datum.append(file[:,i])
-	data.append(datum)
+file1 = scipy.io.array_import.read_array(sys.argv[1])
+file2 = scipy.io.array_import.read_array(sys.argv[2])
+data1 = []
+data2 = []
+
+for i in range(len(file1[0])):
+		data1.append(file1[:,i])
+for i in range(len(file2[0])):
+		data2.append(file2[:,i])
+x = data1[0]
+y =	data1[1]
 
 # create a figure
-fig = figure(1, facecolor='white')
-
-cmBase = cm.jet   # choose a colormap to use for the plot
-
-# This processes the data and adds the colored 2D histogram to the figure
-'''
-for datum in data:
-im = plt.imshow(datum, aspect='auto', extent=(-20.0, 150.0, -1.0,1.0), interpolation='bilinear')    
-'''
+fig = plt.figure(1, facecolor='white', figsize=(11,11))
 # Create the triptych layout of the three histograms
-titles = ['Bisector','Normal',r'OH$_A$',r'OH$_B$']
-for i in range(len(data)):
-	subplot(2,2,i+1)
-	title(titles[i], fontsize=28)
-	im = plt.imshow(data[i], cmap=cm.jet, aspect='auto', extent=(-1.0, 1.0, 150.0, -20.0), interpolation='bilinear')    
+ax = fig.add_subplot(1,1,1)
+plt.title('Molecular Axis Orientation Distribution', fontsize=28)
+ax.plot (x, y, 'r-', linewidth=4, label='Decane')
 
-	# zoom in on the region of interest
-	plt.ylim(68.0, 58.0)
-	# Turn on the X-Y grid
-	if i%2 == 0:
-		yticks(fontsize=20)
-		ylabel('Slab Position', fontsize=28)
-	else:
-		yticks(yticks()[0], ())
-	if i > 1:
-		xlabel(r'$\cos(\theta)$', fontsize=28)		
-		xticks(fontsize=20)
-		
-	grid(True)
+x = data2[0]
+y =	data2[1]
+ax.plot (x, y, 'b-', linewidth=4, label='Perfluorodecane')
 
-# A little magic to create a colorbar - legend for the plot(s)
-cax = axes([0.95, 0.33, 0.025, 0.33])
-cb = plt.colorbar(im, cax=cax) # grab the Colorbar instance
-for t in cb.ax.get_yticklabels():
-	t.set_fontsize(20)
-cb.ax.set_yticklabels(())	
+plt.legend()
 
-# Pass go - collect $200
-draw()
-show()
+# zoom in on the region of interest
+#plt.ylim(2.5, 32.5)
+#plt.xlim(-1.5, 30.0)
+# Turn on the X-Y grid
+yticks(fontsize=18)
+xlabel(r'$\cos(\theta)$', fontsize=28)		
+ylabel(r'$\rho$', fontsize=28)
+xticks(fontsize=18)
+
+grid(True)
+
+plt.show()

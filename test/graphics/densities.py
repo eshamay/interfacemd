@@ -4,5 +4,5 @@ from DensityProfiler import DensityProfiler as dp
 
 d = dp(sys.argv[1:])
 
-d.PlotData()
+d.PlotData(cols=[1])
 

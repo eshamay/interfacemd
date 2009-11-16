@@ -38,7 +38,7 @@ class DensityProfiler:
 		for i in range(len(self.data)):
 			# some of the prelim stuff for our figure
 			ax = self.fig.add_subplot(len(self.data),1,i+1)
-			ax.set_title('Perfluorodecane Interface', size='x-large')
+			ax.set_title('Decane/Water Interface', size='x-large')
 
 			x = self.data[i][0]
 			size = self.data[i].NUMCOLUMNS
@@ -51,6 +51,7 @@ class DensityProfiler:
 					continue
 
 				datum = self.data[i][j]
+				datum = map(lambda x: x*18.01, datum)
 
 				# sets the maximum of the graph
 				dat_max = max(datum)
@@ -63,6 +64,22 @@ class DensityProfiler:
 				else:
 					ax.plot(x, datum, colors[j-1]+':', linewidth=4)
 
+				# Show the location of the maximum water density peak and
+				# the trough behind it
+				peak = max(datum)
+				peak_index = datum.index(peak)
+				ax.axhline(y=peak, color='b', linestyle=':')
+				#here's the trough
+				trough_region = datum[peak_index:peak_index+80]
+				trough = min(trough_region)
+				trough_index = datum.index(trough)
+
+				ax.axhline(y=trough, color='b', linestyle=':')
+
+				print "max density = %f\ntrough density = %f\n" % (peak, trough)
+				print "Max Location = %f\nTrough Location = %f\n" % (x[peak_index], x[trough_index])
+
+
 				# now take care of plotting the fitting functions
 				if fit:
 					if j == 1:
@@ -73,6 +90,7 @@ class DensityProfiler:
 			ax.set_axis_bgcolor('w')
 
 		ax.set_xlabel(r'Slab Position $\AA$', size='x-large')
+		ax.set_ylabel(r'$\rho_{H_2O}$ ($\frac{mg}{mL}$)', size='x-large')
 		self.SetLegend()
 		plt.show()
 
@@ -102,6 +120,10 @@ class DensityProfiler:
 		(fit, params) = d.FitWater(x, datum)
 		ax.plot(x, fit, color+'-', linewidth=2, label=r'H$_2$O Fit')
 
+		print "Bulk Density = %f\n" % (max(fit))
+
+
+
 		### This is added to identify the water region with shading
 		plt.axvspan(params[4]-params[5],params[4]+params[5], facecolor='b', alpha=0.2)
 		plt.axvspan(params[6]-params[7],params[6]+params[7], facecolor='b', alpha=0.2)
@@ -110,7 +132,7 @@ class DensityProfiler:
 		# this adds a box that clearly labels the width and 90-10 thickness of the interface from the fitting tanh
 		gibbs_1 = matplotlib.patches.Ellipse ((params[4], max(datum)/2.0), 0.5, 0.1, alpha=0.0, fc="none")
 
-		ax.annotate("Water Interface #1\nThickness = %5.3f\n\"90-10\" = %5.3f" % (params[5], params[5]*2.197), (params[4], max(datum)/2.0),
+		ax.annotate("Water/Decane Interface\nThickness = %5.3f\n\"90-10\" = %5.3f" % (params[5], params[5]*2.197), (params[4], max(datum)/2.0),
 			    xytext=(-200,80), textcoords='offset points', size=14,
 			    bbox=dict(boxstyle="round", fc=(1.0, 0.7, 0.7), ec=(1., .5, .5)),
 			    arrowprops=dict(arrowstyle="wedge,tail_width=1.",

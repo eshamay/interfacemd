@@ -42,7 +42,7 @@ struct WaterSystemParams {
 	int timesteps, restart;
 
 	double posmin, posmax, posres;
-	int posbins;
+	int		posbins;
 	double pbcflip;
 	double angmin, angmax, angres;
 	int angbins;
@@ -102,44 +102,26 @@ public:
 protected:
 
 	T * sys;
-	std::string output_filename;
-	FILE * output;
 
 	BondGraph	graph;
 
-	coord axis;
-	VecR ref_axis;
-
-	int	output_freq;
-
-	// position boundaries and bin width
-	double	posmin, posmax, posres;
-	int		posbins;
-	double	pbcflip;
-	double 	angmin, angmax, angres;
-	int		angbins;
-	unsigned int timesteps;
-	unsigned int restart;
-
+	double	posmin, posmax;
+	double	pbcflip;			// location to flip about periodic boundaries
+	coord axis;					// axis normal to the infterface
 	double int_low, int_high, middle;		// the positions of analysis cutoffs
 
+
 	Water_ptr_vec	int_wats;		// interfacial waters, or just all the waters in the system depending on the function call
-	Mol_ptr_vec int_mols;
+	Mol_ptr_vec 	int_mols;
 	Atom_ptr_vec	int_atoms;		// interfacial water atoms (or as above)
 
 };
 
 template <class T>
 WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
-	:
-		output_filename(params.output_filename), output(params.output),
-		axis(params.axis), ref_axis(params.ref_axis),
-		output_freq(params.output_freq),
-		posmin(params.posmin), posmax(params.posmax), posres(params.posres),
-		posbins(int ((posmax - posmin)/posres) + 1), pbcflip(params.pbcflip),
-		angmin(params.angmin), angmax(params.angmax), angres(params.angres),
-		angbins(int ((angmax - angmin)/angres) + 1), 
-		timesteps(params.timesteps), restart(params.restart)
+	: 
+		posmin(params.posmin), posmax(params.posmax), pbcflip(params.pbcflip), 
+		axis(params.axis)
 {
 
 /*
@@ -159,25 +141,12 @@ WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
 	}
 */
 
-	OpenFile ();
 
 	return;
 }
 
 template <class T>
 WaterSystem<T>::~WaterSystem () {
-	fclose (output);
-
-	return;
-}
-
-template <class T>
-void WaterSystem<T>::OpenFile () {
-
-	if (output == (FILE *)NULL) {
-		printf ("WaterSystem::WaterSystem (argc, argv) - couldn't open the data output file!\n");
-		exit(1);
-	}
 
 	return;
 }
@@ -251,6 +220,12 @@ void WaterSystem<T>::FindMols (const string name) {
 		}
 	}
 
+	if ((int)int_mols.size() == 0) {
+		printf ("\n\n***  Couldn't find any molecules with the residue name \"%s\" in the system\nCheck the system settings\n", name.c_str());
+		exit(1);
+	}
+
+	fflush(stdout);
 return;
 }
 

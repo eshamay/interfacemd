@@ -79,7 +79,7 @@ void AmberSystem::_ParseMolecules () {
 		else if (name == "h2o") {
 			_mols.push_back (new Water());
 		}
-		else if (name == "dec") {
+		else if (name == "dec" || name == "pds") {
 			_mols.push_back (new Decane());
 		}
 		// otherwise add on a generic molecule

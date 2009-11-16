@@ -22,8 +22,12 @@ TEMPFILES	= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o temp.cpp
 COORDINATION	= $(WATERSYSTEM) coordination.o
 ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
 HCORIENTATION	= $(WATERSYSTEM) $(CARBONCHAIN) carbonchainsystem.o
+QUARTZ			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o quartz.o
 
 ROTATE			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o molecule-rotate.cpp
+
+quartz: $(QUARTZ)
+	$(CXX) $(CPPFLAGS) $(QUARTZ) -llapack -o quartz-slab
 
 hcorientation: $(HCORIENTATION)
 	$(CXX) $(CPPFLAGS) $(HCORIENTATION) -llapack -o carbon-orientation

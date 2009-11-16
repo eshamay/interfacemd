@@ -1,0 +1,162 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.7	//
+AMAX	angledistro.h	22;"	d
+AMIN	angledistro.h	23;"	d
+ANGLEDISTRO_H_	angledistro.h	2;"	d
+ARES	angledistro.h	24;"	d
+AVG	coordination.h	6;"	d
+AVG	ordercoords.h	6;"	d
+AXIS	angledistro.h	14;"	d
+AmberTest	ambertest.h	/^class AmberTest : public WaterSystem<AmberSystem> {$/;"	c
+AnalysisParams	carbonchainsystem.h	/^} AnalysisParams;$/;"	t	typeref:struct:__anon1
+Analyze	morita2002.h	/^void Morita2002<T>::Analyze () {$/;"	f	class:Morita2002
+AngleDistro	angledistro.h	/^class AngleDistro {$/;"	c
+Axis_Vector_Fn	carbonchainsystem.h	/^typedef VecR (CarbonChain::*Axis_Vector_Fn) ();	\/\/ a pointer to an axis vector function to find carbon-chain axes$/;"	t
+CARBONCHAINSYSTEM_H_	carbonchainsystem.h	2;"	d
+COORDINATION_H_	coordination.h	2;"	d
+CarbonChainSystem	carbonchainsystem.h	/^class CarbonChainSystem : public Analyzer<CarbonChainSystem, AnalysisParams> {$/;"	c
+Complex_vec	morita.h	/^typedef std::vector< complex<double> > Complex_vec;$/;"	t
+CoordOrderParams	ordercoords.h	/^class CoordOrderParams : public WaterSystem {$/;"	c
+CoordinationTest	coordination.h	/^class CoordinationTest : public WaterSystem {$/;"	c
+DEFINITIONS_H_	definitions.h	2;"	d
+DensityAnalyzer	densitytest.h	/^class DensityAnalyzer : public WaterSystem<AmberSystem> {$/;"	c
+Double_histo	ordercoords.h	/^typedef std::vector<Double_vec> 	Double_histo;$/;"	t
+Double_vec	ordercoords.h	/^typedef std::vector<double> 		Double_vec;$/;"	t
+FORCE	angledistro.h	12;"	d
+FORCE	freqtest.h	12;"	d
+FORCE	mpitest.h	5;"	d
+FREQTEST_H_	freqtest.h	2;"	d
+FnPtr	carbonchainsystem.h	/^typedef void (CarbonChain::*FnPtr) ();$/;"	t
+HIGH_COORD	coordination.h	8;"	d
+INTERFACE	mpitest.h	10;"	d
+Int_histo	coordination.h	/^typedef std::vector< vector<int> > Int_histo;$/;"	t
+Int_histo	ordercoords.h	/^typedef std::vector<Int_vec> 		Int_histo;$/;"	t
+Int_vec	coordination.h	/^typedef std::vector<int> Int_vec;$/;"	t
+Int_vec	ordercoords.h	/^typedef std::vector<int>			Int_vec;$/;"	t
+MDCRD	angledistro.h	11;"	d
+MDCRD	freqtest.h	11;"	d
+MDCRD	mpitest.h	4;"	d
+MORITA2002_H_	morita2002.h	2;"	d
+MORITA_H_	morita.h	2;"	d
+MolChi	morita.h	/^	Complex_vec MolChi;			\/\/ chi for a given molecule$/;"	m	class:SFGAnalyzer
+Morita2002	morita2002.h	/^	Morita2002 (const WaterSystemParams& params, const std::string filepath, const VecR& size, const std::string wannierpath)$/;"	f	class:Morita2002
+Morita2002	morita2002.h	/^	Morita2002 (const WaterSystemParams& params, const std::string prmtop, const std::string mdcrd, const std::string mdvel = "")$/;"	f	class:Morita2002
+Morita2002	morita2002.h	/^class Morita2002 : public WaterSystem<T> {$/;"	c
+ORDER_PARAMS_H_	ordercoords.h	2;"	d
+ORDER_PARAMS_H_	orderparams-histo.h	2;"	d
+ORDER_PARAMS_H_	orderparams.h	2;"	d
+OUTPUT_FILE	angledistro.h	16;"	d
+OUTPUT_FREQ	dipoletcf.h	41;"	d
+OUTPUT_FREQ	mpitest.h	13;"	d
+OUTPUT_FREQ	xyzdipole_analysis.h	57;"	d
+OrderParameters	orderparams-histo.h	/^class OrderParameters : public WaterSystem<AmberSystem> {$/;"	c
+OrderParameters	orderparams.h	/^class OrderParameters : public WaterSystem<AmberSystem> {$/;"	c
+OutputPtr	carbonchainsystem.h	/^typedef void (CarbonChain::*OutputPtr) (const int timestep);$/;"	t
+PRMTOP	angledistro.h	10;"	d
+PRMTOP	freqtest.h	10;"	d
+PRMTOP	mpitest.h	3;"	d
+PRMTOP	toptest.h	11;"	d
+QPT_H_	Qpt.h	2;"	d
+S1	ordercoords.h	/^	Double_histo S1;$/;"	m	class:CoordOrderParams
+S2_den	ordercoords.h	/^	Double_histo S2_den;$/;"	m	class:CoordOrderParams
+S2_num	ordercoords.h	/^	Double_histo S2_num;$/;"	m	class:CoordOrderParams
+SFGAnalyzer	morita.h	/^class SFGAnalyzer : public WaterSystem<AmberSystem> {$/;"	c
+TCF_RUN	xyzdipole_analysis.h	20;"	d
+TIMESTEPS	mpitest.h	14;"	d
+TOPTEST_H_	toptest.h	2;"	d
+TimestepChi	morita.h	/^	Complex_vec TimestepChi;	\/\/ chi spectrum of several different molecules collected over an entire timestep$/;"	m	class:SFGAnalyzer
+TotalChi	morita.h	/^	Complex_vec TotalChi;		\/\/ Running total of all the data for several timesteps$/;"	m	class:SFGAnalyzer
+ZMAX	angledistro.h	18;"	d
+ZMIN	angledistro.h	19;"	d
+ZRES	angledistro.h	20;"	d
+_AMBERTEST_H_	ambertest.h	2;"	d
+_DENSITYTEST_H_	densitytest.h	2;"	d
+_DIPOLETCF_H_	dipoletcf.h	2;"	d
+_M	morita2002.h	/^	VecR	_M;		\/\/ system polarization$/;"	m	class:Morita2002
+_XYZDIPOLE_ANALYSIS_H_	xyzdipole_analysis.h	2;"	d
+_alpha	morita2002.h	/^	MatR	_alpha;	\/\/ system polarizability (susceptibility?)$/;"	m	class:Morita2002
+_anglebins	angledistro.h	/^	int _anglebins;$/;"	m	class:AngleDistro
+_anglemax	angledistro.h	/^	double _anglemin, _anglemax, _angleres;$/;"	m	class:AngleDistro
+_anglemin	angledistro.h	/^	double _anglemin, _anglemax, _angleres;$/;"	m	class:AngleDistro
+_angleres	angledistro.h	/^	double _anglemin, _anglemax, _angleres;$/;"	m	class:AngleDistro
+_axis	angledistro.h	/^	coord _axis;$/;"	m	class:AngleDistro
+_data	orderparams-histo.h	/^	vector< vector<int>	> _data;$/;"	m	class:OrderParameters
+_data	orderparams.h	/^	vector< vector<double> >	_data;$/;"	m	class:OrderParameters
+_histo	angledistro.h	/^	vector< vector<int> > _histo;$/;"	m	class:AngleDistro
+_output	angledistro.h	/^	FILE * _output;$/;"	m	class:AngleDistro
+_sfg	morita2002.h	/^	MoritaSFG	_sfg;$/;"	m	class:Morita2002
+_sys	angledistro.h	/^	AmberSystem _sys;$/;"	m	class:AngleDistro
+_timestep	angledistro.h	/^	int _timestep;$/;"	m	class:AngleDistro
+_zbins	angledistro.h	/^	int _zbins;$/;"	m	class:AngleDistro
+_zmax	angledistro.h	/^	double _zmin, _zmax, _zres;$/;"	m	class:AngleDistro
+_zmin	angledistro.h	/^	double _zmin, _zmax, _zres;$/;"	m	class:AngleDistro
+_zres	angledistro.h	/^	double _zmin, _zmax, _zres;$/;"	m	class:AngleDistro
+angbins	ordercoords.h	/^	int		angbins;$/;"	m	class:CoordOrderParams
+angbins	orderparams-histo.h	/^	int		angbins;$/;"	m	class:OrderParameters
+angbins	orderparams.h	/^	int		angbins;$/;"	m	class:OrderParameters
+angmax	ordercoords.h	/^	double	angmax;$/;"	m	class:CoordOrderParams
+angmax	orderparams-histo.h	/^	double	angmax;$/;"	m	class:OrderParameters
+angmax	orderparams.h	/^	double	angmax;$/;"	m	class:OrderParameters
+angmin	ordercoords.h	/^	double	angmin;$/;"	m	class:CoordOrderParams
+angmin	orderparams-histo.h	/^	double	angmin;$/;"	m	class:OrderParameters
+angmin	orderparams.h	/^	double	angmin;$/;"	m	class:OrderParameters
+angres	ordercoords.h	/^	double	angres;$/;"	m	class:CoordOrderParams
+angres	orderparams-histo.h	/^	double	angres;$/;"	m	class:OrderParameters
+angres	orderparams.h	/^	double	angres;$/;"	m	class:OrderParameters
+atomNames	densitytest.h	/^	vector<string> atomNames;$/;"	m	class:DensityAnalyzer
+atom_name	carbonchainsystem.h	/^	string			atom_name;$/;"	m	struct:__anon1
+axis	mpitest.h	/^const coord axis = y;$/;"	v
+axisFn	carbonchainsystem.h	/^	Axis_Vector_Fn	axisFn;$/;"	m	struct:__anon1
+density_histo_2	carbonchainsystem.h	/^	vector< vector<int> >		density_histo_2;$/;"	m	struct:__anon1
+filename	Qpt.h	15;"	d
+filename	dipoletcf.h	38;"	d
+filename	xyzdipole_analysis.h	54;"	d
+histo	coordination.h	/^	Int_histo histo;$/;"	m	class:CoordinationTest
+histo	densitytest.h	/^	vector< vector<int> > histo;	\/\/ histogram for atom particle numbers arranged by atom names$/;"	m	class:DensityAnalyzer
+histogram	carbonchainsystem.h	/^	vector<double> 	histogram; 					\/\/ total running histogram$/;"	m	struct:__anon1
+histogram_2	carbonchainsystem.h	/^	vector< vector<double> >	histogram_2;$/;"	m	struct:__anon1
+mol_name	carbonchainsystem.h	/^	string 			mol_name;$/;"	m	struct:__anon1
+mol_t	carbonchainsystem.h	/^typedef Decane mol_t;$/;"	t
+name_map	coordination.h	/^	coord_map name_map;$/;"	m	class:CoordinationTest
+name_map	ordercoords.h	/^	coord_map name_map;$/;"	m	class:CoordOrderParams
+numMolsProcessed	morita.h	/^	unsigned long numMolsProcessed;$/;"	m	class:SFGAnalyzer
+numSteps	Qpt.h	18;"	d
+number_density	ordercoords.h	/^	Int_histo number_density;$/;"	m	class:CoordOrderParams
+number_density	orderparams.h	/^	vector<unsigned long int> number_density;$/;"	m	class:OrderParameters
+outputfilename	dipoletcf.h	/^	const string outputfilename	 = "tcf.dat";$/;"	v
+outputfilename	xyzdipole_analysis.h	/^	const string outputfilename	 = "power.dat";$/;"	v
+outputfilename	xyzdipole_analysis.h	/^	const string outputfilename	 = "tcf.dat";$/;"	v
+outputfilename	xyzdipole_analysis.h	/^	const string outputfilename	 = "test.dat";$/;"	v
+sfg	morita.h	/^	SFGCalculator	sfg;$/;"	m	class:SFGAnalyzer
+slab35	dipoletcf.h	15;"	d
+slab35	xyzdipole_analysis.h	16;"	d
+vcoords	coordination.h	/^	std::vector<coordination> vcoords;$/;"	m	class:CoordinationTest
+vcoords	ordercoords.h	/^	std::vector<coordination> vcoords;$/;"	m	class:CoordOrderParams
+wannierfile	Qpt.h	22;"	d
+wannierfile	dipoletcf.h	39;"	d
+wannierfile	xyzdipole_analysis.h	55;"	d
+xSize	Qpt.h	11;"	d
+xSize	dipoletcf.h	/^	const double xSize	= 12.0;$/;"	v
+xSize	dipoletcf.h	/^	const double xSize	= 12.4138;$/;"	v
+xSize	dipoletcf.h	/^	const double xSize	= 13.4724;$/;"	v
+xSize	xyzdipole_analysis.h	/^	const double xSize	= 12.0;$/;"	v
+xSize	xyzdipole_analysis.h	/^	const double xSize	= 12.4138;$/;"	v
+xSize	xyzdipole_analysis.h	/^	const double xSize	= 13.4724;$/;"	v
+ySize	Qpt.h	12;"	d
+ySize	dipoletcf.h	/^	const double ySize	= 12.0;$/;"	v
+ySize	dipoletcf.h	/^	const double ySize	= 12.4138;$/;"	v
+ySize	dipoletcf.h	/^	const double ySize	= 15.5566;$/;"	v
+ySize	xyzdipole_analysis.h	/^	const double ySize	= 12.0;$/;"	v
+ySize	xyzdipole_analysis.h	/^	const double ySize	= 12.4138;$/;"	v
+ySize	xyzdipole_analysis.h	/^	const double ySize	= 15.5566;$/;"	v
+zSize	Qpt.h	13;"	d
+zSize	dipoletcf.h	/^	const double zSize	= 12.4138;$/;"	v
+zSize	dipoletcf.h	/^	const double zSize	= 20.0;$/;"	v
+zSize	dipoletcf.h	/^	const double zSize	= 30.0000;$/;"	v
+zSize	xyzdipole_analysis.h	/^	const double zSize	= 12.4138;$/;"	v
+zSize	xyzdipole_analysis.h	/^	const double zSize	= 20.0;$/;"	v
+zSize	xyzdipole_analysis.h	/^	const double zSize	= 30.0000;$/;"	v
