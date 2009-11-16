@@ -14,16 +14,16 @@ protected:
 	std::string _name,
 		   _residue;
 
-	int    _ID;				// some numerical identifier in case the atom is in an ordered list
-	int	   _molid;		// the molecule that contains this atom
+	int    _ID;	// some numerical identifier in case the atom is in an ordered list
+	int	   _molid;			   // the molecule that contains this atom
 
 	Molecule * _pmolecule;
 
 	double _mass,
 		   _charge;
 
-	VecR _position;			// Particle position
-	VecR _force;			// the external force on the atom at any given point in time
+	VecR _position;				// Particle position
+	VecR _force; // the external force on the atom at any given point in time
 
 
 public:

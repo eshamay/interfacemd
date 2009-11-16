@@ -64,6 +64,8 @@ class Analyzer : public WaterSystem<AmberSystem> {
 	void _OutputHeader () const;
 	void _OutputStatus (const int timestep) const;
 
+	void _EmptyFunction () const { return; } /* A simple empty function that does nothing to the system */
+
 	void CheckOutputFile ();
 
 	// function pointers to perform the actual system analysis operations
@@ -74,7 +76,7 @@ class Analyzer : public WaterSystem<AmberSystem> {
 
 };
 
- 
+
 template <class T, typename U>
 Analyzer<T,U>::Analyzer (U& ap, WaterSystemParams& wsp)
 
@@ -175,19 +177,6 @@ int Analyzer<T,U>::Bin (const double value, const double min, const double res)
 	return bin;
 }
 
-// calculate the histogram bin to be used given a particular angle
-template <class T, typename U>
-int Analyzer<T,U>::AngleBin (const double angle) const {
-  int anglebin = int ((angle - angmin)/angres);
-  return anglebin;
-}
-
-template <class T, typename U>
-int Analyzer<T,U>::PositionBin (const double position) const {
-  int posbin = Bin(position, posmin, posres);
-  return posbin;
-}
-
 // Find the position a particular atom fits into for a histogram
 template <class T, typename U>
 int Analyzer<T,U>::PositionBin (const Atom * patom) const {
@@ -199,21 +188,22 @@ int Analyzer<T,U>::PositionBin (const Atom * patom) const {
 #ifdef AVG
   // here the bin will be selected based on the distance to a given interface. Negative distances are inside the water phase, positive are in the CCl4
   double distance = (position > middle) ? position - int_high : int_low - position;
-  int bin = PositionBin (distance);
+  int bin = Bin (distance, posmin, posres);
 #else
   //if (position < START or position > END) continue;		// only bin stuff within the bounds that have been set up
-  int bin = PositionBin (position);
+  int bin = Bin (position, posmin, posres);
 #endif
 
   return bin;
 }
 
-// Create a histogram of the angles formed by an axis of a molecule's given reference axis. The supplied axis function should return the molecular axis vector of the molecule.
+// Create a histogram of the angles formed by an axis of a molecule's given reference axis.
+// The supplied axis function should return the molecular axis vector of the molecule.
 template <class T, typename U>
 template <typename molecule_t>
 vector<int> Analyzer<T,U>::Molecular_Axis_Orientation_Histogram (
 		string molName,
-		VecR (molecule_t::*axisFn)()
+		VecR (molecule_t::*axisFn)() /* This axisFn must return the molecular axis of interest of the molecule */
 		)
 {
 
@@ -235,65 +225,53 @@ vector<int> Analyzer<T,U>::Molecular_Axis_Orientation_Histogram (
   return (histo);
 }
 
-// creates a 2D histogram showing the shape of the plane formed by a given atom of a molecule averaged over a simulation
+// creates a 2D histogram showing the shape of the plane formed by a given atom of a molecule averaged over a simulation.
 // The histogram will show either the population density at a particular in-plane point giving the population as a function of the two coordinates...
 // or it can show the average location (in the surface-normal direction) of atoms in the plane.
 template <class T, typename U>
 template <typename molecule_t>
 vector< vector<double> > Analyzer<T,U>::Interface_Location_Histogram (
-		// 2 directions (axes) parallel to the plane
-		const coord d1, const coord d2,		
-		const string mol_name,				// name of the molecule to analyze
-		const string atom_name,
-		vector< vector<double> >& histogram,
-		vector< vector<int> >& density)
+								      // 2 directions (axes) parallel to the plane
+								      const coord d1, const coord d2,
+								      // name of the molecule to analyze
+								      const string mol_name,
+								      // Atom name to analyze
+								      const string atom_name,
+								      vector< vector<double> >& histogram,
+								      vector< vector<int> >& density)
 {
-	double d_min = -5.0;
-	// the size of the system in the d1 direction
-	double d1_max = Atom::Size()[d1] + 10.0;	
-	// the size of the system in the d2 direction
-	double d2_max = Atom::Size()[d2] + 10.0;
-	double d_res = 1.0;
+  double d_min = -5.0;
+  // the size of the system in the d1 direction
+  double d1_max = Atom::Size()[d1] + 10.0;	
+  // the size of the system in the d2 direction
+  double d2_max = Atom::Size()[d2] + 10.0;
+  double d_res = 1.0;
 
-	int numBins1 = (int)((d1_max - d_min)/d_res);
-	int numBins2 = (int)((d2_max - d_min)/d_res);
+  int numBins1 = (int)((d1_max - d_min)/d_res);
+  int numBins2 = (int)((d2_max - d_min)/d_res);
 
-	if (histogram.size() == 0)
-		histogram.resize (numBins1, vector<double> (numBins2, 0));
-	if (density.size() == 0)
-		density.resize (numBins1, vector<int> (numBins2, 0));
+  if (histogram.size() == 0)
+    histogram.resize (numBins1, vector<double> (numBins2, 0));
+  if (density.size() == 0)
+    density.resize (numBins1, vector<int> (numBins2, 0));
 	
-	molecule_t * mol;
-	Atom * atom;
-	int d1_bin, d2_bin;
-	RUN (int_mols) {
-		mol = static_cast<molecule_t *>(int_mols[i]);
-		atom = mol->GetAtom(atom_name);
+  molecule_t * mol;
+  Atom * atom;
+  int d1_bin, d2_bin;
+  RUN (int_mols) {
+    mol = static_cast<molecule_t *>(int_mols[i]);
+    atom = mol->GetAtom(atom_name);
 		
-		d1_bin = Bin (atom->Position()[d1], d_min, d_res);
-		d2_bin = Bin (atom->Position()[d2], d_min, d_res);
-		// bin the location of an atom at each point on the plane
-		double ref_position = atom->Position()[axis];
+    d1_bin = Bin (atom->Position()[d1], d_min, d_res);
+    d2_bin = Bin (atom->Position()[d2], d_min, d_res);
+    // bin the location of an atom at each point on the plane
+    double ref_position = atom->Position()[axis];
 
-		histogram[d1_bin][d2_bin] += ref_position;
-		density[d1_bin][d2_bin]++;
-	}
+    histogram[d1_bin][d2_bin] += ref_position;
+    density[d1_bin][d2_bin]++;
+  }
 
-	// after finding the locations of all the atoms, divide each bin by the number of atoms comprising the bin.
-	/*
-	RUN (histogram) {
-		RUN2 (histogram[i]) {
-			if (density[i][j] == 0) {
-				histogram[i][j] = 0.0;
-			}
-			else {
-				histogram[i][j] /= (double)density[i][j];
-			}
-		}
-	}
-	*/
-
-	return histogram;
+  return histogram;
 }
 
 #endif

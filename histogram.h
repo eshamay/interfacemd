@@ -7,37 +7,67 @@
 
 using namespace std;
 
+template <typename ValueType>
 class Histogram {
 
 private:
-
-	double _min;
-	double _max;
+  
+	ValueType _min;
+	ValueType _max;
 	double _numBins;
-	double _binSize;
+	ValueType _binSize;
 
-	vector<int> _histogram;
+	ValueType * _data;
 
 public:
 
-	Histogram (double const min, double const max, int numbins);
-	Histogram (double const min, double const max, double binsize);
+	Histogram (ValueType const min, ValueType const max, ValueType const binsize);
+	~Histogram ();
 
-	double Min () { return _min; }
-	double Max () { return _max; }
-	double NumBins () { return _numBins; }
-	double BinSize () { return _binSize; }
+	ValueType Min () const { return _min; }
+	ValueType Max () const { return _max; }
+	int NumBins () const { return _numBins; }
+	ValueType BinSize () const { return _binSize; }
 
-	int		operator[] (int bin) { return _histogram[bin]; }
-	void	operator[] (double value) { _histogram[this->Bin(value)]++; }
-	int 	operator++ (int bin) { _histogram[bin]++; }
-	int 	operator-- (int bin) { _histogram[bin]--; }
-
-	int Bin (int const value) const {		// calculates the bin for the given value
+	int Bin (ValueType const value) const {		// Returns the bin that the value would go into
 		return int( (value - _min)/_binSize );
 	}
 
-	void Print ();
+	int Add (ValueType const value) 			// Increment the histogram bin for the given value
+	{
+		int bin = Bin(value);
+		_data[bin]++;
+		return bin;
+	}
+	int Remove (ValueType const value)			// Decrement the associated bin for the value given
+	{
+		int bin = Bin(value);
+		_data[bin]--;
+		return bin;
+	}
+
 };
+
+template <typename ValueType>
+Histogram::Histogram (ValueType const min, ValueType const max, ValueType const binsize)	
+	: _min (min), _max (max), _binSize (binsize), _numBins ( int((max - min)/binsize) + 1)
+{
+	_data = new ValueType [_numBins];
+return;
+}
+	
+<typename ValueType>
+Histogram::~Histogram () {
+	delete [] _data;
+return;
+}
+
+<typename ValueType>
+void Histogram::Histogram Clear () {
+	for (int i = 0; i < _numBins; i++) {
+		_data[i] = ValueType(0);
+	}
+return;
+}
 
 #endif

@@ -5,7 +5,7 @@
 // These RUN macros should clean up code for checking through vectors and arrays
 #ifndef RUN
 
-#define RUN(list)   \
+#define RUN(list)   \		// works for vectors - not for simple arrays
 	for (size_t i = 0; i < list.size(); i++)
 
 #endif
