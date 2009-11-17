@@ -79,7 +79,8 @@ void BondGraph::_ParseBonds () {
 		if (ai_name == aj_name) continue;
 
 		// calculate the distance between the two atoms
-		double bondlength = v_position[*vi].MinDistance(v_position[*vj], Atom::_size);
+		double bondlength = MDSystem::Distance (v_position[*vi], v_position[*vj]).Magnitude();
+		//double bondlength = v_position[*vi].MinDistance(v_position[*vj], Atom::_size);
 		bondtype btype = unbonded;
 
 		// first look at bonds between O and H
@@ -112,8 +113,8 @@ void BondGraph::_ParseBonds () {
 				wat = static_cast<Water *>(h->ParentMolecule());
 				o1 = wat->GetAtom("O");
 
-				VecR oh1 = o1->Position().MinVector(h->Position(), Atom::Size());	// the covalent bond
-				VecR oh2 = h->Position().MinVector(o2->Position(), Atom::Size());	// the H-bond
+				VecR oh1 = MDSystem::Distance (o1, h);	// the covalent bond
+				VecR oh2 = MDSystem::Distance (o2, h);	// the H-bond
 
 				double angle = acos(oh1 < oh2);
 				//printf ("% 10.3f\n", angle * 180.0/M_PI);

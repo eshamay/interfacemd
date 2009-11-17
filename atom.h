@@ -27,7 +27,6 @@ protected:
 
 
 public:
-	static VecR _size;				// system size
 
 	// constructors
 	Atom ();
@@ -39,12 +38,6 @@ public:
 
 	double operator- (const Atom& input) const;		// operator usage to determine the distance between two atoms
 	double operator[] (const coord index) const;	// get the atom's position by coordinate
-
-	double MinDistance (const Atom& input) const;
-	double MinDistance (Atom const * const input) const;
-	VecR MinVector (const Atom * input) const {
-		return _position.MinVector(input->_position, _size);
-	}
 
 	// Input
 	void Name (const std::string name) { _name = name; }
@@ -65,11 +58,10 @@ public:
 	void X (double val) { _position.X(val); }			// for setting the atom's position
 	void Y (double val) { _position.Y(val); }
 	void Z (double val) { _position.Z(val); }
+
 	void SetMass ();
 	void MolID (const int mol) { _molid = mol; }	// sets the ID of the molecule containing this atom
 	void ParentMolecule (Molecule * mol) { _pmolecule = mol; }	// sets a pointer to the molecule that contains the atom
-	static void Size (VecR size) { _size = size; }	// sets the system size
-	static const VecR& Size ()	{ return _size; }
 
 	void Shift (VecR shift);			// shift the atom's position
 
@@ -91,7 +83,6 @@ public:
 	double Z () const 		{ return _position[z]; }
 	int MolID () const		{ return _molid; }
 	Molecule * ParentMolecule () const { return _pmolecule; }
-	void Wrap (VecR origin);							// A way to wrap the atom's position into the central image of the system cell
 	void Print () const;
 };
 

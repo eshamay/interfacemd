@@ -2,6 +2,8 @@
 #define GRAPH_H_
 
 #include "utility.h"
+#include "mdsystem.h"
+
 #include "atom.h"
 #include "h2o.h"
 

@@ -2,8 +2,9 @@
 #define HNO3_H_
 
 #include <iostream>
-#include "molecule.h"
 #include "vecr.h"
+#include "molecule.h"
+#include "mdsystem.h"
 #include "utility.h"
 
 

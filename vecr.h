@@ -11,7 +11,6 @@ enum coord {x=0, y=1, z=2};
 
 class MatR;
 
-//typedef FTensor::Tensor1<double,3>	d_vector;
 typedef std::vector<double>	Double_vector;
 
 class VecR {
@@ -38,7 +37,6 @@ public:
 	void 	operator-= (const double input);
 	double 	operator* (const VecR& input) const;		// Vector inner-product (dot-product)
 	VecR  	operator* (const double input) const;	// Vector scaling
-	//VecR 	operator* (const MatR& input) const;
 	void 	operator*= (const double input);		// Vector scaling (assignment)
 	VecR	operator% (const VecR& input) const;		// Vector cross-product
 	double	operator< (const VecR& input) const;		// Find the cos(angle) between two vectors
@@ -61,10 +59,6 @@ public:
 	void Zero ();								// Zero all elements of a vector
 	void Scale (double val);					// scale the entire vector's magnitude
 	void Scale (VecR val);						// scale each individual element by each element of another vector
-	VecR MinVector (const VecR& input, const VecR& size) const;
-	double MinDistance (const VecR& input, const VecR& size) const;
-	//VecR RotateToFrame (VecR const * const frame) const;
-	VecR& Wrap (VecR& size, VecR origin = VecR ());						// Used to wrap a vector into a central periodic cell of the given size
 
 	void X (const double val) { _coords[x] = val; }
 	void Y (const double val) { _coords[y] = val; }

@@ -27,6 +27,6 @@ VecR CarbonChain::Vector_CoM_To_End () {
 	// the last carbon in the chain
 	Atom * LastCarbon = _carbons[_carbons.size() - 1];
 	// the axis between the center of mass and the last chain-carbon
-	VecR axis (_centerofmass.MinVector(LastCarbon->Position(), Atom::Size()));
+	VecR axis (_centerofmass - LastCarbon->Position());
 	return (axis);
 }

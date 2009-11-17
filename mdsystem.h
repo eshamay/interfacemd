@@ -4,14 +4,9 @@
 #include <vector>
 #include <math.h>
 #include <string>
-#include "molecule.h"
+#include "vecr.h"
 #include "atom.h"
-#include "h2o.h"
-#include "h3o.h"
-#include "hno3.h"
-#include "carbonchain.h"
-#include "decane.h"
-#include "oh.h"
+#include "molecule.h"
 #include "utility.h"
 
 typedef std::vector<Atom *> Atom_ptr_vec;
@@ -23,7 +18,7 @@ protected:
 	Atom_ptr_vec	_atoms;		// the atoms in the system
 	Mol_ptr_vec		_mols;		// the molecules in the system
 
-	VecR			_dims;		// system dimensions - size
+	static VecR		_dimensions;		// system dimensions - size
 	int				_numTimeSteps;		// number of timesteps in the MD data files
 
 public:
@@ -43,8 +38,24 @@ public:
 	const int NumAtoms ()	const { return (int)_atoms.size(); }
 
 	const int size () const { return (int)_atoms.size(); }
-	virtual const int NumSteps () const { return _numTimeSteps; }
+	static VecR Dimensions () { return _dimensions; }
+	static void Dimensions (const VecR& dimensions) { MDSystem::_dimensions = dimensions; }
+	const int NumSteps () { return _numTimeSteps; }
 
+	/* Beyond simple system stats, various computations are done routinely in a molecular dynamics system: */
+
+	// Calculate the distance between two points within a system that has periodic boundaries
+	static VecR Distance (const VecR& v1, const VecR& v2);
+
+	// Calculate the distance between two atoms given the periodic boundaries of the system
+	static VecR Distance (const Atom * atom1, const Atom * atom2);
 };
+
+#include "h2o.h"
+#include "h3o.h"
+#include "hno3.h"
+#include "carbonchain.h"
+#include "decane.h"
+#include "oh.h"
 
 #endif

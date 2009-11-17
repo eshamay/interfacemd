@@ -1,7 +1,5 @@
 #include "atom.h"
 
-VecR Atom::_size = VecR ();
-
 Atom::Atom () :
 	_name(""),
 	_residue(""),
@@ -85,22 +83,6 @@ double Atom::operator[] (const coord index) const {
 	}
 	return pos;
 }
-
-double Atom::operator- (const Atom& input) const {
-
-	return (_position.MinDistance(input.Position(), _size));
-}
-
-double Atom::MinDistance (const Atom& input) const {
-
-	return (_position.MinDistance(input.Position(), _size));
-}
-
-double Atom::MinDistance (Atom const * const input) const {
-
-	return (_position.MinDistance(input->Position(), _size));
-}
-
 void Atom::Print () const {
 	printf ("%s (%d)\t%s\t% f\t% f\t% f\n", _name.c_str(), _ID, _residue.c_str(), _position[x], _position[y], _position[z]);
 }
@@ -117,13 +99,6 @@ void Atom::SetMass () {
 	if (_name.find("S") != std::string::npos) _mass = 32.065;
 	if (_name.find("F") != std::string::npos) _mass = 18.9984;
 
-return;
-}
-
-// wrap the atom's position to the central periodic-image, given by the size of the system
-void Atom::Wrap (VecR origin = VecR(0.0, 0.0, 0.0)) {
-
-	_position.Wrap(_size, origin);
 return;
 }
 

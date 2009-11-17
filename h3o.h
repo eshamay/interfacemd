@@ -25,7 +25,4 @@ public:
 	VecR const * OH3 () const { return &_oh3; }
 };
 
-typedef std::vector<Water *> Water_ptr_vec;
-typedef std::vector<Water> Water_vec;
-
 #endif

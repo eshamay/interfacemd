@@ -2,7 +2,6 @@
 #define H2O_H_
 
 #include "molecule.h"
-#include <map>
 
 #ifdef H2O_DIPOLE_PARM
 #include "dipoleparm.h"

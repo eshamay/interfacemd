@@ -6,9 +6,7 @@ XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath) :
 	_wanniers(wannierpath)
 {
 
-	// set the system size
-	Atom::Size (size);
-	_dims = size;
+	MDSystem::Dimensions (size);
 	_graph.SysType("xyz");
 
 	this->LoadFirst();
@@ -99,7 +97,7 @@ void XYZSystem::_ParseWanniers () {
 		for (vi = wans.begin(); vi != wans.end(); vi++) {
 
 			// we find the distance to the oxygen from the wannier center
-			double distance = O->Position().MinDistance (*vi, Atom::Size());
+			double distance = MDSystem::Distance (O->Position(), *vi).Magnitude();
 
 			// if it's close enough, then that oxygen gets it
 			if (distance < 1.0) {

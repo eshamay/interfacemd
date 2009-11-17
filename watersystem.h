@@ -82,7 +82,6 @@ class WaterSystem {
   coord axis;					// axis normal to the infterface
   double int_low, int_high, middle;		// the positions of analysis cutoffs
 
-
   Water_ptr_vec	int_wats;		// interfacial waters, or just all the waters in the system depending on the function call
   Mol_ptr_vec 	int_mols;
   Atom_ptr_vec	int_atoms;		// interfacial water atoms (or as above)
@@ -144,7 +143,7 @@ void WaterSystem<T>::FindInterfacialWaters () {
 
     double position = water->Atoms(0)->Position()[axis];
     // and find molecules that sit within the interface.
-    if (position < pbcflip) position += Atom::Size()[axis];		// adjust for funky boundaries
+    if (position < pbcflip) position += MDSystem::Dimensions()[axis];	// adjust for funky boundaries
     // these values have to be adjusted for each system
     if (position < posmin or position > posmax) continue;				// set the interface cutoffs
 
@@ -244,7 +243,7 @@ void WaterSystem<T>::SliceWaters (const double low, const double high) {
     VecR r = oxy->Position();
     double position = r[axis];
     if (position < pbcflip) {
-      position += Atom::Size()[axis];		// deal with the periodic cutoffs
+      position += MDSystem::Dimensions()[axis];		// deal with the periodic cutoffs
     }
 
     if (position > low && position < high) {

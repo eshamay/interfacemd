@@ -3,8 +3,8 @@
 
 #include "../carbonchain.h"
 #include "../decane.h"
-#include "../analysis.h"
 #include "../utility.h"
+#include "../analysis.h"
 
 typedef VecR (CarbonChain::*Axis_Vector_Fn) ();	// a pointer to an axis vector function to find carbon-chain axes
 typedef void (CarbonChain::*FnPtr) ();

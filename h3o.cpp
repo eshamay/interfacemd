@@ -29,9 +29,9 @@ void Hydronium::SetAtoms () {
 		_h3 = hydrogens[2];
 
 		// while we're here we may as well also find the N-O bond vectors
-		_oh1 = _h1->Position().MinVector(_o->Position(), Atom::Size());
-		_oh2 = _h2->Position().MinVector(_o->Position(), Atom::Size());
-		_oh3 = _h3->Position().MinVector(_o->Position(), Atom::Size());
+		_oh1 = _h1->Position() - _o->Position();
+		_oh2 = _h2->Position() - _o->Position();
+		_oh3 = _h3->Position() - _o->Position();
 
 		_set = true;
 

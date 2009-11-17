@@ -164,6 +164,7 @@ void VecR::Print () const {
 	printf ("% 8.4f\t% 8.4f\t% 8.4f\n", _coords[x], _coords[y], _coords[z]);
 }
 
+/*
 // Get back a vector wrapped into a periodic cell's central-image (given by the size of the cell). this assumes that the origin is at 0,0,0
 VecR& VecR::Wrap (VecR& size, VecR origin) {
 
@@ -189,78 +190,5 @@ VecR& VecR::Wrap (VecR& size, VecR origin) {
 	}
 
 return (*this);
-}
-
-// Find the smallest vector between two locations in a periodic system defined by he size parameter
-// the resulting vector will point from the current vector to the (VecR& input) location
-VecR VecR::MinVector (const VecR& input, const VecR& size) const {
-
-	// first we gather all our coordinates for point a (current vector) and point b (the end-point vector)
-	double ax = _coords[x];
-	double ay = _coords[y];
-	double az = _coords[z];
-
-	double bx = input[x];
-	double by = input[y];
-	double bz = input[z];
-
-	double cx, cy, cz;		// this will be our output vector
-
-	// Now we'll hold one coordinate while move the other through its periodic images until the distance between the two is <= size/2
-	// this is very much like the fmod() function, but it's written out for clarity here to show that one is being held fixed
-	while (fabs(ax-bx) > size[x]/2.0) {
-		if (ax < bx) ax += size[x];
-		else 		 ax -= size[x];
-	}
-
-	while (fabs(ay-by) > size[y]/2.0) {
-		if (ay < by) ay += size[y];
-		else 		 ay -= size[y];
-	}
-
-	while (fabs(az-bz) > size[z]/2.0) {
-		if (az < bz) az += size[z];
-		else 		 az -= size[z];
-	}
-
-	// now that both points are "closest-images" over each other, we can calculate the distance between them, and get the correct sign
-	cx = bx - ax;
-	cy = by - ay;
-	cz = bz - az;
-
-return (VecR(cx, cy, cz));
-}
-
-// A function for calculating the minimum-image distance between the current vector and another, given the system size
-double VecR::MinDistance (const VecR& input, const VecR& size) const {
-
-	VecR min  = this->MinVector(input, size);
-	double mag = min.Magnitude();
-
-return (mag);
-}
-
-/*
-// Rotating a vector to a new coordinate axes/frame
-VecR VecR::RotateToFrame (VecR const * const frame) const {
-
-	VecR _x = frame[0];
-	VecR _y = frame[1];
-	VecR _z = frame[2];
-
-	//here's he lab-frame coordinates hat we rotate from
-	VecR X (1.0, 0.0, 0.0);
-	VecR Y (0.0, 1.0, 0.0);
-	VecR Z (0.0, 0.0, 1.0);
-
-	// now we build our direction cosine matrix (eah element is he cosine of he angle between two axes)
-
-	double rotation[9] = { _x<X, _x<Y, _x<Z, _y<X, _y<Y, _y<Z, _z<X, _z<Y, _z<Z };
-
-	double a = rotation[0]*_coords(0) + rotation[3]*_coords(1) + rotation[6]*_coords(2);
-	double b = rotation[1]*_coords(0) + rotation[4]*_coords(1) + rotation[7]*_coords(2);
-	double c = rotation[2]*_coords(0) + rotation[5]*_coords(1) + rotation[8]*_coords(2);
-
-	return (VecR(a,b,c));
 }
 */

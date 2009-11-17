@@ -9,7 +9,7 @@ AmberSystem::AmberSystem (const std::string prmtop, const std::string mdcrd, con
 	_atoms = Atom_ptr_vec(_topfile.NumAtoms(), (Atom *)NULL);
 
 	// because some really useful functionality comes out of the Atom class if the Atom::Size() is set, we'll do that here
-	Atom::Size (_coords.Dims());
+	MDSystem::Dimensions (_coords.Dims());
 
 	// and then actually create these bad mamma jammas
 	RUN (_atoms) {

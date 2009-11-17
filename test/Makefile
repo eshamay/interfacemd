@@ -1,10 +1,10 @@
 include ../Makefile
 
-MDSYSTEM = ../atom.o ../h2o.o ../hno3.o ../molecule.o ../vecr.o ../matrixr.o ../bond.o ../oh.o ../h3o.o
+MDSYSTEM = ../vecr.o ../matrixr.o ../atom.o ../molecule.o ../mdsystem.o ../h2o.o ../hno3.o ../bond.o ../oh.o ../h3o.o 
 XYZSYSTEM = ../xyzsystem.o ../xyzfile.o ../wannier.o ../graph.o
 AMBERSYSTEM	= ../ambersystem.o ../crdfile.o ../forcefile.o ../topfile.o
 
-WATERSYSTEM	= $(MDSYSTEM) $(XYZSYSTEM) $(AMBERSYSTEM)
+WATERSYSTEM	= $(MDSYSTEM) $(XYZSYSTEM) $(AMBERSYSTEM) 
 CARBONCHAIN	= ../carbonchain.o ../decane.o
 MORITAFILES	= morita.o ../watersfg.o $(WATERSYSTEM)
 MPIMORITAFILES	= $(MORITAFILES) ../mpi/mpisys.o
@@ -96,15 +96,4 @@ morita2002: $(MORITA2002)
 	$(CXX) $(CPPFLAGS) $(MORITA2002) -g3 -llapack -o morita2002
 
 cleantest :
-	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams ordercoords morita2002
-
-#densitytest.o: densitytest.cpp densitytest.h
-#toptest.o: toptest.cpp toptest.h
-#matrixtest.o: matrixtest.cpp ../matrixr.cpp ../matrixr.h
-#morita.o: morita.cpp morita.h
-#ambertest.o: ambertest.cpp ambertest.h
-#angletest.o: angledistro.cpp angledistro.h
-#Qpt.o: Qpt.cpp Qpt.h
-#closest.o: closest.cpp
-#mdcrd2pdb.o: mdcrd2pdb.cpp
-#fillbox.o: fillbox.cpp
+	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams ordercoords morita2002 rotate carbon-orientation quartz-slab orderparams-histo matrix-sandbox coordination

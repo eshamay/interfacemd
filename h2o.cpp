@@ -50,8 +50,8 @@ void Water::SetAtoms () {
 		}
 
 		// we can calculate the two O-H vectors
-		_oh1 = _o->Position().MinVector(_h1->Position(), Atom::Size());
-		_oh2 = _o->Position().MinVector(_h2->Position(), Atom::Size());
+		_oh1 = _h1->Position() - _o->Position();
+		_oh2 = _h2->Position() - _o->Position();
 
 		_set = true;
 	//}

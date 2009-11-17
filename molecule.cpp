@@ -169,13 +169,10 @@ VecR Molecule::UpdateCenterOfMass () {
 	RUN (_atoms) {
 		VecR ri = _atoms[i]->Position();
 		double mi = _atoms[i]->Mass();
-
-		_centerofmass += (origin.MinVector (ri, Atom::Size()) * mi);
-
 		_mass += mi;
+		_centerofmass += (ri - origin) * mi;
 	}
 	_centerofmass = _centerofmass * (1.0/_mass);
-	//_centerofmass += origin;
 
 return(_centerofmass);
 }
@@ -336,13 +333,13 @@ VecR Molecule::CalcDipole () {
 
 	// the dipole is just a sum of the position vectors multiplied by the charges (classical treatment)
 	RUN (_atoms) {
-		VecR r = _centerofmass.MinVector(_atoms[i]->Position(), Atom::Size());
+		VecR r = _atoms[i]->Position() - _centerofmass;
 		_dipole += r * _atoms[i]->Charge();
 	}
 
 	// wannier centers have a charge of -2
 	RUN (_wanniers) {
-		_dipole -= _centerofmass.MinVector(_wanniers[i], Atom::Size()) * 2.0;
+		_dipole -= (_wanniers[i] - _centerofmass) * 2.0;
 	}
 
 return (_dipole);
@@ -360,7 +357,7 @@ double Molecule::MinDistance (Molecule& mol) {
 			Atom * atom1 = _atoms[i];
 			Atom * atom2 = mol.Atoms(j);
 
-			double temp = *atom1 - *atom2;
+			double temp = (atom1->Position() - atom2->Position()).Magnitude();
 			//printf ("%f\n", temp);
 			if (first) {
 				first = false;

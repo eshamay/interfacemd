@@ -16,7 +16,7 @@ void Hydroxide::SetAtoms () {
 	_o = this->GetAtom("O");
 	_h = this->GetAtom("H");
 
-	_oh = _h->Position().MinVector(_o->Position(), Atom::Size());
+	_oh = _h->Position() - _o->Position();
 	_set = true;
 
 return;
