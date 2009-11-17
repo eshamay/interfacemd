@@ -36,6 +36,7 @@ class Analyzer : public WaterSystem<AmberSystem> {
 
 	void CheckOutputFile ();
 
+	/*
 	// function pointers to perform the actual system analysis operations
 	FnPtr 
 	  _setup, 
@@ -43,6 +44,7 @@ class Analyzer : public WaterSystem<AmberSystem> {
 	  _post_analysis;
 	DataOutputPtr 
 	  _data_output;
+	  */
 
   public:
 	Analyzer (U& analysis_params, WaterSystemParams& params);
@@ -84,10 +86,10 @@ class Analyzer : public WaterSystem<AmberSystem> {
 	}
 	int PositionBin (const Atom * patom) const;
 
-	void Set_Setup 			(FnPtr f) 			{ _setup = f; }
-	void Set_Analysis 		(FnPtr f) 			{ _analysis = f; }
-	void Set_PostAnalysis 	(FnPtr f) 			{ _post_analysis = f; }
-	void Set_DataOutput 	(DataOutputPtr d) 	{ _data_output = d; }
+	virtual void Setup ();
+	virtual void Analysis ();
+	virtual void Post_Analysis ();
+	virtual void DataOutput ();
 
 };
 
