@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import matplotlib.text
 import matplotlib.patches
 
+TITLE = 'Water in NaNO3'
+XRANGE = [0.0,120.0]
 class DensityProfiler:
 
 	def __init__(self,files=[],avg=False):
@@ -38,7 +40,7 @@ class DensityProfiler:
 		for i in range(len(self.data)):
 			# some of the prelim stuff for our figure
 			ax = self.fig.add_subplot(len(self.data),1,i+1)
-			ax.set_title('Decane/Water Interface', size='x-large')
+			ax.set_title(TITLE, size='x-large')
 
 			x = self.data[i][0]
 			size = self.data[i].NUMCOLUMNS
@@ -86,7 +88,7 @@ class DensityProfiler:
 						self.PlotWaterFit(ax, x, datum, colors[j-1])		
 			ylim = ymax * 1.1
 			ax.set_ylim([0.0,ylim])
-			ax.set_xlim([45.0,70.0])
+			ax.set_xlim(XRANGE)
 			ax.set_axis_bgcolor('w')
 
 		ax.set_xlabel(r'Slab Position $\AA$', size='x-large')

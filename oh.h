@@ -20,6 +20,7 @@ public:
 	static int numHydroxides;			// total number of waters in the system
 
 	void SetAtoms ();					// set the _oh bond vector
+	VecR MolecularAxis () { return _oh; }
 	VecR const * OH () const { return &_oh; }
 };
 

@@ -36,6 +36,7 @@ public:
 
 	// Functions for analysis
 	VecR MolecularPlaneVector ();
+	VecR MolecularAxis () { return _z; }
 	VecR NO2Dipole () const { return _no2dipole; }
 	VecR NO2Bisector ();
 	void PrintNO2 () const;
@@ -63,6 +64,7 @@ public:
 
 	void SetAtoms ();
 
+	VecR MolecularAxis () { return _z; }
 	VecR const * NO1 () { return &_no1; }
 	VecR const * NO2 () { return &_no2; }
 	VecR const * NO3 () { return &_no3; }

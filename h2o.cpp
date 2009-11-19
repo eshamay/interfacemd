@@ -135,6 +135,11 @@ void Water::SetOrderAxes () {
 return;
 }
 
+VecR Water::MolecularAxis () {
+  this->SetOrderAxes ();
+  return _z;
+}
+
 /*
 #ifdef WATER_POLARIZ
 // This calculations of the molecular polarizability is based on the Morita-Hynes 2002 paper where they use ab initio calcs to find fitting parameters to calculate alpha. We calculate a polarizability tensor for both OH bonds, and then rotate each one into the molecular frame, and then sum them to get the molecular polarizability.

@@ -98,6 +98,7 @@ void Atom::SetMass () {
 	if (_name.find("Si") != std::string::npos) _mass = 28.0855;
 	if (_name.find("S") != std::string::npos) _mass = 32.065;
 	if (_name.find("F") != std::string::npos) _mass = 18.9984;
+	if (_name.find("Cl") != std::string::npos) _mass = 35.453;
 
 return;
 }

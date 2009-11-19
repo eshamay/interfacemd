@@ -7,6 +7,7 @@
 #include "utility.h"
 #include "graph.h"
 
+
 struct WaterSystemParams {
   WaterSystemParams (		/* Constructor and initial/default values for system parameters */
 		     std::string _output = "temp.dat",
@@ -14,9 +15,9 @@ struct WaterSystemParams {
 		     const bool _avg = false,
 		     const coord _axis = y,
 		     const VecR _ref_axis = VecR (0.0, 1.0, 0.0),
-		     const int _output_freq = 500, const int _restart = 0,
+		     const int _output_freq = 100, const int _restart = 0,
 		     const double _posmin = -20.0, const double _posmax = 150.0, 
-		     const double _posres = 1.0,
+		     const double _posres = 0.5,
 		     const double _angmin = -1.0, const double _angmax = 1.0, 
 		     const double _angres = 0.01,
 		     const double _pbcflip = 15.0
@@ -46,6 +47,15 @@ struct WaterSystemParams {
   double pbcflip;
   double angmin, angmax, angres; /* For generating histograms to bin angle data (min, max, bin width/resolution) */
   int angbins;
+
+  void PrintParameters () {
+	printf ("output_file = %s\naxis = %d, ref_axis = ", output_filename.c_str(), axis);
+	ref_axis.Print();
+	printf ("output_freq = %d, timesteps = %d, restart = %d\n", output_freq, timesteps, restart);
+	printf ("posmin = % 8.3f, posmax = % 8.3f, posres = % 8.3f, posbins = %d\n", posmin, posmax, posres, posbins);
+	printf ("pbcflip = % 8.3f\nangmin = % 8.3f, angmax = % 8.3f, angres = % 8.3f, angbins = %d\n",
+		pbcflip, angmin, angmax, angres, angbins);
+  }
 };
 
 
@@ -55,13 +65,25 @@ class WaterSystem {
  public:
 
   WaterSystem (const WaterSystemParams& params);
-
   //WaterSystem (const int argc, const char **argv, const WaterSystemParams& params);
   virtual ~WaterSystem ();
+
+  static WaterSystemParams wsp;
+
+  static double	posmin, posmax;
+  static double	pbcflip;			// location to flip about periodic boundaries
+  static coord axis;					// axis normal to the infterface
+  static double int_low, int_high, middle;		// the positions of analysis cutoffs
+
+  static Water_ptr_vec	int_wats;		// interfacial waters, or just all the waters in the system depending on the function call
+  static Mol_ptr_vec 	int_mols;
+  static Atom_ptr_vec	int_atoms;		// interfacial water atoms (or as above)
+
 
   void OpenFile ();
   void Debug (string msg) const;
 
+  void LoadAll ();							// Loads all the molecules and atoms in the system into the containers
   void FindWaters ();						// Find all the waters
   void FindMols (const string name);		// find all molecules with this name
   void FlipWaters (const coord axis = y);
@@ -76,24 +98,29 @@ class WaterSystem {
   T * sys;
 
   BondGraph	graph;
-
-  double	posmin, posmax;
-  double	pbcflip;			// location to flip about periodic boundaries
-  coord axis;					// axis normal to the infterface
-  double int_low, int_high, middle;		// the positions of analysis cutoffs
-
-  Water_ptr_vec	int_wats;		// interfacial waters, or just all the waters in the system depending on the function call
-  Mol_ptr_vec 	int_mols;
-  Atom_ptr_vec	int_atoms;		// interfacial water atoms (or as above)
-
 };
+
+template<typename T> WaterSystemParams WaterSystem<T>::wsp;
+
+template<typename T> double WaterSystem<T>::posmin;
+template<typename T> double WaterSystem<T>::posmax;
+template<typename T> double WaterSystem<T>::pbcflip;
+template<typename T> coord WaterSystem<T>::axis;
+
+template<typename T> Water_ptr_vec WaterSystem<T>::int_wats;
+template<typename T> Mol_ptr_vec WaterSystem<T>::int_mols;
+template<typename T> Atom_ptr_vec WaterSystem<T>::int_atoms;
 
 template <class T>
 WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
-: 
-posmin(params.posmin), posmax(params.posmax), pbcflip(params.pbcflip), 
-  axis(params.axis)
 {
+
+  WaterSystem::wsp = params;
+
+  WaterSystem::posmin = params.posmin;
+  WaterSystem::posmax = params.posmax;
+  WaterSystem::pbcflip = params.pbcflip;
+  WaterSystem::axis = params.axis;
 
   /*
     if (params.avg) {	// when averaging, the interface locations are taken from the command line.
@@ -197,6 +224,29 @@ void WaterSystem<T>::FindMols (const string name) {
   }
 
   fflush(stdout);
+  return;
+}
+
+template <class T>
+void WaterSystem<T>::LoadAll () {
+
+  int_mols.clear();
+  int_atoms.clear();
+
+  Molecule * pmol;
+
+  // go through the system
+  for (int i = 0; i < sys->NumMols(); i++) {
+    // grab each molecule to be added
+	pmol = sys->Molecules(i);
+    int_mols.push_back (pmol);
+
+    // and then add all of its atoms
+    RUN2(pmol->Atoms()) {
+      int_atoms.push_back (pmol->Atoms(j));
+    }
+  }
+
   return;
 }
 

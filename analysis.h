@@ -3,54 +3,37 @@
 
 #include "watersystem.h"
 
-typedef void (Analyzer::*FnPtr)();
-typedef void (Analyzer::*DataOutputPtr)(const int timestep);
-
-template<typename U>
 class Analyzer : public WaterSystem<AmberSystem> {
 
   protected:
 
-	// parameters for this particular analysis
-	U _analysisParameters;
-
 	std::string output_filename;
 	FILE * output;
-
-	VecR ref_axis;
-
 	int	output_freq;
-
-	// position boundaries and bin width
-	double	posres;
-	int		posbins;
-	double 	angmin, angmax, angres;
-	int		angbins;
-	unsigned int timesteps;
-	unsigned int restart;
 
 	void _OutputHeader () const;
 	void _OutputStatus (const int timestep) const;
+	void _CheckOutputFile ();
 
 	void _EmptyFunction () const { return; } /* A simple empty function that does nothing to the system */
 
-	void CheckOutputFile ();
 
-	/*
-	// function pointers to perform the actual system analysis operations
-	FnPtr 
-	  _setup, 
-	  _analysis, 
-	  _post_analysis;
-	DataOutputPtr 
-	  _data_output;
-	  */
 
   public:
-	Analyzer (U& analysis_params, WaterSystemParams& params);
-	~Analyzer ();
+	Analyzer (WaterSystemParams& params);
+	virtual ~Analyzer ();
 
-	void SystemAnalysis ();
+	virtual void SystemAnalysis ();
+
+	static VecR ref_axis;
+
+	// position boundaries and bin widths for gathering histogram data
+	static double	posres;
+	static int		posbins;
+	static double 	angmin, angmax, angres;
+	static int		angbins;
+	static unsigned int timesteps;
+	static unsigned int restart;
 
 	// create a histogram of the angle between a given molecular axis vector (determined by the axisFunc) and the system's ref_axis. The molecule is chosen by the residue name. The molecules must themselves have the functions for determining the molecular axis vector.
 	template <typename molecule_t>
@@ -62,7 +45,7 @@ class Analyzer : public WaterSystem<AmberSystem> {
 	// Creates a 2-D histogram of position in a slab vs. molecular orientation (calculated by the axis returned by the axisFunction). The vector returned can be accessed by vector[position][angle].
 	// The true angles are not computed, but rather the cosines of the angles formed between the molecular axis and the system-reference axis.
 	template <typename molecule_t>
-	  vector< vector<int> > Molecular_Axis_Orientation-Position_Histogram (
+	  vector< vector<int> > Molecular_Axis_Orientation_Position_Histogram (
 		  string moleculeName,
 		  VecR (molecule_t::*axisFunction)()
 		  );
@@ -76,47 +59,69 @@ class Analyzer : public WaterSystem<AmberSystem> {
 		  vector< vector<int> >& density);
 
 	// calculate a bin for a histogram
-	int Bin (const double value, const double min, const double res) const {
+	static int Bin (const double value, const double min, const double res) {
 	  return (int)((value-min)/res);
 	}
 
-	int AngleBin (const double angle) const;
-	int PositionBin (const double position) const {
-	  return Bin (position, posmin, posres); 
-	}
-	int PositionBin (const Atom * patom) const;
+	static int PositionBin (const double position);
+	static int PositionBin (const Atom * patom) ;
 
-	virtual void Setup ();
-	virtual void Analysis ();
-	virtual void Post_Analysis ();
-	virtual void DataOutput ();
+	static int AngleBin (const double angle) {
+	  return Bin (angle, angmin, angres);
+	}
+
+	// analysis loop functions
+	virtual void Setup () { return; }
+	virtual void Analysis () { return; }
+	virtual void PostAnalysis () { return; }
+	virtual void DataOutput (const unsigned int timestep) { return; }
 
 };
 
 
-  template <typename U>
-Analyzer<U>::Analyzer (U& analysisParameters, WaterSystemParams& wsp)
+double	Analyzer::posres;
+int		Analyzer::posbins;
 
-: WaterSystem<AmberSystem>(wsp), _analysisParameters(analysisParameters),
-  output_filename(wsp.output_filename), output(wsp.output),
-  ref_axis(wsp.ref_axis),
-  output_freq(wsp.output_freq),
-  posres(wsp.posres), posbins(int((posmax - posmin)/posres)),
-  angmin(wsp.angmin), angmax(wsp.angmax), angres(wsp.angres),
-  angbins(int ((angmax - angmin)/angres) + 1), 
-  timesteps(wsp.timesteps), restart(wsp.restart)
+double 	Analyzer::angmin;
+double	Analyzer::angmax;
+double	Analyzer::angres;
+int		Analyzer::angbins;
+
+unsigned int Analyzer::timesteps;
+unsigned int Analyzer::restart;
+
+VecR	Analyzer::ref_axis;
+
+
+Analyzer::Analyzer (WaterSystemParams& params)
+
+: WaterSystem<AmberSystem>(params),
+  output_filename(params.output_filename), output(params.output),
+  output_freq(params.output_freq)
 
 { 
-  this->CheckOutputFile();
+  Analyzer::posres = params.posres;
+  Analyzer::posbins = int((params.posmax - params.posmin)/params.posres);
+
+  Analyzer::angmin = params.angmin;
+  Analyzer::angmax = params.angmax;
+  Analyzer::angres = params.angres;
+  Analyzer::angbins = int((params.angmax - params.angmin)/params.angres);
+
+  Analyzer::timesteps = params.timesteps;
+  Analyzer::restart = params.restart;
+
+  Analyzer::ref_axis = params.ref_axis;
+
+  this->_CheckOutputFile();
   this->sys = new AmberSystem("prmtop", "mdcrd", "mdvel");
   this->_OutputHeader();
 }
 
-template <typename U>
-void Analyzer<U>::_OutputHeader () const {
+void Analyzer::_OutputHeader () const {
 
   printf ("Analysis Parameters:\n\tOutput Filename = \"%s\"\n\tScreen output frequency = 1/%d\n\n\tPosition extents for analysis:\n\t\tMin = % 8.3f\n\t\tMax = % 8.3f\n\t\tPosition Resolution = % 8.3f\n\n\tPrimary Axis = %d\nNumber of timesteps to be analyzed = %d\n",
-	  output_filename.c_str(), output_freq, posmin, posmax, posres, int(axis), timesteps);
+	  output_filename.c_str(), output_freq, posmin, posmax, Analyzer::posres, int(Analyzer::axis), Analyzer::timesteps);
 
 #ifdef AVG
   printf ("\n\nThe analysis is averaging about the two interfaces located as:\n\tLow  = % 8.3f\n\tHigh = % 8.3f\n\n", int_low, int_high);
@@ -124,14 +129,12 @@ void Analyzer<U>::_OutputHeader () const {
   return;
 }
 
-template <typename U>
-Analyzer<U>::~Analyzer () {
+Analyzer::~Analyzer () {
   fclose (output);
   return;
 }
 
-template <typename U>
-void Analyzer<U>::CheckOutputFile () {
+void Analyzer::_CheckOutputFile () {
 
   if (output == (FILE *)NULL) {
 	printf ("WaterSystem::WaterSystem (argc, argv) - couldn't open the data output file!\n");
@@ -141,8 +144,7 @@ void Analyzer<U>::CheckOutputFile () {
   return;
 }
 
-template <typename U>
-void Analyzer<U>::_OutputStatus (const int timestep) const
+void Analyzer::_OutputStatus (const int timestep) const
 {
   if (!(timestep % (this->output_freq * 10)))
 	cout << endl << timestep << "/" << this->timesteps << " ) ";
@@ -154,40 +156,48 @@ void Analyzer<U>::_OutputStatus (const int timestep) const
 }
 
 // A routine that performs some type of typical/generic analysis of a system
-  template <typename U>
-void Analyzer<U>::SystemAnalysis ()
+void Analyzer::SystemAnalysis ()
 {
   // do some initial setup
-  (this->*_setup) ();
+  this->Setup();
 
   unsigned int timestep = 0;
   // start the analysis - run through each timestep
   for (timestep = 0; timestep < this->timesteps; timestep++) {
 
 	// Perform the main loop analysis that works on every timestep of the simulation
-	(this->*_analysis) ();
+	this->Analysis ();
 
 	// load the next timestep
 	this->sys->LoadNext();
 
 	// output the status of the analysis (to the screen or somewhere useful)
-	_outputStatus (timestep);
+	this->_OutputStatus (timestep);
 	// Output the actual data being collected to a file or something for processing later
-	(this->*_data_output) (timestep);
+	this->DataOutput(timestep);
   }
 
   // do a little work after the main analysis loop (normalization of a histogram? etc.)
-  (this->*_post_analysis) ();
+  this->PostAnalysis ();
 
   // do one final data output to push out the finalized data set
-  (this->*_data_output) (timestep);
+  this->DataOutput(timestep);
 
   return;
 }
 
+int Analyzer::PositionBin (const double position) {
+
+  // check for flipping due to periodic boundaries
+  double pos = position;
+  if (pos < pbcflip) 
+	pos += MDSystem::Dimensions()[axis];
+  return (Bin (pos, posmin, posres));
+
+}
+
 // Find the position a particular atom fits into for a histogram
-template <typename U>
-int Analyzer<U>::PositionBin (const Atom * patom) const {
+int Analyzer::PositionBin (const Atom * patom) {
 
   VecR r = patom->Position();
   double position = r[axis];
@@ -207,9 +217,8 @@ int Analyzer<U>::PositionBin (const Atom * patom) const {
 
 // Create a histogram of the angles formed by an axis of a molecule's given reference axis.
 // The supplied axis function should return the molecular axis vector of the molecule.
-template <typename U>
 template <typename molecule_t>
-vector<int> Analyzer<U>::Molecular_Axis_Orientation_Histogram (
+vector<int> Analyzer::Molecular_Axis_Orientation_Histogram (
 	string molName,
 	VecR (molecule_t::*axisFn)() /* This axisFn must return the molecular axis of interest of the molecule */
 	)
@@ -233,12 +242,11 @@ vector<int> Analyzer<U>::Molecular_Axis_Orientation_Histogram (
   return (histo);
 }
 
-template <typename U>
+/*
 template <typename molecule_t>
-vector<int> Analyzer<U>::Molecular_Axis_Orientation-Position_Histogram (
+vector<int> Analyzer::Molecular_Axis_Orientation_Position_Histogram (
 	string molName,
-	string positioningAtom,				/* The atom that will designate the molecular position */
-	VecR (molecule_t::*axisFunction)() 	/* This axisFn must return the molecular axis of interest of the molecule */
+	VecR (molecule_t::*axisFunction)() 	// This axisFn must return the molecular axis of interest of the molecule
 	)
 {
 
@@ -258,18 +266,18 @@ vector<int> Analyzer<U>::Molecular_Axis_Orientation-Position_Histogram (
 	const double angle = (molAxis < ref_axis);	// calculates the cos(angle) between the two axes
 	int anglebin = this->Bin (angle, angmin, angres);
 
-	histo[posbin][anglebin]++;	/* Binning into the histogram, ftw */
+	histo[posbin][anglebin]++;	// Binning into the histogram, ftw
   }
 
   return (histo);
 }
+*/
 
 // creates a 2D histogram showing the shape of the plane formed by a given atom of a molecule averaged over a simulation.
 // The histogram will show either the population density at a particular in-plane point giving the population as a function of the two coordinates...
 // or it can show the average location (in the surface-normal direction) of atoms in the plane.
-template <typename U>
 template <typename molecule_t>
-vector< vector<double> > Analyzer<U>::Interface_Location_Histogram (
+vector< vector<double> > Analyzer::Interface_Location_Histogram (
 	// 2 directions (axes) parallel to the plane
 	const coord d1, const coord d2,
 	// name of the molecule to analyze

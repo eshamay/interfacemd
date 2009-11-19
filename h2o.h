@@ -65,6 +65,7 @@ public:
 	VecR const * OH2 () const { return &_oh2; }
 	double Angle () const { return acos(_oh1 < _oh2) * 180.0/M_PI; }
 
+	VecR MolecularAxis (); 
 };
 
 typedef std::vector<Water *> Water_ptr_vec;

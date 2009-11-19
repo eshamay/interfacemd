@@ -1,6 +1,6 @@
 include ../Makefile
 
-MDSYSTEM = ../vecr.o ../matrixr.o ../atom.o ../molecule.o ../mdsystem.o ../h2o.o ../hno3.o ../bond.o ../oh.o ../h3o.o 
+MDSYSTEM = ../vecr.o ../matrixr.o ../atom.o ../molecule.o ../mdsystem.o ../h2o.o ../hno3.o ../bond.o ../oh.o ../h3o.o ../decane.o ../carbonchain.o
 XYZSYSTEM = ../xyzsystem.o ../xyzfile.o ../wannier.o ../graph.o
 AMBERSYSTEM	= ../ambersystem.o ../crdfile.o ../forcefile.o ../topfile.o
 
@@ -9,8 +9,7 @@ CARBONCHAIN	= ../carbonchain.o ../decane.o
 MORITAFILES	= morita.o ../watersfg.o $(WATERSYSTEM)
 MPIMORITAFILES	= $(MORITAFILES) ../mpi/mpisys.o
 MORITA2002	= $(WATERSYSTEM) ../moritasfg2002.o morita2002.o
-
-DENSITYFILES = $(WATERSYSTEM) densitytest.o
+DENSITYFILES = $(WATERSYSTEM) density-histogram.o
 DIPOLETCF = $(XYZSYSTEM) dipoletcf.o ../hno3analysis.o
 QPT = $(XYZSYSTEM) ../hno3analysis.o Qpt.o
 MDCRD2PDB = $(AMBERSYSTEM) ../pdbfile.o mdcrd2pdb.o
@@ -23,8 +22,11 @@ COORDINATION	= $(WATERSYSTEM) coordination.o
 ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
 HCORIENTATION	= $(WATERSYSTEM) $(CARBONCHAIN) carbonchainsystem.o
 QUARTZ			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o quartz.o
-
+ANGLEPOSITIONHISTO = $(WATERSYSTEM) Angle-Position-Histogram-2D.o
 ROTATE			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o molecule-rotate.cpp
+
+apanalysis: $(ANGLEPOSITIONHISTO)
+	$(CXX) $(CPPFLAGS) $(ANGLEPOSITIONHISTO) -llapack -o apanalysis
 
 quartz: $(QUARTZ)
 	$(CXX) $(CPPFLAGS) $(QUARTZ) -llapack -o quartz-slab
@@ -35,8 +37,8 @@ hcorientation: $(HCORIENTATION)
 ambertest : $(WATERSYSTEM) ambertest.o
 	$(CXX) $(CPPFLAGS) $(WATERSYSTEM) ambertest.o -llapack -o ambertest
 
-densitytest : $(DENSITYFILES)
-	$(CXX) $(CPPFLAGS) $(DENSITYFILES) -llapack -o densitytest
+density : $(DENSITYFILES)
+	$(CXX) $(CPPFLAGS) $(DENSITYFILES) -llapack -o density
 
 morita : $(MORITAFILES)
 	$(CXX) $(CPPFLAGS) $(MORITAFILES) -llapack -o morita

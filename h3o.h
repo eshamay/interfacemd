@@ -20,6 +20,7 @@ public:
 	static int numHydroniums;			// total number of waters in the system
 
 	void SetAtoms ();
+	VecR MolecularAxis () { return _z; }
 	VecR const * OH1 () const { return &_oh1; }
 	VecR const * OH2 () const { return &_oh2; }
 	VecR const * OH3 () const { return &_oh3; }

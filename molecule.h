@@ -91,6 +91,8 @@ public:
 	VecR CalcDipole ();	// calculate the dipole
 	VecR Dipole () const { return _dipole; }		// return the dipole of the molecule
 
+	virtual VecR MolecularAxis () { return _z; }
+
 	// Operators
 	Atom * operator[] (int index) const { return _atoms[index]; }	// retrieve an atom by array index
 	Atom * operator[] (const string atomname) const;			// retrieve a particular atom using its unique name/ID
