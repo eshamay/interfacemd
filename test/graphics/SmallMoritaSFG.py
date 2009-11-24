@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import csv
 import numpy
 import sys
 import os

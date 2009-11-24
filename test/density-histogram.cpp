@@ -6,7 +6,7 @@ void DensityBinner<T>::operator() (T * t) {
   if (!MapKeyExists(t))
 	AddNewHistogram(t);
 
-  int positionbin = Analyzer::PositionBin (t->Position()[Analyzer::axis]);
+  int positionbin = Analyzer::PositionBin (t->Position()[y]);
   _histograms[t->Name()][positionbin]++;
 
   return;

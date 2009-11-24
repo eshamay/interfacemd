@@ -1,50 +1,40 @@
-import csv
+import numpy
 
 class ColumnDataFile:
 
 	def __init__(self,file):
-		self.filepath = file
-		if self.filepath == "":
-			print "No filename given!"
+		self.file = file
 
-		# Here's where the data will be held
+		self.ParseHeader()
+		self.reader = numpy.loadtxt(self.file, skiprows=1)
+		self.FormDataDict()
 
 		# Output the file name of the data files we're working with
-		print "Processing file: ", file
+		print "Processing column data file: ", file
 		# crunch through the density data
-		self.DataDict()
 
-	# Should handle extracting all the data we want into a dictionary from the density profile data files
-	def DataDict(self):
+	def FormDataDict(self):
+		self.data = {}
+		for name in range(len(self.header)):
+			self.data[self.header[name]] = self.reader[1:,name]
 
-		self.data = []
-		datareader = csv.reader(open(self.filepath), dialect=csv.excel_tab)
-		for row in datareader:
-			row = row[0].split()
+	def ParseHeader(self):
+		self.reader = open(self.file)
+		header = self.reader.next()
+		header = header.split()
+		self.header = header
+		self.reader.close()
+		return
+	
+	def __getitem__(self,item):
+		return self.data[item]
 
-			if len(self.data) == 0:
-				for i in range(len(row)):
-					self.data.append([])
+	def __setitem__(self,k,v):
+		self.data[k] = v
+		return
 
-			for i in range(len(row)):
-				self.data[i].append(self.num(row[i]))
+	def fieldnames(self):
+		return self.data.keys()
 
-		self.NUMCOLUMNS = len(self.data)
-		self.NUMROWS = len(self.data[0])
-
-	def num (self,s):
-		try:
-			return int(s)
-		except ValueError:
-			return float(s)
-
-	# For retrieving data from the column data file
-	def __getitem__(self,key):
-
-		try:
-			return self.data[key]
-		except IndexError:
-			print "ColumnDataFile.__getitem__ :: not enough columns in the data file!"
-			print "there are ", len(self.data), " columns in the file,"
-			print "column ", key+1, " was requested"
-			return "Error"
+	def iteritems(self):
+		return self.data.iteritems()

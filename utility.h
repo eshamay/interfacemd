@@ -48,8 +48,8 @@ struct 2DHistogram : public std::binary_function<T,T,bool>
   std::pair<T,T> resolution;				// resolution for each dimension
   std::pair<int,int> size;					// dimensions of the 2-d data (number of histogram bins)
 
-  typedef std::vector<T> Histogram_t;
-  std::vector<Histogram> histogram;			// 2-d container/histogram
+  typedef std::vector<int> Histogram_t;
+  std::vector<Histogram_t> histogram;		// 2-d container/histogram
 
   typedef int bin;
   typedef std::pair<bin,bin> bins;
@@ -82,6 +82,11 @@ struct 2DHistogram : public std::binary_function<T,T,bool>
 	}
 	else { return false; }
   }
+
+  // Return the element of the histogram
+  int Element (const int x, const int y) const { return histogram[x][y]; }
+
+
 };
 
 /*******************************************************************************************************************************************************/

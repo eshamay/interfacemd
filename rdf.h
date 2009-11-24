@@ -21,7 +21,7 @@ typedef std::map<NamePair_t, 2DHistogram> RDF_map;
 template <class T>
 class RDFMachine : public std::binary_function<T,T,bool> {
   public:
-	// the first values refer to the slab positions, and the 2nd value refer to the rdf itself
+	// Initialization of all the histograms
 	RDFMachine (const NamePairList& names, double_pair maxima, double_pair minima, double_pair bin_widths);
 
 	/* Adds the given pair into the histogram after checking to see if that pair is one of those being analyzed */
@@ -33,9 +33,8 @@ class RDFMachine : public std::binary_function<T,T,bool> {
 	  NamePairList::iterator list_pair = PairListMember(name_pair, _name_pair_list.begin(), _name_pair_list.end());
 
 	  if (list_pair != _name_pair_list.end())	// see if the atomic pair is found in the list
-	  {
 		BinAtomPairData (*list_pair, a1, a2);
-	  }
+
 	  return;
 	}
 
@@ -57,10 +56,7 @@ template <class T> NamePairList RDFMachine<T>::_name_pair_list;
 template <class T> 
 RDFMachine<T>::RDFMachine (const NamePairList& names, double_pair maxima, double_pair minima, double_pair bin_widths)
 {
-  RDFMachine::_max_rdf_distance = max_length;
-  RDFMachine::_bin_size = bin_size;
-
-  // Create a new histogram for each pair of names for the analysis
+  // Create a new histogram for each pair of atomic names required for the analysis
   RUN (names) {
 	_rdfs[names[i]] = 2DHistogram(maxima, bin_widths, minima);
 	_name_pair_list.push_back (names[i]);
@@ -88,28 +84,54 @@ void RDFMachine<T>::Output (FILE * output) const
   /* first print out a header row that contains the position and pair-names */
   rewind(output);
 
-  fprintf (output, "Distance");
+  std::pair<int,int> size = make_pair(0,0);
+  std::pair<double,double> resolution = make_pair(0.0,0.0);
+  std::pair<double,double> max = make_pair(0.0,0.0);
+  std::pair<double,double> min = make_pair(0.0,0.0);
+
+  fprintf (output, "Distance    ");
   for (RDF_map::iterator it = _rdfs.begin(); it != _rdfs.end(); it++)
   {
-	fprintf (output, " (%-4s,%-4s) ", (*it).first.first.c_str(), (*it).first.second.c_str());	// output the atom names in the pair
+	if (!size.first) 
+	{
+	  size = it->second.size;
+	  resolution = it->second.resolution;
+	  max = it->second.max;
+	  min = it->second.min;
+	}
+
+	for (double position = min.first; position < max.first; position += resolution.first)
+	{
+	  // output the atom names in the pair
+	  fprintf (output, "(%-2s,%-2s,%5.3f)", it->first.first.c_str(), it->first.second.c_str(), position);
+	}
   }
   fprintf (output, "\n");
 
-  /* then go through each histogram and print out the data for the given position/distance */
-  for (int i = 0; i < int(_max_rdf_distance/_bin_size + 1); i++)
+  /* print out on each row the rdf position */
+  for (int rdf_position = 0; rdf_position < size.second; rdf_position++)
   {
-	fprintf (output, "%13f", double(i) * _bin_size);
+	fprintf (output, "%13f", rdf_position);
 
+	/* then output a set of columns for each atom name-pair */
 	for (RDF_map::iterator it = _rdfs.begin(); it != _rdfs.end(); it++)
 	{
-	  double num = double(it->second[i]);					// the number density of the given atom-pair at a given distance
-	  double volume = 4.0/3.0*M_PI*pow(_max_rdf_distance,3);		// total volume over which we're checking
-	  double norm = volume / (4 * M_PI * pow(double(i)*_bin_size,2) * _bin_size) / num;	// here's our normalization
+	  /* and for each name-pair, output the columns for each of the slab positions */
+	  for (int slab_position = 0; slab_position < size.first; slab_position++)
+	  {
+		// the number density of the given atom-pair at a given distance
+		double num = double(it->second.Element(slab_position, rdf_position));
+		// the differential volume of the shell being parsed
+		double volume = 4.0/3.0*M_PI*(pow(double(rdf_position)*resolution.second, 3))
+		// here's our normalization
+		double norm = volume / (4 * M_PI * pow(double(rdf_position)*resolution.second, 2) * resolution.second) / num;	
 
-	  fprintf (output, "%13f", norm);
+		fprintf (output, "%13f", norm);
+	  }
 	}
 	fprintf (output, "\n");
   }
+
   return;
 }
 

@@ -5,96 +5,89 @@ import matplotlib.pyplot as plt
 import matplotlib.text
 import matplotlib.patches
 
+ATOMS = ['O','C']
 TITLE = 'Water in NaNO3'
 XRANGE = [0.0,120.0]
+YRANGE = [0.0,0.0]
+# line color/style and labels
+LINESTYLES = {'O':['k:',r'H$_2$O'], 'C':['b:',r'CCl$_4$'], 'NA':['#C2A606:',r'Na$^+$'], 'N':['#A10F05:',r'NO$_3^-$'], 'S':['#6805A1:',r'SO$_4^{-2}'], 'CL':['#CBB808:',r'Cl$^-$']}
+
 class DensityProfiler:
 
-	def __init__(self,files=[],avg=False):
-		self.files = files
-		if len(files) == 0:
-			print "No files given. Try again with data filenames provided"
-			raise NameError('No files given')
-
-		# file i/o to get the data
-		self.data = []
-
-		self.avg = avg
-
+	def __init__(self,file):
+		self.file = file
 		# crunch through the density data
-		for file in self.files:
-			self.data.append (CDF(file))
+		self.data = CDF(file)
+		# and scale it to be in units of g/mL instead of number density
+		self.ScaleDataToDensity()
 
-	def PlotData(self,cols=[],fit=True):
+	# scale each data set to adjust the number density to density in terms of g/mL
+	def ScaleDataToDensity(self):
+		molecular_weight = {'O':18.01, 'C':153.82, 'NA':22.99, 'N':62.00, 'S':96.06, 'CL':35.45}
+
+		for k,v in self.data.iteritems():
+			if k in ATOMS:
+				self.data[k] = map(lambda x: x * molecular_weight[k] / 270.996, v)
+
+		return
+
+	def PlotData(self,fit=True):
 
 		# Set up the plot parameters (labels, size, limits, etc)
 		self.fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
 
-		colors = ['b','g','r','c','m','y','k','g','r','c','m']
+		# some of the prelim stuff for our figure
+		ax = self.fig.add_subplot(1,1,1)
+		ax.set_title(TITLE, size='x-large')
 
-		# the extents of the x-range
-		#xmin = min(self.data[0][0])
-		#xmax = max(self.data[0][0])
+		x = self.data['Position']
 
-		ymax = 0.0
+		# plot the desired atomic densities
+		for atom in ATOMS:
 
-		for i in range(len(self.data)):
-			# some of the prelim stuff for our figure
-			ax = self.fig.add_subplot(len(self.data),1,i+1)
-			ax.set_title(TITLE, size='x-large')
+			datum = self.data[atom]
 
-			x = self.data[i][0]
-			size = self.data[i].NUMCOLUMNS
+			# sets the maximum of the graph
+			dat_max = max(datum)
+			if dat_max > YRANGE[1]:
+				YRANGE[1] = dat_max
 
-			#plot each column data-set against the x variable
-			for j in range(size)[1:]:
-				if len(cols) == 0:
-					pass
-				elif j not in cols:
-					continue
+			# plots the data
+			ax.plot(x, datum, LINESTYLES[atom][0], linewidth=4, label=LINESTYLES[atom][1])
 
-				datum = self.data[i][j]
-				datum = map(lambda x: x*18.01, datum)
+		# Do some labeling of the water data curve
+		self.LabelWaterExtrema(ax,x,self.data['O'])
 
-				# sets the maximum of the graph
-				dat_max = max(datum)
-				if dat_max > ymax:
-					ymax = dat_max
+		# now take care of plotting the fitting functions
+		if fit:
+			self.PlotWaterFit(ax, x, self.data['O'], 'k-')
 
-				# plots the data
-				if j == 1:
-					ax.plot(x, datum, colors[j-1]+':', linewidth=4, label=r'H$_2$O')
-				else:
-					ax.plot(x, datum, colors[j-1]+':', linewidth=4)
-
-				# Show the location of the maximum water density peak and
-				# the trough behind it
-				peak = max(datum)
-				peak_index = datum.index(peak)
-				ax.axhline(y=peak, color='b', linestyle=':')
-				#here's the trough
-				trough_region = datum[peak_index:peak_index+80]
-				trough = min(trough_region)
-				trough_index = datum.index(trough)
-
-				ax.axhline(y=trough, color='b', linestyle=':')
-
-				print "max density = %f\ntrough density = %f\n" % (peak, trough)
-				print "Max Location = %f\nTrough Location = %f\n" % (x[peak_index], x[trough_index])
-
-
-				# now take care of plotting the fitting functions
-				if fit:
-					if j == 1:
-						self.PlotWaterFit(ax, x, datum, colors[j-1])		
-			ylim = ymax * 1.1
-			ax.set_ylim([0.0,ylim])
-			ax.set_xlim(XRANGE)
-			ax.set_axis_bgcolor('w')
+		ylim = YRANGE[1] * 1.1
+		ax.set_ylim([YRANGE[0],ylim])
+		ax.set_xlim(XRANGE)
+		ax.set_axis_bgcolor('w')
 
 		ax.set_xlabel(r'Slab Position $\AA$', size='x-large')
 		ax.set_ylabel(r'$\rho_{H_2O}$ ($\frac{mg}{mL}$)', size='x-large')
 		self.SetLegend()
 		plt.show()
+
+	def LabelWaterExtrema(self,ax,x,datum):
+			# Show the location of the maximum water density peak and
+			# the trough behind it
+			peak = max(datum)
+			peak_index = datum.index(peak)
+			ax.axhline(y=peak, color='b', linestyle=':')
+			#here's the trough
+			trough_region = datum[peak_index:peak_index+80]
+			trough = min(trough_region)
+			trough_index = datum.index(trough)
+
+			ax.axhline(y=trough, color='b', linestyle=':')
+
+			print "max density = %f\ntrough density = %f\n" % (peak, trough)
+			print "Max Location = %f\nTrough Location = %f\n" % (x[peak_index], x[trough_index])
+
 
 	def SetLegend (self):
 		# set some legend properties.  All the code below is optional.  The
@@ -114,22 +107,20 @@ class DensityProfiler:
 		for l in leg.get_lines():
 			l.set_linewidth(2.0)  # the legend line width
 
-
-
-	def PlotWaterFit (self, ax, x, datum, color):
+	def PlotWaterFit (self, ax, x, datum, linetype='k-'):
 		
 		d = DF()
 		(fit, params) = d.FitWater(x, datum)
-		ax.plot(x, fit, color+'-', linewidth=2, label=r'H$_2$O Fit')
+		# plot the fit line for the water
+		ax.plot(x, fit, linetype, linewidth=2, label=r'H$_2$O Fit')
 
-		print "Bulk Density = %f\n" % (max(fit))
-
-
+		print "Bulk Density = %f\n" % (average([params[1],params[2]]))
 
 		### This is added to identify the water region with shading
 		plt.axvspan(params[4]-params[5],params[4]+params[5], facecolor='b', alpha=0.2)
 		plt.axvspan(params[6]-params[7],params[6]+params[7], facecolor='b', alpha=0.2)
 
+		'''
 		# some text to distinguish the water regions
 		# this adds a box that clearly labels the width and 90-10 thickness of the interface from the fitting tanh
 		gibbs_1 = matplotlib.patches.Ellipse ((params[4], max(datum)/2.0), 0.5, 0.1, alpha=0.0, fc="none")
@@ -157,7 +148,8 @@ class DensityProfiler:
 					    relpos=(0.2, 0.8),
 					    connectionstyle="arc3,rad=-0.1"),
 			    )
-	
+		'''	
+	'''
 
 	def PlotPDSWaterFit (self, ax, x, datum, color):
 		
@@ -196,5 +188,14 @@ class DensityProfiler:
 					    relpos=(0.2, 0.8),
 					    connectionstyle="arc3,rad=-0.1"),
 			    )
+
+		'''
+		
+def average(values):
+	"""Computes the arithmetic mean of a list of numbers.
+	>>> print average([20, 30, 70])
+	40.0
+	"""
+	return sum(values, 0.0) / len(values)
 
 
