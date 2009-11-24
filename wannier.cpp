@@ -36,7 +36,7 @@ void WannierFile::LoadNext () {
 	for (int i = 0; i < _size; i++) {
 		//printf ("% 8.4f % 8.4f % 8.4f\n", a,b,c);
 		//if (fscanf (_file, " %*s %lf %lf %lf %*lf ", &a, &b, &c) == EOF) _eof=true;
-		if (fscanf (_file, " %*s %lf %lf %lf %*lf %*lf %*lf ", &a, &b, &c) == EOF) _eof=true;
+		if (fscanf (_file, " %*s %lf %lf %lf %*f %*f %*f ", &a, &b, &c) == EOF) _eof=true;
 		_coords.push_back(VecR (a, b, c));
 	}
 

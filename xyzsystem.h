@@ -38,7 +38,7 @@ public:
 	void LoadNext ();	 					// Update the system to the next timestep
 	void LoadFirst ();
 	void Seek (int step);
-	const int NumSteps () const { return _coords.NumSteps(); }		// number of timesteps in the xyzfile
+	int NumSteps () const { return _coords.NumSteps(); }		// number of timesteps in the xyzfile
 	int Current ()		const { return _coords.Current(); }
 
 	const std::vector<VecR>& Wanniers () const { return _wanniers.Coords(); }

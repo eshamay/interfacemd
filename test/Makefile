@@ -37,6 +37,9 @@ hcorientation: $(HCORIENTATION)
 ambertest : $(WATERSYSTEM) ambertest.o
 	$(CXX) $(CPPFLAGS) $(WATERSYSTEM) ambertest.o -llapack -o ambertest
 
+rdf : $(WATERSYSTEM) rdf-analysis.o
+	$(CXX) $(CPPFLAGS) $(WATERSYSTEM) rdf-analysis.o -llapack -o rdf
+
 density : $(DENSITYFILES)
 	$(CXX) $(CPPFLAGS) $(DENSITYFILES) -llapack -o density
 

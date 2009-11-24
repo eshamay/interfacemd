@@ -17,8 +17,6 @@ class Analyzer : public WaterSystem<AmberSystem> {
 
 	void _EmptyFunction () const { return; } /* A simple empty function that does nothing to the system */
 
-
-
   public:
 	Analyzer (WaterSystemParams& params);
 	virtual ~Analyzer ();

@@ -22,7 +22,7 @@ void DensityBinner<T>::Output (FILE * output) {
   fprintf (output, "%13s", "Position");	// The position column
   // column headers for each atom type (name)
   for (Histogram_it it = _histograms.begin(); it != _histograms.end(); it++) {
-	fprintf (output, "%13s", (*it).first.c_str());
+	fprintf (output, "%-13s", (*it).first.c_str());
   }
   fprintf(output, "\n");
 

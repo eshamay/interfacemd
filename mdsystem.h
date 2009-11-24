@@ -19,7 +19,6 @@ protected:
 	Mol_ptr_vec		_mols;		// the molecules in the system
 
 	static VecR		_dimensions;		// system dimensions - size
-	int				_numTimeSteps;		// number of timesteps in the MD data files
 
 public:
 
@@ -30,17 +29,16 @@ public:
 
 	Mol_ptr_vec& Molecules () { return _mols; }
 	Molecule * Molecules (int index) { return _mols[index]; }
-	const int NumMols () const { return _mols.size(); }
+	int NumMols () const { return _mols.size(); }
 
 	Atom_ptr_vec& Atoms () { return _atoms; }
 	Atom * Atoms (const int index) { return _atoms[index]; }
 	Atom * operator[] (int index) { return _atoms[index]; }
-	const int NumAtoms ()	const { return (int)_atoms.size(); }
+	int NumAtoms ()	const { return (int)_atoms.size(); }
 
-	const int size () const { return (int)_atoms.size(); }
+	int size () const { return (int)_atoms.size(); }
 	static VecR Dimensions () { return _dimensions; }
 	static void Dimensions (const VecR& dimensions) { MDSystem::_dimensions = dimensions; }
-	const int NumSteps () { return _numTimeSteps; }
 
 	/* Beyond simple system stats, various computations are done routinely in a molecular dynamics system: */
 

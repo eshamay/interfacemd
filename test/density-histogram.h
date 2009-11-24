@@ -35,8 +35,7 @@ class DensityBinner {
 
 	// Check if the map already contains a histogram for the incoming ... thing
 	bool MapKeyExists (T * t) {
-	  Histogram_it it = _histograms.find(t->Name());
-	  return (it != _histograms.end());
+	  return _histograms.end() != _histograms.find(t->Name());
 	}
 };
 

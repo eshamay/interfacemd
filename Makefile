@@ -9,7 +9,8 @@ CXXDEBUG	= -g3 -ggdb -Wall -D_GLIBCXX_DEBUG
 CXXOPTIMIZE = -O2 -finline-functions -finline-limit-1000 -funroll-loops
 CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CXXOPTIMIZE)
 #CXXFLAGS    = -ftemplate-depth-100 -Drestrict= $(CXXDEBUG)
-CXX			= g++ $(CXXFLAGS)
+#CXX			= g++ $(CXXFLAGS)
+CXX			= icpc $(CXXFLAGS)
 MPICXX		= mpiCC -g -I$(MPI)/include
 
 ANALYSISFILES	=	analysis.o xyzsystem.o connectmatrix.o dipoleparm.o h2o.o hno3.o matrixr.o molecule.o atom.o vecr.o wannier.o xyzfile.o
