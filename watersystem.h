@@ -7,6 +7,9 @@
 #include "utility.h"
 #include "graph.h"
 
+// Predicates (defined below)
+template <class T> bool Name_pred (const T t, const std::string name);
+template <class T> bool AtomicPosition_pred (const T t, const std::pair<double,double> extents);
 
 struct WaterSystemParams {
   WaterSystemParams (		/* Constructor and initial/default values for system parameters */
@@ -17,18 +20,18 @@ struct WaterSystemParams {
 		     const VecR _ref_axis = VecR (0.0, 1.0, 0.0),
 		     const int _output_freq = 100, const int _restart = 0,
 		     const double _posmin = -20.0, const double _posmax = 150.0, 
-		     const double _posres = 0.5,
+		     const double _posres = 0.1,
 		     const double _angmin = -1.0, const double _angmax = 1.0, 
 		     const double _angres = 0.01,
-		     const double _pbcflip = 15.0
+		     const double _pbcflip = 20.0
 		     ) :	/* The initialization of the system parameters */
   avg(_avg), output_filename(_output), output(fopen(_output.c_str(), "w")),
     axis(_axis), ref_axis(_ref_axis), output_freq(_output_freq), timesteps(_timesteps), restart(_restart),
     posmin(_posmin), posmax(_posmax), posres(_posres), 
-    posbins ((posmax-posmin)/posres),
+    posbins (int((posmax-posmin)/posres)),
     pbcflip(_pbcflip),
     angmin(_angmin), angmax(_angmax), angres(_angres),
-    angbins ((angmax-angmin)/angres)
+    angbins (int((angmax-angmin)/angres))
   { }
 
   bool avg;			/* Will averaging of two interfaces be performed? Can also be used for other functionality */
@@ -87,6 +90,7 @@ class WaterSystem {
   void FindWaters ();						// Find all the waters
   void FindMols (const string name);		// find all molecules with this name
   void FlipWaters (const coord axis = y);
+  void SliceAtoms (const double low, const double high);
   void SliceWaters (const double low, const double high);
   void SliceWaterCoordination (const coordination coord);
   void FindInterfacialWaters ();
@@ -121,24 +125,6 @@ WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
   WaterSystem::posmax = params.posmax;
   WaterSystem::pbcflip = params.pbcflip;
   WaterSystem::axis = params.axis;
-
-  /*
-    if (params.avg) {	// when averaging, the interface locations are taken from the command line.
-    if (argc < 3) {
-    printf ("not enough parameters given (interface locations?)\n");
-    exit(1);
-    }
-    int_low = atof(argv[1]);
-    int_high = atof(argv[2]);
-    middle = (int_low + int_high)/2.0;
-    }
-    else {
-    int_low = 0.0;
-    int_high = 0.0;
-    middle = 0.0;
-    }
-  */
-
 
   return;
 }
@@ -240,7 +226,6 @@ void WaterSystem<T>::LoadAll () {
     // grab each molecule to be added
 	pmol = sys->Molecules(i);
     int_mols.push_back (pmol);
-
     // and then add all of its atoms
     RUN2(pmol->Atoms()) {
       int_atoms.push_back (pmol->Atoms(j));
@@ -339,5 +324,32 @@ void WaterSystem<T>::SliceWaterCoordination (const coordination coord) {
 
   return;
 }
+
+/* used as a predicate for names */
+template <class T>
+bool Name_pred (const T t, const std::string name)
+{
+  return t->Name() == name;
+}
+
+// Removes any of the members with the given name
+#define REMOVE_BY_NAME(vec,type,name)	\
+  D_REMOVE_IF(vec,std::bind2nd(pointer_to_binary_function<const type, const std::string, bool>(Name_pred), name))
+
+// a remove-if-not routine to remove anything *without* the given name
+#define KEEP_BY_NAME(vec,type,name)	\
+  D_REMOVE_IF(vec, std::bind2nd(not2(pointer_to_binary_function<const type, const std::string, bool>(Name_pred)), name))
+
+/* used as a predicate to determine if a given atom is within the bounds specified */
+template <class T>
+bool AtomicPosition_pred (const T t, const std::pair<double,double> extents)
+{
+  double position = t->Position()[WaterSystem<AmberSystem>::axis];
+  return position > extents.first && position < extents.second;
+}
+
+// Removes all elements not within the given slice bounded by the min and max positions within the watersystem slab
+#define SLICE_BY_POSITION(vec,type,min,max)	\
+  D_REMOVE_IF(vec, std::bind2nd(std::not2(std::pointer_to_binary_function<const type, const std::pair<double,double>, bool>(AtomicPosition_pred)), make_pair(min,max)))
 
 #endif

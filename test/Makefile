@@ -80,7 +80,7 @@ fillbox : $(FILLBOX) fillbox.o
 	$(CXX) $(CPPFLAGS) fillbox.o $(FILLBOX) -o fillbox
 
 temp: $(TEMPFILES)
-	$(CXX) $(CPPFLAGS) -llapack -g3 -O0 -o temp $(TEMPFILES)
+	$(CXX) $(CPPFLAGS) $(TEMPFILES) -llapack -o temp 
 
 rotate: $(ROTATE)
 	$(CXX) $(CPPFLAGS) -llapack -g3 -O0 -o rotate $(ROTATE)

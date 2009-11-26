@@ -51,109 +51,113 @@ return;
 // Edges/bonds should only exist between atoms that are bound in some fashion (h-hond, covalent, etc.)
 void BondGraph::_ParseBonds () {
 
-	// first clear out all the bonds from before
-	this->_ClearBonds();
+  // first clear out all the bonds from before
+  this->_ClearBonds();
 
-	// now run through all atom combos and get their bondlengths in order to set their bondtypes
-	Atom *ai, *aj;
+#ifdef ANGLE_CRITERIA
+  // now run through all atom combos and get their bondlengths in order to set their bondtypes
+  Atom *ai, *aj;
+#endif
 
-	// this little for-loop bit runs through all atom-pair combinations once and find the bond-types between them
-	Vertex_it vi, vi_end, next_i;
-	tie(vi, vi_end) = vertices(_graph);
-	Vertex_it vj, vj_end, next_j;
-	tie(vj, vj_end) = vertices(_graph);
+  // this little for-loop bit runs through all atom-pair combinations once and find the bond-types between them
+  Vertex_it vi, vi_end, next_i;
+  tie(vi, vi_end) = vertices(_graph);
+  Vertex_it vj, vj_end, next_j;
+  tie(vj, vj_end) = vertices(_graph);
 
-	--vi_end;
-	for (next_i = vi; vi != vi_end; vi = next_i) {
-		++next_i;
-		vj = next_i;
+  --vi_end;
+  for (next_i = vi; vi != vi_end; vi = next_i) {
+	++next_i;
+	vj = next_i;
 	for (next_j = vj; vj != vj_end; vj = next_j) {
-		++next_j;
+	  ++next_j;
 
-		ai = v_atom[*vi];
-		aj = v_atom[*vj];
-		std::string ai_name = v_name[*vi];
-		std::string aj_name = v_name[*vj];
+#ifdef ANGLE_CRITERIA
+	  ai = v_atom[*vi];
+	  aj = v_atom[*vj];
+#endif
+	  std::string ai_name = v_name[*vi];
+	  std::string aj_name = v_name[*vj];
 
-		// Don't connect oxygens to oxygens, and hydrogen to hydrogen...etc.
-		if (ai_name == aj_name) continue;
+	  // Don't connect oxygens to oxygens, and hydrogen to hydrogen...etc.
+	  if (ai_name == aj_name) continue;
 
-		// calculate the distance between the two atoms
-		double bondlength = MDSystem::Distance (v_position[*vi], v_position[*vj]).Magnitude();
-		//double bondlength = v_position[*vi].MinDistance(v_position[*vj], Atom::_size);
-		bondtype btype = unbonded;
+	  // calculate the distance between the two atoms
+	  double bondlength = MDSystem::Distance (v_position[*vi], v_position[*vj]).Magnitude();
+	  //double bondlength = v_position[*vi].MinDistance(v_position[*vj], Atom::_size);
+	  bondtype btype = unbonded;
 
-		// first look at bonds between O and H
-		if ( (ai_name.find("O") != std::string::npos || aj_name.find("O") != std::string::npos)
-			&&
-			 (ai_name.find("H") != std::string::npos || aj_name.find("H") != std::string::npos)
-		   )
-		{
-			// one type of bond is the O-H covalent
-			if (bondlength <= OHBONDLENGTH) {
-				btype = ohbond;
-			}
-
-			// Or an H-bond is formed!
-			if (bondlength <= HBONDLENGTH && bondlength > OHBONDLENGTH) {
-				// additionally, let's check the angle-criteria for an H-bond.
-				// This is done by looking at the angle formed from
-				#ifdef ANGLE_CRITERIA
-				Atom *o1, *h, *o2;	// o1 is covalently bound to h, and o2 is h-bound to h
-				Water * wat;
-
-				if (ai_name.find("O") != std::string::npos) {		// ai is the O, and aj is the H
-					o2 = ai;
-					h = aj;
-				}
-				else if (aj_name.find("O") != std::string::npos) {
-					h = ai;
-					o2 = aj;
-				}
-				wat = static_cast<Water *>(h->ParentMolecule());
-				o1 = wat->GetAtom("O");
-
-				VecR oh1 = MDSystem::Distance (o1, h);	// the covalent bond
-				VecR oh2 = MDSystem::Distance (o2, h);	// the H-bond
-
-				double angle = acos(oh1 < oh2);
-				//printf ("% 10.3f\n", angle * 180.0/M_PI);
-
-				if (angle < HBONDANGLE)
-				#endif
-
-				btype = hbond;
-			}
+	  // first look at bonds between O and H
+	  if ( (ai_name.find("O") != std::string::npos || aj_name.find("O") != std::string::npos)
+		  &&
+		  (ai_name.find("H") != std::string::npos || aj_name.find("H") != std::string::npos)
+		 )
+	  {
+		// one type of bond is the O-H covalent
+		if (bondlength <= OHBONDLENGTH) {
+		  btype = ohbond;
 		}
 
-		// now connect Os to Ns
-		if ( (ai_name.find("O") != std::string::npos || aj_name.find("O") != std::string::npos)
-			&&
-			 (ai_name.find("N") != std::string::npos || aj_name.find("N") != std::string::npos)
-		   )
-		{
-			if (bondlength <= NOBONDLENGTH) {
-				btype = nobond;
-			}
+		// Or an H-bond is formed!
+		if (bondlength <= HBONDLENGTH && bondlength > OHBONDLENGTH) {
+		  // additionally, let's check the angle-criteria for an H-bond.
+		  // This is done by looking at the angle formed from
+#ifdef ANGLE_CRITERIA
+		  Atom *o1, *h, *o2;	// o1 is covalently bound to h, and o2 is h-bound to h
+		  Water * wat;
+
+		  if (ai_name.find("O") != std::string::npos) {		// ai is the O, and aj is the H
+			o2 = ai;
+			h = aj;
+		  }
+		  else if (aj_name.find("O") != std::string::npos) {
+			h = ai;
+			o2 = aj;
+		  }
+		  wat = static_cast<Water *>(h->ParentMolecule());
+		  o1 = wat->GetAtom("O");
+
+		  VecR oh1 = MDSystem::Distance (o1, h);	// the covalent bond
+		  VecR oh2 = MDSystem::Distance (o2, h);	// the H-bond
+
+		  double angle = acos(oh1 < oh2);
+		  //printf ("% 10.3f\n", angle * 180.0/M_PI);
+
+		  if (angle < HBONDANGLE)
+#endif
+
+			btype = hbond;
 		}
-		// add in the bond between two atoms
-		if (btype != unbonded)
-			this->_SetBond (*vi, *vj, bondlength, btype);
+	  }
+
+	  // now connect Os to Ns
+	  if ( (ai_name.find("O") != std::string::npos || aj_name.find("O") != std::string::npos)
+		  &&
+		  (ai_name.find("N") != std::string::npos || aj_name.find("N") != std::string::npos)
+		 )
+	  {
+		if (bondlength <= NOBONDLENGTH) {
+		  btype = nobond;
+		}
+	  }
+	  // add in the bond between two atoms
+	  if (btype != unbonded)
+		this->_SetBond (*vi, *vj, bondlength, btype);
 	}}
 
 	// Now fix up any weird atom-sharing between molecules. At this point we have to consider if we want to divide the system into separate molecules, or if we're interested in other phenomena, such as contact-ion pairs, etc.
 	if (_sys_type == "xyz")
-		this->_FixSharedAtoms ();
-return;
+	  this->_FixSharedAtoms ();
+	return;
 }
 
 // Set all the bonds to unbonded
 void BondGraph::_ClearBonds () {
-	// Remove all the edges.
-	Edge_it ei, e_end, next;
-	tie(ei, e_end) = edges(_graph);
-	for (next = ei; ei != e_end; ei = next) {
-		++next;
+  // Remove all the edges.
+  Edge_it ei, e_end, next;
+  tie(ei, e_end) = edges(_graph);
+  for (next = ei; ei != e_end; ei = next) {
+	++next;
 		remove_edge(*ei, _graph);
 	}
 return;

@@ -22,6 +22,8 @@ protected:
 
 public:
 
+	virtual ~MDSystem();
+
 	virtual void LoadNext () = 0;
 	virtual void LoadFirst () = 0;
 

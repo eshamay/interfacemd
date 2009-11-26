@@ -30,7 +30,7 @@ class Analyzer : public WaterSystem<AmberSystem> {
 	static int		posbins;
 	static double 	angmin, angmax, angres;
 	static int		angbins;
-	static unsigned int timesteps;
+	static int 		timesteps;
 	static unsigned int restart;
 
 	// create a histogram of the angle between a given molecular axis vector (determined by the axisFunc) and the system's ref_axis. The molecule is chosen by the residue name. The molecules must themselves have the functions for determining the molecular axis vector.
@@ -68,6 +68,11 @@ class Analyzer : public WaterSystem<AmberSystem> {
 	  return Bin (angle, angmin, angres);
 	}
 
+	void LoadNext () { this->sys->LoadNext(); }
+	Atom_ptr_vec& Atoms () { return int_atoms; } 
+	Mol_ptr_vec& Molecules () { return int_mols; }
+	Water_ptr_vec& Waters () { return int_wats; }
+
 	// analysis loop functions
 	virtual void Setup () { return; }
 	virtual void Analysis () { return; }
@@ -85,7 +90,7 @@ double	Analyzer::angmax;
 double	Analyzer::angres;
 int		Analyzer::angbins;
 
-unsigned int Analyzer::timesteps;
+int 	Analyzer::timesteps;
 unsigned int Analyzer::restart;
 
 VecR	Analyzer::ref_axis;
@@ -128,6 +133,7 @@ void Analyzer::_OutputHeader () const {
 }
 
 Analyzer::~Analyzer () {
+  delete this->sys;
   fclose (output);
   return;
 }
@@ -157,29 +163,29 @@ void Analyzer::_OutputStatus (const int timestep) const
 void Analyzer::SystemAnalysis ()
 {
   // do some initial setup
-  this->Setup();
+  Setup();
 
-  unsigned int timestep = 0;
+  int timestep = 0;
   // start the analysis - run through each timestep
-  for (timestep = 0; timestep < this->timesteps; timestep++) {
+  for (timestep = 0; timestep < timesteps; timestep++) {
 
 	// Perform the main loop analysis that works on every timestep of the simulation
-	this->Analysis ();
+	Analysis ();
 
 	// load the next timestep
-	this->sys->LoadNext();
+	LoadNext();
 
 	// output the status of the analysis (to the screen or somewhere useful)
-	this->_OutputStatus (timestep);
+	_OutputStatus (timestep);
 	// Output the actual data being collected to a file or something for processing later
-	this->DataOutput(timestep);
+	DataOutput(timestep);
   }
 
   // do a little work after the main analysis loop (normalization of a histogram? etc.)
-  this->PostAnalysis ();
+  PostAnalysis ();
 
   // do one final data output to push out the finalized data set
-  this->DataOutput(timestep);
+  DataOutput(timestep);
 
   return;
 }

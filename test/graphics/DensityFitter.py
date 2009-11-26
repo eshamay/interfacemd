@@ -29,9 +29,13 @@ class DensityFitter(SM):
 
 		fit = fit_func(x,plsq[0])
 
-		print "Fitting the water density - found the following parameters"
+		print "Fitting the water density - found the following parameters:"
+		print "Lower interface:"
 		print "density (%6.3f) [%6.3f - %6.3f]    d = % 6.4f\n" % (plsq[0][4], plsq[0][0], plsq[0][1], plsq[0][5])
+
+		print "Upper interface:"
 		print "density (%6.3f) [%6.3f - %6.3f]    d = % 6.4f\n" % (plsq[0][6], plsq[0][3], plsq[0][2], plsq[0][7])
 
+		print "Average of the densities (low-high) = %6.3f" % (sum([plsq[0][0], plsq[0][1], plsq[0][2], plsq[0][3]])/4.0)
 		return (fit, plsq[0])
 

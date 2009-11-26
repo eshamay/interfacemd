@@ -1,5 +1,5 @@
-#ifndef __UTIL_H_
-#define __UTIL_H_
+#ifndef __UTIL_H
+#define __UTIL_H
 
 #include <vector>
 #include <algorithm>
@@ -7,6 +7,8 @@
 #include <functional>
 
 
+template <class Iter>
+Iter PairListMember (const typename std::iterator_traits<Iter>::value_type& p, Iter first, Iter last);
 /*******************************************************************************************************************************************************/
 /***************************************** Dealing with Pairs ******************************************************************************************/
 
@@ -32,31 +34,23 @@ Iter PairListMember (const typename std::iterator_traits<Iter>::value_type& p, I
 #define PAIR_IN_LIST(pair,list)	\
   list.end() != PairListMember(pair, list.begin(), list.end())
 
-#define PAIR_LIST_MEMBER
-
-
 
 /*******************************************************************************************************************************************************/
 /***************************************** Histograms **************************************************************************************************/
 
 /* A 2-dimensional histogram functor. Each application of the histogram will bin the given values. Initial setup requires some parameters for the histogram (size, resolution, etc) */
 template <class T>
-struct 2DHistogram : public std::binary_function<T,T,bool>
+class Histogram2D : public std::binary_function<T,T,bool>
 {
+  public:
   std::pair<T,T> max;						// maximum value the histogram can bin in each dimension
   std::pair<T,T> min;						// minimum values for each dimension
   std::pair<T,T> resolution;				// resolution for each dimension
   std::pair<int,int> size;					// dimensions of the 2-d data (number of histogram bins)
-
-  typedef std::vector<int> Histogram_t;
-  std::vector<Histogram_t> histogram;		// 2-d container/histogram
-
-  typedef int bin;
-  typedef std::pair<bin,bin> bins;
-
+  
   // Initialization
-  2DHistogram (const std::pair<T,T>& maxima, const std::pair<T,T>& resolutions, const std::pair<T,T>& minima = make_pair(T(0), T(0))) 
-	: max(maxima), resolution(resolutions), min(minima)
+  Histogram2D (const std::pair<T,T>& maxima, const std::pair<T,T>& resolutions, const std::pair<T,T>& minima = std::make_pair(T(0), T(0))) 
+	: max(maxima), min(minima), resolution(resolutions)
   {
 	size.first = int((max.first - min.first)/resolution.first) + 1;
 	size.second = int((max.second - min.second)/resolution.second) + 1;
@@ -65,27 +59,36 @@ struct 2DHistogram : public std::binary_function<T,T,bool>
 	histogram.resize (size.first, Histogram_t (size.second, 0));
   }
 
-  /* calculates the bins into which a value will be placed */
-  bins Bin (const T& a, const T& b)
-  { return make_pair( bin((a-min.first)/resolution.first), bin((b-min.second)/resolution.second) ); }
-
-  /* checks if the given value pair is within the limits of the histogram */
-  bool CheckLimits (const T& a, const T& b) const
-  { return a > min.first && a < max.first && b > min.second && b < max.second; }
-
-  bool operator() (const T& a, const T& b) {
+  void operator() (const T& a, const T& b) {
 	if (CheckLimits(a,b))
 	{
-	  bins b = Bin(a,b);
-	  histogram[b.first][b.second]++;
-	  return true;
+	  bins new_bins = Bin(a,b);
+	  histogram[new_bins.first][new_bins.second]++;
 	}
-	else { return false; }
+	return;
   }
 
   // Return the element of the histogram
   int Element (const int x, const int y) const { return histogram[x][y]; }
 
+  private:
+  typedef std::vector<int> Histogram_t;
+  std::vector<Histogram_t> histogram;		// 2-d container/histogram
+ 
+  typedef int bin;
+  typedef std::pair<bin,bin> bins;
+
+  /* calculates the bins into which a value will be placed */
+  bins Bin (const T& a, const T& b)
+  { 
+	return std::make_pair( bin((a-min.first)/resolution.first), bin((b-min.second)/resolution.second) );
+  }
+
+  /* checks if the given value pair is within the limits of the histogram */
+  bool CheckLimits (const T& a, const T& b) const
+  { 
+	return a > min.first && a < max.first && b > min.second && b < max.second;
+  }
 
 };
 
@@ -99,9 +102,9 @@ struct 2DHistogram : public std::binary_function<T,T,bool>
 #define RUN2(list)  \
   for (size_t j = 0; j < list.size(); j++)
 
-
-#define REMOVE_IF(vec,pred)	\
-  vec.erase (std::remove_if (vec.begin(), vec.end(), pred()), vec.end() );
+// A destructive remove_if that erases the given list with a new list containing only the elements that don't match the predicate op
+#define D_REMOVE_IF(vec,pred)	\
+  vec.erase (std::remove_if (vec.begin(), vec.end(), pred), vec.end() );
 
 // A general method for making new functors
 #define MAKE_FUNCTOR(name,return_type,arg_type,code)	\

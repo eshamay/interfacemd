@@ -60,6 +60,7 @@ public:
 
 	// Output Functions
 	VecR CenterOfMass () const		{ return _centerofmass; }
+	VecR Position () const			{ return _centerofmass; }
 	Atom_ptr_vec Atoms () const			{ return _atoms; }			// returns the molecule's atom list
 	Atom * Atoms (int index) const		{ return _atoms[index]; }
 	const std::vector<VecR>& Wanniers ()		const { return _wanniers; }

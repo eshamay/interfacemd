@@ -3,6 +3,10 @@
 // The system size for periodic boundary calculations
 VecR MDSystem::_dimensions = VecR ();
 
+MDSystem::~MDSystem () {
+  return;
+}
+
 // Find the smallest vector between two locations in a periodic system defined by the dimensions.
 // The resulting vector will point from the v1 to v2
 VecR MDSystem::Distance (const VecR& v1, const VecR& v2) {

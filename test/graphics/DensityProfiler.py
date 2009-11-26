@@ -6,11 +6,12 @@ import matplotlib.text
 import matplotlib.patches
 
 ATOMS = ['O','C']
-TITLE = 'Water in NaNO3'
+TITLE = 'Water'
 XRANGE = [0.0,120.0]
 YRANGE = [0.0,0.0]
 # line color/style and labels
-LINESTYLES = {'O':['k:',r'H$_2$O'], 'C':['b:',r'CCl$_4$'], 'NA':['#C2A606:',r'Na$^+$'], 'N':['#A10F05:',r'NO$_3^-$'], 'S':['#6805A1:',r'SO$_4^{-2}'], 'CL':['#CBB808:',r'Cl$^-$']}
+LINESTYLES = {'O':['black',r'H$_2$O'], 'C':['blue',r'CCl$_4$'], 'NA':['#088618',r'Na'], 'N':['#a10f05',r'NO$_3$'], 'S':['#6805a1',r'SO$_4$'], 'Cl':['#6e6f00',r'Cl']}
+BIN_WIDTH = 0.1
 
 class DensityProfiler:
 
@@ -23,11 +24,12 @@ class DensityProfiler:
 
 	# scale each data set to adjust the number density to density in terms of g/mL
 	def ScaleDataToDensity(self):
-		molecular_weight = {'O':18.01, 'C':153.82, 'NA':22.99, 'N':62.00, 'S':96.06, 'CL':35.45}
+		molecular_weight = {'O':18.01, 'C':153.82, 'NA':229.9, 'N':620.0, 'S':960.6, 'Cl':354.5}
 
+		scale = 1.0/(30.0*30.0*BIN_WIDTH * 1.0e-24 * 6.02e23)
 		for k,v in self.data.iteritems():
 			if k in ATOMS:
-				self.data[k] = map(lambda x: x * molecular_weight[k] / 270.996, v)
+				self.data[k] = map(lambda x: x * molecular_weight[k] * scale, v)
 
 		return
 
@@ -53,10 +55,10 @@ class DensityProfiler:
 				YRANGE[1] = dat_max
 
 			# plots the data
-			ax.plot(x, datum, LINESTYLES[atom][0], linewidth=4, label=LINESTYLES[atom][1])
+			ax.plot(x, datum, color=LINESTYLES[atom][0], linestyle=':', linewidth=4, label=LINESTYLES[atom][1])
 
-		# Do some labeling of the water data curve
-		self.LabelWaterExtrema(ax,x,self.data['O'])
+		# Do some labeling of the water data curve extrema (max/min, peaks/troughs, etc) for various reasons
+		#self.LabelWaterExtrema(ax,x,self.data['O'])
 
 		# now take care of plotting the fitting functions
 		if fit:

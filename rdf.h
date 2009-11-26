@@ -10,19 +10,19 @@ typedef std::vector<int> Histogram_t;
 typedef std::pair<std::string, std::string> NamePair_t;
 typedef std::pair<double, double> double_pair;
 typedef std::vector<NamePair_t> NamePairList;
-typedef std::map<NamePair_t, 2DHistogram> RDF_map;
+typedef std::map<NamePair_t, Histogram2D<double> > RDF_map;
 	
 /* This functor takes atom-pairs to generate a radial-distribution-functions.
  * Application of the functor on an atom-pair creates several RDFs. Each atom
  * pair has its own set of RDFs, and each set of RDFs is divided up into sub-
  * RDFs representing slices of volume cutting up an MD slab.
  * The slab-position of an RDF is based on the first atom named in an atom-pair.
- * All the atom pairs are defined a priori and supplied to the functors ctor. */
+ * All the atom pairs are defined a priori and supplied to the functor's ctor. */
 template <class T>
 class RDFMachine : public std::binary_function<T,T,bool> {
   public:
-	// Initialization of all the histograms
-	RDFMachine (const NamePairList& names, double_pair maxima, double_pair minima, double_pair bin_widths);
+	// Initialization of all the histograms - the parameter pairs refer to <slab position, rdf>
+	RDFMachine (const NamePairList& names, const double_pair maxima, const double_pair minima, const double_pair bin_widths);
 
 	/* Adds the given pair into the histogram after checking to see if that pair is one of those being analyzed */
 	void operator() (const T a1, const T a2) 
@@ -54,11 +54,12 @@ template <class T> RDF_map RDFMachine<T>::_rdfs;
 template <class T> NamePairList RDFMachine<T>::_name_pair_list;
 
 template <class T> 
-RDFMachine<T>::RDFMachine (const NamePairList& names, double_pair maxima, double_pair minima, double_pair bin_widths)
+RDFMachine<T>::RDFMachine (const NamePairList& names, const double_pair maxima, const double_pair minima, const double_pair bin_widths)
 {
   // Create a new histogram for each pair of atomic names required for the analysis
   RUN (names) {
-	_rdfs[names[i]] = 2DHistogram(maxima, bin_widths, minima);
+	//_rdfs[names[i]] = Histogram2D<double>(maxima, bin_widths, minima);
+	_rdfs.insert(std::make_pair(names[i], Histogram2D<double>(maxima, bin_widths, minima)));
 	_name_pair_list.push_back (names[i]);
   }
   return;
@@ -68,12 +69,12 @@ template <class T>
 void RDFMachine<T>::BinAtomPairData (const NamePair_t name_pair, const T a1, const T a2) 
 {
   // The inter-atomic distance
-  double distance = MDSystem::Distance(a1, a2).Magnitude();
+  double atomic_distance = MDSystem::Distance(a1, a2).Magnitude();
   // Because the atomic position is being taken into account when slicing up the slab into many pieces, the correct atom must be used to determine the rdf position bin.
   // Thus, the following will choose the correct atomic position to use (namely, the first one listed in the name pair)
-  double position = (a1->Name() == name_pair.first) ? a1->Position()[WaterSystem::axis] : a2->Position()[WaterSystem::axis];
+  double slab_position = (a1->Name() == name_pair.first) ? a1->Position()[WaterSystem<AmberSystem>::axis] : a2->Position()[WaterSystem<AmberSystem>::axis];
   // then call the 2Dhistogram to do the actual binning using the position and inter-atomic distances
-  _rdfs[name_pair](position, distance);
+  _rdfs.find(name_pair)->second(slab_position, atomic_distance);
   return;
 }
 
@@ -89,7 +90,7 @@ void RDFMachine<T>::Output (FILE * output) const
   std::pair<double,double> max = make_pair(0.0,0.0);
   std::pair<double,double> min = make_pair(0.0,0.0);
 
-  fprintf (output, "Distance    ");
+  fprintf (output, "%13s", "Distance");
   for (RDF_map::iterator it = _rdfs.begin(); it != _rdfs.end(); it++)
   {
 	if (!size.first) 
@@ -100,33 +101,42 @@ void RDFMachine<T>::Output (FILE * output) const
 	  min = it->second.min;
 	}
 
-	for (double position = min.first; position < max.first; position += resolution.first)
+	std::string name1 = it->first.first;
+	std::string name2 = it->first.second;
+	for (double slab_position = min.first; slab_position < max.first; slab_position += resolution.first)
 	{
 	  // output the atom names in the pair
-	  fprintf (output, "(%-2s,%-2s,%5.3f)", it->first.first.c_str(), it->first.second.c_str(), position);
+	  fprintf (output, "(%2s-%2s)%4.2f ", name1.c_str(), name2.c_str(), slab_position);
 	}
   }
   fprintf (output, "\n");
 
   /* print out on each row the rdf position */
-  for (int rdf_position = 0; rdf_position < size.second; rdf_position++)
+  for (int rdf_i = 0; rdf_i < size.second; rdf_i++)
   {
-	fprintf (output, "%13f", rdf_position);
+	double rdf_position = double(rdf_i)*resolution.second;	// assuming that all the RDFs will have the same resolution
 
-	/* then output a set of columns for each atom name-pair */
+	// print out the rdf-position at the start of each row
+	fprintf (output, "%13f", rdf_position);		// don't add the rdf min because it will always be 0... for now.
+
+	/* then output a data point for each atom name-pair's rdf value for each slab position */
 	for (RDF_map::iterator it = _rdfs.begin(); it != _rdfs.end(); it++)
 	{
-	  /* and for each name-pair, output the columns for each of the slab positions */
-	  for (int slab_position = 0; slab_position < size.first; slab_position++)
-	  {
-		// the number density of the given atom-pair at a given distance
-		double num = double(it->second.Element(slab_position, rdf_position));
-		// the differential volume of the shell being parsed
-		double volume = 4.0/3.0*M_PI*(pow(double(rdf_position)*resolution.second, 3))
-		// here's our normalization
-		double norm = volume / (4 * M_PI * pow(double(rdf_position)*resolution.second, 2) * resolution.second) / num;	
+	  size = it->second.size;
+	  resolution = it->second.resolution;
+	  min = it->second.min;
 
-		fprintf (output, "%13f", norm);
+	  /* and for each name-pair, output the columns for each of the slab positions */
+	  for (int slab_i = 0; slab_i < size.first; slab_i++)
+	  {
+		// the number density of the given atom-pair separated by a given distance
+		double num = double(it->second.Element(slab_i, rdf_i));
+		// the differential volume of the shell being parsed
+		double volume = 4.0/3.0*M_PI*(pow(rdf_position, 3));
+		// here's our normalization
+		double rdf = volume / (4 * M_PI * pow(rdf_position, 2) * resolution.second) / num;	
+
+		fprintf (output, "%13f", rdf);
 	  }
 	}
 	fprintf (output, "\n");

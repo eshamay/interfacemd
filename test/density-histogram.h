@@ -16,10 +16,10 @@ class DensityBinner {
   public:
 
 	// The functor's operation for binning of atomic positions
-	void operator() (T * t);
+	void operator() (T t);
 
 	// Output data from the histograms to a file
-	void Output (FILE * output);
+	void Output (FILE * output, const int timestep);
 
   private:
 
@@ -28,13 +28,13 @@ class DensityBinner {
 	static map<string, Histogram_1D> _histograms;		
 
 	// Create a new histogram in the map
-	void AddNewHistogram (T * t) {
+	void AddNewHistogram (T t) {
 	  _histograms[t->Name()] = Histogram_1D (Analyzer::posbins, 0);
 	  atom_types.push_back(t->Name());
 	}
 
 	// Check if the map already contains a histogram for the incoming ... thing
-	bool MapKeyExists (T * t) {
+	bool MapKeyExists (T t) {
 	  return _histograms.end() != _histograms.find(t->Name());
 	}
 };
@@ -55,13 +55,13 @@ class DensityAnalyzer : public Analyzer {
 	  Analyzer(wsp) { return; }
 
 	// the utility functor for getting all the data accumulated
-	DensityBinner<Atom> binner;
+	DensityBinner<Atom *> binner;
 
 	void Setup () { LoadAll(); }
 
 	void Analysis () {
 	  // bin each water's position and angle
-	  FOR_EACH(int_atoms, this->binner);
+	  FOR_EACH(int_atoms, binner);
 	  return;
 	}
 
@@ -70,7 +70,7 @@ class DensityAnalyzer : public Analyzer {
 
 	void DataOutput (const unsigned int timestep) {
 	  if (!(timestep % (output_freq * 10)))
-		this->binner.Output(output);
+		binner.Output(output, timestep);
 	  return;
 	}
 };

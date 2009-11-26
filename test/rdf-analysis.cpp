@@ -17,7 +17,7 @@ int main () {
   names.push_back(std::make_pair("C", "C"));
   */
 
-  RDFAnalyzer rdf (wsp, names, 15.0, 0.1);
+  RDFAnalyzer rdf (wsp, names, make_pair(30.0,15.0), make_pair(29.0,0.0), make_pair(0.1,0.1));
 
   rdf.SystemAnalysis();
 
