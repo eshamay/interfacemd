@@ -114,7 +114,7 @@ void RDFMachine<T>::Output (FILE * output) const
 	for (double slab_position = min.first; slab_position <= max.first; slab_position += resolution.first)
 	{
 	  // output the atom names in the pair
-	  fprintf (output, "(%2s-%2s)%4.2f ", name1.c_str(), name2.c_str(), slab_position);
+	  fprintf (output, " (%s-%s)%04.2f ", name1.c_str(), name2.c_str(), slab_position);
 	}
   }
   fprintf (output, "\n");
