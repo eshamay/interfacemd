@@ -48,7 +48,7 @@ void DensityBinner<T>::Output (FILE * output, const int timestep) {
 
 int main () {
 
-  WaterSystemParams wsp ("atomic-densities.dat");
+  WaterSystemParams wsp ("atomic-densities.dat", 75000);
 
   DensityAnalyzer da (wsp);
 

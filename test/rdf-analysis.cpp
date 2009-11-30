@@ -6,6 +6,7 @@ int main () {
 
   NamePairList names;
   names.push_back(std::make_pair("O", "O"));
+  names.push_back(std::make_pair("O", "H1"));
   /*
   names.push_back(std::make_pair("O", "H"));
   names.push_back(std::make_pair("H", "H"));
@@ -17,7 +18,7 @@ int main () {
   names.push_back(std::make_pair("C", "C"));
   */
 
-  RDFAnalyzer rdf (wsp, names, make_pair(30.0,15.0), make_pair(29.0,0.0), make_pair(0.1,0.1));
+  RDFAnalyzer rdf (wsp, names, make_pair(45.0,10.0), make_pair(25.0,0.0), make_pair(2.0,0.1));
 
   rdf.SystemAnalysis();
 

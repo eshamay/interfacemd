@@ -325,12 +325,37 @@ void WaterSystem<T>::SliceWaterCoordination (const coordination coord) {
   return;
 }
 
-/* used as a predicate for names */
+/* used as a predicate for names equivalency */
 template <class T>
 bool Name_pred (const T t, const std::string name)
 {
   return t->Name() == name;
 }
+
+/* predicate for finding a name in a list */
+template <class T>
+bool Name_in_list_pred (T t, std::vector<string> names) 
+{
+  return names.end() != find(names.begin(), names.end(), t->Name());
+}
+
+/* a predicate for name sorting */
+template <class T>
+struct Name_sort_pred {
+    bool operator()(const T &left, const T &right) {
+        return left->Name() < right->Name();
+    }
+};
+
+/* removes all the atoms/molecules that are in the list of names to remove */
+#define REMOVE_BY_NAMES(vec,type,names)	\
+  std::sort(vec.begin(), vec.end(), Name_sort_pred<Atom *>());	\
+  D_REMOVE_IF(vec, std::bind2nd(std::pointer_to_binary_function<type, std::vector<string>, bool>(Name_in_list_pred), names))
+
+/* keeps all the things with names that appear in the names-list. names has to be a std::vector */
+#define KEEP_BY_NAMES(vec,type,names)	\
+  std::sort(vec.begin(), vec.end(), Name_sort_pred<Atom *>());	\
+  D_REMOVE_IF(vec, std::bind2nd(not2(std::pointer_to_binary_function<type, std::vector<string>, bool>(Name_in_list_pred)), names))
 
 // Removes any of the members with the given name
 #define REMOVE_BY_NAME(vec,type,name)	\

@@ -34,6 +34,35 @@ Iter PairListMember (const typename std::iterator_traits<Iter>::value_type& p, I
 #define PAIR_IN_LIST(pair,list)	\
   list.end() != PairListMember(pair, list.begin(), list.end())
 
+template<class C>
+struct Inserter {
+  std::back_insert_iterator<C> in;
+  Inserter(C& c) : in(c) {}
+  void operator()(const std::pair<typename C::value_type, typename C::value_type>& p)
+  {
+	*in++ = p.first;
+	*in++ = p.second;
+  }
+};
+
+  template<class C>
+Inserter<C> make_inserter(C& c)
+{ 
+  return Inserter<C>(c); 
+}
+
+/* Takes a container of pairs (pairlist) and flattens it such that each pair element is now an element of the new list */
+#define FLATTEN_PAIRLIST(pairlist,result)	\
+  std::for_each(pairlist.begin(), pairlist.end(), make_inserter(result));
+
+/* sorts and finds unique elements of a given list and stores them into the result */
+#define UNIQUE_PAIRLIST_ELEMENTS(pairlist,result)	\
+  FLATTEN_PAIRLIST (pairlist, result)	\
+  sort(result.begin(), result.end());	\
+  result.resize( unique(result.begin(), result.end()) - result.begin());
+
+
+
 
 /*******************************************************************************************************************************************************/
 /***************************************** Histograms **************************************************************************************************/
@@ -117,8 +146,8 @@ class Histogram2D : public std::binary_function<T,T,bool>
 #define MAKE_PREDICATE(name,arg_type,code)	\
   MAKE_FUNCTOR(name, bool, arg_type, return code;);
 
-#define FOR_EACH(name,fn)	\
-  std::for_each (name.begin(), name.end(), fn);
+#define FOR_EACH(list,fn)	\
+  std::for_each (list.begin(), list.end(), fn);
 
 // Maps OP onto A and stores the result into B
 #define MAP_TO(A,B,OP)	\

@@ -9,7 +9,7 @@
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_utility.hpp>
-#include <boost/property_map.hpp>
+#include <boost/property_map/property_map.hpp>
 
 
 const double OHBONDLENGTH = 1.3;				// used to be 1.1

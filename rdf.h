@@ -32,8 +32,10 @@ class RDFMachine : public std::binary_function<T,T,bool> {
 	  /* find the actual way the pair is ordered in the list (i.e. first atom named = first atom, etc) */
 	  NamePairList::iterator list_pair = PairListMember(name_pair, _name_pair_list.begin(), _name_pair_list.end());
 
-	  if (list_pair != _name_pair_list.end())	// see if the atomic pair is found in the list
+	  if (list_pair < _name_pair_list.end())	// see if the atomic pair is found in the list
+	  {
 		BinAtomPairData (*list_pair, a1, a2);
+	  }
 
 	  return;
 	}
@@ -42,20 +44,25 @@ class RDFMachine : public std::binary_function<T,T,bool> {
 	void Output (FILE * output) const;
 
   private:
+	static unsigned long _total_pairs;	// total number of pairs processed within the maximum RDF distance
 	static RDF_map _rdfs;
 	static vector<NamePair_t> _name_pair_list;
+	static double _rdf_volume;	// the sphere of bonding distances in which we're calculating RDFs
 
 	/* Calculates the rdf data and adds it into the correct histogram */
-	void BinAtomPairData (const NamePair_t name_pair, const T a1, const T a2);
+	void BinAtomPairData (const NamePair_t& name_pair, const T a1, const T a2);
 
 };
 
 template <class T> RDF_map RDFMachine<T>::_rdfs;
 template <class T> NamePairList RDFMachine<T>::_name_pair_list;
+template <class T> unsigned long RDFMachine<T>::_total_pairs = 0;
+template <class T> double RDFMachine<T>::_rdf_volume;
 
 template <class T> 
 RDFMachine<T>::RDFMachine (const NamePairList& names, const double_pair maxima, const double_pair minima, const double_pair bin_widths)
 {
+  _rdf_volume = 4.0/3.0 * M_PI * pow(maxima.second, 3);
   // Create a new histogram for each pair of atomic names required for the analysis
   RUN (names) {
 	//_rdfs[names[i]] = Histogram2D<double>(maxima, bin_widths, minima);
@@ -66,7 +73,7 @@ RDFMachine<T>::RDFMachine (const NamePairList& names, const double_pair maxima, 
 }
 
 template <class T> 
-void RDFMachine<T>::BinAtomPairData (const NamePair_t name_pair, const T a1, const T a2) 
+void RDFMachine<T>::BinAtomPairData (const NamePair_t& name_pair, const T a1, const T a2) 
 {
   // The inter-atomic distance
   double atomic_distance = MDSystem::Distance(a1, a2).Magnitude();
@@ -75,6 +82,7 @@ void RDFMachine<T>::BinAtomPairData (const NamePair_t name_pair, const T a1, con
   double slab_position = (a1->Name() == name_pair.first) ? a1->Position()[WaterSystem<AmberSystem>::axis] : a2->Position()[WaterSystem<AmberSystem>::axis];
   // then call the 2Dhistogram to do the actual binning using the position and inter-atomic distances
   _rdfs.find(name_pair)->second(slab_position, atomic_distance);
+  _total_pairs++;
   return;
 }
 
@@ -103,7 +111,7 @@ void RDFMachine<T>::Output (FILE * output) const
 
 	std::string name1 = it->first.first;
 	std::string name2 = it->first.second;
-	for (double slab_position = min.first; slab_position < max.first; slab_position += resolution.first)
+	for (double slab_position = min.first; slab_position <= max.first; slab_position += resolution.first)
 	{
 	  // output the atom names in the pair
 	  fprintf (output, "(%2s-%2s)%4.2f ", name1.c_str(), name2.c_str(), slab_position);
@@ -112,7 +120,7 @@ void RDFMachine<T>::Output (FILE * output) const
   fprintf (output, "\n");
 
   /* print out on each row the rdf position */
-  for (int rdf_i = 0; rdf_i < size.second; rdf_i++)
+  for (int rdf_i = 1; rdf_i < size.second; rdf_i++)
   {
 	double rdf_position = double(rdf_i)*resolution.second;	// assuming that all the RDFs will have the same resolution
 
@@ -130,13 +138,19 @@ void RDFMachine<T>::Output (FILE * output) const
 	  for (int slab_i = 0; slab_i < size.first; slab_i++)
 	  {
 		// the number density of the given atom-pair separated by a given distance
-		double num = double(it->second.Element(slab_i, rdf_i));
+		double density = double(it->second.Element(slab_i, rdf_i));
+		// The differential area in the sphere
+		double area = 4.0 * M_PI * pow(rdf_position, 2) * resolution.second;
+		// normalization value to scale the histogram
+		double norm = _rdf_volume / area / _total_pairs;
+		/*
 		// the differential volume of the shell being parsed
 		double volume = 4.0/3.0*M_PI*(pow(rdf_position, 3));
 		// here's our normalization
-		double rdf = volume / (4 * M_PI * pow(rdf_position, 2) * resolution.second) / num;	
+		double rdf = volume / area / num;	
+		*/
 
-		fprintf (output, "%13f", rdf);
+		fprintf (output, "%13f", density * norm);
 	  }
 	}
 	fprintf (output, "\n");

@@ -3,34 +3,37 @@
 
 using namespace std;
 
-typedef std::pair<int,int> int_pair;
-typedef std::map<int_pair, int>	int_map;
+
+/* a predicate for name sorting */
+template <class T>
+struct Name_equal_pred {
+    bool operator()(const T &left, const T &right) {
+        return left->Name() < right->Name();
+    }
+};
+
 
 int main () {
 
-  //WaterSystemParams wsp ("temp.out");
-  //Analyzer an(wsp);
+  WaterSystemParams wsp ("temp.out");
+  Analyzer an(wsp);
 
+  an.LoadAll();
+  Atom_ptr_vec atoms = an.Atoms();
 
-  int_map a;
+  std::vector<string> names;
+  names.push_back("O");
+  names.push_back("C");
+  names.push_back("H1");
+  names.push_back("H2");
+  names.push_back("Cl1");
+  names.push_back("Cl3");
+  names.push_back("Cl4");
 
-  vector<int_pair> b;
-  b.push_back (std::make_pair(1,2));
-  b.push_back (std::make_pair(2,2));
-  b.push_back (std::make_pair(3,3));
-  b.push_back (std::make_pair(4,2));
-  b.push_back (std::make_pair(5,3));
+  KEEP_BY_NAMES(atoms, Atom *, names);
 
-  for (vector<int_pair>::iterator it = b.begin(); it != b.end(); it++)
-  {
-	a[*it] = it->first + it->second;
-  }
-
-  a[std::make_pair(4,2)] = 7;
-
-  for (int_map::iterator it = a.begin(); it != a.end(); it++) {
-	std::cout << it->first.first << " + " << it->first.second << " = " << it->second << std::endl;
-  }
+  RUN (atoms)
+	std::cout << atoms[i]->Name() << std::endl;
 
   return 0;
 }
