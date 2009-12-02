@@ -25,18 +25,17 @@ class RDFMachine : public std::binary_function<T,T,bool> {
 	RDFMachine (const NamePairList& names, const double_pair maxima, const double_pair minima, const double_pair bin_widths);
 
 	/* Adds the given pair into the histogram after checking to see if that pair is one of those being analyzed */
-	void operator() (const T a1, const T a2) 
+	void operator() (const T atom1, const T atom2) 
 	{
 	  /* Check if the pair's RDF is being calculated i.e. in the list of name-pairs */
-	  NamePair_t name_pair = std::make_pair(a1->Name(), a2->Name());
+	  NamePair_t name_pair = std::make_pair(atom1->Name(), atom2->Name());
 	  /* find the actual way the pair is ordered in the list (i.e. first atom named = first atom, etc) */
 	  NamePairList::iterator list_pair = PairListMember(name_pair, _name_pair_list.begin(), _name_pair_list.end());
 
 	  if (list_pair < _name_pair_list.end())	// see if the atomic pair is found in the list
 	  {
-		BinAtomPairData (*list_pair, a1, a2);
+		BinAtomPairData (*list_pair, atom1, atom2);
 	  }
-
 	  return;
 	}
 
@@ -44,10 +43,10 @@ class RDFMachine : public std::binary_function<T,T,bool> {
 	void Output (FILE * output) const;
 
   private:
-	static unsigned long _total_pairs;	// total number of pairs processed within the maximum RDF distance
+	static unsigned long _total_atoms;
 	static RDF_map _rdfs;
 	static vector<NamePair_t> _name_pair_list;
-	static double _rdf_volume;	// the sphere of bonding distances in which we're calculating RDFs
+	static double _total_volume;	// the sphere of bonding distances in which we're calculating RDFs
 
 	/* Calculates the rdf data and adds it into the correct histogram */
 	void BinAtomPairData (const NamePair_t& name_pair, const T a1, const T a2);
@@ -56,13 +55,12 @@ class RDFMachine : public std::binary_function<T,T,bool> {
 
 template <class T> RDF_map RDFMachine<T>::_rdfs;
 template <class T> NamePairList RDFMachine<T>::_name_pair_list;
-template <class T> unsigned long RDFMachine<T>::_total_pairs = 0;
-template <class T> double RDFMachine<T>::_rdf_volume;
+template <class T> double RDFMachine<T>::_total_volume;
 
 template <class T> 
 RDFMachine<T>::RDFMachine (const NamePairList& names, const double_pair maxima, const double_pair minima, const double_pair bin_widths)
 {
-  _rdf_volume = 4.0/3.0 * M_PI * pow(maxima.second, 3);
+  _total_volume = 4.0/3.0 * M_PI * pow(maxima.second, 3);
   // Create a new histogram for each pair of atomic names required for the analysis
   RUN (names) {
 	//_rdfs[names[i]] = Histogram2D<double>(maxima, bin_widths, minima);
@@ -82,7 +80,6 @@ void RDFMachine<T>::BinAtomPairData (const NamePair_t& name_pair, const T a1, co
   double slab_position = (a1->Name() == name_pair.first) ? a1->Position()[WaterSystem<AmberSystem>::axis] : a2->Position()[WaterSystem<AmberSystem>::axis];
   // then call the 2Dhistogram to do the actual binning using the position and inter-atomic distances
   _rdfs.find(name_pair)->second(slab_position, atomic_distance);
-  _total_pairs++;
   return;
 }
 
@@ -132,25 +129,18 @@ void RDFMachine<T>::Output (FILE * output) const
 	{
 	  size = it->second.size;
 	  resolution = it->second.resolution;
-	  min = it->second.min;
 
 	  /* and for each name-pair, output the columns for each of the slab positions */
 	  for (int slab_i = 0; slab_i < size.first; slab_i++)
 	  {
-		// the number density of the given atom-pair separated by a given distance
-		double density = double(it->second.Element(slab_i, rdf_i));
-		// The differential area in the sphere
-		double area = 4.0 * M_PI * pow(rdf_position, 2) * resolution.second;
-		// normalization value to scale the histogram
-		double norm = _rdf_volume / area / _total_pairs;
-		/*
-		// the differential volume of the shell being parsed
-		double volume = 4.0/3.0*M_PI*(pow(rdf_position, 3));
-		// here's our normalization
-		double rdf = volume / area / num;	
-		*/
+		// The differential volume in the spherical shell
+		double dV = 4.0 * M_PI * pow(rdf_position, 2) * resolution.second;
+		// the number the given atom-pairs separated by a given distance
+		double n = double(it->second.Element(slab_i, rdf_i));
+		// Total number of pairs that were processed for the rdf
+		double N = double (it->second.Count(slab_i));
 
-		fprintf (output, "%13f", density * norm);
+		fprintf (output, "%13f", n * _total_volume / dV / N);
 	  }
 	}
 	fprintf (output, "\n");

@@ -12,7 +12,7 @@ class Atom {
 
 protected:
 	std::string _name,
-		   _residue;
+			   _residue;
 
 	int    _ID;	// some numerical identifier in case the atom is in an ordered list
 	int	   _molid;			   // the molecule that contains this atom

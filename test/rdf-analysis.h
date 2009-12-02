@@ -35,11 +35,11 @@ class RDFAnalyzer : public Analyzer {
 
 	void Analysis () {
 	  /* Send each atom pair to the RDF machinery */
-	  for (int i = 0; i < int(int_atoms.size()) - 1; i++)
+	  for (Atom_ptr_vec::iterator it = int_atoms.begin(); it < int_atoms.end(); it++)
 	  {
-		for (int j = i+1; j < int(int_atoms.size()); j++)
+		for (Atom_ptr_vec::iterator jt = int_atoms.begin(); jt < int_atoms.end(); jt++)
 		{
-		  rdf(int_atoms[i], int_atoms[j]);
+		  rdf(*it, *jt);
 		}
 	  }
 	  return;

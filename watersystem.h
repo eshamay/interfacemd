@@ -352,7 +352,7 @@ struct Name_sort_pred {
   std::sort(vec.begin(), vec.end(), Name_sort_pred<Atom *>());	\
   D_REMOVE_IF(vec, std::bind2nd(std::pointer_to_binary_function<type, std::vector<string>, bool>(Name_in_list_pred), names))
 
-/* keeps all the things with names that appear in the names-list. names has to be a std::vector */
+/* keeps all the things in vec with names that appear in the names-list. names should be a std::vector */
 #define KEEP_BY_NAMES(vec,type,names)	\
   std::sort(vec.begin(), vec.end(), Name_sort_pred<Atom *>());	\
   D_REMOVE_IF(vec, std::bind2nd(not2(std::pointer_to_binary_function<type, std::vector<string>, bool>(Name_in_list_pred)), names))

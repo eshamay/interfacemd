@@ -16,7 +16,7 @@ class ColumnDataFile:
 	def FormDataDict(self):
 		self.data = {}
 		for name in range(len(self.header)):
-			self.data[self.header[name]] = self.reader[1:,name]
+			self.data[self.header[name]] = list(self.reader[1:,name])
 
 	def ParseHeader(self):
 		self.reader = open(self.file)
@@ -33,7 +33,7 @@ class ColumnDataFile:
 		self.data[k] = v
 		return
 
-	def fieldnames(self):
+	def keys(self):
 		return self.data.keys()
 
 	def iteritems(self):
