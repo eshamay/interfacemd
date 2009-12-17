@@ -57,7 +57,25 @@ class DensityAnalyzer : public Analyzer {
 	// the utility functor for getting all the data accumulated
 	DensityBinner<Atom *> binner;
 
-	void Setup () { LoadAll(); }
+	void Setup () { 
+
+	  LoadAll();
+	  std::vector<Atom *> v_si;
+	  /* grab all the Si atoms */
+	  RUN (int_atoms)
+	  {
+		Atom * atom = int_atoms[i];
+		if (atom->Name() == "SI")
+		  v_si.push_back(atom);
+	  }
+
+	  /* load only the waters */
+	  FindWaters();
+
+	  /* now load all the Si atoms into the ones to be processed */
+	  copy(v_si.begin(), v_si.end(), back_inserter(int_atoms));
+
+	}
 
 	void Analysis () {
 	  // bin each water's position and angle

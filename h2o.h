@@ -61,6 +61,10 @@ public:
 	MatR const & Alpha () const { return _alpha; }
 	#endif
 
+	Atom * O () { return _o; }
+	Atom * H1 () { return _h1; }
+	Atom * H2 () { return _h2; }
+
 	VecR const * OH1 () const { return &_oh1; }
 	VecR const * OH2 () const { return &_oh2; }
 	double Angle () const { return acos(_oh1 < _oh2) * 180.0/M_PI; }

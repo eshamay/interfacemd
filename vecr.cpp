@@ -111,6 +111,19 @@ void VecR::operator*= (const double input) {
 	return;
 }
 
+VecR VecR::operator/ (const double input) const {
+  VecR v;
+  for (int i = 0; i < 3; i++)
+	v._coords[i] = _coords[i] / input;
+  return v;
+}
+
+void VecR::operator/= (const double input) {
+  for (int i = 0; i < 3; i++)
+	_coords[i] /= input;
+  return;
+}
+
 // vector cross-product
 VecR VecR::operator% (const VecR& input) const {
 	VecR v;

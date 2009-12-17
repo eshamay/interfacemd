@@ -4,18 +4,18 @@
 #include <algorithm>
 #include "mdsystem.h"
 #include "xyzfile.h"
-#include "graph.h"
 #include "wannier.h"
+#include "graph.h"
 
 #define DEBUG 1
 
 class XYZSystem : public MDSystem {
 
 private:
-	XYZFile				_coords;			// Atomlist parsed from an xyz file
+	XYZFile				_coords;		// Atomlist parsed from an xyz file
 	WannierFile 		_wanniers;		// The wannier centers
-	BondGraph			_graph;			// a really useful graph for playing with atoms and bonds
 	bool _parsed;
+	BondGraph		_graph;			// a really useful graph for playing with atoms and bonds
 
 	/* For debugging (and other useful things?) this will keep a list of all the atoms that have been processed into molecules. Any atoms left over at the end of the parsing routine are not included and ... can potentially cause problems */
 	Atom_ptr_vec _unparsed;

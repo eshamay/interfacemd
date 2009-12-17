@@ -20,6 +20,7 @@ protected:
 
 	static VecR		_dimensions;		// system dimensions - size
 
+
 public:
 
 	virtual ~MDSystem();

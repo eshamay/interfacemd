@@ -72,9 +72,7 @@ return(patom);
 }
 
 Atom * Molecule::GetAtom (const string atomname) const {
-
 	Atom * patom = (*this)[atomname];
-
 return(patom);
 }
 
@@ -82,7 +80,6 @@ return(patom);
 void Molecule::AddAtom (Atom * const atom) {
 	_atoms.push_back (atom);            // add the central-periodic image of the atom
 	this->FixAtom (atom);
-
 return;
 }
 
@@ -163,16 +160,13 @@ VecR Molecule::UpdateCenterOfMass () {
 	_mass = 0.0;
 
 	// then run through each atom's coords and add in its contribution.
-	VecR origin (0.0,0.0,0.0);
-	//VecR origin (_atoms[0]->Position());
-
 	RUN (_atoms) {
 		VecR ri = _atoms[i]->Position();
 		double mi = _atoms[i]->Mass();
 		_mass += mi;
-		_centerofmass += (ri - origin) * mi;
+		_centerofmass += (ri) * mi;
 	}
-	_centerofmass = _centerofmass * (1.0/_mass);
+	_centerofmass /= _mass;
 
 return(_centerofmass);
 }

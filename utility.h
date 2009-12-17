@@ -5,7 +5,18 @@
 #include <algorithm>
 #include <utility>
 #include <functional>
+#include <iterator>
+#include <iostream>
 
+/*
+void DEBUGMSG (const std::string msg)
+{
+#ifdef __DEBUG__
+  std::cout << msg << std::endl;
+#endif
+  return;
+}
+*/
 
 template <class Iter>
 Iter PairListMember (const typename std::iterator_traits<Iter>::value_type& p, Iter first, Iter last);
@@ -164,5 +175,67 @@ class Histogram2D : public std::binary_function<T,T,bool>
 // Maps OP onto A and stores the result back into A - destructive function
 #define MAP(A,OP)	\
   MAP_TO(A,A,OP);
+
+
+/*******************************************************************************************************************************************************/
+/***************************************** Binary file I/O functors/iterators *************************************************************************************************/
+
+/*
+// output-stream iterator for writing binary data to an output
+template<typename T>
+struct oi_t: public std::iterator<output_iterator_tag, void, void, void, void>
+{
+  oi_t(std::ostream& str)
+    :m_str(str)
+  {}
+  oi_t operator++()   {return *this;}  // increment does not do anything.
+  oi_t operator++(int){return *this;}
+  oi_t operator*()    {return *this;}  // Dereference returns a reference to this
+                                       // So that when the assignment is done we
+                                       // actually write the data from this class
+  oi_t operator=(T const& data)
+  {
+    // Write the data in a binary format
+    m_str.write(reinterpret_cast<char const*>(&data),sizeof(T));
+  }
+
+  private:
+    std::ostream&   m_str;
+};
+
+// istream iterator for reading in data from a binary file
+template<typename T>
+struct ii_t: public iterator<input_iterator_tag, void, void, void, void>
+{
+  ii_t(std::istream& str)
+    :m_str(&str)
+  {}
+  ii_t()
+    :m_str(NULL)
+  {}
+  ii_t operator++()   {return *this;}  // increment does nothing.
+  ii_t operator++(int){return *this;}
+  T& operator*()
+  {
+    // On the de-reference we actuall read the data into a local //// static ////
+    // Thus we can return a reference
+    static T result;
+    m_str->read(reinterpret_cast<char*>(&result),sizeof(T));
+    return result;
+  }
+  // If either iterator has a NULL pointer then it is the end() of stream iterator.
+  // Input iterators are only equal if they have read past the end of stream.
+  bool operator!=(ii_t const& rhs)
+  {
+      bool lhsPastEnd = (m_str == NULL)     || (!m_str->good());
+      bool rhsPastEnd = (rhs.m_str == NULL) || (!rhs.m_str->good());
+
+      return !(lhsPastEnd && rhsPastEnd);
+  } 
+
+  private:
+    std::istream*   m_str;
+};
+*/
 
 #endif

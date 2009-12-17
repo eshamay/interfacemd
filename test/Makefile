@@ -1,12 +1,8 @@
 include ../Makefile
 
-MDSYSTEM = ../vecr.o ../matrixr.o ../atom.o ../molecule.o ../mdsystem.o ../h2o.o ../hno3.o ../bond.o ../oh.o ../h3o.o ../decane.o ../carbonchain.o
-XYZSYSTEM = ../xyzsystem.o ../xyzfile.o ../wannier.o ../graph.o
-AMBERSYSTEM	= ../ambersystem.o ../crdfile.o ../forcefile.o ../topfile.o
 
-WATERSYSTEM	= $(MDSYSTEM) $(XYZSYSTEM) $(AMBERSYSTEM) 
 CARBONCHAIN	= ../carbonchain.o ../decane.o
-MORITAFILES	= morita.o ../watersfg.o $(WATERSYSTEM)
+MORITAFILES	= $(WATERSYSTEM) ../watersfg.o morita.o 
 MPIMORITAFILES	= $(MORITAFILES) ../mpi/mpisys.o
 MORITA2002	= $(WATERSYSTEM) ../moritasfg2002.o morita2002.o
 DENSITYFILES = $(WATERSYSTEM) density-histogram.o
@@ -17,19 +13,14 @@ FILLBOX = $(AMBERSYSTEM) ../pdbfile.o ../boxfiller.o
 MPIFILES	=	$(AMBERSYSTEM) ../mpi/mpisys.o mpitest.o
 ORDERPARAMS = $(WATERSYSTEM) orderparams.o
 ORDERPARAMSHISTO = $(WATERSYSTEM) orderparams-histo.o
-TEMPFILES	= $(WATERSYSTEM) temp.cpp
 COORDINATION	= $(WATERSYSTEM) coordination.o
 ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
 HCORIENTATION	= $(WATERSYSTEM) $(CARBONCHAIN) carbonchainsystem.o
-QUARTZ			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o quartz.o
 ANGLEPOSITIONHISTO = $(WATERSYSTEM) Angle-Position-Histogram-2D.o
 ROTATE			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o molecule-rotate.cpp
 
 apanalysis: $(ANGLEPOSITIONHISTO)
 	$(CXX) $(CPPFLAGS) $(ANGLEPOSITIONHISTO) -llapack -o apanalysis
-
-quartz: $(QUARTZ)
-	$(CXX) $(CPPFLAGS) $(QUARTZ) -llapack -o quartz-slab
 
 hcorientation: $(HCORIENTATION)
 	$(CXX) $(CPPFLAGS) $(HCORIENTATION) -llapack -o carbon-orientation
@@ -42,12 +33,6 @@ rdf : $(WATERSYSTEM) rdf-analysis.o
 
 density : $(DENSITYFILES)
 	$(CXX) $(CPPFLAGS) $(DENSITYFILES) -llapack -o density
-
-morita : $(MORITAFILES)
-	$(CXX) $(CPPFLAGS) $(MORITAFILES) -llapack -o morita
-
-mpimorita : $(MPIMORITAFILES)
-	$(MPICXX) $(CPPFLAGS) $(MPILIBS) $(MPIMORITAFILES) -o mpi-morita
 
 matrixtest : matrixtest.o ../vecr.o ../matrixr.o
 	$(CXX) $(CPPFLAGS) matrixtest.o ../vecr.o ../matrixr.o -o matrixtest
@@ -79,9 +64,6 @@ mdcrd2pdb : $(MDCRD2PDB)
 fillbox : $(FILLBOX) fillbox.o
 	$(CXX) $(CPPFLAGS) fillbox.o $(FILLBOX) -o fillbox
 
-temp: $(TEMPFILES)
-	$(CXX) $(CPPFLAGS) $(TEMPFILES) -llapack -o temp 
-
 rotate: $(ROTATE)
 	$(CXX) $(CPPFLAGS) -llapack -g3 -O0 -o rotate $(ROTATE)
 
@@ -101,4 +83,4 @@ morita2002: $(MORITA2002)
 	$(CXX) $(CPPFLAGS) $(MORITA2002) -g3 -llapack -o morita2002
 
 cleantest :
-	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test temp mpitest orderparams ordercoords morita2002 rotate carbon-orientation quartz-slab orderparams-histo matrix-sandbox coordination
+	rm -f *.o morita matrixtest toptest ambertest densitytest dipoletcf angledistro qpt_test a.out mdcrd2pdb closest fillbox test mpitest orderparams ordercoords morita2002 rotate carbon-orientation orderparams-histo matrix-sandbox coordination

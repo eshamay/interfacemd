@@ -95,13 +95,13 @@ class WaterSystem {
   void SliceWaterCoordination (const coordination coord);
   void FindInterfacialWaters ();
 
-  void UpdateGraph () { graph.UpdateGraph (int_atoms); }
+  void UpdateGraph () { _graph.UpdateGraph (int_atoms); }
 
  protected:
 
   T * sys;
 
-  BondGraph	graph;
+  BondGraph	_graph;
 };
 
 template<typename T> WaterSystemParams WaterSystem<T>::wsp;
@@ -306,7 +306,7 @@ void WaterSystem<T>::SliceWaterCoordination (const coordination coord) {
 
   RUN (int_wats) {
     Water * wat = int_wats[i];
-    coordination c = graph.WaterCoordination(wat);
+    coordination c = _graph.WaterCoordination(wat);
     if (c == coord) {
       wats.push_back(wat);
     }

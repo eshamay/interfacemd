@@ -10,7 +10,7 @@ TITLE = 'Water'
 XRANGE = [0.0,120.0]
 YRANGE = [0.0,0.0]
 # line color/style and labels
-LINESTYLES = {'O':['black',r'H$_2$O'], 'C':['blue',r'CCl$_4$'], 'NA':['#088618',r'Na'], 'N':['#a10f05',r'NO$_3$'], 'S':['#6805a1',r'SO$_4$'], 'Cl':['#6e6f00',r'Cl']}
+LINESTYLES = {'O':['black',r'H$_2$O'], 'C':['blue',r'CCl$_4$'], 'NA':['#088618',r'Na'], 'N':['#a10f05',r'NO$_3$'], 'SI':['#6805a1',r'SO$_4$'], 'S':['#6805a1',r'SO$_4$'], 'Cl':['#6e6f00',r'Cl']}
 BIN_WIDTH = 0.1
 
 class DensityProfiler:
@@ -24,7 +24,7 @@ class DensityProfiler:
 
 	# scale each data set to adjust the number density to density in terms of g/mL
 	def ScaleDataToDensity(self):
-		molecular_weight = {'O':18.01, 'C':153.82, 'NA':229.9, 'N':620.0, 'S':960.6, 'Cl':354.5}
+		molecular_weight = {'O':18.01, 'C':153.82, 'NA':229.9, 'N':620.0, 'S':960.6, 'Cl':354.5, 'SI':28.0855}
 
 		scale = 1.0/(30.0*30.0*BIN_WIDTH * 1.0e-24 * 6.02e23)
 		for k,v in self.data.iteritems():

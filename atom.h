@@ -42,9 +42,23 @@ public:
 	// Input
 	void Name (const std::string name) { _name = name; }
 
-	void Position (const VecR& position) { _position = position; }
-	void Position (double X, double Y, double Z) { _position.Set(X, Y, Z); }
-	void Position (coord const axis, double const value) { _position.Set (axis, value); }
+	void Position (const VecR& position) 
+	{ 
+	  _position = position;
+	  if (_pmolecule != (Molecule *)NULL)
+		_pmolecule->UpdateCenterOfMass();
+	}
+	void Position (double X, double Y, double Z) { 
+	  _position.Set(X, Y, Z);
+	  if (_pmolecule != (Molecule *)NULL)
+		_pmolecule->UpdateCenterOfMass();
+	}
+
+	void Position (coord const axis, double const value) { 
+	  _position.Set (axis, value); 
+	  if (_pmolecule != (Molecule *)NULL)
+		_pmolecule->UpdateCenterOfMass();
+	}
 
 	void Force (const VecR& force) { _force = force; }
 	void Force (double X, double Y, double Z) { _force.Set(X, Y, Z); }
@@ -54,10 +68,23 @@ public:
 	//void Charge (double charge) { _charge = charge; }
 	void SetCharge ();
 	void Residue (std::string residue) { _residue = residue; }
-
-	void X (double val) { _position.X(val); }			// for setting the atom's position
-	void Y (double val) { _position.Y(val); }
-	void Z (double val) { _position.Z(val); }
+	
+	// for setting the atom's position
+	void X (double val) { 
+	  _position.X(val); 
+	  if (_pmolecule != (Molecule *)NULL)
+		_pmolecule->UpdateCenterOfMass();
+	}			
+	void Y (double val) { 
+	  _position.Y(val); 
+	  if (_pmolecule != (Molecule *)NULL)
+		_pmolecule->UpdateCenterOfMass();
+	}
+	void Z (double val) { 
+	  _position.Z(val);
+	  if (_pmolecule != (Molecule *)NULL)
+		_pmolecule->UpdateCenterOfMass();
+	}
 
 	void SetMass ();
 	void MolID (const int mol) { _molid = mol; }	// sets the ID of the molecule containing this atom

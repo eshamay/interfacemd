@@ -7,9 +7,8 @@ Atom::Atom () :
 	_molid(-1),
 	_pmolecule((Molecule *)NULL),
 	_mass(0.0),
-	_charge(0.0),
-	_position(VecR()),
-	_force(VecR()) {
+	_charge(0.0)
+	{
 }
 
 Atom::Atom (std::string name, VecR position, VecR force) :
@@ -35,8 +34,8 @@ Atom::Atom (std::string name, VecR position) :
 	_pmolecule((Molecule *)NULL),
 	_mass(0.0),
 	_charge(0.0),
-	_position(position),
-	_force(VecR()) {
+	_position(position)
+	{
 
 	this->SetMass ();			// set the atom's mass if the name is known
 	this->SetCharge ();
@@ -66,9 +65,8 @@ Atom::Atom (VecR position) :
 	_pmolecule((Molecule *)NULL),
 	_mass(0.0),
 	_charge(0.0),
-	_position(position),
-	_force(VecR()) {
-}
+	_position(position)
+{ }
 
 Atom::~Atom () {
 }
@@ -83,6 +81,7 @@ double Atom::operator[] (const coord index) const {
 	}
 	return pos;
 }
+
 void Atom::Print () const {
 	printf ("%s (%d)\t%s\t% f\t% f\t% f\n", _name.c_str(), _ID, _residue.c_str(), _position[x], _position[y], _position[z]);
 }
@@ -105,6 +104,8 @@ return;
 
 void Atom::Shift (VecR shift) {
 	_position += shift;
+	if (_pmolecule != (Molecule *)NULL)
+	  _pmolecule->UpdateCenterOfMass();
 }
 
 void Atom::SetCharge () {

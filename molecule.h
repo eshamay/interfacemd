@@ -61,8 +61,19 @@ public:
 	// Output Functions
 	VecR CenterOfMass () const		{ return _centerofmass; }
 	VecR Position () const			{ return _centerofmass; }
-	Atom_ptr_vec Atoms () const			{ return _atoms; }			// returns the molecule's atom list
+
+	/* Dealing with atoms in the molecule */
+	Atom_ptr_vec Atoms () const			{ return _atoms; }
 	Atom * Atoms (int index) const		{ return _atoms[index]; }
+
+	typedef std::vector<Atom *>::const_iterator	const_iterator;
+	const_iterator begin() const {
+	  return _atoms.begin();
+	}
+	const_iterator end() const {
+	  return _atoms.end();
+	}
+
 	const std::vector<VecR>& Wanniers ()		const { return _wanniers; }
 	double Mass () const 			{ return _mass; }					// Returns the molecular mass
 	int size () const				{ return _atoms.size(); }
