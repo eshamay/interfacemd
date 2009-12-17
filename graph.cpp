@@ -37,11 +37,8 @@ void BondGraph::_ParseAtoms (const Atom_ptr_vec& atoms) {
 	RUN (atoms) {
 		v = boost::vertex(i, _graph);
 		v_atom[v] = atoms[i];
-		//_graph[v].atom = atoms[i];
 		v_position[v] = atoms[i]->Position();
-		//_graph[v].position = atoms[i]->Position();
 		v_name[v] = atoms[i]->Name();
-		//_graph[v].name = atoms[i]->Name();
 	}
 
 return;

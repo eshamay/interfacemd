@@ -102,12 +102,6 @@ void Atom::SetMass () {
 return;
 }
 
-void Atom::Shift (VecR shift) {
-	_position += shift;
-	if (_pmolecule != (Molecule *)NULL)
-	  _pmolecule->UpdateCenterOfMass();
-}
-
 void Atom::SetCharge () {
 
 	if (_name.find("O") != std::string::npos) _charge =  6.0;

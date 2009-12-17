@@ -246,11 +246,13 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
   _C1a = V12/(sqrt(V12*V12 + (_wa-_w1)*(_wa-_w1)));
   _C2a = (_wa-_w1)/(sqrt(V12*V12 + (_wa-_w1)*(_wa-_w1)));
 
+  /*
   printf ("V12 = %12.4f\nwa = %12.4f ws = %12.4f\nw1 = %12.4f w2 = %12.4f\n", 
 	  V12*AU2WAVENUMBER, _wa*AU2WAVENUMBER, _ws*AU2WAVENUMBER, _w1*AU2WAVENUMBER, _w2*AU2WAVENUMBER);
   printf ("\nc1s = % 12.4f c1a = % 12.4f\nc2s = % 12.4f c2a = % 12.4f\n", _C1s, _C1a, _C2s, _C2a);
   printf ("% 12.4f\n", (_w1-_wa)*_C1a + V12*_C2a);
   exit(1);
+  */
 
   // before leaving, let's normalize the eigen vectors {C1x,C2x} to a magnitude of 1.0
   /*

@@ -38,7 +38,7 @@ public:
 	double 	operator* (const VecR& input) const;		// Vector inner-product (dot-product)
 	VecR  	operator* (const double input) const;	// Vector scaling
 	void 	operator*= (const double input);		// Vector scaling (assignment)
-	void 	operator/ (const double input) const;
+	VecR 	operator/ (const double input) const;
 	void 	operator/= (const double input);
 	VecR	operator% (const VecR& input) const;		// Vector cross-product
 	double	operator< (const VecR& input) const;		// Find the cos(angle) between two vectors
