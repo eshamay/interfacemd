@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 import matplotlib.text
 import matplotlib.patches
 
-ATOMS = ['O','C']
-TITLE = 'Water'
-XRANGE = [0.0,120.0]
+ATOMS = ['O','C','NA','S']
+#ATOMS = ['O','C']
+TITLE = r'The Aqueous Na$_2$SO$_4$ Solution - CCl$_4$ Interface'
+XRANGE = [-9.0,17.5]
 YRANGE = [0.0,0.0]
 # line color/style and labels
 LINESTYLES = {'O':['black',r'H$_2$O'], 'C':['blue',r'CCl$_4$'], 'NA':['#088618',r'Na'], 'N':['#a10f05',r'NO$_3$'], 'SI':['#6805a1',r'SO$_4$'], 'S':['#6805a1',r'SO$_4$'], 'Cl':['#6e6f00',r'Cl']}
@@ -25,11 +26,12 @@ class DensityProfiler:
 	# scale each data set to adjust the number density to density in terms of g/mL
 	def ScaleDataToDensity(self):
 		molecular_weight = {'O':18.01, 'C':153.82, 'NA':229.9, 'N':620.0, 'S':960.6, 'Cl':354.5, 'SI':28.0855}
+		scale = {'O':1.0, 'C':1.0, 'NA':0.6, 'N':2.0, 'S':0.6, 'Cl':2.0, 'SI':1.0}
 
-		scale = 1.0/(30.0*30.0*BIN_WIDTH * 1.0e-24 * 6.02e23)
+		conversion = 1.0/(30.0*30.0*BIN_WIDTH * 1.0e-24 * 6.02e23)
 		for k,v in self.data.iteritems():
 			if k in ATOMS:
-				self.data[k] = map(lambda x: x * molecular_weight[k] * scale, v)
+				self.data[k] = map(lambda x: x * molecular_weight[k] * scale[k] * conversion, v)
 
 		return
 
@@ -44,6 +46,11 @@ class DensityProfiler:
 
 		x = self.data['Position']
 
+		# take care of plotting the fitting functions for the water
+		if fit:
+			self.PlotWaterFit(ax, x, self.data['O'], 'k-')
+
+		x = self.ShiftAxis(x,self.shift)
 		# plot the desired atomic densities
 		for atom in ATOMS:
 
@@ -60,19 +67,18 @@ class DensityProfiler:
 		# Do some labeling of the water data curve extrema (max/min, peaks/troughs, etc) for various reasons
 		#self.LabelWaterExtrema(ax,x,self.data['O'])
 
-		# now take care of plotting the fitting functions
-		if fit:
-			self.PlotWaterFit(ax, x, self.data['O'], 'k-')
-
 		ylim = YRANGE[1] * 1.1
 		ax.set_ylim([YRANGE[0],ylim])
 		ax.set_xlim(XRANGE)
 		ax.set_axis_bgcolor('w')
 
-		ax.set_xlabel(r'Slab Position $\AA$', size='x-large')
+		ax.set_xlabel(r'Slab Position ($\AA$)', size='x-large')
 		ax.set_ylabel(r'$\rho_{H_2O}$ ($\frac{mg}{mL}$)', size='x-large')
 		self.SetLegend()
 		plt.show()
+
+	def ShiftAxis(self,axis,shift):
+		return map(lambda p: p-shift, axis)
 
 	def LabelWaterExtrema(self,ax,x,datum):
 			# Show the location of the maximum water density peak and
@@ -112,15 +118,19 @@ class DensityProfiler:
 	def PlotWaterFit (self, ax, x, datum, linetype='k-'):
 		
 		d = DF()
-		(fit, params) = d.FitWater(x, datum)
+		(self.fit, self.params) = d.FitWater(x, datum)
+		self.shift = self.params[4]
+		print "System: ", TITLE
+		print "Left-side gibb's surface is located at: ", self.shift
 		# plot the fit line for the water
-		ax.plot(x, fit, linetype, linewidth=2, label=r'H$_2$O Fit')
+		x = self.ShiftAxis(x,self.shift)
+		ax.plot(x, self.fit, linetype, linewidth=2, label=r'H$_2$O Fit')
 
-		print "Bulk Density = %f\n" % (average([params[1],params[2]]))
+		print "Bulk Density = %f\n" % (average([self.params[1],self.params[2]]))
 
 		### This is added to identify the water region with shading
-		plt.axvspan(params[4]-params[5],params[4]+params[5], facecolor='b', alpha=0.2)
-		plt.axvspan(params[6]-params[7],params[6]+params[7], facecolor='b', alpha=0.2)
+		plt.axvspan(self.params[4]-self.shift-self.params[5],self.params[4]-self.shift+self.params[5], facecolor='b', alpha=0.2)
+		plt.axvspan(self.params[6]-self.shift-self.params[7],self.params[6]-self.shift+self.params[7], facecolor='b', alpha=0.2)
 
 		'''
 		# some text to distinguish the water regions

@@ -12,29 +12,6 @@
 #include <boost/property_map/property_map.hpp>
 
 
-const double OHBONDLENGTH = 1.3;				// used to be 1.1
-const double HBONDLENGTH  = 2.5;				// used to be 2.46
-const double HBONDANGLE	= 30.0*M_PI/180.0;		// bonding angle has to be less than this value to be considered an H-bond
-const double NOBONDLENGTH = 2.0;
-const double NHBONDLENGTH = 1.3;		// uhmm... check this?
-
-/* Encoding of the different coordination types
- * The numbering is based on each O having a value of 1, and each H haveing a value of 10 (i.e. add 1 for every O, and 10 for every H...). So a water in a state of OOHH bonding would have a coordination of 22, and a coordination of 13 would be OOOH, 12 = OOH, 11 = OH, 10 = H, etc.
- */
-typedef enum {
-	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			// no H
-	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			// 1 H
-	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		// 2 Hs
-	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	// 3 Hs
-	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44
-} coordination;
-// And hopefully that covers all the bonding coordination types :)
-
-typedef std::map<coordination, std::string> coord_map;
-
-// bond types
-typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;
-
 
 /* The idea of a connectivity matrix is the same as mapping the connections between different members of a system. In this case, we're dealing with atoms in a system, and the connections are defined by the distances between the atoms. We're going to employ a few tricks here in order to make data retrieval a bit more succinct, and also to store more information into one matrix.
 
@@ -47,42 +24,63 @@ As for the diagonal elements - instead of writing a routine that will count the 
 This leaves the bottom-diagonal free to store more information. If two atoms are covalently bound, then the bottom diagonal element will mark this with a 1.0.
 */
 
+// bond types
+typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;
+
 using namespace std;
 using namespace boost;
-
-// Vertices are atoms
-struct VertexProperties {
-	Atom * atom;
-	VecR position;
-	std::string name;
-};
-
-// edges are bonds between atoms
-struct EdgeProperties {
-	EdgeProperties (const double b_length, const bondtype b_type) : distance(b_length), btype(b_type) { }
-	double 		distance;
-	bondtype	btype;
-};
-
-typedef boost::adjacency_list<listS, listS, undirectedS, VertexProperties, EdgeProperties> Graph;
-typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
-typedef boost::graph_traits<Graph>::vertex_iterator Vertex_it;
-typedef boost::graph_traits<Graph>::edge_descriptor Edge;
-typedef boost::graph_traits<Graph>::edge_iterator Edge_it;
-typedef boost::graph_traits<Graph>::adjacency_iterator Adj_it;
-typedef std::vector<Atom *> Atom_ptr_vec;
-
-// generic property maps
-template <class T, class Property_T> struct PropertyMap
-{
-	typedef typename boost::property_map<Graph, T Property_T::*>::type Type;
-};
-
 class BondGraph {
 
 private:
-	static Graph _graph;
-	std::string	_sys_type;
+	static const double OHBONDLENGTH;
+	static const double HBONDLENGTH;
+	static const double HBONDANGLE;
+	static const double NOBONDLENGTH;
+	static const double NHBONDLENGTH;
+
+	/* Encoding of the different coordination types
+	 * The numbering is based on each O having a value of 1, and each H haveing a value of 10 (i.e. add 1 for every O, and 10 for every H...). So a water in a state of OOHH bonding would have a coordination of 22, and a coordination of 13 would be OOOH, 12 = OOH, 11 = OH, 10 = H, etc.
+	 */
+	typedef enum {
+	  UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			// no H
+	  H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			// 1 H
+	  HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		// 2 Hs
+	  HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	// 3 Hs
+	  HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44
+	} coordination;
+	// And hopefully that covers all the bonding coordination types :)
+
+	typedef std::map<coordination, std::string> coord_map;
+
+
+	// Vertices are atoms
+	struct VertexProperties {
+	  Atom * atom;
+	  VecR position;
+	  std::string name;
+	};
+
+	// edges are bonds between atoms
+	struct EdgeProperties {
+	  EdgeProperties (const double b_length, const bondtype b_type) : distance(b_length), btype(b_type) { }
+	  double 		distance;
+	  bondtype	btype;
+	};
+
+	typedef boost::adjacency_list<listS, listS, undirectedS, VertexProperties, EdgeProperties> Graph;
+	typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
+	typedef boost::graph_traits<Graph>::vertex_iterator Vertex_it;
+	typedef boost::graph_traits<Graph>::edge_descriptor Edge;
+	typedef boost::graph_traits<Graph>::edge_iterator Edge_it;
+	typedef boost::graph_traits<Graph>::adjacency_iterator Adj_it;
+	typedef std::vector<Atom *> Atom_ptr_vec;
+
+	// generic property maps
+	template <class T, class Property_T> struct PropertyMap
+	{
+	  typedef typename boost::property_map<Graph, T Property_T::*>::type Type;
+	};
+
 
 	static PropertyMap<double,EdgeProperties>::Type 		b_length;
 	static PropertyMap<bondtype,EdgeProperties>::Type 		b_type;
@@ -102,6 +100,9 @@ private:
 	void _RemoveBond (const Vertex& vi, const Vertex& vj);
 	void _RemoveBond (Atom const * const a1, Atom const * const a2);
 	Vertex_it _FindVertex (Atom const * const ap) const;
+
+	static Graph _graph;
+	std::string	_sys_type;
 
 public:
 

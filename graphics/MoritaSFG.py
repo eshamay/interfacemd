@@ -1,4 +1,3 @@
-
 import csv
 import numpy
 import sys
@@ -10,105 +9,92 @@ import matplotlib.text
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
+class SFGData:
+	def __init__(self,file):
+		self.filename = file
+		self.systemName = file.split('/')[-2]
+
+		self.data = loadtxt(file)
+
+		self.freq = self.data[:,0]		# Frequency for each data point
+		self.real = list(self.data[:,1])		# The real part
+		self.imag = list(self.data[:,2])		# The imaginary part
+
+		# The complex representation of the data
+		self.comp = map(lambda r,i: complex(r,i), self.real, self.imag)
+
+		# chi is the magnitude-squared of the complex lineshape
+		self.chi = map(lambda c: real(c*c.conjugate()), self.comp)
+	
+	def Filename(self):
+		return self.filename
+	def SystemName(self):
+		return self.systemName
+	def Freq(self):
+		return self.freq
+	def Real(self):
+		return self.real
+	def Imag(self):
+		return self.imag
+	def Complex(self):
+		return self.comp
+	def Chi(self):
+		return self.chi
+
+	# returns the chi lineshape scaled by some value
+	def ScaleChi_LowFreqs(self,scale):
+		return map(lambda x: x * scale, self.chi)
+
+	def NormalizeChiToMaximum(self):
+		# find the max point in the curve
+		max_peak = max(self.chi)
+		return self.ScaleChi_LowFreqs(1.0/max_peak)
+
+	def NormalizeChiToArea(self):
+		# find the area of the curve:
+		area = numpy.trapz(self.chi, self.x, dx=0.1)
+		return self.ScaleChi_LowFreqs(1.0/area)
+	
+
+
+
 class MoritaSFG:
 
-	def __init__(self):
-		self.files = []
-		self.names = []
-		#for file in os.listdir('../'):
-			#if file.find('sfg.1-') > -1:
-				#self.files.append('../'+file)
-#
-				#print file
-				#file = file.strip("sfg.1-")
-				#self.names.append(file)
-				#print file
-		#self.files.append('../sfg.0.8-0.6.dat')
-		#self.files.append('../sfg.dsw-1.dat')
-		#self.files.append('/raid1/Analysis/H2O+CTC/sfg.dsw-2.dat')
-		self.files.append('/home/eric/cl7/raid1/Analysis/pds/sfg.alpha-switch.dat')
-		#self.files.append('../sfg.set1-cos-term.dat')
-		#self.files.append('../sfg.set2.dat')
-		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.set2.dat')
-		#self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.set2.dat')
-		#self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.set2.67.dat')
-		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.dat')
-		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2-1.dat')
-		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.55.dat')
-		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.60.dat')
-		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.65.dat')
-		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.70.dat')
-		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set1.70.dat')
-		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.70.dat')
-		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.set2.0.8-0.6.70.dat')
-		#self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.set2.0.8-0.6.60.dat')
-		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.set2.0.8-0.6.70.dat')
-		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.alpha-switch.dat')
-		#self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.alpha-switch.dat')
-		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.alpha-switch.dat')
-		#self.files.append('/raid1/Analysis/NaCl+CTC/sfg.dsw-1.dat')
-		#self.files.append('/raid1/Analysis/NaNO3+CTC/sfg.dsw-1.dat')
-		#self.files.append('/raid1/Analysis/Na2SO4+CTC/sfg.dsw-1.dat')
-
-		#self.files.append('../sfg.DSW6.dat')
-		#self.files.append('../sfg.DSW7-OHH.dat')
-
-		self.names = self.files
+	def __init__(self,files):
+		self.files = files
 
 		# file i/o to get the data
-		self.data = []
-		self.x = []
+		self.sfgdata = []
+		self.h2o = SFGData(files[0])
 
-		self.real = []
-		self.imag = []
+		for file in self.files[1:]:
+			self.sfgdata.append(SFGData(file))
 
-		for i in range(len(self.files)):
-			self.data.append(loadtxt(self.files[i]))
-			self.x.append(self.data[i][:,0])
-			self.real.append(self.data[i][:,1])
-			self.imag.append(self.data[i][:,2])
+		self.InitPlot()
 
-		# complex number representation
-		self.comp = []
-		scale = 0.0
-		for i in range(len(self.files)):
-			self.comp.append([])
+		#titles = [r'CCl$_4$-NaCl', r'CCl$_4$-NaNO$_3$', r'CCl$_4$-Na$_2$SO$_4$', r'Salt Comparison']
+		for dat,ax in zip(self.sfgdata,self.axs):
 
-			if i == 1:
-				scale = -20.0
-			if i == 2:
-				scale = -55.0
-			if i == 3:
-				scale = 35.0
+			self.fig.sca(ax)
 
-			for j in range(len(self.real[i])):
-				c = complex(self.real[i][j]+scale,self.imag[i][j])
-				self.comp[i].append(c)
+			self.PlotChi(dat,ax)
+			self.SetTicksAndLabels(dat,ax)
+			self.ShowLegend(ax)
 
-		# the total chi-squared lineshapes
-		self.chi = []
-		for i in range(len(self.files)):
-			self.chi.append([])
-			for c in self.comp[i]:
-				#self.chi[i].append(abs(c)*abs(c))
-				self.chi[i].append(real(c*c.conjugate()))
+			plt.xlim(2800,3800)
+		plt.show()
 
-		# normalizing by one method or another
-		for i in range(len(self.files)):
-			# find the area of the curve:
-			area = numpy.trapz(self.chi[i], self.x[i], dx=0.1)
-			# find the max point in the curve
-			max_peak = max(self.chi[i])
-			for j in range(len(self.chi[i])):
-				# normalize by area
-				#self.chi[i][j] = self.chi[i][j] / area
-				# normalize by free-oh peak
-				self.chi[i][j] = self.chi[i][j] / max_peak
-
-	def PlotData(self):
+	def InitPlot(self):
 
 		# Set up the plot parameters (labels, size, limits, etc)
 		self.fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
+
+		self.axs = []
+		for i in range(len(self.sfgdata)):
+			self.axs.append(self.fig.add_subplot(2,2,i+1))
+			plt.title(self.sfgdata[i].SystemName(), size='xx-large')
+
+		return
 
 		'''
 		extra_axes = True
@@ -137,29 +123,117 @@ class MoritaSFG:
 			ax.xaxis.grid(False)
 		'''
 
-		axs = []
-		colors = ['r-','g-','b-']
-		titles = [r'CCl$_4$-NaCl', r'CCl$_4$-NaNO$_3$', r'CCl$_4$-Na$_2$SO$_4$', r'Salt Comparison']
-		for i in range(4):
-			axs.append(self.fig.add_subplot(2,2,i+1))
-			if i == 3:
-				for j in range(3):
-					axs[i].plot(self.x[j+1], self.chi[j+1], colors[j], linewidth=3, label=titles[j])
-			else:
-				# first the water plot
-				axs[i].plot(self.x[0], self.chi[0], 'k-', linewidth=3)
-				# now the salt plots
-				axs[i].plot(self.x[i+1], self.chi[i+1], colors[i], linewidth=3)
-			axs[i].set_yticklabels([])
-			labels = axs[i].get_xticklabels() + axs[i].get_yticklabels()
-			for label in labels:
-				label.set_size('x-large')
-			plt.title(titles[i], size='xx-large')
+
+
+	# Plot out all the real and imaginary parts
+	def PlotRealImag(self,dat,ax):
+		ax.plot(dat.Freq(), dat.Real(), 'b-', linewidth=2, label='Real')
+		ax.plot(dat.Freq(), dat.Imag(), 'g-', linewidth=2, label='Imaginary')
+
+	def ScaleChi_LowFreqs(self,dat,scale,cut_freq):
+	  	cut_ind = list(dat.Freq()).index(cut_freq)
+		re = dat.Real()
+
+		# cut the imaginary part into two and scale the lower one
+		imag = dat.Imag()
+		low_imag = imag[:cut_ind]
+		low_imag = map(lambda im: im*scale, low_imag)		# scale the complex part somehow
+		high_imag = imag[cut_ind:]
+
+		new_imag = low_imag + high_imag
+
+		comp = map(lambda r,i: complex(r,i), re, new_imag)
+		chi = map(lambda c: real(c*c.conjugate()), comp)
+
+		return chi
+
+	def ScaleChi(self,dat,scale):
+		re = dat.Real()
+
+		# cut the imaginary part into two and scale the lower one
+		imag = dat.Imag()
+		new_imag = map(lambda im: im*scale, imag)		# scale the complex part somehow
+
+		comp = map(lambda r,i: complex(r,i), re, new_imag)
+		chi = map(lambda c: real(c*c.conjugate()), comp)
+
+		return chi
+
+
+	def NormalizeListToMax(self,dat):
+		max_peak = max(dat)
+		return map(lambda x: x/max_peak, dat)
+
+	def MakeFreqList(self,min,max,numbins):
+	  	df = (max-min)/float(numbins)
+		return [min + x*df for x in range(numbins)]
+
+	def StretchFreq(self,freq,new_min,cut_freq):
+	  	cut_freq_id = list(freq).index(cut_freq)
+
+	  	low = list(freq[:cut_freq_id])
+		high = list(freq[cut_freq_id:])
+
+		new_low = self.MakeFreqList(new_min, cut_freq, len(low))
+
+  		return new_low + high
+
+
+	# plot the chi-squared lineshape
+	def PlotChi(self,dat,ax):
+		cut_freq = 0.0
+		low_freq = 0.0
+		line_color = 'k-'
+
+	  	scale = 1.0
+		if dat.SystemName() == 'NaCl':
+			cut_freq = 3600.0
+			low_freq = 1500.0
+		  	scale = 1.4
+			line_color = 'g-'
+		elif dat.SystemName() == 'NaNO3':
+			cut_freq = 3550.0
+			low_freq = 2000.0
+		  	scale = 1.5
+			line_color = 'r-'
+		elif dat.SystemName() == 'Na2SO4':
+			cut_freq = 3630.0
+			low_freq = 1000.0
+		  	scale = 0.7
+			line_color = 'purple'
+
+
+  		# scale the chi
+		h2o = self.h2o.Chi()
+		h2o = self.NormalizeListToMax(h2o)
+
+		chi = self.ScaleChi (dat, scale)
+		chi = self.NormalizeListToMax(chi)
+
+  		# scale the frequencies
+  		dat_freq = self.StretchFreq (dat.Freq(), low_freq, cut_freq)
+  		#dat_freq = dat.Freq()
+  		h2o_freq = self.StretchFreq (self.h2o.Freq(), 2000, 3600.0)
+  		#h2o_freq = self.h2o.Freq()
+
+		#ax.plot(dat.Freq(), dat.Chi(), 'b:', linewidth=4, label=dat.SystemName()) #label=r'$|\chi|^{2}$')
+		ax.plot(dat_freq, chi, line_color, linewidth=4, label=dat.SystemName()) #label=r'$|\chi|^{2}$')
+		ax.plot(h2o_freq, h2o, 'k:', linewidth=4, label=r'H$_2$O')
+
+
+
+	def SetTicksAndLabels(self,dat,ax):
+		#axs[i].set_yticklabels([])
+		labels = ax.get_xticklabels() + ax.get_yticklabels()
+		for label in labels:
+			label.set_size('x-large')
+
+	def ShowLegend(self,ax):
 
 		# set some legend properties.  All the code below is optional.  The
 		# defaults are usually sensible but if you need more control, this
 		# shows you how
-		leg = plt.legend(loc='best', shadow=True)
+		leg = plt.legend(loc='best', shadow=True, fancybox=True)
 
 		# the matplotlib.patches.Rectangle instance surrounding the legend
 		frame = leg.get_frame()
@@ -173,4 +247,3 @@ class MoritaSFG:
 		for l in leg.get_lines():
 			l.set_linewidth(4.0)  # the legend line width
 
-		plt.show()

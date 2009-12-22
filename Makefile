@@ -6,7 +6,7 @@ CINCLUDE	= -I$(SRCLIB) -I/usr/include -I$(BOOST)
 CLIBS		= -L$(MKL) -lmkl_lapack -lmkl -lguide -lpthread
 CPPFLAGS	= $(CINCLUDE)
 #CXX			= mpiCC -g
-CXXDEBUG	= -g3 -ggdb -Wall -D_GLIBCXX_DEBUG -pg
+CXXDEBUG	= -g3 -ggdb -Wall -D_GLIBCXX_DEBUG
 CXXOPTIMIZE = -O2 -finline-functions -finline-limit-1000 -funroll-loops
 #CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CXXOPTIMIZE)
 CXXFLAGS    = -ftemplate-depth-100 -Drestrict= $(CXXDEBUG) #-wd981,1599,1572,383

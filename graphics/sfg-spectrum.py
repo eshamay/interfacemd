@@ -2,5 +2,4 @@
 import sys
 from MoritaSFG import MoritaSFG
 
-d = MoritaSFG()
-d.PlotData()
+d = MoritaSFG(sys.argv[1:])

@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from pylab import *
 
 
+
 # Load up multiple files and parse the matrix data from them
 data = []
 for arg in sys.argv[1:]:

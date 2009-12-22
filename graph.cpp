@@ -1,14 +1,21 @@
 #include "graph.h"
 
-Graph BondGraph::_graph (0);
+BondGraph::Graph BondGraph::_graph (0);
+
+const double BondGraph::OHBONDLENGTH = 1.3;				// used to be 1.1
+const double BondGraph::HBONDLENGTH  = 2.5;				// used to be 2.46
+const double BondGraph::HBONDANGLE	= 30.0*M_PI/180.0;		// bonding angle has to be less than this value to be considered an H-bond
+const double BondGraph::NOBONDLENGTH = 2.0;
+const double BondGraph::NHBONDLENGTH = 1.3;		// uhmm... check this?
+
 
 // property map definitions
-PropertyMap<double,EdgeProperties>::Type BondGraph::b_length = get(&EdgeProperties::distance, _graph);
-PropertyMap<bondtype,EdgeProperties>::Type BondGraph::b_type = get(&EdgeProperties::btype, _graph);
+BondGraph::PropertyMap<double,BondGraph::EdgeProperties>::Type BondGraph::b_length = get(&EdgeProperties::distance, _graph);
+BondGraph::PropertyMap<bondtype,BondGraph::EdgeProperties>::Type BondGraph::b_type = get(&EdgeProperties::btype, _graph);
 
-PropertyMap<Atom *,VertexProperties>::Type BondGraph::v_atom = get(&VertexProperties::atom, _graph);
-PropertyMap<VecR,VertexProperties>::Type BondGraph::v_position = get(&VertexProperties::position, _graph);
-PropertyMap<std::string,VertexProperties>::Type BondGraph::v_name = get(&VertexProperties::name, _graph);
+BondGraph::PropertyMap<Atom *,BondGraph::VertexProperties>::Type BondGraph::v_atom = get(&VertexProperties::atom, _graph);
+BondGraph::PropertyMap<VecR,BondGraph::VertexProperties>::Type BondGraph::v_position = get(&VertexProperties::position, _graph);
+BondGraph::PropertyMap<std::string,BondGraph::VertexProperties>::Type BondGraph::v_name = get(&VertexProperties::name, _graph);
 
 BondGraph::BondGraph ()
 { return; }
@@ -204,7 +211,7 @@ void BondGraph::_SetBond (const Vertex& vi, const Vertex& vj, const double bondl
 return;
 }
 
-Vertex_it BondGraph::_FindVertex (Atom const * const ap) const {
+BondGraph::Vertex_it BondGraph::_FindVertex (Atom const * const ap) const {
 
 	Vertex_it vi, vi_end, next;
 	tie(vi, vi_end) = vertices(_graph);
@@ -270,7 +277,7 @@ return (num);
 }
 
 // calculates the water bonding coordination of a given water molecule
-coordination BondGraph::WaterCoordination (Water const * const wat) const {
+BondGraph::coordination BondGraph::WaterCoordination (Water const * const wat) const {
 
 	int c = 0;
 	Atom * ap;
@@ -354,7 +361,7 @@ double BondGraph::Distance (Atom const * const a1, Atom const * const a2) const 
 return (b_length[e]);
 }
 
-Edge BondGraph::_GetBond (const Vertex& vi, const Vertex& vj) const {
+BondGraph::Edge BondGraph::_GetBond (const Vertex& vi, const Vertex& vj) const {
 
 	Edge e;
 	bool b;
@@ -368,7 +375,7 @@ Edge BondGraph::_GetBond (const Vertex& vi, const Vertex& vj) const {
 return (e);
 }
 
-Edge BondGraph::_GetBond (Atom const * const a1, Atom const * const a2) const {
+BondGraph::Edge BondGraph::_GetBond (Atom const * const a1, Atom const * const a2) const {
 
 	Vertex_it v1 = this->_FindVertex(a1);
 	Vertex_it v2 = this->_FindVertex(a2);
