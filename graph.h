@@ -38,20 +38,6 @@ private:
 	static const double NOBONDLENGTH;
 	static const double NHBONDLENGTH;
 
-	/* Encoding of the different coordination types
-	 * The numbering is based on each O having a value of 1, and each H haveing a value of 10 (i.e. add 1 for every O, and 10 for every H...). So a water in a state of OOHH bonding would have a coordination of 22, and a coordination of 13 would be OOOH, 12 = OOH, 11 = OH, 10 = H, etc.
-	 */
-	typedef enum {
-	  UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			// no H
-	  H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			// 1 H
-	  HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		// 2 Hs
-	  HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	// 3 Hs
-	  HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44
-	} coordination;
-	// And hopefully that covers all the bonding coordination types :)
-
-	typedef std::map<coordination, std::string> coord_map;
-
 
 	// Vertices are atoms
 	struct VertexProperties {
@@ -110,6 +96,20 @@ public:
 	BondGraph ();
 	BondGraph (const Atom_ptr_vec& atoms, std::string sys = "xyz");
 	~BondGraph ();
+
+	/* Encoding of the different coordination types
+	 * The numbering is based on each O having a value of 1, and each H haveing a value of 10 (i.e. add 1 for every O, and 10 for every H...). So a water in a state of OOHH bonding would have a coordination of 22, and a coordination of 13 would be OOOH, 12 = OOH, 11 = OH, 10 = H, etc.
+	 */
+	typedef enum {
+	  UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			// no H
+	  H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			// 1 H
+	  HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		// 2 Hs
+	  HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	// 3 Hs
+	  HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44
+	} coordination;
+	// And hopefully that covers all the bonding coordination types :)
+
+	typedef std::map<coordination, std::string> coord_map;
 
 	void SysType (std::string sys_type) { _sys_type = sys_type; }
 	void UpdateGraph (const Atom_ptr_vec& atoms);

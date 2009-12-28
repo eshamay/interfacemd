@@ -1,8 +1,5 @@
 include ../Makefile
 
-%.o: %.cpp %.h
-	$(CXX) $(CPPFLAGS) -c -o $@ $<
-
 PDBSYSTEM		= $(MDSYSTEM) ../pdbfile.o
 
 QUARTZ			= $(PDBSYSTEM) make-quartz-slab.cpp
@@ -11,28 +8,28 @@ CONNECTIVITY	= $(PDBSYSTEM) quartz-connectivity.cpp
 TEMPFILES		= $(WATERSYSTEM) ../pdbfile.o temp.cpp
 
 quartz: $(PDBSYSTEM) make-quartz-slab.cpp
-	$(CXX) $(CPPFLAGS) $(PDBSYSTEM) make-quartz-slab.cpp -llapack -o make-quartz-slab
+	$(CXX) $(CPPFLAGS) $(PDBSYSTEM) make-quartz-slab.cpp -llapack -o ../bin/make-quartz-slab
 
 temp: $(TEMPFILES)
-	$(CXX) $(CPPFLAGS) $(TEMPFILES) -llapack -o temp 
+	$(CXX) $(CPPFLAGS) $(TEMPFILES) -llapack -o ../bin/temp 
 
 makeonemolecule: $(MAKEONEMOL)
-	$(CXX) $(CPPFLAGS) $(MAKEONEMOL) -o make-one-mol 
+	$(CXX) $(CPPFLAGS) $(MAKEONEMOL) -o ../bin/make-one-mol 
 
 connectivity: $(CONNECTIVITY)
-	$(CXX) $(CPPFLAGS) $(CONNECTIVITY) -o connect
+	$(CXX) $(CPPFLAGS) $(CONNECTIVITY) -o ../bin/connect
 
 findoh: $(PDBSYSTEM) find-oh.cpp
-	$(CXX) $(CPPFLAGS) $(PDBSYSTEM) find-oh.cpp -o find-oh
+	$(CXX) $(CPPFLAGS) $(PDBSYSTEM) find-oh.cpp -o ../bin/find-oh
 
 independent-mols: $(PDBSYSTEM) make-independent-mols.cpp
-	$(CXX) $(CPPFLAGS) $(PDBSYSTEM) make-independent-mols.cpp -o make-ind-mols
+	$(CXX) $(CPPFLAGS) $(PDBSYSTEM) make-independent-mols.cpp -o ../bin/make-ind-mols
 	
 findtypes: $(PDBSYSTEM) find-atom-types.cpp
-	$(CXX) $(CPPFLAGS) $(PDBSYSTEM) find-atom-types.cpp -o find-types
+	$(CXX) $(CPPFLAGS) $(PDBSYSTEM) find-atom-types.cpp -llapack -o ../bin/find-types
 
 
   	
 
 cleanquartz :
-	rm -f *.o make-quartz-slab temp make-one-mol connect find-oh
+	rm -f *.o

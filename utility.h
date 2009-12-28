@@ -83,18 +83,25 @@ template <class T>
 class Histogram2D : public std::binary_function<T,T,bool>
 {
   public:
-  std::pair<T,T> max;						// maximum value the histogram can bin in each dimension
-  std::pair<T,T> min;						// minimum values for each dimension
-  std::pair<T,T> resolution;				// resolution for each dimension
+
+  typedef std::pair<T,T>	pair_t;
+  pair_t max;						// maximum value the histogram can bin in each dimension
+  pair_t min;						// minimum values for each dimension
+  pair_t resolution;				// resolution for each dimension
   std::pair<int,int> size;					// dimensions of the 2-d data (number of histogram bins)
   std::vector<int> counts;					// A running total of each time a bin was updated in the 1st dimension of the histogram i.e. access count
 
   // Initialization
-  Histogram2D (const std::pair<T,T>& maxima, const std::pair<T,T>& resolutions, const std::pair<T,T>& minima = std::make_pair(T(0), T(0))) 
+  Histogram2D (const pair_t& maxima, const pair_t& resolutions, const pair_t& minima = std::make_pair(T(0), T(0))) 
 	: max(maxima), min(minima), resolution(resolutions)
   {
 	size.first = int((max.first - min.first)/resolution.first) + 1;
 	size.second = int((max.second - min.second)/resolution.second) + 1;
+
+	/* 
+	printf ("size = <%d,%d>\nmax = <%f,%f\n,min = <%f,%f>\nres = <%f,%f>\n",
+		size.first, size.second, max.first, max.second, min.first, min.second, resolution.first, resolution.second);
+	*/
 
 	histogram.clear();
 	histogram.resize (size.first, Histogram_t (size.second, 0));
@@ -115,6 +122,13 @@ class Histogram2D : public std::binary_function<T,T,bool>
 	return;
   }
 
+  /* Increment the bins given by the two indices without doing any checks */
+  void Shove (const int a, const int b)
+  {
+	histogram[a][b]++;
+	counts[a]++;
+	return;
+  }
   // Return the element of the histogram
   int Element (const int x, const int y) const { return histogram[x][y]; }
   int Count (const int i) const { return counts[i]; }

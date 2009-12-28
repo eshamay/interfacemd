@@ -62,7 +62,10 @@ class Analyzer : public WaterSystem<AmberSystem> {
 	}
 
 	static int PositionBin (const double position);
-	static int PositionBin (const Atom * patom) ;
+	static int PositionBin (const Atom * patom);
+	static double Position (const Atom * patom);
+	static double Position (const VecR& v);
+	static double Position (const double d);
 
 	static int AngleBin (const double angle) {
 	  return Bin (angle, angmin, angres);
@@ -203,9 +206,10 @@ int Analyzer::PositionBin (const double position) {
 // Find the position a particular atom fits into for a histogram
 int Analyzer::PositionBin (const Atom * patom) {
 
-  VecR r = patom->Position();
-  double position = r[axis];
-  if (position < pbcflip) position += MDSystem::Dimensions()[axis];
+  double position = Analyzer::Position(patom);
+  //VecR r = patom->Position();
+  //double position = r[axis];
+  //if (position < pbcflip) position += MDSystem::Dimensions()[axis];
 
 #ifdef AVG
   // here the bin will be selected based on the distance to a given interface. Negative distances are inside the water phase, positive are in the CCl4
@@ -217,6 +221,22 @@ int Analyzer::PositionBin (const Atom * patom) {
 #endif
 
   return bin;
+}
+
+/* Find the periodic-boundary-satistfying location of an atom, vector, or raw coordinate along the reference axis */
+double Analyzer::Position (const Atom * patom) {
+  return Analyzer::Position(patom->Position());
+}
+
+double Analyzer::Position (const VecR& v) {
+  double position = v[axis];
+  return Analyzer::Position(position);
+}
+
+double Analyzer::Position (const double d) {
+  double pos = d;
+  if (pos < pbcflip) pos += MDSystem::Dimensions()[axis];
+  return pos;
 }
 
 // Create a histogram of the angles formed by an axis of a molecule's given reference axis.

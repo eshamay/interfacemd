@@ -92,7 +92,7 @@ class WaterSystem {
   void FlipWaters (const coord axis = y);
   void SliceAtoms (const double low, const double high);
   void SliceWaters (const double low, const double high);
-  void SliceWaterCoordination (const coordination coord);
+  void SliceWaterCoordination (const BondGraph::coordination c);
   void FindInterfacialWaters ();
 
   void UpdateGraph () { _graph.UpdateGraph (int_atoms); }
@@ -300,14 +300,14 @@ void WaterSystem<T>::SliceWaters (const double low, const double high) {
 }
 
 template <class T>
-void WaterSystem<T>::SliceWaterCoordination (const coordination coord) {
+void WaterSystem<T>::SliceWaterCoordination (const BondGraph::coordination c) {
 
   Water_ptr_vec wats;
 
   RUN (int_wats) {
     Water * wat = int_wats[i];
-    coordination c = _graph.WaterCoordination(wat);
-    if (c == coord) {
+	BondGraph::coordination cd = _graph.WaterCoordination(wat);
+    if (cd == c) {
       wats.push_back(wat);
     }
   }
