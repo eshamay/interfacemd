@@ -63,7 +63,7 @@ class DensityProfiler:
 			if atom != "O" and atom != "C":
 				print "yeehaw"
 				print x[datum.index(max(datum[:DATA_LENGTH]))]
-				ax.axvline(x[datum.index(max(datum[:DATA_LENGTH]))], color=LINESTYLES[atom][0], linestyle=':', linewidth=4)
+				ax.axvline(x[datum.index(max(datum[:DATA_LENGTH]))], color=LINESTYLES[atom][0], linestyle=':', linewidth=5)
 				
 				
 
@@ -73,7 +73,7 @@ class DensityProfiler:
 				#YRANGE[1] = dat_max
 
 			# plots the data
-			ax.plot(x, datum, color=LINESTYLES[atom][0], linestyle='--', linewidth=2, label=LINESTYLES[atom][1])
+			ax.plot(x, datum, color=LINESTYLES[atom][0], linestyle='--', linewidth=5, label=LINESTYLES[atom][1])
 
 		# Do some labeling of the water data curve extrema (max/min, peaks/troughs, etc) for various reasons
 		#self.LabelWaterExtrema(ax,x,self.data['O'])
@@ -83,8 +83,12 @@ class DensityProfiler:
 		ax.set_xlim(XRANGE)
 		ax.set_axis_bgcolor('w')
 
-		ax.set_xlabel(r'Distance to Interface ($\AA$)', size='x-large')
-		ax.set_ylabel(r'$\rho_{H_2O}$ ($\frac{mg}{mL}$)', size='x-large')
+		ax.set_xlabel(r'Distance to Interface ($\AA$)', size=40)
+		ax.set_ylabel(r'$\rho_{H_2O}$ ($\frac{mg}{mL}$)', size=35)
+
+		for a in ax.get_xticklabels() + ax.get_yticklabels():
+			a.set_fontsize(35)
+
 		#self.SetLegend()
 		plt.show()
 
@@ -139,7 +143,7 @@ class DensityProfiler:
 		print "Left-side gibb's surface is located at: ", shift
 		# plot the fit line for the water
 		fit_x = self.ShiftAxis(fit_x,shift)
-		ax.plot(fit_x, self.fit, linetype, linewidth=2, label=r'H$_2$O Fit')
+		ax.plot(fit_x, self.fit, linetype, linewidth=4, label=r'H$_2$O Fit')
 
 		### This is added to identify the water region with shading
 		plt.axvspan(-width/2.0,width/2.0, facecolor='b', alpha=0.2)
