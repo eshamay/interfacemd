@@ -5,11 +5,16 @@ import matplotlib.pyplot as plt
 import matplotlib.text
 import matplotlib.patches
 
+
+ATOMS = ['O','C']
+#ATOMS = ['O','C','NA','S']
+#ATOMS = ['O','C','NA','N']
+#ATOMS = ['O','C','NA','Cl']
+DATA_LENGTH = 750
 #ATOMS = ['O','C']
-ATOMS = ['O','C','NA','Cl']
-#TITLE = r'The Aqueous Na$_2$SO$_4$ Solution - CCl$_4$ Interface'
+TITLE = r'The Aqueous Na$_2$SO$_4$ Solution - CCl$_4$ Interface'
 XRANGE = [-9.0,17.5]
-YRANGE = [0.0,0.0]
+YRANGE = [0.0,2.0]
 # line color/style and labels
 LINESTYLES = {'O':['black',r'H$_2$O'], 'C':['blue',r'CCl$_4$'], 'NA':['#088618',r'Na'], 'N':['#a10f05',r'NO$_3$'], 'SI':['#6805a1',r'SO$_4$'], 'S':['#6805a1',r'SO$_4$'], 'Cl':['#6e6f00',r'Cl']}
 BIN_WIDTH = 0.1
@@ -55,31 +60,32 @@ class DensityProfiler:
 		for atom in ATOMS:
 
 			datum = self.data[atom]
+			if atom != "O" and atom != "C":
+				print "yeehaw"
+				print x[datum.index(max(datum[:DATA_LENGTH]))]
+				ax.axvline(x[datum.index(max(datum[:DATA_LENGTH]))], color=LINESTYLES[atom][0], linestyle=':', linewidth=4)
+				
+				
 
 			# sets the maximum of the graph
-			dat_max = max(datum)
-			if dat_max > YRANGE[1]:
-				YRANGE[1] = dat_max
+			#dat_max = max(datum)
+			#if dat_max > YRANGE[1]:
+				#YRANGE[1] = dat_max
 
 			# plots the data
-			ax.plot(x, datum, color=LINESTYLES[atom][0], linestyle='--', linewidth=7, label=LINESTYLES[atom][1])
+			ax.plot(x, datum, color=LINESTYLES[atom][0], linestyle='--', linewidth=2, label=LINESTYLES[atom][1])
 
 		# Do some labeling of the water data curve extrema (max/min, peaks/troughs, etc) for various reasons
 		#self.LabelWaterExtrema(ax,x,self.data['O'])
 
 		ylim = YRANGE[1] * 1.1
-		#ax.set_ylim([YRANGE[0],ylim])
-		ax.set_ylim([0.0,2.0])
+		ax.set_ylim(YRANGE)
 		ax.set_xlim(XRANGE)
 		ax.set_axis_bgcolor('w')
 
-		ax.set_xlabel(r'Slab Position ($\AA$)', size=40)
-		ax.set_ylabel(r'$\rho_{H_2O}$ ($\frac{mg}{mL}$)', size=50)
+		ax.set_xlabel(r'Distance to Interface ($\AA$)', size='x-large')
+		ax.set_ylabel(r'$\rho_{H_2O}$ ($\frac{mg}{mL}$)', size='x-large')
 		#self.SetLegend()
-
-		for label in ax.get_xticklabels() + ax.get_yticklabels():
-			label.set_fontsize(40)
-
 		plt.show()
 
 	def ShiftAxis(self,axis,shift):
@@ -123,26 +129,26 @@ class DensityProfiler:
 	def PlotWaterFit (self, ax, x, datum, linetype='k-'):
 		
 		d = DF()
-		(self.fit, self.params) = d.FitWater(x, datum)
-		self.shift = self.params[4]
-		#print "System: ", TITLE
-		print "Left-side gibb's surface is located at: ", self.shift
-		# plot the fit line for the water
-		x = self.ShiftAxis(x,self.shift)
-		ax.plot(x, self.fit, linetype, linewidth=4, label=r'H$_2$O Fit')
+		fit_x = x[:DATA_LENGTH]
+		(self.fit, self.params) = d.FitLowerWater(fit_x, datum[:DATA_LENGTH])
+		shift = self.params["gibbs"]
+		self.shift = shift
+		width = self.params["width"]
 
-		print "Bulk Density = %f\n" % (average([self.params[1],self.params[2]]))
+		print "System: ", TITLE
+		print "Left-side gibb's surface is located at: ", shift
+		# plot the fit line for the water
+		fit_x = self.ShiftAxis(fit_x,shift)
+		ax.plot(fit_x, self.fit, linetype, linewidth=2, label=r'H$_2$O Fit')
 
 		### This is added to identify the water region with shading
-		plt.axvspan(self.params[4]-self.shift-self.params[5],self.params[4]-self.shift+self.params[5], facecolor='b', alpha=0.2)
-		plt.axvspan(self.params[6]-self.shift-self.params[7],self.params[6]-self.shift+self.params[7], facecolor='b', alpha=0.2)
+		plt.axvspan(-width/2.0,width/2.0, facecolor='b', alpha=0.2)
 
-		'''
 		# some text to distinguish the water regions
 		# this adds a box that clearly labels the width and 90-10 thickness of the interface from the fitting tanh
-		gibbs_1 = matplotlib.patches.Ellipse ((params[4], max(datum)/2.0), 0.5, 0.1, alpha=0.0, fc="none")
+		gibbs_1 = matplotlib.patches.Ellipse ((shift, max(datum)/2.0), 0.5, 0.1, alpha=0.0, fc="none")
 
-		ax.annotate("Water/Decane Interface\nThickness = %5.3f\n\"90-10\" = %5.3f" % (params[5], params[5]*2.197), (params[4], max(datum)/2.0),
+		ax.annotate("Water/Decane Interface\nThickness = %5.3f\n\"90-10\" = %5.3f" % (width, width*2.197), (shift, max(datum)/2.0),
 			    xytext=(-200,80), textcoords='offset points', size=14,
 			    bbox=dict(boxstyle="round", fc=(1.0, 0.7, 0.7), ec=(1., .5, .5)),
 			    arrowprops=dict(arrowstyle="wedge,tail_width=1.",
@@ -153,6 +159,7 @@ class DensityProfiler:
 					    connectionstyle="arc3,rad=-0.1"),
 			    )
 
+		'''
 		gibbs_2 = matplotlib.patches.Ellipse ((params[6], max(datum)/2.0), 0.5, 0.1, alpha=0.0, fc="none")
 
 		ax.annotate("Water Interface #2\nThickness = %5.3f\n\"90-10\" = %5.3f" % (params[7], params[7]*2.197), (params[6], max(datum)/2.0),
@@ -165,7 +172,7 @@ class DensityProfiler:
 					    relpos=(0.2, 0.8),
 					    connectionstyle="arc3,rad=-0.1"),
 			    )
-		'''	
+		'''
 	'''
 
 	def PlotPDSWaterFit (self, ax, x, datum, color):
