@@ -78,6 +78,60 @@ Inserter<C> make_inserter(C& c)
 /*******************************************************************************************************************************************************/
 /***************************************** Histograms **************************************************************************************************/
 
+/* 1-d histogram functor */
+template <class T>
+class Histogram1D : public std::unary_function<T,bool>
+{
+  private:
+	typedef T histo_element_t;
+
+	T _min, _max, _res;
+	int _size;
+	int _access_count;
+	std::vector<histo_element_t> _histogram;
+
+	int Bin (const T t) const { return int ((t - _min)/_res); }
+
+  public:
+
+	Histogram1D (const T min, const T max, const T res) : _min(min), _max(max), _res(res), 
+														  _size(int((max - min)/res) + 1),
+														  _access_count(0)
+  { 
+	if (min > max) {
+	  printf ("Check the limits given to Histogram1D - minimum is greater than the maximum!!\n");
+	  exit(1);
+	}
+	_histogram.resize(_size, histo_element_t(0));
+  }
+
+
+	bool operator() (const T t) {
+	  bool ret = false;
+	  if (t < _min || t > _max) { 
+		ret = false;				// out of bounds issue...
+	  }
+	  else {
+		_histogram [Bin(t)]++;
+		_access_count++;
+		ret = true;
+	  }
+
+	  return ret;
+	}
+
+	int Count () const { return _access_count; }
+	int Size () const { return _size; }
+	int Max () const { return _max; }
+	int Min () const { return _min; }
+	int Resolution () const { return _res; }
+
+	int Population (const T t) const { return _histogram[this->Bin(t)]; }		// returns the population of a single bin given a value
+	std::vector<histo_element_t>& Histogram () { return _histogram; }
+
+};
+	
+
 /* A 2-dimensional histogram functor. Each application of the histogram will bin the given values. Initial setup requires some parameters for the histogram (size, resolution, etc) */
 template <class T>
 class Histogram2D : public std::binary_function<T,T,bool>

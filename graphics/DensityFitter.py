@@ -28,8 +28,6 @@ class DensityFitter(SM):
 		plsq = leastsq(residual, p0, args=(data,x), maxfev=100000)
 
 		fit = fit_func(x,plsq[0])
-		
-		param_hash = {"dens_low_1":plsq[0][0], "dens_high_1":plsq[0][1], "dens_low_2":plsq[0][3], "dens_high_2":plsq[0][2], "gibbs_1":plsq[0][4], "width_1":plsq[0][5], "gibbs_2":plsq[0][6], "width_2":plsq[0][7]}
 
 		print "Fitting the water density - found the following parameters:"
 		print "Lower interface:"
@@ -39,28 +37,5 @@ class DensityFitter(SM):
 		print "density (%6.3f) [%6.3f - %6.3f]    d = % 6.4f\n" % (plsq[0][6], plsq[0][3], plsq[0][2], plsq[0][7])
 
 		print "Average of the densities (low-high) = %6.3f" % (sum([plsq[0][0], plsq[0][1], plsq[0][2], plsq[0][3]])/4.0)
-		return (fit, param_hash)
-
-	def FitLowerWater(self,x,data,gibbs=30.0):
-		# initial guess values
-		dens_low = 0.0
-		dens_high = max(data)
-		width = 5.0
-
-		p0 = array ([dens_low,dens_high,gibbs,width])
-		fit_func = self.tanh_fit
-
-		residual = self.FittingFunction(self.residuals,function=fit_func)
-		plsq = leastsq(residual, p0, args=(data,x), maxfev=100000)
-
-		fit = fit_func(x,plsq[0])
-		
-		params = {"dens_low":plsq[0][0], "dens_high":plsq[0][1], "gibbs":plsq[0][2], "width":plsq[0][3]}
-
-		print "Fitting the water density - found the following parameters:"
-		print "Lower interface:"
-		print "density (%6.3f) [%6.3f - %6.3f]    d = % 6.4f\n" % (plsq[0][2], plsq[0][0], plsq[0][1], plsq[0][3])
-
-		return (fit, params)
-
+		return (fit, plsq[0])
 

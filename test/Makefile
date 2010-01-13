@@ -18,6 +18,10 @@ ORDERCOORDS		= $(WATERSYSTEM) ordercoords.o
 HCORIENTATION	= $(WATERSYSTEM) $(CARBONCHAIN) carbonchainsystem.o
 ANGLEPOSITIONHISTO = $(WATERSYSTEM) Angle-Position-Histogram-2D.o
 ROTATE			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o molecule-rotate.cpp
+ANGLEHISTO = $(WATERSYSTEM) angle-histogram.o
+
+anglehisto: $(ANGLEHISTO)
+	$(CXX) $(CPPFLAGS) $(ANGLEHISTO) -llapack -o ../bin/anglehisto
 
 apanalysis: $(ANGLEPOSITIONHISTO)
 	$(CXX) $(CPPFLAGS) $(ANGLEPOSITIONHISTO) -llapack -o apanalysis

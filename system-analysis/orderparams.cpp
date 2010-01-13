@@ -18,13 +18,6 @@ OrderParameters::OrderParameters (int argc, const char **argv, const WaterSystem
 
 	printf ("Running an order parameter analysis with the following options:\n");
 
-	#ifdef AVG
-	if (argc < 3) {
-		printf ("Rerun with the two interface locations:\norderparams <int_low> <int_high>\n");
-		exit(1);
-	}
-	#endif
-
 	printf ("\tAngle cosines will range from:\n\t\tMax = % 8.3f\n\t\tMin = % 8.3f\n\t\tResolution = % 8.3f\n", angmin, angmax, angres);
 
 	this->sys = new AmberSystem("prmtop", "mdcrd", "mdvel");
@@ -92,6 +85,7 @@ return;
 */
 void OrderParameters::Analysis () {
 
+  /*
 	// if restarting, then fast-forward to the point where we'll restart
 	#ifdef RESTART
 	printf ("\n\n*** Restart Run ***\n\tNow skipping %d steps before beginning analysis\n", restart);
@@ -102,23 +96,18 @@ void OrderParameters::Analysis () {
 	printf ("\n*** Begin Analysis ***\n\tStarting analysis at timestep %d\n\n", timestep);
 	for (timestep = restart; timestep < timesteps; timestep++) {
 	#else
+  */
 	// start the analysis - run through each timestep
 	for (timestep = 0; timestep < timesteps; timestep++) {
-	#endif
+	//#endif
 
 		// find all the waters
 		this->FindWaters ();
-
-// ***********************************
-// used for testing on so4 + no3
-		//this->SliceWaters (0.0, 50.0);
-// ***********************************
 
 		/******
 		 * When doing any work involving H-bonding or bond distances...
 		 ******/
 		//this->UpdateMatrix ();
-		VecR ref_axis (0.0, 1.0, 0.0);	// reference axis normal to the interfaces
 
 		RUN (int_wats) {
 
