@@ -7,14 +7,15 @@
 #include <functional>
 #include <iterator>
 #include <iostream>
+#include <cctype>
 
 /*
-void DEBUGMSG (const std::string msg)
-{
+   void DEBUGMSG (const std::string msg)
+   {
 #ifdef __DEBUG__
-  std::cout << msg << std::endl;
+std::cout << msg << std::endl;
 #endif
-  return;
+return;
 }
 */
 
@@ -30,12 +31,12 @@ struct EqualPairs : public std::binary_function<T,T,bool>
 {
   bool operator() (const T& lhs, const T& rhs) const 
   {
-	return lhs == rhs || lhs.first == rhs.second && lhs.second == rhs.first;
+    return lhs == rhs || lhs.first == rhs.second && lhs.second == rhs.first;
   }
 };
 
 /* Searches for the supplied pair p in the sequence of pairs from first to last */
-template <class Iter>
+  template <class Iter>
 Iter PairListMember (const typename std::iterator_traits<Iter>::value_type& p, Iter first, Iter last)
 {
   return find_if (first, last, std::bind1st(EqualPairs<typename std::iterator_traits<Iter>::value_type>(), p));
@@ -51,8 +52,8 @@ struct Inserter {
   Inserter(C& c) : in(c) {}
   void operator()(const std::pair<typename C::value_type, typename C::value_type>& p)
   {
-	*in++ = p.first;
-	*in++ = p.second;
+    *in++ = p.first;
+    *in++ = p.second;
   }
 };
 
@@ -69,8 +70,8 @@ Inserter<C> make_inserter(C& c)
 /* sorts and finds unique elements of a given list and stores them into the result */
 #define UNIQUE_PAIRLIST_ELEMENTS(pairlist,result)	\
   FLATTEN_PAIRLIST (pairlist, result)	\
-  sort(result.begin(), result.end());	\
-  result.resize( unique(result.begin(), result.end()) - result.begin());
+sort(result.begin(), result.end());	\
+result.resize( unique(result.begin(), result.end()) - result.begin());
 
 
 
@@ -83,54 +84,56 @@ template <class T>
 class Histogram1D : public std::unary_function<T,bool>
 {
   private:
-	typedef T histo_element_t;
+    typedef T histo_element_t;
 
-	T _min, _max, _res;
-	int _size;
-	int _access_count;
-	std::vector<histo_element_t> _histogram;
+    T _min, _max, _res;
+    int _size;
+    int _access_count;
+    std::vector<histo_element_t> _histogram;
 
-	int Bin (const T t) const { return int ((t - _min)/_res); }
+    // Returns the bin for a given value
+    int Bin (const T t) const { return int ((t - _min)/_res); }
 
   public:
 
-	Histogram1D (const T min, const T max, const T res) : _min(min), _max(max), _res(res), 
-														  _size(int((max - min)/res) + 1),
-														  _access_count(0)
+    Histogram1D (const T min, const T max, const T res) 
+      : _min(min), _max(max), _res(res), 
+      _size(int((max - min)/res) + 1), _access_count(0)
   { 
-	if (min > max) {
-	  printf ("Check the limits given to Histogram1D - minimum is greater than the maximum!!\n");
-	  exit(1);
-	}
-	_histogram.resize(_size, histo_element_t(0));
+    if (min > max) {
+      printf ("Check the limits given to Histogram1D - minimum is greater than the maximum!!\n");
+      exit(1);
+    }
+    _histogram.resize(_size, histo_element_t(0));
   }
 
 
-	bool operator() (const T t) {
-	  bool ret = false;
-	  if (t < _min || t > _max) { 
-		ret = false;				// out of bounds issue...
-	  }
-	  else {
-		_histogram [Bin(t)]++;
-		_access_count++;
-		ret = true;
-	  }
+    bool operator() (const T t) {
+      bool ret = false;
+      if (t < _min || t > _max) { 
+	ret = false;				// out of bounds issue...
+      }
+      else {
+	_histogram [Bin(t)]++;
+	_access_count++;
+	ret = true;
+      }
 
-	  return ret;
-	}
+      return ret;
+    }
 
-	int Count () const { return _access_count; }
-	int Size () const { return _size; }
-	int Max () const { return _max; }
-	int Min () const { return _min; }
-	int Resolution () const { return _res; }
+    int Count () const { return _access_count; }
+    int Size () const { return _size; }
+    int Max () const { return _max; }
+    int Min () const { return _min; }
+    int Resolution () const { return _res; }
 
-	int Population (const T t) const { return _histogram[this->Bin(t)]; }		// returns the population of a single bin given a value
-	std::vector<histo_element_t>& Histogram () { return _histogram; }
+    
+    int Population (const T t) const { return _histogram[this->Bin(t)]; }		// returns the population of a single bin given a value
+    std::vector<histo_element_t>& Histogram () { return _histogram; }
 
 };
-	
+
 
 /* A 2-dimensional histogram functor. Each application of the histogram will bin the given values. Initial setup requires some parameters for the histogram (size, resolution, etc) */
 template <class T>
@@ -138,73 +141,73 @@ class Histogram2D : public std::binary_function<T,T,bool>
 {
   public:
 
-  typedef std::pair<T,T>	pair_t;
-  pair_t max;						// maximum value the histogram can bin in each dimension
-  pair_t min;						// minimum values for each dimension
-  pair_t resolution;				// resolution for each dimension
-  std::pair<int,int> size;					// dimensions of the 2-d data (number of histogram bins)
-  std::vector<int> counts;					// A running total of each time a bin was updated in the 1st dimension of the histogram i.e. access count
+    typedef std::pair<T,T>	pair_t;
+    pair_t max;						// maximum value the histogram can bin in each dimension
+    pair_t min;						// minimum values for each dimension
+    pair_t resolution;				// resolution for each dimension
+    std::pair<int,int> size;					// dimensions of the 2-d data (number of histogram bins)
+    std::vector<int> counts;					// A running total of each time a bin was updated in the 1st dimension of the histogram i.e. access count
 
-  // Initialization
-  Histogram2D (const pair_t& maxima, const pair_t& resolutions, const pair_t& minima = std::make_pair(T(0), T(0))) 
-	: max(maxima), min(minima), resolution(resolutions)
-  {
-	size.first = int((max.first - min.first)/resolution.first) + 1;
-	size.second = int((max.second - min.second)/resolution.second) + 1;
+    // Initialization
+    Histogram2D (const pair_t& maxima, const pair_t& resolutions, const pair_t& minima = std::make_pair(T(0), T(0))) 
+      : max(maxima), min(minima), resolution(resolutions)
+    {
+      size.first = int((max.first - min.first)/resolution.first) + 1;
+      size.second = int((max.second - min.second)/resolution.second) + 1;
 
-	/* 
-	printf ("size = <%d,%d>\nmax = <%f,%f\n,min = <%f,%f>\nres = <%f,%f>\n",
-		size.first, size.second, max.first, max.second, min.first, min.second, resolution.first, resolution.second);
-	*/
+      /* 
+	 printf ("size = <%d,%d>\nmax = <%f,%f\n,min = <%f,%f>\nres = <%f,%f>\n",
+	 size.first, size.second, max.first, max.second, min.first, min.second, resolution.first, resolution.second);
+	 */
 
-	histogram.clear();
-	histogram.resize (size.first, Histogram_t (size.second, 0));
+      histogram.clear();
+      histogram.resize (size.first, Histogram_t (size.second, 0));
 
-	counts.resize(size.first, 0);
-  }
+      counts.resize(size.first, 0);
+    }
 
-  void operator() (const T& a, const T& b) {
-	if (CheckLimits(a,b))
-	{
-	  // find which bin is to be updated
-	  bins new_bins = Bin(a,b);
-	  // Update the correct bin
-	  histogram[new_bins.first][new_bins.second]++;
-	  // update the number of times that this particular 1st-dimensions has been accessed (total # of bin updates)
-	  counts[new_bins.first]++;
-	}
-	return;
-  }
+    void operator() (const T& a, const T& b) {
+      if (CheckLimits(a,b))
+      {
+	// find which bin is to be updated
+	bins new_bins = Bin(a,b);
+	// Update the correct bin
+	histogram[new_bins.first][new_bins.second]++;
+	// update the number of times that this particular 1st-dimensions has been accessed (total # of bin updates)
+	counts[new_bins.first]++;
+      }
+      return;
+    }
 
-  /* Increment the bins given by the two indices without doing any checks */
-  void Shove (const int a, const int b)
-  {
-	histogram[a][b]++;
-	counts[a]++;
-	return;
-  }
-  // Return the element of the histogram
-  int Element (const int x, const int y) const { return histogram[x][y]; }
-  int Count (const int i) const { return counts[i]; }
+    /* Increment the bins given by the two indices without doing any checks */
+    void Shove (const int a, const int b)
+    {
+      histogram[a][b]++;
+      counts[a]++;
+      return;
+    }
+    // Return the element of the histogram
+    int Element (const int x, const int y) const { return histogram[x][y]; }
+    int Count (const int i) const { return counts[i]; }
 
   private:
-  typedef std::vector<int> Histogram_t;
-  std::vector<Histogram_t> histogram;		// 2-d container/histogram
- 
-  typedef unsigned int bin;
-  typedef std::pair<bin,bin> bins;
+    typedef std::vector<int> Histogram_t;
+    std::vector<Histogram_t> histogram;		// 2-d container/histogram
 
-  /* calculates the bins into which a value will be placed */
-  bins Bin (const T& a, const T& b)
-  { 
-	return std::make_pair( bin((a-min.first)/resolution.first), bin((b-min.second)/resolution.second) );
-  }
+    typedef unsigned int bin;
+    typedef std::pair<bin,bin> bins;
 
-  /* checks if the given value pair is within the limits of the histogram */
-  bool CheckLimits (const T& a, const T& b) const
-  { 
-	return a > min.first && a < max.first && b > min.second && b < max.second;
-  }
+    /* calculates the bins into which a value will be placed */
+    bins Bin (const T& a, const T& b)
+    { 
+      return std::make_pair( bin((a-min.first)/resolution.first), bin((b-min.second)/resolution.second) );
+    }
+
+    /* checks if the given value pair is within the limits of the histogram */
+    bool CheckLimits (const T& a, const T& b) const
+    { 
+      return a > min.first && a < max.first && b > min.second && b < max.second;
+    }
 
 };
 
@@ -225,8 +228,8 @@ class Histogram2D : public std::binary_function<T,T,bool>
 // A general method for making new functors
 #define MAKE_FUNCTOR(name,return_type,arg_type,code)	\
   class name {	\
-	public:	\
-	  return_type operator() (arg_type t) { code }	\
+    public:	\
+		return_type operator() (arg_type t) { code }	\
   };
 
 // Creates a new predicate object that has a name as given, and takes a value of the given type (can be an object), and returns the value of the 'code' provided. code must return a boolean for this to work.
@@ -245,6 +248,9 @@ class Histogram2D : public std::binary_function<T,T,bool>
   MAP_TO(A,A,OP);
 
 
+/************************************** String Manipulation *******************************************/
+
+
 /*******************************************************************************************************************************************************/
 /***************************************** Binary file I/O functors/iterators *************************************************************************************************/
 
@@ -253,56 +259,56 @@ class Histogram2D : public std::binary_function<T,T,bool>
 template<typename T>
 struct oi_t: public std::iterator<output_iterator_tag, void, void, void, void>
 {
-  oi_t(std::ostream& str)
-    :m_str(str)
-  {}
-  oi_t operator++()   {return *this;}  // increment does not do anything.
-  oi_t operator++(int){return *this;}
-  oi_t operator*()    {return *this;}  // Dereference returns a reference to this
-                                       // So that when the assignment is done we
-                                       // actually write the data from this class
-  oi_t operator=(T const& data)
-  {
-    // Write the data in a binary format
-    m_str.write(reinterpret_cast<char const*>(&data),sizeof(T));
-  }
+oi_t(std::ostream& str)
+:m_str(str)
+{}
+oi_t operator++()   {return *this;}  // increment does not do anything.
+oi_t operator++(int){return *this;}
+oi_t operator*()    {return *this;}  // Dereference returns a reference to this
+// So that when the assignment is done we
+// actually write the data from this class
+oi_t operator=(T const& data)
+{
+// Write the data in a binary format
+m_str.write(reinterpret_cast<char const*>(&data),sizeof(T));
+}
 
-  private:
-    std::ostream&   m_str;
+private:
+std::ostream&   m_str;
 };
 
 // istream iterator for reading in data from a binary file
 template<typename T>
 struct ii_t: public iterator<input_iterator_tag, void, void, void, void>
 {
-  ii_t(std::istream& str)
-    :m_str(&str)
-  {}
-  ii_t()
-    :m_str(NULL)
-  {}
-  ii_t operator++()   {return *this;}  // increment does nothing.
-  ii_t operator++(int){return *this;}
-  T& operator*()
-  {
-    // On the de-reference we actuall read the data into a local //// static ////
-    // Thus we can return a reference
-    static T result;
-    m_str->read(reinterpret_cast<char*>(&result),sizeof(T));
-    return result;
-  }
-  // If either iterator has a NULL pointer then it is the end() of stream iterator.
-  // Input iterators are only equal if they have read past the end of stream.
-  bool operator!=(ii_t const& rhs)
-  {
-      bool lhsPastEnd = (m_str == NULL)     || (!m_str->good());
-      bool rhsPastEnd = (rhs.m_str == NULL) || (!rhs.m_str->good());
+ii_t(std::istream& str)
+:m_str(&str)
+{}
+ii_t()
+:m_str(NULL)
+{}
+ii_t operator++()   {return *this;}  // increment does nothing.
+ii_t operator++(int){return *this;}
+T& operator*()
+{
+// On the de-reference we actuall read the data into a local //// static ////
+// Thus we can return a reference
+static T result;
+m_str->read(reinterpret_cast<char*>(&result),sizeof(T));
+return result;
+}
+// If either iterator has a NULL pointer then it is the end() of stream iterator.
+// Input iterators are only equal if they have read past the end of stream.
+bool operator!=(ii_t const& rhs)
+{
+bool lhsPastEnd = (m_str == NULL)     || (!m_str->good());
+bool rhsPastEnd = (rhs.m_str == NULL) || (!rhs.m_str->good());
 
-      return !(lhsPastEnd && rhsPastEnd);
-  } 
+return !(lhsPastEnd && rhsPastEnd);
+} 
 
-  private:
-    std::istream*   m_str;
+private:
+std::istream*   m_str;
 };
 */
 

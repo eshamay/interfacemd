@@ -48,7 +48,14 @@ void DensityBinner<T>::Output (FILE * output, const int timestep) {
 
 int main () {
 
-  WaterSystemParams wsp ("atomic-densities.dat", 75000);
+  libconfig::Config cfg;
+  cfg.readFile("system.cfg");
+
+  std::string filename = cfg.lookup("analysis.density.filename");
+  libconfig::Setting &analysis = cfg.lookup("analysis");
+  analysis.add("filename", libconfig::Setting::TypeString) = filename;
+
+  WaterSystemParams wsp (cfg);
 
   DensityAnalyzer da (wsp);
 

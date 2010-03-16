@@ -30,3 +30,18 @@ VecR CarbonChain::Vector_CoM_To_End () {
 	VecR axis (_centerofmass - LastCarbon->Position());
 	return (axis);
 }
+
+/*
+// sets the _carbons by name for easier access
+void CarbonChain::SetCarbons () {
+
+  for (Atom_it ai = this->begin(); ai != this->end(); ai++)
+  {
+    std::string name = (*ai)->Name();
+    if (name[0] == "C" && std::isdigit(name[1]))
+      _carbons[FindDigits(name)] = *ai;
+  }
+
+  return;
+}
+*/

@@ -20,11 +20,11 @@ class APBinner {
 	void operator() (T * mol) {
 	  // calculate the bin for the cos(angle) formed between the molecular axis and the reference axis.
 	  mol->SetOrderAxes();
-	  //VecR molAxis = mol->MolecularAxis();
-	  VecR molAxis = mol->Normal();
+	  VecR molAxis = mol->MolecularAxis();	// water bisector
+	  //VecR molAxis = mol->Normal();			// Water normal
 	  double angle = molAxis < Analyzer::ref_axis;
 // flip equivalent angles (only good for when doing calculations on the molecular normal axis)
-	  angle = (angle < 0.0) ? -angle : angle;
+	  //angle = (angle < 0.0) ? -angle : angle;
 	  //int anglebin = Analyzer::AngleBin (molAxis < Analyzer::ref_axis);
 
 	  // Calculate the bin for the molecule's position (based on center of mass)

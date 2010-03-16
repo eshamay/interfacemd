@@ -21,8 +21,7 @@ class ColumnDataFile:
 	def ParseHeader(self):
 		self.reader = open(self.file)
 		header = self.reader.next()
-		header = header.split()
-		self.header = header
+		self.header = header.split()
 		self.reader.close()
 		return
 	

@@ -6,13 +6,17 @@
 #include "xyzsystem.h"
 #include "utility.h"
 #include "graph.h"
+#include <libconfig.h++>
+#include <cstdlib>
+#include <iomanip>
 
 // Predicates (defined below)
 template <class T> bool Name_pred (const T t, const std::string name);
 template <class T> bool AtomicPosition_pred (const T t, const std::pair<double,double> extents);
 
 struct WaterSystemParams {
-  WaterSystemParams (		/* Constructor and initial/default values for system parameters */
+  /*
+  WaterSystemParams (		// Constructor and initial/default values for system parameters
 		     std::string _output = "temp.dat",
 		     const int _timesteps = 200000,
 		     const bool _avg = false,
@@ -24,7 +28,7 @@ struct WaterSystemParams {
 		     const double _angmin = -1.0, const double _angmax = 1.0, 
 		     const double _angres = 0.01,
 		     const double _pbcflip = 20.0
-		     ) :	/* The initialization of the system parameters */
+		     ) :	// The initialization of the system parameters
   avg(_avg), output_filename(_output), output(fopen(_output.c_str(), "w")),
     axis(_axis), ref_axis(_ref_axis), output_freq(_output_freq), timesteps(_timesteps), restart(_restart),
     posmin(_posmin), posmax(_posmax), posres(_posres), 
@@ -33,6 +37,47 @@ struct WaterSystemParams {
     angmin(_angmin), angmax(_angmax), angres(_angres),
     angbins (int((angmax-angmin)/angres))
   { }
+  */
+
+  WaterSystemParams () { }
+
+  WaterSystemParams (libconfig::Config::Config& cfg)
+  {
+    try {
+      config_file = &cfg;
+      posmin = (cfg.lookup("analysis.position-range")[0]);
+      posmax = (cfg.lookup("analysis.position-range")[1]);
+
+      avg = cfg.lookup("analysis.averaging");
+      output_filename = (const char *)cfg.lookup("analysis.filename");
+      output = fopen(output_filename.c_str(), "w");
+      axis = (coord)((int)cfg.lookup("analysis.reference-axis"));
+      ref_axis = VecR(
+	  cfg.lookup("analysis.reference-vector")[0], 
+	  cfg.lookup("analysis.reference-vector")[1], 
+	  cfg.lookup("analysis.reference-vector")[2]);
+      output_freq = cfg.lookup("analysis.output-frequency");
+      timesteps = cfg.lookup("system.timesteps");
+      restart = cfg.lookup("analysis.restart-time");
+      posres = cfg.lookup("analysis.resolution.position");
+      posbins  = int((posmax-posmin)/posres);
+      pbcflip = cfg.lookup("analysis.PBC-flip");
+      angmin = cfg.lookup("analysis.angle-range")[0];
+      angmax = cfg.lookup("analysis.angle-range")[1];
+      angres = cfg.lookup("analysis.resolution.angle");
+      angbins  = int((angmax-angmin)/angres);
+    }
+    catch(const libconfig::SettingTypeException &stex) {
+      std::cerr << "Something is wrong with the configuration parameters or file - check syntax\n(watersystem.h)" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+    catch(const libconfig::SettingNotFoundException &snfex) {
+      std::cerr << "A setting is missing from the configuration file!" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  libconfig::Config * config_file;	/* Configuration file */
 
   bool avg;			/* Will averaging of two interfaces be performed? Can also be used for other functionality */
 
@@ -118,7 +163,6 @@ template<typename T> Atom_ptr_vec WaterSystem<T>::int_atoms;
 template <class T>
 WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
 {
-
   WaterSystem::wsp = params;
 
   WaterSystem::posmin = params.posmin;

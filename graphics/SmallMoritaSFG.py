@@ -74,16 +74,23 @@ class MoritaSFG:
 		colors = ['r','b','g','c','m','y','k']
 		color = 0
 
-		ax = self.fig.add_subplot(1,1,1)
+		ax = self.fig.add_subplot(2,1,1)
+		ax2 = self.fig.add_subplot(2,1,2)
 		
 		# plot all the plots
 		for d in self.data:
-			ax.plot(d['x'], d['chi'], colors[color]+'-', linewidth=3, label=d['file'])
+			#ax.plot(d['x'], d['chi'], colors[color]+'-', linewidth=3, label=d['file'])
+			ax.plot(d['x'], d['chi'], colors[color]+'-', linewidth=3)
+			ax2.plot(d['x'], d['real'], 'b-', linewidth=3, label='Re')
+			ax2.plot(d['x'], d['imag'], 'r-', linewidth=3, label='Im')
 			color = color + 1
-			ax.set_xlabel('Frequency')
+			ax.set_ylabel(r'$|\chi^{(2)}|^2$', fontsize=28)
+			ax2.set_ylabel(r'$\chi^{(2)}$', fontsize=28)
+			ax2.set_xlabel('Frequency', fontsize=28)
 			ax.set_yticklabels([])
+			ax2.set_yticklabels([])
 
-			labels = ax.get_xticklabels() + ax.get_yticklabels()
+			labels = ax.get_xticklabels() + ax.get_yticklabels() + ax2.get_xticklabels() + ax2.get_yticklabels() 
 			for label in labels:
 				label.set_size('x-large')
 

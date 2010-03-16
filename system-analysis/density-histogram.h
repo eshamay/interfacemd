@@ -3,6 +3,7 @@
 
 #include "../utility.h"
 #include "../analysis.h"
+#include <libconfig.h++>
 
 typedef vector<int> Histogram_1D;
 typedef map<string, Histogram_1D>::iterator Histogram_it;
@@ -59,21 +60,27 @@ class DensityAnalyzer : public Analyzer {
 
 	void Setup () { 
 
+	  /* Load all the atoms in the system */
 	  LoadAll();
-	  std::vector<Atom *> v_si;
+
+	  //std::vector<Atom *> v_si;
+
+
 	  /* grab all the Si atoms */
+	  /*
 	  RUN (int_atoms)
 	  {
 		Atom * atom = int_atoms[i];
 		if (atom->Name() == "SI")
 		  v_si.push_back(atom);
 	  }
+	  */
 
 	  /* load only the waters */
-	  FindWaters();
+	  //FindWaters();
 
 	  /* now load all the Si atoms into the ones to be processed */
-	  copy(v_si.begin(), v_si.end(), back_inserter(int_atoms));
+	  //copy(v_si.begin(), v_si.end(), back_inserter(int_atoms));
 
 	}
 

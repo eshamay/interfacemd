@@ -29,7 +29,7 @@ void SFGAnalyzer::Analysis () {
   // first find all the waters in the system
   FindWaters();
   // first let's find all the waters in the interface
-  SLICE_BY_POSITION(int_wats, Water *, 25.0, 40.0);
+  SLICE_BY_POSITION(int_wats, Water *, 60.0, 80.0);
 
 
   // and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
@@ -45,7 +45,8 @@ void SFGAnalyzer::Analysis () {
 
 	Molecular_Beta.clear();
 
-	// and then calculate the chi spectrum for the molecule SPS
+	// and then calculate the chi spectrum for the molecule 
+	// 0,2,1 = SSP. S = X and Z axes, P = Y axis
 	Molecular_Beta = sfg.Beta (*water, 0,2,1);
 
 	numMolsProcessed++;
@@ -119,7 +120,7 @@ void SFGAnalyzer::PostAnalysis ()
 int main () {
 
 
-  WaterSystemParams params ("Morita-SFG.dat", 75000);
+  WaterSystemParams params ("Morita-SFG.dat", 100000);
 
   SFGAnalyzer analyzer (params);
 

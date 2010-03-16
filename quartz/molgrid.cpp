@@ -3,61 +3,85 @@
 
 using namespace std;
 
+struct GridParams {
+
+  GridParams (Molecule * uc, string _name, double spacing_factor, int _x, int _y, int _z) 
+	: 
+	  unitCell(uc),
+	  name(_name),
+	  spacing(spacing_factor),
+	  x(_x), y(_y), z(_z),
+	  x_shift (VecR (spacing, 0.0, 0.0)),
+	  y_shift (VecR()),
+	  z_shift (VecR (0.0, 0.0, spacing*sqrt(3.0)/2.0))
+  { }
+
+  Molecule * unitCell;
+  string name;
+  double spacing;	// spacing factor between molecules
+  int x, y, z;		// number of columns, rows, etc. of molecules in each grid direction
+  VecR x_shift;		// distance to shift each unitcell in a row
+  VecR y_shift;
+  VecR z_shift;		// row spacing
+};
+
 // Rename all the molecules into a single molecule
-std::vector<Molecule *> UnitCellToSlab (Molecule *, VecR&, VecR&, VecR&);
+std::vector<Molecule *> UnitCellToSlab (GridParams&);
 Molecule * MakeSingleMolecule (std::vector<Molecule *>&);
-void FixSingleMoleculeNaming (Molecule *);
-void AddDanglingHydrogens (Molecule *);
-void PrintMoleculePDB (Molecule *);
+void FixSingleMoleculeNaming (GridParams&);
+void AddDanglingHydrogens (GridParams&);
+void PrintMoleculePDB (GridParams&);
+void PrintMoleculesPDB (Mol_ptr_vec& mols);
 
 int main () {
-  //PDBFile pdb ("quartz_100_short.pdb");
-  PDBFile pdb ("beta-cristobalite.pdb");
+  // The unitcell's PDB file - must have a "TER" after the residue
+  PDBFile pdb ("octadecane.pdb");
+  string name = "odn";
+  double spacing = 5.528;	// inter-chain spacing
 
-  // create the quartz unitcell
-  Molecule * uc = pdb.Molecules(0);
-
-  //make copies of the quartz unitcell and shift them around
-  //VecR x_shift (4.91, 0.0, 0.0);
-  VecR x_shift (10.0, 0.0, 0.0);
-  VecR y_shift (0.0, 10.0, 0.0);
-  VecR z_shift (0.0, 0.0, 0.0);
+  GridParams params (pdb.Molecules(0), name, spacing, 7, 1, 6);
 
   // Create the slab by creating and shifting copies of the unit cell
-  Mol_ptr_vec mols = UnitCellToSlab(uc, x_shift, y_shift, z_shift);
+  Mol_ptr_vec mols = UnitCellToSlab(params);
 
-  Molecule * mol = MakeSingleMolecule (mols);
+  //Molecule * mol = MakeSingleMolecule (params);
 
-  //AddDanglingHydrogens (mol);
+  //AddDanglingHydrogens (params);
 
   // Take care of renaming the atoms and the residue before printing it out
-  FixSingleMoleculeNaming (mol);
+  //FixSingleMoleculeNaming (params);
 
-  PrintMoleculePDB (mol);
+  PrintMoleculesPDB (mols);
 
   return 0;
 }
 
 // Makes a repeating slab out of a single unit cell by creating copies and shifting
-Mol_ptr_vec UnitCellToSlab (Molecule * uc, VecR& x_shift,VecR& y_shift, VecR& z_shift) {
+Mol_ptr_vec UnitCellToSlab (GridParams& params) {
 
   std::vector<Molecule *> mols;
+  Molecule * uc = params.unitCell;
+
   VecR yshift, xshift, zshift;
-  for (int i = 0; i < 1; i++) {
+
+  yshift.Zero();
+  for (int i = 0; i < params.y; i++) {
     zshift.Zero();
-    yshift.Zero();
 
-    for (int j = 0; j < 6; j++) {
+    for (int j = 0; j < params.x; j++) {
       xshift.Zero();
+      if (!(j % 2))
+		xshift += params.x_shift * 0.5;
 
-      for (int k = 0; k < 6; k++) {
+      for (int k = 0; k < params.z; k++) {
 
 	// make a copy of the unitcell
 	Molecule * copy = new Molecule();
-	copy->Name("qtz");
+	copy->Name(params.name);
 	// make copies of all the atoms in the unitcell
-	for (int atom = 0; atom < uc->size(); atom++) {
-	  Atom * pa = new Atom (*uc->Atoms(atom));
+	for (Atom_it atom_i = uc->begin(); atom_i != uc->end(); atom_i++) {
+	//for (int atom = 0; atom < uc->size(); atom++) {
+	  Atom * pa = new Atom (*(*atom_i));
 	  copy->AddAtom(pa);
 	}
 
@@ -65,12 +89,12 @@ Mol_ptr_vec UnitCellToSlab (Molecule * uc, VecR& x_shift,VecR& y_shift, VecR& z_
 	copy->Shift(yshift + xshift + zshift);
 	mols.push_back(copy);
 
-	xshift += x_shift;
+	xshift += params.x_shift;
       } 
 
-      yshift += y_shift;
+      zshift += params.z_shift;
     } 
-    zshift += z_shift;
+    yshift += params.y_shift;
   }
 
   return mols;
@@ -91,9 +115,10 @@ Molecule * MakeSingleMolecule (Mol_ptr_vec& mols) {
   return mol;
 }
 
-/* Single molecule naming - takes a group of residues and sets the naming scheme so that the output is a single residue with lots of renamed atoms */
-void FixSingleMoleculeNaming (Molecule * mol) {
-  /* now that there are several copies of the molecules, let's go through and rename the atoms, and stick them all into a single molecule of sio2 */
+/*
+//Single molecule naming - takes a group of residues and sets the naming scheme so that the output is a single residue with lots of renamed atoms 
+void FixSingleMoleculeNaming (GridParams& params) {
+  // now that there are several copies of the molecules, let's go through and rename the atoms, and stick them all into a single molecule of sio2
   mol->Name("qtz");
   std::string new_name;
   int si=0; 
@@ -117,25 +142,27 @@ void FixSingleMoleculeNaming (Molecule * mol) {
 
   return;
 }
+*/
 
-void AddDanglingHydrogens (Molecule * mol) {
+/*
+void AddDanglingHydrogens (GridParams& params) {
 
   Atom_ptr_vec atoms = mol->Atoms();
   Atom_ptr_vec Hs;
 
-  /* cycle through each atom in order of the pdb file */
+  // cycle through each atom in order of the pdb file
   for (Atom_it atom_i = mol->begin(); atom_i != mol->end(); atom_i++) {
     Atom * atom = *atom_i;
     VecR pos = atom->Position();
 
-    /* find the surface Oxygens */
+    // find the surface Oxygens
     if (atom->Name().find("O") != string::npos && pos[z] > -8.5)
     {
-      /* add H's to the surface */
+      // add H's to the surface
       Atom * h = new Atom ("H", pos + VecR (0.0, 0.0, 1.1));
       Hs.push_back(h);
     }
-    /* oxygens on the slab's side */
+    // oxygens on the slab's side
     if (atom->Name().find("O") != string::npos && pos[y] > 36.0) {
       Atom * h = new Atom ("H", pos + VecR (0.0, 1.1, 0.0));
       Hs.push_back(h);
@@ -146,6 +173,12 @@ void AddDanglingHydrogens (Molecule * mol) {
   RUN (Hs)
     mol->AddAtom(Hs[i]);
 
+  return;
+}
+*/
+
+void PrintMoleculesPDB (Mol_ptr_vec& mols) {
+  PDBFile::WritePDB (mols);
   return;
 }
 

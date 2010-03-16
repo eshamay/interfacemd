@@ -6,17 +6,18 @@ import matplotlib.text
 import matplotlib.patches
 
 
-ATOMS = ['O','C']
-#ATOMS = ['O','C','NA','S']
-#ATOMS = ['O','C','NA','N']
+#ATOMS = ['O','C']
 #ATOMS = ['O','C','NA','Cl']
-DATA_LENGTH = 750
+#ATOMS = ['O','C','NA','N']
+#ATOMS = ['O','C','NA','S']
+ATOMS = ['O', 'C1', 'C18']
+DATA_LENGTH = 790
 #ATOMS = ['O','C']
 TITLE = r'The Aqueous Na$_2$SO$_4$ Solution - CCl$_4$ Interface'
-XRANGE = [-9.0,17.5]
+XRANGE = [-9.0,20.0]
 YRANGE = [0.0,2.0]
 # line color/style and labels
-LINESTYLES = {'O':['black',r'H$_2$O'], 'C':['blue',r'CCl$_4$'], 'NA':['#088618',r'Na'], 'N':['#a10f05',r'NO$_3$'], 'SI':['#6805a1',r'SO$_4$'], 'S':['#6805a1',r'SO$_4$'], 'Cl':['#6e6f00',r'Cl']}
+LINESTYLES = {'O':['black',r'H$_2$O'], 'C1':['blue',r'C$_1$'], 'C18':['blue',r'C$_18$'], 'C':['blue',r'CCl$_4$'], 'NA':['#088618',r'Na'], 'N':['#a10f05',r'NO$_3$'], 'SI':['#6805a1',r'SO$_4$'], 'S':['#6805a1',r'SO$_4$'], 'Cl':['#6e6f00',r'Cl']}
 BIN_WIDTH = 0.1
 
 class DensityProfiler:
@@ -30,8 +31,8 @@ class DensityProfiler:
 
 	# scale each data set to adjust the number density to density in terms of g/mL
 	def ScaleDataToDensity(self):
-		molecular_weight = {'O':18.01, 'C':153.82, 'NA':22.99, 'N':62.00, 'S':96.06, 'Cl':35.45, 'SI':28.0855}
-		scale = {'O':1.0, 'C':1.0, 'NA':10.0, 'N':5.0, 'S':5.0, 'Cl':5.0, 'SI':1.0}
+		molecular_weight = {'O':18.01, 'C':153.82, 'C1':153.82, 'C18':153.82, 'NA':22.99, 'N':62.00, 'S':96.06, 'Cl':35.45, 'SI':28.0855}
+		scale = {'O':1.0, 'C':1.0, 'C1':1.0, 'C18':1.0, 'NA':10.0, 'N':5.0, 'S':5.0, 'Cl':5.0, 'SI':1.0}
 
 		conversion = 1.0/(30.0*30.0*BIN_WIDTH * 1.0e-24 * 6.02e23)
 		for k,v in self.data.iteritems():
@@ -65,8 +66,6 @@ class DensityProfiler:
 				print x[datum.index(max(datum[:DATA_LENGTH]))]
 				ax.axvline(x[datum.index(max(datum[:DATA_LENGTH]))], color=LINESTYLES[atom][0], linestyle=':', linewidth=5)
 				
-				
-
 			# sets the maximum of the graph
 			#dat_max = max(datum)
 			#if dat_max > YRANGE[1]:
@@ -84,10 +83,10 @@ class DensityProfiler:
 		ax.set_axis_bgcolor('w')
 
 		ax.set_xlabel(r'Distance to Interface ($\AA$)', size=40)
-		ax.set_ylabel(r'$\rho_{H_2O}$ ($\frac{mg}{mL}$)', size=35)
+		ax.set_ylabel(r'$\rho$ ($\frac{mg}{mL}$)', size=45)
 
 		for a in ax.get_xticklabels() + ax.get_yticklabels():
-			a.set_fontsize(35)
+			a.set_fontsize(40)
 
 		#self.SetLegend()
 		plt.show()
@@ -152,6 +151,7 @@ class DensityProfiler:
 		# this adds a box that clearly labels the width and 90-10 thickness of the interface from the fitting tanh
 		gibbs_1 = matplotlib.patches.Ellipse ((shift, max(datum)/2.0), 0.5, 0.1, alpha=0.0, fc="none")
 
+		'''
 		ax.annotate("Water/Decane Interface\nThickness = %5.3f\n\"90-10\" = %5.3f" % (width, width*2.197), (shift, max(datum)/2.0),
 			    xytext=(-200,80), textcoords='offset points', size=14,
 			    bbox=dict(boxstyle="round", fc=(1.0, 0.7, 0.7), ec=(1., .5, .5)),
@@ -163,7 +163,6 @@ class DensityProfiler:
 					    connectionstyle="arc3,rad=-0.1"),
 			    )
 
-		'''
 		gibbs_2 = matplotlib.patches.Ellipse ((params[6], max(datum)/2.0), 0.5, 0.1, alpha=0.0, fc="none")
 
 		ax.annotate("Water Interface #2\nThickness = %5.3f\n\"90-10\" = %5.3f" % (params[7], params[7]*2.197), (params[6], max(datum)/2.0),

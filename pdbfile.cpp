@@ -17,6 +17,8 @@ PDBFile::PDBFile (string path) {
 	exit(1);
   }
 
+  // include here a check for the TER
+  
   //this->_FindLastStep();
 
   this->LoadFirst ();	// load the first frame of the file

@@ -66,11 +66,10 @@ public:
 	Atom_ptr_vec Atoms () const			{ return _atoms; }
 	Atom * Atoms (int index) const		{ return _atoms[index]; }
 
-	typedef std::vector<Atom *>::const_iterator	const_iterator;
-	const_iterator begin() const {
+	Atom_it begin() const {
 	  return _atoms.begin();
 	}
-	const_iterator end() const {
+	Atom_it end() const {
 	  return _atoms.end();
 	}
 
@@ -153,9 +152,7 @@ public:
 	MatR const & DCMToLab (const coord axis = z);
 };
 
-typedef std::vector<Molecule *>::iterator PMOL_IT;
-typedef std::vector<Molecule>::iterator MOL_IT;
 typedef std::vector<Molecule *> Mol_ptr_vec;
-typedef std::vector<Molecule> Mol_vec;
+typedef Mol_ptr_vec::const_iterator Mol_it;
 
 #endif

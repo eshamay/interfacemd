@@ -9,6 +9,8 @@ import matplotlib.text
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
+NAMES = {'Na2SO4':r'Na$_2$SO$_4$', 'NaCl':r'NaCl', 'NaNO3':r'NaNO$_3$'}
+
 class SFGData:
 	def __init__(self,file):
 		self.filename = file
@@ -79,9 +81,10 @@ class MoritaSFG:
 
 			self.PlotChi(dat,ax)
 			self.SetTicksAndLabels(dat,ax)
-			self.ShowLegend(ax)
+			#self.ShowLegend(ax)
 
 			plt.xlim(2800,3800)
+			plt.ylim(0.0,1.1)
 		plt.show()
 
 	def InitPlot(self):
@@ -92,7 +95,11 @@ class MoritaSFG:
 		self.axs = []
 		for i in range(len(self.sfgdata)):
 			self.axs.append(self.fig.add_subplot(2,2,i+1))
-			plt.title(self.sfgdata[i].SystemName(), size='xx-large')
+			plt.title(NAMES[self.sfgdata[i].SystemName()], size=30)
+			self.axs[i].set_yticklabels(())
+			self.axs[i].set_ylabel(r'$\left|\chi^{(2)}\right|^2 (a.u.)$', size=35)
+			
+				
 
 		return
 
@@ -105,7 +112,6 @@ class MoritaSFG:
 			ax1 = self.fig.add_subplot(1,1,1)
 
 		ax1.set_title('SFG Spectrum', size='x-large')
-		ax1.set_ylabel(r'$\left|\chi^{(2)}\right|^2$', size='xx-large')
 
 		if extra_axes == True:
 			ax2 = self.fig.add_subplot(3,1,2)
@@ -168,6 +174,9 @@ class MoritaSFG:
 	  	df = (max-min)/float(numbins)
 		return [min + x*df for x in range(numbins)]
 
+	def MoveXAxis(self,x,shift):
+		return map(lambda y: y+shift, x)
+
 	def StretchFreq(self,freq,new_min,cut_freq):
 	  	cut_freq_id = list(freq).index(cut_freq)
 
@@ -192,7 +201,7 @@ class MoritaSFG:
 		  	scale = 1.4
 			line_color = 'g-'
 		elif dat.SystemName() == 'NaNO3':
-			cut_freq = 3550.0
+			cut_freq = 3600.0
 			low_freq = 2000.0
 		  	scale = 1.5
 			line_color = 'r-'
@@ -212,6 +221,9 @@ class MoritaSFG:
 
   		# scale the frequencies
   		dat_freq = self.StretchFreq (dat.Freq(), low_freq, cut_freq)
+		if dat.SystemName() == 'NaNO3':
+			dat_freq = self.MoveXAxis(dat_freq,37)
+
   		#dat_freq = dat.Freq()
   		h2o_freq = self.StretchFreq (self.h2o.Freq(), 2000, 3600.0)
   		#h2o_freq = self.h2o.Freq()
@@ -219,7 +231,6 @@ class MoritaSFG:
 		#ax.plot(dat.Freq(), dat.Chi(), 'b:', linewidth=4, label=dat.SystemName()) #label=r'$|\chi|^{2}$')
 		ax.plot(dat_freq, chi, line_color, linewidth=4, label=dat.SystemName()) #label=r'$|\chi|^{2}$')
 		ax.plot(h2o_freq, h2o, 'k:', linewidth=4, label=r'H$_2$O')
-
 
 
 	def SetTicksAndLabels(self,dat,ax):

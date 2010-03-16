@@ -41,11 +41,11 @@ class DensityFitter(SM):
 		print "Average of the densities (low-high) = %6.3f" % (sum([plsq[0][0], plsq[0][1], plsq[0][2], plsq[0][3]])/4.0)
 		return (fit, param_hash)
 
-	def FitLowerWater(self,x,data,gibbs=30.0):
+	def FitLowerWater(self,x,data,gibbs=65.0):
 		# initial guess values
 		dens_low = 0.0
 		dens_high = max(data)
-		width = 5.0
+		width = 2.0
 
 		p0 = array ([dens_low,dens_high,gibbs,width])
 		fit_func = self.tanh_fit
