@@ -11,6 +11,7 @@ typedef std::pair<std::string, std::string> NamePair;
 typedef std::vector<NamePair> NamePairList;
 typedef std::pair<double, double> double_pair;
 typedef std::map<NamePair, Histogram1D<double> > RDF_map;
+typedef std::map<NamePair, Histogram2D<double> > RDF2D_map;
 
 struct RDFParameters {
 
@@ -37,6 +38,7 @@ struct RDFParameters {
     }
 
     ParseAtomPairs (config_file);
+    PrintParams ();
   }
 
   // Parse the atom pairs from the configuration file
@@ -63,15 +65,20 @@ struct RDFParameters {
     return;
   }
 
-  void PrintParams () {
+  void PrintParams () const {
 
     printf ("Atom pairs parsed from configuration file:\n");
-    for (NamePairList::iterator it = name_pairs.begin(); it != name_pairs.end(); it++) {
+    for (NamePairList::const_iterator it = name_pairs.begin(); it != name_pairs.end(); it++) {
       std::cout << it->first << " -- " << it->second << std::endl;
     }
 
-    printf ("rdf_max = %f\nrdf_min = %f\nrdf_res = %f\n\n", rdf_max, rdf_min, rdf_res);
-    printf ("position_max = %f\nposition_min = %f\nposition_res = %f\n\n", position_max, position_min, position_res);
+    printf ("\n\nPerforming an RDF analysis using the following parameters:\n");
+    printf ("\tRDF Parameters:\n\t\tMinimum: %f\n\t\tMaximum: %f\n\t\tResolution: %f\n",
+	rdf_min, rdf_max, rdf_res);
+    printf ("\tPosition Parameters:\n\t\tMinimum: %f\n\t\tMaximum: %f\n\t\tResolution: %f\n\n",
+	position_min, position_max, position_res);
+
+    return;
   }
 
   typedef NamePairList::const_iterator namepair_it;
@@ -89,83 +96,101 @@ struct RDFParameters {
 };
 
 
-/* This functor takes atom-pairs to generate a radial-distribution-functions.
- * Application of the functor on an atom-pair creates several RDFs. Each atom
- * pair has its own set of RDFs, and each set of RDFs is divided up into sub-
- * RDFs representing slices of volume cutting up an MD slab.
- * The slab-position of an RDF is based on the first atom named in an atom-pair.
- * All the atom pairs are defined a priori and supplied to the functor's ctor. */
+
+
+
+/**********************************************************************************************/ 
+/*************** Abstract base class for processing RDFs in multiple dimensions ***************/
 template <class T>
-class RDFMachine : public std::binary_function<T,T,bool> {
+class RDFProcessor : public std::binary_function<T,T,bool> {
   public:
-
-    RDFMachine (const RDFParameters& params);
-
-    /* Adds the given pair into the histogram after checking to see if that pair is one of those being analyzed */
-    void operator() (const T atom1, const T atom2) 
+    RDFProcessor (const RDFParameters& params)
     {
-
-      /** Check if the pair's RDF is being calculated i.e. in the list of name-pairs **/
-      NamePair name_pair = std::make_pair(atom1->Name(), atom2->Name());
-
-      /* find the actual way the pair is ordered in the list (i.e. first atom named = first atom, etc) */
-      NamePairList::iterator list_pair = PairListMember(
-	  name_pair, _params.name_pairs.begin(), _params.name_pairs.end());
-
-      if (list_pair < _params.name_pairs.end())	// see if the atomic pair is found in the list
-      {
-	BinAtomPairData (*list_pair, atom1, atom2);
-      }
-      return;
+      _params = params;
+      _total_volume =  4.0/3.0 * M_PI * pow(_params.rdf_max, 3);
     }
 
-    /* print the histograms to a file */
-    void Output (FILE * output) const;
+    /* process the RDF and histogramming of the distance between the two atoms */
+    void operator() (const T atom1, const T atom2);
 
-  private:
+    /* print the histograms to a file */
+    virtual void Output (FILE * output) const = 0;
+
     static RDFParameters _params;
-    static unsigned long _total_atoms;
-    static RDF_map _rdfs;
     static double _total_volume;	// the sphere of bonding distances in which we're calculating RDFs
 
-    /* Calculates the rdf data and adds it into the correct histogram */
-    void BinAtomPairData (const NamePair& name_pair, const T a1, const T a2);
-
+    virtual void BinAtomPairData (const NamePair& name_pair, const T a1, const T a2) = 0;
 };
 
-template <class T> RDFParameters RDFMachine<T>::_params;
-template <class T> RDF_map RDFMachine<T>::_rdfs;
-template <class T> double RDFMachine<T>::_total_volume;
+template <class T> RDFParameters RDFProcessor<T>::_params;
+template <class T> double RDFProcessor<T>::_total_volume;
 
   template <class T>
-RDFMachine<T>::RDFMachine (const RDFParameters& rdfparams)
+void RDFProcessor<T>::operator() (const T atom1, const T atom2)
 {
-  _params = rdfparams;
 
-  _total_volume =  4.0/3.0 * M_PI * pow(_params.rdf_max, 3);
+  /** Check if the pair's RDF is being calculated i.e. in the list of name-pairs **/
+  NamePair name_pair = std::make_pair(atom1->Name(), atom2->Name());
 
-  // Create a new histogram for each pair of atomic names required for the analysis
-  for (NamePairList::const_iterator it = _params.begin(); it != _params.end(); it++) {
-    //RUN (_params.name_pairs) {
-    _rdfs.insert(std::make_pair(
-	  *it,
-	  Histogram1D<double>(_params.rdf_min, _params.rdf_max, _params.rdf_res)));
+  /* find the actual way the pair is ordered in the list (i.e. first atom named = first atom, etc) */
+  NamePairList::iterator list_pair = PairListMember(
+      name_pair, _params.name_pairs.begin(), _params.name_pairs.end());
+
+  if (list_pair < _params.name_pairs.end())	// see if the atomic pair is found in the list
+  {
+    BinAtomPairData (*list_pair, atom1, atom2);
   }
-
   return;
 }
 
 
+
+
+
+
+
+/**********************************************************************************************/ 
+/****************************** 1D RDF Processor **********************************************/ 
+template <class T>
+class RDFMachine : public RDFProcessor<T> {
+  public:
+
+    RDFMachine (const RDFParameters& params);
+
+    virtual void Output (FILE * output) const;
+
+  private:
+    static RDF_map _rdfs;
+
+    /* Calculates the rdf data and adds it into the correct histogram */
+    virtual void BinAtomPairData (const NamePair& name_pair, const T a1, const T a2);
+
+};
+
+template <class T> RDF_map RDFMachine<T>::_rdfs;
+
+  template <class T>
+  RDFMachine<T>::RDFMachine (const RDFParameters& rdfparams)
+: RDFProcessor<T> (rdfparams)
+{
+
+  // Create a new histogram for each pair of atomic names required for the analysis
+  for (NamePairList::const_iterator it = RDFProcessor<T>::_params.begin(); it != RDFProcessor<T>::_params.end(); it++) {
+    _rdfs.insert(std::make_pair(
+	  *it,
+	  Histogram1D<double>(RDFProcessor<T>::_params.rdf_min, RDFProcessor<T>::_params.rdf_max, RDFProcessor<T>::_params.rdf_res)));
+  }
+
+  printf ("RDF Analysis is using only one dimension - interatomic distances\n");
+  return;
+}
+
   template <class T> 
 void RDFMachine<T>::BinAtomPairData (const NamePair& name_pair, const T a1, const T a2) 
 {
-  // The inter-atomic distance
+  // The inter-atomic distance is calculated
   double atomic_distance = MDSystem::Distance(a1, a2).Magnitude();
-  // Because the atomic position is being taken into account when slicing up the slab into many pieces, the correct atom must be used to determine the rdf position bin.
-  // Thus, the following will choose the correct atomic position to use (namely, the first one listed in the name pair)
-  //double slab_position = (a1->Name() == name_pair.first) ? a1->Position()[WaterSystem<AmberSystem>::axis] : a2->Position()[WaterSystem<AmberSystem>::axis];
-  // then call the 2Dhistogram to do the actual binning using the position and inter-atomic distances
-  //_rdfs.find(name_pair)->second(slab_position, atomic_distance);
+  // and then the histogram is updated to track populations
   _rdfs.find(name_pair)->second(atomic_distance);
   return;
 }
@@ -190,16 +215,20 @@ void RDFMachine<T>::Output (FILE * output) const
 
   /**** Data Rows ****/
   /* print out on each row the rdf position - assuming all the RDFs have the same min,max,res... */
-  double min = _params.rdf_min;
-  double max = _params.rdf_max;
-  double res = _params.rdf_res;
+  double min = RDFProcessor<T>::_params.rdf_min;
+  double max = RDFProcessor<T>::_params.rdf_max;
+  double res = RDFProcessor<T>::_params.rdf_res;
   int size = (int)((max - min)/res);
   double rdf_position;
 
 
+  double dV, n, N;
+
   for (int rdf_i = 1; rdf_i < size; rdf_i++)
   {
     rdf_position = (double)rdf_i * res + min;
+    // The differential volume in the spherical shell
+    dV = 4.0 * M_PI * pow(rdf_position, 2) * res;
 
     // print out the rdf-position at the start of each row
     fprintf (output, "%13f", rdf_position);
@@ -207,14 +236,133 @@ void RDFMachine<T>::Output (FILE * output) const
     /* then output a data point for each rdf at that position */
     for (RDF_map::iterator it = _rdfs.begin(); it != _rdfs.end(); it++)
     {
-      // The differential volume in the spherical shell
-      double dV = 4.0 * M_PI * pow(rdf_position, 2) * res;
       // the number of the given atom-pairs separated by a given distance
-      double n = double(it->second.Population(rdf_position));
+      n = double(it->second.Population(rdf_position));
       // Total number of pairs that were processed for the rdf
-      double N = double (it->second.Count());
+      N = double (it->second.Count());
 
-      fprintf (output, "%13f", n * _total_volume / dV / N);
+      fprintf (output, "%13f", n * RDFProcessor<T>::_total_volume / dV / N);
+    }
+    fprintf (output, "\n");
+  }
+
+  return;
+}
+
+
+/************************* 2D RDF *****************************/
+/* This functor takes atom-pairs to generate a radial-distribution-functions.
+ * Application of the functor on an atom-pair creates several RDFs. Each atom
+ * pair has its own set of RDFs, and each set of RDFs is divided up into sub-
+ * RDFs representing slices of volume cutting up an MD slab.
+ * The slab-position of an RDF is based on the first atom named in an atom-pair.
+ * All the atom pairs are defined a priori and supplied to the functor's ctor. */
+template <class T>
+class RDF2DMachine : public RDFProcessor<T> {
+  public:
+
+    RDF2DMachine (const RDFParameters& params);
+
+    /* Adds the given pair into the histogram after checking to see if that pair is one of those being analyzed */
+    virtual void Output (FILE * output) const;
+
+  private:
+    static RDF2D_map _rdfs;
+
+    /* Calculates the rdf data and adds it into the correct histogram */
+    virtual void BinAtomPairData (const NamePair& name_pair, const T a1, const T a2);
+
+};
+
+template <class T> RDF2D_map RDF2DMachine<T>::_rdfs;
+
+  template <class T>
+  RDF2DMachine<T>::RDF2DMachine (const RDFParameters& params) 
+: RDFProcessor<T>(params)
+{
+  // Create a new histogram for each pair of atomic names required for the analysis
+  // ordering of all successive calls to the 2D histogram is [system position][rdf position/distance]
+  for (NamePairList::const_iterator it = RDFProcessor<T>::_params.begin(); it != RDFProcessor<T>::_params.end(); it++) {
+    _rdfs.insert(std::make_pair( 
+	  *it, Histogram2D<double>( 
+	    std::make_pair(RDFProcessor<T>::_params.position_min, RDFProcessor<T>::_params.rdf_min),
+	    std::make_pair(RDFProcessor<T>::_params.position_max, RDFProcessor<T>::_params.rdf_max),
+	    std::make_pair(RDFProcessor<T>::_params.position_res, RDFProcessor<T>::_params.rdf_res))));
+  }
+
+	printf ("RDF Analysis is using two dimensions - slab position & interatomic distances\n");
+
+  return;
+}
+
+  template <class T> 
+void RDF2DMachine<T>::BinAtomPairData (const NamePair& name_pair, const T a1, const T a2) 
+{
+  // The inter-atomic distance
+  double atomic_distance = MDSystem::Distance(a1, a2).Magnitude();
+  // Because the atomic position is being taken into account when slicing up the slab into many pieces, the correct atom must be used to determine the rdf position bin.
+  // Thus, the following will choose the correct atomic position to use (namely, the first one listed in the name pair)
+  double slab_position = (a1->Name() == name_pair.first) ? a1->Position()[WaterSystem<AmberSystem>::axis] : a2->Position()[WaterSystem<AmberSystem>::axis];
+  // then call the 2Dhistogram to do the actual binning using the position and inter-atomic distances
+  _rdfs.find(name_pair)->second(slab_position, atomic_distance);
+
+  return;
+}
+
+template <class T>
+void RDF2DMachine<T>::Output (FILE * output) const
+{
+
+  rewind(output);
+
+  // first a header that lists Position, name-pairs, and min/max/res information for both position and rdf 
+  // first column is the rdf position 
+  fprintf (output, "%13s", "Position");
+  // next the columns are for each name-pair
+  for (RDF2D_map::iterator it = _rdfs.begin(); it != _rdfs.end(); it++)
+  {
+    std::string name1 = it->first.first;
+    std::string name2 = it->first.second;
+    fprintf (output, " (%s-%s)     ", name1.c_str(), name2.c_str());
+  }
+  fprintf (output, "\n");
+
+  // to keep track of all the information of the system analysis, the next line will list 6 numbers:
+  // position min, max, resolution, and rdf min, max, and resolution.
+  // next the position extents/res 
+  fprintf (output, "position %f %f %f ", RDFProcessor<T>::_params.position_min, RDFProcessor<T>::_params.position_max, RDFProcessor<T>::_params.position_res);
+  // then the rdf information 
+  fprintf (output, "rdf %f %f %f\n", RDFProcessor<T>::_params.rdf_min, RDFProcessor<T>::_params.rdf_max, RDFProcessor<T>::_params.rdf_res);
+
+  // The differential volume in the spherical shell
+  double dV, n, N;
+
+  // main rdf-calculation loop to process populations into rdfs 
+  // go through each rdf slice
+  for (
+      double rdf_distance = RDFProcessor<T>::_params.rdf_min; 
+      rdf_distance < RDFProcessor<T>::_params.rdf_max; 
+      rdf_distance += RDFProcessor<T>::_params.rdf_res)
+  {
+    // print out the rdf-position
+    fprintf (output, "% 13f", rdf_distance);
+    // calculate the differential shell volume
+    dV = 4.0 * M_PI * pow(rdf_distance, 2) * RDFProcessor<T>::_params.rdf_res;
+
+    // for each pair of atoms
+    for (RDF2D_map::iterator it = _rdfs.begin(); it != _rdfs.end(); it++)
+    {
+      // for each slab position in the region of interest
+      for (double pos = RDFProcessor<T>::_params.position_min; pos < RDFProcessor<T>::_params.position_max; pos += RDFProcessor<T>::_params.position_res)
+      {
+	// find the population of the given atom-pairs separated by a given distance
+	n = double(it->second.Population(pos, rdf_distance));
+	// Total number of pairs that were processed for the rdf
+	N = double (it->second.Count(pos));
+
+	// and print out the rdf-value for the given slab position, rdf-distance combo
+	fprintf (output, " %8.4f", n * RDFProcessor<T>::_total_volume / dV / N);
+      }
     }
     fprintf (output, "\n");
   }

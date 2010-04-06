@@ -6,6 +6,8 @@
 #include "../rdf.h"
 #include <libconfig.h++>
 
+// abstract class for RDF analyzers
+template <class T>
 class RDFAnalyzer : public Analyzer {
 
   public:
@@ -13,18 +15,16 @@ class RDFAnalyzer : public Analyzer {
       : Analyzer(wsp), rdfparams(wsp.config_file), rdf(rdfparams)
     { return; }
 
+  protected:
+    
+    virtual void Setup ();
+    virtual void Analysis ();
+    virtual void PostAnalysis ();
+    virtual void DataOutput (const unsigned int timestep);
 
-  private:
     // the utility functor for getting all the data accumulated
     RDFParameters rdfparams;
-    RDFMachine<Atom *> rdf;
-    NamePairList _atom_name_pairs;	// names of atom pairs that will be processed
-
-    void Setup ();
-    void Analysis ();
-    void PostAnalysis ();
-    void DataOutput (const unsigned int timestep);
-
+    T rdf;
 };
 
 #endif

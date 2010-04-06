@@ -1,6 +1,7 @@
 #include "rdf-analysis.h"
 
-void RDFAnalyzer::Setup () {
+template <class T>
+void RDFAnalyzer<T>::Setup () {
   LoadAll();
   // slice the slab into the region of interest
   SLICE_BY_POSITION(int_atoms, Atom *, rdfparams.position_min, rdfparams.position_max);
@@ -15,11 +16,12 @@ void RDFAnalyzer::Setup () {
   return;
 }
 
-void RDFAnalyzer::Analysis () {
+template <class T>
+void RDFAnalyzer<T>::Analysis () {
   /* Send each atom pair to the RDF machinery */
-  for (Atom_it it = int_atoms.begin(); it < int_atoms.end(); it++)
+  for (Atom_it it = int_atoms.begin(); it != int_atoms.end(); it++)
   {
-    for (Atom_it jt = it; jt < int_atoms.end(); jt++)
+    for (Atom_it jt = it; jt != int_atoms.end(); jt++)
     {
       if (it == jt) 
 	continue;
@@ -30,30 +32,46 @@ void RDFAnalyzer::Analysis () {
   return;
 }
 
-void RDFAnalyzer::PostAnalysis () { 
+template <class T>
+void RDFAnalyzer<T>::PostAnalysis () { 
   return; 
 }
 
-  void RDFAnalyzer::DataOutput (const unsigned int timestep) {
-    if (!(timestep % (output_freq * 10)))
-      rdf.Output(output);
-    return;
+template <class T>
+void RDFAnalyzer<T>::DataOutput (const unsigned int timestep) {
+  if (!(timestep % (output_freq * 10)))
+  {
+    rdf.Output(output);
+    this->Setup();
   }
+  return;
+}
 
 int main () {
 
   libconfig::Config cfg;
   cfg.readFile("system.cfg");
 
+  /* 1d or 2d rdf */
+  int rdf_type = cfg.lookup("analysis.rdf.rdf-type");
+
+  /* get the output filename */
   std::string filename = cfg.lookup("analysis.rdf.filename");
   libconfig::Setting &analysis = cfg.lookup("analysis");
   analysis.add("filename", libconfig::Setting::TypeString) = filename;
 
   WaterSystemParams wsp (cfg);
 
-  RDFAnalyzer rdf (wsp);
-
-  rdf.SystemAnalysis();
+  if (rdf_type == 1)
+  {
+  	RDFAnalyzer< RDFMachine<Atom *> > rdf (wsp);
+  	rdf.SystemAnalysis();
+  }
+  else if (rdf_type == 2)
+  {
+  	RDFAnalyzer< RDF2DMachine<Atom *> > rdf (wsp);
+  	rdf.SystemAnalysis();
+  }
 
   return 0;
 }

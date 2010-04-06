@@ -142,15 +142,15 @@ class Histogram2D : public std::binary_function<T,T,bool>
   public:
 
     typedef std::pair<T,T>	pair_t;
-    pair_t max;						// maximum value the histogram can bin in each dimension
     pair_t min;						// minimum values for each dimension
+    pair_t max;						// maximum value the histogram can bin in each dimension
     pair_t resolution;				// resolution for each dimension
     std::pair<int,int> size;					// dimensions of the 2-d data (number of histogram bins)
     std::vector<int> counts;					// A running total of each time a bin was updated in the 1st dimension of the histogram i.e. access count
 
-    // Initialization
-    Histogram2D (const pair_t& maxima, const pair_t& resolutions, const pair_t& minima = std::make_pair(T(0), T(0))) 
-      : max(maxima), min(minima), resolution(resolutions)
+    // Initialization with [min, max, resolution]
+    Histogram2D (const pair_t& minima, const pair_t& maxima, const pair_t& resolutions) 
+      : min(minima), max(maxima), resolution(resolutions)
     {
       size.first = int((max.first - min.first)/resolution.first) + 1;
       size.second = int((max.second - min.second)/resolution.second) + 1;
@@ -160,8 +160,8 @@ class Histogram2D : public std::binary_function<T,T,bool>
 	 size.first, size.second, max.first, max.second, min.first, min.second, resolution.first, resolution.second);
 	 */
 
-      histogram.clear();
-      histogram.resize (size.first, Histogram_t (size.second, 0));
+      _histogram.clear();
+      _histogram.resize (size.first, Histogram_t (size.second, 0));
 
       counts.resize(size.first, 0);
     }
@@ -172,7 +172,7 @@ class Histogram2D : public std::binary_function<T,T,bool>
 	// find which bin is to be updated
 	bins new_bins = Bin(a,b);
 	// Update the correct bin
-	histogram[new_bins.first][new_bins.second]++;
+	_histogram[new_bins.first][new_bins.second]++;
 	// update the number of times that this particular 1st-dimensions has been accessed (total # of bin updates)
 	counts[new_bins.first]++;
       }
@@ -182,23 +182,32 @@ class Histogram2D : public std::binary_function<T,T,bool>
     /* Increment the bins given by the two indices without doing any checks */
     void Shove (const int a, const int b)
     {
-      histogram[a][b]++;
+      _histogram[a][b]++;
       counts[a]++;
       return;
     }
     // Return the element of the histogram
-    int Element (const int x, const int y) const { return histogram[x][y]; }
-    int Count (const int i) const { return counts[i]; }
+    int Element (const int x, const int y) const { return _histogram[x][y]; }
+    
+    // returns the population of a single bin given a value
+    int Population (const T& a, const T& b) const 
+    { 
+      bins temp = Bin(a, b);
+      return _histogram[temp.first][temp.second]; 
+    }		
+
+    //int Count (const int i) const { return counts[i]; }
+    int Count (const T& i) const { return counts[(i-min.first)/resolution.first]; }
 
   private:
     typedef std::vector<int> Histogram_t;
-    std::vector<Histogram_t> histogram;		// 2-d container/histogram
+    std::vector<Histogram_t> _histogram;		// 2-d container/histogram
 
     typedef unsigned int bin;
     typedef std::pair<bin,bin> bins;
 
     /* calculates the bins into which a value will be placed */
-    bins Bin (const T& a, const T& b)
+    bins Bin (const T& a, const T& b) const
     { 
       return std::make_pair( bin((a-min.first)/resolution.first), bin((b-min.second)/resolution.second) );
     }

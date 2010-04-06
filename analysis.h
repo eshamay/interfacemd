@@ -168,7 +168,7 @@ void Analyzer::_OutputStatus (const int timestep) const
 {
   if (!(timestep % (this->output_freq * 10)))
     cout << endl << timestep << "/" << this->timesteps << " ) ";
-  if (!(timestep % this->output_freq))
+  if (!(timestep % this->output_freq) && timestep != 0)
     cout << "*";
 
   fflush (stdout);
