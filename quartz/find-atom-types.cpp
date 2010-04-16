@@ -4,7 +4,7 @@ using namespace std;
 
 int main () {
 
-  PDBFile pdb ("bc-slab.pdb");
+  PDBFile pdb ("quartz-slab.pdb");
 
   Molecule * mol = pdb.Molecules(0);
   Atom_ptr_vec atoms = mol->Atoms();
@@ -24,23 +24,22 @@ int main () {
     const char * a = atom_name.c_str();
     if (a[0] == 'H') {
       atom_type = "HO";
-      charge =  0.2060;
+      charge =  -0.4358;
       num = 1;
     }
 
     if (a[0] == 'O')
     {
-      if (pos[y] > 1.0) 
+      // check for OS or OH
+      if (pos[y] > -8.5)
       {
 	atom_type = "OH";
-	charge = -0.5330;
-	//charge = -.54;
+	charge = -0.8715;
       }
       else
       {
 	atom_type = "OS";
-	charge = -0.6290;
-	//charge = -.5425;
+	charge = -0.8715;
       }
       num = 8;
     }
@@ -48,20 +47,7 @@ int main () {
     if (a[0] == 'S')
     {
       atom_type = "SI";
-      charge = 1.2830;
-      /*
-	 if (pos[y] < -16.0)
-	 {
-	 atom_type = "SH";
-      //charge = 0.8;
-      charge = 0.5;
-      }
-      else {
-      atom_type = "SI";
-      //charge = 1.08;
-      charge = 1.32;
-      }
-      */
+      charge = 1.428;
       num = 14;
     }
 

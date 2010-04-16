@@ -120,13 +120,14 @@ class WaterSystem {
 
   static double	posmin, posmax;
   static double	pbcflip;			// location to flip about periodic boundaries
-  static coord axis;					// axis normal to the infterface
-  static double int_low, int_high, middle;		// the positions of analysis cutoffs
+  static coord axis;				// axis normal to the infterface
+  static double int_low, int_high, middle;	// the positions of analysis cutoffs
 
+  static Atom_ptr_vec	sys_atoms;		// all atoms/mols in the system
+  static Mol_ptr_vec	sys_mols;
   static Water_ptr_vec	int_wats;		// interfacial waters, or just all the waters in the system depending on the function call
   static Mol_ptr_vec 	int_mols;
   static Atom_ptr_vec	int_atoms;		// interfacial water atoms (or as above)
-
 
   void OpenFile ();
   void Debug (string msg) const;
@@ -140,13 +141,46 @@ class WaterSystem {
   void SliceWaterCoordination (const BondGraph::coordination c);
   void FindInterfacialWaters ();
 
+  void KeepAtomsByNames (Atom_ptr_vec& atoms, std::vector<string>& names);
+  void RemoveAtomsByNames (Atom_ptr_vec& atoms, std::vector<string>& names);
+
+  void RemoveAtomsInSlice (Atom_ptr_vec& atoms, std::pair<double,double>& extents);
+  void KeepAtomsInSlice (Atom_ptr_vec& atoms, std::pair<double,double>& extents);
+
   void UpdateGraph () { _graph.UpdateGraph (int_atoms); }
+
+  void PrintAtoms (const Atom_ptr_vec& atoms) const
+  {
+    for (Atom_it it = atoms.begin(); it != atoms.end(); it++) 
+    { (*it)->Print(); }
+  }
 
  protected:
 
   T * sys;
 
   BondGraph	_graph;
+
+  class AtomPositionInSlice : public std::binary_function<Atom *,std::pair<double,double>,bool> {
+    public:
+      bool operator() (const Atom * atom, const std::pair<double,double>& extents) const
+      {
+	double pos = atom->Position()[axis];
+	return pos > extents.first && pos < extents.second;
+      }
+  };
+
+  class AtomNameInList : public std::binary_function<Atom *,std::vector<string>,bool> {
+    public:
+      bool operator() (const Atom * atom, const std::vector<string>& names) const
+      {
+	return names.end() != std::find(names.begin(), names.end(), atom->Name());
+      }
+  };
+
+
+
+
 };
 
 template<typename T> WaterSystemParams WaterSystem<T>::wsp;
@@ -156,11 +190,13 @@ template<typename T> double WaterSystem<T>::posmax;
 template<typename T> double WaterSystem<T>::pbcflip;
 template<typename T> coord WaterSystem<T>::axis;
 
+template<typename T> Atom_ptr_vec WaterSystem<T>::sys_atoms;
+template<typename T> Mol_ptr_vec WaterSystem<T>::sys_mols;
 template<typename T> Water_ptr_vec WaterSystem<T>::int_wats;
 template<typename T> Mol_ptr_vec WaterSystem<T>::int_mols;
 template<typename T> Atom_ptr_vec WaterSystem<T>::int_atoms;
 
-template <class T>
+  template <class T>
 WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
 {
   WaterSystem::wsp = params;
@@ -260,6 +296,8 @@ void WaterSystem<T>::FindMols (const string name) {
 template <class T>
 void WaterSystem<T>::LoadAll () {
 
+  sys_mols.clear();
+  sys_atoms.clear();
   int_mols.clear();
   int_atoms.clear();
 
@@ -268,11 +306,13 @@ void WaterSystem<T>::LoadAll () {
   // go through the system
   for (int i = 0; i < sys->NumMols(); i++) {
     // grab each molecule to be added
-	pmol = sys->Molecules(i);
+    pmol = sys->Molecules(i);
     int_mols.push_back (pmol);
+    sys_mols.push_back (pmol);
     // and then add all of its atoms
     RUN2(pmol->Atoms()) {
       int_atoms.push_back (pmol->Atoms(j));
+      sys_atoms.push_back (pmol->Atoms(j));
     }
   }
 
@@ -350,7 +390,7 @@ void WaterSystem<T>::SliceWaterCoordination (const BondGraph::coordination c) {
 
   RUN (int_wats) {
     Water * wat = int_wats[i];
-	BondGraph::coordination cd = _graph.WaterCoordination(wat);
+    BondGraph::coordination cd = _graph.WaterCoordination(wat);
     if (cd == c) {
       wats.push_back(wat);
     }
@@ -386,39 +426,48 @@ bool Name_in_list_pred (T t, std::vector<string> names)
 /* a predicate for name sorting */
 template <class T>
 struct Name_sort_pred {
-    bool operator()(const T &left, const T &right) {
-        return left->Name() < right->Name();
-    }
+  bool operator()(const T &left, const T &right) {
+    return left->Name() < right->Name();
+  }
 };
 
-/* removes all the atoms/molecules that are in the list of names to remove */
-#define REMOVE_BY_NAMES(vec,type,names)	\
-  std::sort(vec.begin(), vec.end(), Name_sort_pred<Atom *>());	\
-  D_REMOVE_IF(vec, std::bind2nd(std::pointer_to_binary_function<type, std::vector<string>, bool>(Name_in_list_pred), names))
-
-/* keeps all the things in vec with names that appear in the names-list. names should be a std::vector */
-#define KEEP_BY_NAMES(vec,type,names)	\
-  std::sort(vec.begin(), vec.end(), Name_sort_pred<Atom *>());	\
-  D_REMOVE_IF(vec, std::bind2nd(not2(std::pointer_to_binary_function<type, std::vector<string>, bool>(Name_in_list_pred)), names))
-
-// Removes any of the members with the given name
-#define REMOVE_BY_NAME(vec,type,name)	\
-  D_REMOVE_IF(vec,std::bind2nd(pointer_to_binary_function<const type, const std::string, bool>(Name_pred), name))
-
-// a remove-if-not routine to remove anything *without* the given name
-#define KEEP_BY_NAME(vec,type,name)	\
-  D_REMOVE_IF(vec, std::bind2nd(not2(pointer_to_binary_function<const type, const std::string, bool>(Name_pred)), name))
-
-/* used as a predicate to determine if a given atom is within the bounds specified */
+/* keep only atoms in the given atom_ptr_vec that have a name in the names list */
 template <class T>
-bool AtomicPosition_pred (const T t, const std::pair<double,double> extents)
-{
-  double position = t->Position()[WaterSystem<AmberSystem>::axis];
-  return position > extents.first && position < extents.second;
+void WaterSystem<T>::KeepAtomsByNames (Atom_ptr_vec& atoms, std::vector<string>& names) {
+  atoms.erase(
+      remove_if(atoms.begin(), atoms.end(), 
+	not1(std::bind2nd(AtomNameInList(), names))), 
+      atoms.end());
+  return;
 }
 
-// Removes all elements not within the given slice bounded by the min and max positions within the watersystem slab
-#define SLICE_BY_POSITION(vec,type,min,max)	\
-  D_REMOVE_IF(vec, std::bind2nd(std::not2(std::pointer_to_binary_function<const type, const std::pair<double,double>, bool>(AtomicPosition_pred)), make_pair(min,max)))
+/* remove all atoms that have a name in the list */
+template <class T>
+void WaterSystem<T>::RemoveAtomsByNames (Atom_ptr_vec& atoms, std::vector<string>& names) {
+  atoms.erase(
+      remove_if(atoms.begin(), atoms.end(),
+	std::bind2nd(AtomNameInList(), names)),
+      atoms.end());
+  return;
+}
+
+/* remove all the atoms in the defined slice (extents=(min,max)) of the slab */
+template <class T>
+void WaterSystem<T>::RemoveAtomsInSlice (Atom_ptr_vec& atoms, std::pair<double,double>& extents) {
+  atoms.erase(
+      remove_if(atoms.begin(), atoms.end(),
+	std::bind2nd(AtomPositionInSlice(), extents)),
+      atoms.end());
+  return;
+}
+
+template <class T>
+void WaterSystem<T>::KeepAtomsInSlice (Atom_ptr_vec& atoms, std::pair<double,double>& extents) {
+  atoms.erase(
+      remove_if(atoms.begin(), atoms.end(),
+	std::not1(std::bind2nd(AtomPositionInSlice(), extents))),
+      atoms.end());
+  return;
+}
 
 #endif

@@ -3,7 +3,7 @@
 
 int main () {
 
-  PDBFile pdb ("fluorooctadecane.pdb");
+  PDBFile pdb ("quartz-slab.pdb");
   //MDSystem::Dimensions(VecR(29.868, 100.0, 27.792));
 
   Atom_ptr_vec& atoms = pdb.Atoms();
@@ -16,7 +16,7 @@ int main () {
 	{
 	  //double distance = MDSystem::Distance(atoms[i],atoms[j]).Magnitude();
 	  double distance = (atoms[i]->Position() - atoms[j]->Position()).Magnitude();
-	  if (distance < 1.65)
+	  if (distance < 1.7)
 	  {
 		printf (" %d %d 1\n", i+1, j+1);
 	  }

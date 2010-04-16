@@ -14,42 +14,44 @@ typedef std::vector<Molecule *> Mol_ptr_vec;
 
 class MDSystem {
 
-protected:
-	Atom_ptr_vec	_atoms;		// the atoms in the system
-	Mol_ptr_vec		_mols;		// the molecules in the system
+  protected:
+    Atom_ptr_vec	_atoms;		// the atoms in the system
+    Mol_ptr_vec		_mols;		// the molecules in the system
 
-	static VecR		_dimensions;		// system dimensions - size
+    static VecR		_dimensions;		// system dimensions - size
 
 
-public:
+  public:
 
-	virtual ~MDSystem();
+    virtual ~MDSystem();
 
-	virtual void LoadNext () = 0;
-	virtual void LoadFirst () = 0;
+    virtual void LoadNext () = 0;
+    virtual void LoadFirst () = 0;
 
-	virtual void _ParseMolecules () = 0;
+    virtual void _ParseMolecules () = 0;
 
-	Mol_ptr_vec& Molecules () { return _mols; }
-	Molecule * Molecules (int index) { return _mols[index]; }
-	int NumMols () const { return _mols.size(); }
+    Mol_ptr_vec& Molecules () { return _mols; }
+    Molecule * Molecules (int index) { return _mols[index]; }
+    int NumMols () const { return _mols.size(); }
 
-	Atom_ptr_vec& Atoms () { return _atoms; }
-	Atom * Atoms (const int index) { return _atoms[index]; }
-	Atom * operator[] (int index) { return _atoms[index]; }
-	int NumAtoms ()	const { return (int)_atoms.size(); }
+    Atom_it begin () { return _atoms.begin(); }
+    Atom_it end () { return _atoms.end(); }
+    Atom_ptr_vec& Atoms () { return _atoms; }
+    Atom * Atoms (const int index) { return _atoms[index]; }
+    Atom * operator[] (int index) { return _atoms[index]; }
+    int NumAtoms ()	const { return (int)_atoms.size(); }
 
-	int size () const { return (int)_atoms.size(); }
-	static VecR Dimensions () { return _dimensions; }
-	static void Dimensions (const VecR& dimensions) { MDSystem::_dimensions = dimensions; }
+    int size () const { return (int)_atoms.size(); }
+    static VecR Dimensions () { return _dimensions; }
+    static void Dimensions (const VecR& dimensions) { MDSystem::_dimensions = dimensions; }
 
-	/* Beyond simple system stats, various computations are done routinely in a molecular dynamics system: */
+    /* Beyond simple system stats, various computations are done routinely in a molecular dynamics system: */
 
-	// Calculate the distance between two points within a system that has periodic boundaries
-	static VecR Distance (const VecR& v1, const VecR& v2);
+    // Calculate the distance between two points within a system that has periodic boundaries
+    static VecR Distance (const VecR& v1, const VecR& v2);
 
-	// Calculate the distance between two atoms given the periodic boundaries of the system
-	static VecR Distance (const Atom * atom1, const Atom * atom2);
+    // Calculate the distance between two atoms given the periodic boundaries of the system
+    static VecR Distance (const Atom * atom1, const Atom * atom2);
 };
 
 #include "h2o.h"

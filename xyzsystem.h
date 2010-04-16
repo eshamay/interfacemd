@@ -35,7 +35,8 @@ public:
 	~XYZSystem ();
 
 	// Controller & Calculation methods
-	void LoadNext ();	 					// Update the system to the next timestep
+	// Update the system to the next timestep
+	void LoadNext ();
 	void LoadFirst ();
 	void Seek (int step);
 	int NumSteps () const { return _coords.NumSteps(); }		// number of timesteps in the xyzfile
@@ -47,14 +48,6 @@ public:
 	Atom_ptr_vec BondedAtoms (Atom const * const atom) const { return _graph.BondedAtoms (atom); }
 
 	VecR SystemDipole ();	// calculate the total system dipole and return it
-
-
-	// operators
-	Atom * operator[] (int index) {
-		Atom * pa;
-		pa = _atoms[index];
-		return pa;
-	}
 };
 
 #endif

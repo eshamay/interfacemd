@@ -3,7 +3,8 @@
 
 #include "watersystem.h"
 
-class Analyzer : public WaterSystem<AmberSystem> {
+template <class T>
+class Analyzer : public WaterSystem<T> {
 
   protected:
 
@@ -16,6 +17,7 @@ class Analyzer : public WaterSystem<AmberSystem> {
     void _CheckOutputFile ();
 
     void _EmptyFunction () const { return; } /* A simple empty function that does nothing to the system */
+
 
   public:
     Analyzer (const WaterSystemParams& params);
@@ -85,37 +87,38 @@ class Analyzer : public WaterSystem<AmberSystem> {
 };
 
 
-double	Analyzer::posres;
-int		Analyzer::posbins;
+template <class T> double	Analyzer<T>::posres;
+template <class T> int		Analyzer<T>::posbins;
 
-double 	Analyzer::angmin;
-double	Analyzer::angmax;
-double	Analyzer::angres;
-int		Analyzer::angbins;
+template <class T> double 	Analyzer<T>::angmin;
+template <class T> double	Analyzer<T>::angmax;
+template <class T> double	Analyzer<T>::angres;
+template <class T> int		Analyzer<T>::angbins;
 
-int 	Analyzer::timesteps;
-unsigned int Analyzer::restart;
+template <class T> int 		Analyzer<T>::timesteps;
+template <class T> unsigned int Analyzer<T>::restart;
 
-VecR	Analyzer::ref_axis;
+template <class T> VecR		Analyzer<T>::ref_axis;
 
-Analyzer::Analyzer (const WaterSystemParams& params)
+template <class T> 
+Analyzer<T>::Analyzer (const WaterSystemParams& params)
 
 : WaterSystem<AmberSystem>(params),
   output_filename(params.output_filename), output(params.output),
   output_freq(params.output_freq)
 { 
-  Analyzer::posres = params.posres;
-  Analyzer::posbins = int((params.posmax - params.posmin)/params.posres);
+  Analyzer<T>::posres = params.posres;
+  Analyzer<T>::posbins = int((params.posmax - params.posmin)/params.posres);
 
-  Analyzer::angmin = params.angmin;
-  Analyzer::angmax = params.angmax;
-  Analyzer::angres = params.angres;
-  Analyzer::angbins = int((params.angmax - params.angmin)/params.angres);
+  Analyzer<T>::angmin = params.angmin;
+  Analyzer<T>::angmax = params.angmax;
+  Analyzer<T>::angres = params.angres;
+  Analyzer<T>::angbins = int((params.angmax - params.angmin)/params.angres);
 
-  Analyzer::timesteps = params.timesteps;
-  Analyzer::restart = params.restart;
+  Analyzer<T>::timesteps = params.timesteps;
+  Analyzer<T>::restart = params.restart;
 
-  Analyzer::ref_axis = params.ref_axis;
+  Analyzer<T>::ref_axis = params.ref_axis;
 
   this->_CheckOutputFile();
   try {
@@ -137,10 +140,11 @@ Analyzer::Analyzer (const WaterSystemParams& params)
   this->_OutputHeader();
 }
 
-void Analyzer::_OutputHeader () const {
+template <class T> 
+void Analyzer<T>::_OutputHeader () const {
 
   printf ("Analysis Parameters:\n\tOutput Filename = \"%s\"\n\tScreen output frequency = 1/%d\n\n\tPosition extents for analysis:\n\t\tMin = % 8.3f\n\t\tMax = % 8.3f\n\t\tPosition Resolution = % 8.3f\n\n\tPrimary Axis = %d\nNumber of timesteps to be analyzed = %d\n",
-      output_filename.c_str(), output_freq, posmin, posmax, Analyzer::posres, int(Analyzer::axis), Analyzer::timesteps);
+      output_filename.c_str(), output_freq, posmin, posmax, Analyzer<T>::posres, int(Analyzer<T>::axis), Analyzer<T>::timesteps);
 
 #ifdef AVG
   printf ("\n\nThe analysis is averaging about the two interfaces located as:\n\tLow  = % 8.3f\n\tHigh = % 8.3f\n\n", int_low, int_high);
@@ -148,13 +152,15 @@ void Analyzer::_OutputHeader () const {
   return;
 }
 
-Analyzer::~Analyzer () {
+template <class T> 
+Analyzer<T>::~Analyzer () {
   delete this->sys;
   fclose (output);
   return;
 }
 
-void Analyzer::_CheckOutputFile () {
+template <class T> 
+void Analyzer<T>::_CheckOutputFile () {
 
   if (output == (FILE *)NULL) {
     printf ("WaterSystem::WaterSystem (argc, argv) - couldn't open the data output file!\n");
@@ -164,11 +170,12 @@ void Analyzer::_CheckOutputFile () {
   return;
 }
 
-void Analyzer::_OutputStatus (const int timestep) const
+template <class T> 
+void Analyzer<T>::_OutputStatus (const int timestep) const
 {
   if (!(timestep % (this->output_freq * 10)))
     cout << endl << timestep << "/" << this->timesteps << " ) ";
-  if (!(timestep % this->output_freq) && timestep != 0)
+  if (!(timestep % this->output_freq))
     cout << "*";
 
   fflush (stdout);
@@ -176,7 +183,8 @@ void Analyzer::_OutputStatus (const int timestep) const
 }
 
 // A routine that performs some type of typical/generic analysis of a system
-void Analyzer::SystemAnalysis ()
+template <class T> 
+void Analyzer<T>::SystemAnalysis ()
 {
   // do some initial setup
   Setup();
@@ -191,10 +199,11 @@ void Analyzer::SystemAnalysis ()
     // load the next timestep
     LoadNext();
 
-    // output the status of the analysis (to the screen or somewhere useful)
+   // output the status of the analysis (to the screen or somewhere useful)
     _OutputStatus (timestep);
     // Output the actual data being collected to a file or something for processing later
-    DataOutput(timestep);
+    if (!(timestep % (output_freq * 10)) && timestep)
+      DataOutput(timestep);
   }
 
   // do a little work after the main analysis loop (normalization of a histogram? etc.)
@@ -206,7 +215,8 @@ void Analyzer::SystemAnalysis ()
   return;
 }
 
-int Analyzer::PositionBin (const double position) {
+template <class T> 
+int Analyzer<T>::PositionBin (const double position) {
 
   // check for flipping due to periodic boundaries
   double pos = position;
@@ -217,9 +227,10 @@ int Analyzer::PositionBin (const double position) {
 }
 
 // Find the position a particular atom fits into for a histogram
-int Analyzer::PositionBin (const Atom * patom) {
+template <class T> 
+int Analyzer<T>::PositionBin (const Atom * patom) {
 
-  double position = Analyzer::Position(patom);
+  double position = Analyzer<T>::Position(patom);
   //VecR r = patom->Position();
   //double position = r[axis];
   //if (position < pbcflip) position += MDSystem::Dimensions()[axis];
@@ -237,16 +248,19 @@ int Analyzer::PositionBin (const Atom * patom) {
 }
 
 /* Find the periodic-boundary-satistfying location of an atom, vector, or raw coordinate along the reference axis */
-double Analyzer::Position (const Atom * patom) {
-  return Analyzer::Position(patom->Position());
+template <class T> 
+double Analyzer<T>::Position (const Atom * patom) {
+  return Analyzer<T>::Position(patom->Position());
 }
 
-double Analyzer::Position (const VecR& v) {
+template <class T> 
+double Analyzer<T>::Position (const VecR& v) {
   double position = v[axis];
-  return Analyzer::Position(position);
+  return Analyzer<T>::Position(position);
 }
 
-double Analyzer::Position (const double d) {
+template <class T> 
+double Analyzer<T>::Position (const double d) {
   double pos = d;
   if (pos < pbcflip) pos += MDSystem::Dimensions()[axis];
   return pos;
@@ -254,8 +268,8 @@ double Analyzer::Position (const double d) {
 
 // Create a histogram of the angles formed by an axis of a molecule's given reference axis.
 // The supplied axis function should return the molecular axis vector of the molecule.
-template <typename molecule_t>
-vector<int> Analyzer::Molecular_Axis_Orientation_Histogram (
+template <class T, typename molecule_t>
+vector<int> Analyzer<T>::Molecular_Axis_Orientation_Histogram (
     string molName,
     VecR (molecule_t::*axisFn)() /* This axisFn must return the molecular axis of interest of the molecule */
     )
@@ -281,7 +295,7 @@ vector<int> Analyzer::Molecular_Axis_Orientation_Histogram (
 
 /*
    template <typename molecule_t>
-   vector<int> Analyzer::Molecular_Axis_Orientation_Position_Histogram (
+   vector<int> Analyzer<T>::Molecular_Axis_Orientation_Position_Histogram (
    string molName,
    VecR (molecule_t::*axisFunction)() 	// This axisFn must return the molecular axis of interest of the molecule
    )
@@ -313,8 +327,8 @@ return (histo);
 // creates a 2D histogram showing the shape of the plane formed by a given atom of a molecule averaged over a simulation.
 // The histogram will show either the population density at a particular in-plane point giving the population as a function of the two coordinates...
 // or it can show the average location (in the surface-normal direction) of atoms in the plane.
-template <typename molecule_t>
-vector< vector<double> > Analyzer::Interface_Location_Histogram (
+template <class T, typename molecule_t>
+vector< vector<double> > Analyzer<T>::Interface_Location_Histogram (
     // 2 directions (axes) parallel to the plane
     const coord d1, const coord d2,
     // name of the molecule to analyze

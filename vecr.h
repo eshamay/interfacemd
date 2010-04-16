@@ -71,4 +71,8 @@ public:
 	VecR Unit () const;						// returns a unit vector in the same direction of this vector
 	void Print () const;
 };
+
+typedef std::vector<VecR> VecR_vec;
+typedef std::vector<VecR>::const_iterator VecR_it;
+
 #endif

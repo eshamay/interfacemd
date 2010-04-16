@@ -70,8 +70,8 @@ Inserter<C> make_inserter(C& c)
 /* sorts and finds unique elements of a given list and stores them into the result */
 #define UNIQUE_PAIRLIST_ELEMENTS(pairlist,result)	\
   FLATTEN_PAIRLIST (pairlist, result)	\
-sort(result.begin(), result.end());	\
-result.resize( unique(result.begin(), result.end()) - result.begin());
+  sort(result.begin(), result.end());	\
+  result.resize( unique(result.begin(), result.end()) - result.begin());
 
 
 
@@ -84,53 +84,63 @@ template <class T>
 class Histogram1D : public std::unary_function<T,bool>
 {
   private:
-    typedef T histo_element_t;
+    typedef double histo_element_t;
 
     T _min, _max, _res;
     int _size;
-    int _access_count;
+    double _access_count;
     std::vector<histo_element_t> _histogram;
 
     // Returns the bin for a given value
     int Bin (const T t) const { return int ((t - _min)/_res); }
+    bool InBounds (const T t) const { return (t >= _min && t <= _max); }
 
   public:
 
     Histogram1D (const T min, const T max, const T res) 
       : _min(min), _max(max), _res(res), 
-      _size(int((max - min)/res) + 1), _access_count(0)
-  { 
-    if (min > max) {
-      printf ("Check the limits given to Histogram1D - minimum is greater than the maximum!!\n");
-      exit(1);
+      _size(int((max - min)/res) + 1), _access_count(0.0)
+    { 
+      if (min > max) {
+	printf ("Check the limits given to Histogram1D - minimum is greater than the maximum!!\n");
+	exit(1);
+      }
+      _histogram.resize(_size, histo_element_t(0));
     }
-    _histogram.resize(_size, histo_element_t(0));
-  }
-
 
     bool operator() (const T t) {
       bool ret = false;
-      if (t < _min || t > _max) { 
-	ret = false;				// out of bounds issue...
-      }
-      else {
+      if (InBounds(t)) 
+      {
 	_histogram [Bin(t)]++;
 	_access_count++;
+	if (_access_count < 0.0) 
+	{
+	  printf ("weird value started with: %f in the histogram operator()\n", t);
+	  printf ("bin was %d with a population of %d\n", Bin(t), _histogram[Bin(t)]);
+	  printf ("the _access_count is: %d\n", _access_count);
+	  exit(1);
+	}
 	ret = true;
       }
-
       return ret;
     }
 
-    int Count () const { return _access_count; }
+    double Count () const { return _access_count; }
     int Size () const { return _size; }
     int Max () const { return _max; }
     int Min () const { return _min; }
     int Resolution () const { return _res; }
 
-    
-    int Population (const T t) const { return _histogram[this->Bin(t)]; }		// returns the population of a single bin given a value
-    std::vector<histo_element_t>& Histogram () { return _histogram; }
+    // returns the population of a single bin given a value
+    double Population (const T t) const { 
+      if (!InBounds(t)) {
+	printf ("Population requested for a value outside of the histogram limits\n");
+	exit(1);
+      }
+      return _histogram[this->Bin(t)];
+    }
+
 
 };
 
@@ -146,7 +156,7 @@ class Histogram2D : public std::binary_function<T,T,bool>
     pair_t max;						// maximum value the histogram can bin in each dimension
     pair_t resolution;				// resolution for each dimension
     std::pair<int,int> size;					// dimensions of the 2-d data (number of histogram bins)
-    std::vector<int> counts;					// A running total of each time a bin was updated in the 1st dimension of the histogram i.e. access count
+    std::vector<double> counts;					// A running total of each time a bin was updated in the 1st dimension of the histogram i.e. access count
 
     // Initialization with [min, max, resolution]
     Histogram2D (const pair_t& minima, const pair_t& maxima, const pair_t& resolutions) 
@@ -190,17 +200,17 @@ class Histogram2D : public std::binary_function<T,T,bool>
     int Element (const int x, const int y) const { return _histogram[x][y]; }
     
     // returns the population of a single bin given a value
-    int Population (const T& a, const T& b) const 
+    double Population (const T& a, const T& b) const 
     { 
       bins temp = Bin(a, b);
       return _histogram[temp.first][temp.second]; 
     }		
 
     //int Count (const int i) const { return counts[i]; }
-    int Count (const T& i) const { return counts[(i-min.first)/resolution.first]; }
+    double Count (const T& i) const { return counts[(i-min.first)/resolution.first]; }
 
   private:
-    typedef std::vector<int> Histogram_t;
+    typedef std::vector<double> Histogram_t;
     std::vector<Histogram_t> _histogram;		// 2-d container/histogram
 
     typedef unsigned int bin;

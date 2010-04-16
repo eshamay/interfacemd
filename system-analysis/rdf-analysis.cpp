@@ -4,26 +4,30 @@ template <class T>
 void RDFAnalyzer<T>::Setup () {
   LoadAll();
   // slice the slab into the region of interest
-  SLICE_BY_POSITION(int_atoms, Atom *, rdfparams.position_min, rdfparams.position_max);
+  std::pair<double,double> slice = std::make_pair (rdfparams.position_min, rdfparams.position_max);
+  KeepAtomsInSlice(int_atoms, slice);
 
   // find all the unique atom names of atoms that we'll be processing through
   std::vector<string> atom_names;
   UNIQUE_PAIRLIST_ELEMENTS(rdfparams.name_pairs, atom_names);
 
   // keep only the atoms that appear in the list of names that we'll be processing
-  KEEP_BY_NAMES(int_atoms, Atom *, atom_names);
+  KeepAtomsByNames(int_atoms, atom_names);
+  KeepAtomsByNames(sys_atoms, atom_names);
 
   return;
 }
 
 template <class T>
 void RDFAnalyzer<T>::Analysis () {
-  /* Send each atom pair to the RDF machinery */
+  // Send each atom pair to the RDF machinery
+  // perform the correlation between each atom in the specified interface/slice...
   for (Atom_it it = int_atoms.begin(); it != int_atoms.end(); it++)
   {
-    for (Atom_it jt = it; jt != int_atoms.end(); jt++)
+    // to every other atom in the system
+    for (Atom_it jt = sys_atoms.begin(); jt != sys_atoms.end(); jt++)
     {
-      if (it == jt) 
+      if (*it == *jt) 
 	continue;
 
       rdf(*it, *jt);
@@ -39,7 +43,7 @@ void RDFAnalyzer<T>::PostAnalysis () {
 
 template <class T>
 void RDFAnalyzer<T>::DataOutput (const unsigned int timestep) {
-  if (!(timestep % (output_freq * 10)))
+  if (!(timestep % (output_freq * 10)) && timestep)
   {
     rdf.Output(output);
     this->Setup();

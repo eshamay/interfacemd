@@ -89,15 +89,17 @@ void Atom::Print () const {
 void Atom::SetMass () {
 
 	//const double AMU2KG	= 1.6762158e-27;		// conversion for amu -> kg
-	if (_name.find("O") != std::string::npos) _mass = 15.9949146221;
-	if (_name.find("N") != std::string::npos) _mass = 14.0030740052;
-	if (_name.find("H") != std::string::npos) _mass = 1.0078250321;
-	if (_name.find("D") != std::string::npos) _mass = 2.0156500641;
-	if (_name.find("C") != std::string::npos) _mass = 12.0000000;
-	if (_name.find("Si") != std::string::npos) _mass = 28.0855;
-	if (_name.find("S") != std::string::npos) _mass = 32.065;
-	if (_name.find("F") != std::string::npos) _mass = 18.9984;
-	if (_name.find("Cl") != std::string::npos) _mass = 35.453;
+	if (_name.find("DW") != std::string::npos) _mass = 0.0;
+	else if (_name.find("SW") != std::string::npos) _mass = 0.0;
+	else if (_name.find("Cl") != std::string::npos) _mass = 35.453;
+	else if (_name.find("H") != std::string::npos) _mass = 1.0078250321;
+	else if (_name.find("O") != std::string::npos) _mass = 15.9949146221;
+	else if (_name.find("N") != std::string::npos) _mass = 14.0030740052;
+	else if (_name.find("D") != std::string::npos) _mass = 2.0156500641;
+	else if (_name.find("C") != std::string::npos) _mass = 12.0000000;
+	else if (_name.find("Si") != std::string::npos) _mass = 28.0855;
+	else if (_name.find("S") != std::string::npos) _mass = 32.065;
+	else if (_name.find("F") != std::string::npos) _mass = 18.9984;
 
 return;
 }
@@ -105,12 +107,14 @@ return;
 void Atom::SetCharge () {
 
 	if (_name.find("O") != std::string::npos) _charge =  6.0;
-	if (_name.find("H") != std::string::npos) _charge = 1.0;
-	if (_name.find("N") != std::string::npos) _charge =  5.0;
-	if (_name.find("Si") != std::string::npos) _charge =  4.0;
-	if (_name.find("S") != std::string::npos) _charge =  6.0;
-	if (_name.find("Cl") != std::string::npos) _charge =  7.0;
-	if (_name.find("C") != std::string::npos) _charge =  4.0;
+	else if (_name.find("SW") != std::string::npos) _charge = 0.0;
+	else if (_name.find("DW") != std::string::npos) _charge = 0.0;
+	else if (_name.find("H") != std::string::npos) _charge = 1.0;
+	else if (_name.find("N") != std::string::npos) _charge =  5.0;
+	else if (_name.find("Si") != std::string::npos) _charge =  4.0;
+	else if (_name.find("S") != std::string::npos) _charge =  6.0;
+	else if (_name.find("Cl") != std::string::npos) _charge =  7.0;
+	else if (_name.find("C") != std::string::npos) _charge =  4.0;
 
 return;
 }

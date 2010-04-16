@@ -1,0 +1,47 @@
+#ifndef GROFILE_H_
+#define GROFILE_H_
+
+#include <string>
+#include <vector>
+#include <iostream>
+#include "atom.h"
+#include "molecule.h"
+
+class GROFile {
+  public:
+    GROFile (const std::string path) :
+      _file (fopen (path.c_str(), "r"))
+  { 
+    if (_file == (FILE *)NULL) {
+      std::cout << "Error opening the .gro file " << path << std::endl;
+      exit(1);
+    }
+    _ParseSystem();
+    return; 
+  }
+    ~GROFile () 
+    {
+      fclose(_file);
+      return;
+    }
+
+    void Print () const;
+    int NumAtoms () const { return _natoms; }
+    Atom_ptr_vec& Atoms() { return _atoms; }
+    Mol_ptr_vec& Molecules() { return _mols; }
+
+    Atom * operator[] (const int index) { return _atoms[index]; }
+
+  private:
+    FILE * _file;
+    std::string _title;
+    int _natoms;
+    VecR _box_size;
+
+    Atom_ptr_vec _atoms;
+    Mol_ptr_vec _mols;
+
+    void _ParseSystem ();
+};
+
+#endif
