@@ -4,6 +4,7 @@
 #include "mdsystem.h"
 #include "ambersystem.h"
 #include "xyzsystem.h"
+#include "gmxsystem.h"
 #include "utility.h"
 #include "graph.h"
 #include <libconfig.h++>

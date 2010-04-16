@@ -1,8 +1,8 @@
 #include "gmxsystem.h"
 
-GMXSystem::GMXSystem ( char * trr_filepath, char * gro_filepath)
+GMXSystem::GMXSystem (const char * trr_filepath, const char * gro_filepath)
 :
-  _trr(trr_filepath), _gro(gro_filepath)
+  _trr(const_cast<char *>(trr_filepath)), _gro(gro_filepath)
 { 
   this->LoadFirst();
   return; 
@@ -30,6 +30,7 @@ void GMXSystem::_ParseMolecules () {
   }
 }
 
+/*
 int main () {
 
   GMXSystem sys ("sw_md.trr", "sw_md.gro");
@@ -41,3 +42,4 @@ int main () {
 
   return 0;
 }
+*/

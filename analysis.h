@@ -18,10 +18,12 @@ class Analyzer : public WaterSystem<T> {
 
     void _EmptyFunction () const { return; } /* A simple empty function that does nothing to the system */
 
+    virtual void _InitializeSystem ();
 
   public:
     Analyzer (const WaterSystemParams& params);
     virtual ~Analyzer ();
+
 
     virtual void SystemAnalysis ();
 
@@ -35,6 +37,7 @@ class Analyzer : public WaterSystem<T> {
     static int 		timesteps;
     static unsigned int restart;
 
+    /*
     // create a histogram of the angle between a given molecular axis vector (determined by the axisFunc) and the system's ref_axis. The molecule is chosen by the residue name. The molecules must themselves have the functions for determining the molecular axis vector.
     template <typename molecule_t>
       vector<int> Molecular_Axis_Orientation_Histogram (
@@ -57,6 +60,8 @@ class Analyzer : public WaterSystem<T> {
 	  const string atom_name,
 	  vector< vector<double> >& histogram,
 	  vector< vector<int> >& density);
+
+    */
 
     // calculate a bin for a histogram
     static int Bin (const double value, const double min, const double res) {
@@ -103,7 +108,7 @@ template <class T> VecR		Analyzer<T>::ref_axis;
 template <class T> 
 Analyzer<T>::Analyzer (const WaterSystemParams& params)
 
-: WaterSystem<AmberSystem>(params),
+: WaterSystem<T>(params),
   output_filename(params.output_filename), output(params.output),
   output_freq(params.output_freq)
 { 
@@ -121,11 +126,9 @@ Analyzer<T>::Analyzer (const WaterSystemParams& params)
   Analyzer<T>::ref_axis = params.ref_axis;
 
   this->_CheckOutputFile();
+
   try {
-    this->sys = new AmberSystem(
-	params.config_file->lookup("system.files.prmtop"),
-	params.config_file->lookup("system.files.mdcrd"),
-	params.config_file->lookup("system.files.mdvel"));
+    Analyzer<T>::_InitializeSystem();
   }
   catch (const libconfig::SettingTypeException &stex) {
     std::cerr << "Something wrong with the setting type for the system file names (prmtop, mdcrd, mdvel)" << std::endl;
@@ -144,7 +147,7 @@ template <class T>
 void Analyzer<T>::_OutputHeader () const {
 
   printf ("Analysis Parameters:\n\tOutput Filename = \"%s\"\n\tScreen output frequency = 1/%d\n\n\tPosition extents for analysis:\n\t\tMin = % 8.3f\n\t\tMax = % 8.3f\n\t\tPosition Resolution = % 8.3f\n\n\tPrimary Axis = %d\nNumber of timesteps to be analyzed = %d\n",
-      output_filename.c_str(), output_freq, posmin, posmax, Analyzer<T>::posres, int(Analyzer<T>::axis), Analyzer<T>::timesteps);
+      output_filename.c_str(), output_freq, Analyzer<T>::posmin, Analyzer<T>::posmax, Analyzer<T>::posres, int(Analyzer<T>::axis), Analyzer<T>::timesteps);
 
 #ifdef AVG
   printf ("\n\nThe analysis is averaging about the two interfaces located as:\n\tLow  = % 8.3f\n\tHigh = % 8.3f\n\n", int_low, int_high);
@@ -266,32 +269,50 @@ double Analyzer<T>::Position (const double d) {
   return pos;
 }
 
+void Analyzer<AmberSystem>::_InitializeSystem () {
+  this->sys = new AmberSystem(
+      wsp.config_file->lookup("system.files.prmtop"),
+      wsp.config_file->lookup("system.files.mdcrd"),
+      wsp.config_file->lookup("system.files.mdvel"));
+  return;
+}
+
+
+void Analyzer<GMXSystem>::_InitializeSystem () {
+  std::string trr = wsp.config_file->lookup("system.files.gmx-trrfile");
+  std::string gro = wsp.config_file->lookup("system.files.gmx-grofile");
+  this->sys = new GMXSystem(trr.c_str(), gro.c_str());
+  return;
+}
+
+/*
 // Create a histogram of the angles formed by an axis of a molecule's given reference axis.
 // The supplied axis function should return the molecular axis vector of the molecule.
 template <class T, typename molecule_t>
 vector<int> Analyzer<T>::Molecular_Axis_Orientation_Histogram (
-    string molName,
-    VecR (molecule_t::*axisFn)() /* This axisFn must return the molecular axis of interest of the molecule */
-    )
+string molName,
+VecR (molecule_t::*axisFn)() // This axisFn must return the molecular axis of interest of the molecule
+)
 {
 
-  // set up the histogram for output
-  vector<int> histo (angbins, 0);
+// set up the histogram for output
+vector<int> histo (angbins, 0);
 
-  molecule_t * pmol;
-  // Run an analysis on all the carbon-chain molecules in the system to find their orientations over the course of a simulation with respect to a given axis.
-  RUN (int_mols) {
-    pmol = static_cast<molecule_t *>(int_mols[i]);
+molecule_t * pmol;
+// Run an analysis on all the carbon-chain molecules in the system to find their orientations over the course of a simulation with respect to a given axis.
+RUN (int_mols) {
+pmol = static_cast<molecule_t *>(int_mols[i]);
 
-    // find the particular molecular-axis vector
-    VecR molAxis = (pmol->*axisFn)();
-    const double angle = (molAxis < ref_axis);	// calculates the cos(angle) between the two axes
-    int anglebin = this->Bin (angle, angmin, angres);
-    histo[anglebin]++;
-  }
-
-  return (histo);
+// find the particular molecular-axis vector
+VecR molAxis = (pmol->*axisFn)();
+const double angle = (molAxis < ref_axis);	// calculates the cos(angle) between the two axes
+int anglebin = this->Bin (angle, angmin, angres);
+histo[anglebin]++;
 }
+
+return (histo);
+}
+*/
 
 /*
    template <typename molecule_t>
@@ -324,52 +345,87 @@ return (histo);
 }
 */
 
+/*
 // creates a 2D histogram showing the shape of the plane formed by a given atom of a molecule averaged over a simulation.
 // The histogram will show either the population density at a particular in-plane point giving the population as a function of the two coordinates...
 // or it can show the average location (in the surface-normal direction) of atoms in the plane.
 template <class T, typename molecule_t>
 vector< vector<double> > Analyzer<T>::Interface_Location_Histogram (
-    // 2 directions (axes) parallel to the plane
-    const coord d1, const coord d2,
-    // name of the molecule to analyze
-    const string mol_name,
-    // Atom name to analyze
-    const string atom_name,
-    vector< vector<double> >& histogram,
-    vector< vector<int> >& density)
+// 2 directions (axes) parallel to the plane
+const coord d1, const coord d2,
+// name of the molecule to analyze
+const string mol_name,
+// Atom name to analyze
+const string atom_name,
+vector< vector<double> >& histogram,
+vector< vector<int> >& density)
 {
-  double d_min = -5.0;
-  // the size of the system in the d1 direction
-  double d1_max = MDSystem::Dimensions()[d1] + 10.0;	
-  // the size of the system in the d2 direction
-  double d2_max = MDSystem::Dimensions()[d2] + 10.0;
-  double d_res = 1.0;
+double d_min = -5.0;
+// the size of the system in the d1 direction
+double d1_max = MDSystem::Dimensions()[d1] + 10.0;	
+// the size of the system in the d2 direction
+double d2_max = MDSystem::Dimensions()[d2] + 10.0;
+double d_res = 1.0;
 
-  int numBins1 = (int)((d1_max - d_min)/d_res);
-  int numBins2 = (int)((d2_max - d_min)/d_res);
+int numBins1 = (int)((d1_max - d_min)/d_res);
+int numBins2 = (int)((d2_max - d_min)/d_res);
 
-  if (histogram.size() == 0)
-    histogram.resize (numBins1, vector<double> (numBins2, 0));
-  if (density.size() == 0)
-    density.resize (numBins1, vector<int> (numBins2, 0));
+if (histogram.size() == 0)
+histogram.resize (numBins1, vector<double> (numBins2, 0));
+if (density.size() == 0)
+density.resize (numBins1, vector<int> (numBins2, 0));
 
-  molecule_t * mol;
-  Atom * atom;
-  int d1_bin, d2_bin;
-  RUN (int_mols) {
-    mol = static_cast<molecule_t *>(int_mols[i]);
-    atom = mol->GetAtom(atom_name);
+molecule_t * mol;
+Atom * atom;
+int d1_bin, d2_bin;
+RUN (int_mols) {
+mol = static_cast<molecule_t *>(int_mols[i]);
+atom = mol->GetAtom(atom_name);
 
-    d1_bin = Bin (atom->Position()[d1], d_min, d_res);
-    d2_bin = Bin (atom->Position()[d2], d_min, d_res);
-    // bin the location of an atom at each point on the plane
-    double ref_position = atom->Position()[axis];
+d1_bin = Bin (atom->Position()[d1], d_min, d_res);
+d2_bin = Bin (atom->Position()[d2], d_min, d_res);
+// bin the location of an atom at each point on the plane
+double ref_position = atom->Position()[axis];
 
-    histogram[d1_bin][d2_bin] += ref_position;
-    density[d1_bin][d2_bin]++;
-  }
-
-  return histogram;
+histogram[d1_bin][d2_bin] += ref_position;
+density[d1_bin][d2_bin]++;
 }
 
+return histogram;
+}
+*/
+
+/*
+   class AmberAnalyzer : public Analyzer<AmberSystem> {
+
+   public:
+   AmberAnalyzer (WaterSystemParams& wsp) :
+   Analyzer<AmberSystem>(wsp)
+   { return; }
+
+   private:
+   virtual void _InitializeSystem () {
+   this->sys = new AmberSystem(
+   wsp.config_file->lookup("system.files.prmtop"),
+   wsp.config_file->lookup("system.files.mdcrd"),
+   wsp.config_file->lookup("system.files.mdvel"));
+   }
+
+   };
+
+   class GMXAnalyzer : public Analyzer<GMXSystem> {
+
+   public:
+   GMXAnalyzer (WaterSystemParams& wsp) :
+   Analyzer<GMXSystem>(wsp)
+   { return; }
+
+   private:
+   virtual void _InitializeSystem () {
+   std::string trr = wsp.config_file->lookup("system.files.gmx-trrfile");
+   std::string gro = wsp.config_file->lookup("system.files.gmx-grofile");
+   this->sys = new GMXSystem(trr.c_str(), gro.c_str());
+   }
+   };
+   */
 #endif

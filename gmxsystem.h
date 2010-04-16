@@ -12,8 +12,8 @@ class GMXSystem : public MDSystem {
 
   public:
     GMXSystem (
-	char * trr_filepath,
-	char * gro_filepath);
+	const char * trr_filepath,
+	const char * gro_filepath);
 
     void LoadNext ();
     void LoadFirst ();
