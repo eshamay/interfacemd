@@ -12,7 +12,7 @@ typedef map<string, Histogram_1D>::iterator Histogram_it;
 /********************************************************************/
 // A binning functor for accumulating a 2D histogram of angles and positions of molecules
 // The functor can operate on a molecule so long as the molecule has a method for returning its molecular axis (vecr)
-template <class T>
+template <class T, class U>
 class DensityBinner {
   public:
 
@@ -30,7 +30,7 @@ class DensityBinner {
 
 	// Create a new histogram in the map
 	void AddNewHistogram (T t) {
-	  _histograms[t->Name()] = Histogram_1D (Analyzer::posbins, 0);
+	  _histograms[t->Name()] = Histogram_1D (Analyzer<U>::posbins, 0);
 	  atom_types.push_back(t->Name());
 	}
 
@@ -40,8 +40,8 @@ class DensityBinner {
 	}
 };
 
-template <class T> vector<string> DensityBinner<T>::atom_types = vector<string>();
-template <class T> map<string, Histogram_1D> DensityBinner<T>::_histograms;
+template <class T, class U> vector<string> DensityBinner<T,U>::atom_types = vector<string>();
+template <class T, class U> map<string, Histogram_1D> DensityBinner<T,U>::_histograms;
 
 
 /********************************************************************/
@@ -49,44 +49,24 @@ template <class T> map<string, Histogram_1D> DensityBinner<T>::_histograms;
 /********************************************************************/
 
 
-class DensityAnalyzer : public Analyzer {
+template<class T>
+class DensityAnalyzer : public Analyzer<T> {
 
   public:
 	DensityAnalyzer (WaterSystemParams& wsp) :
-	  Analyzer(wsp) { return; }
+	  Analyzer<T>(wsp) { return; }
 
 	// the utility functor for getting all the data accumulated
-	DensityBinner<Atom *> binner;
+	DensityBinner<Atom *, T> binner;
 
 	void Setup () { 
-
 	  /* Load all the atoms in the system */
-	  LoadAll();
-
-	  //std::vector<Atom *> v_si;
-
-
-	  /* grab all the Si atoms */
-	  /*
-	  RUN (int_atoms)
-	  {
-		Atom * atom = int_atoms[i];
-		if (atom->Name() == "SI")
-		  v_si.push_back(atom);
-	  }
-	  */
-
-	  /* load only the waters */
-	  //FindWaters();
-
-	  /* now load all the Si atoms into the ones to be processed */
-	  //copy(v_si.begin(), v_si.end(), back_inserter(int_atoms));
-
+	  this->LoadAll();
 	}
 
 	void Analysis () {
-	  // bin each water's position and angle
-	  FOR_EACH(int_atoms, binner);
+	  // bin each atom's position in the system
+	  std::for_each(this->int_atoms.begin(), this->int_atoms.end(), binner);
 	  return;
 	}
 
@@ -94,8 +74,8 @@ class DensityAnalyzer : public Analyzer {
 	void PostAnalysis () { return; }
 
 	void DataOutput (const unsigned int timestep) {
-	  if (!(timestep % (output_freq * 10)))
-		binner.Output(output, timestep);
+	  if (!(timestep % (this->output_freq * 10)))
+		binner.Output(this->output, timestep);
 	  return;
 	}
 };

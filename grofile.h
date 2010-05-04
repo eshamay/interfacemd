@@ -11,17 +11,23 @@ class GROFile {
   public:
     GROFile (const std::string path) :
       _file (fopen (path.c_str(), "r"))
-  { 
-    if (_file == (FILE *)NULL) {
-      std::cout << "Error opening the .gro file " << path << std::endl;
-      exit(1);
+    { 
+      if (_file == (FILE *)NULL) {
+	std::cout << "Error opening the .gro file " << path << std::endl;
+	exit(1);
+      }
+      _ParseSystem();
+      return; 
     }
-    _ParseSystem();
-    return; 
-  }
+
     ~GROFile () 
     {
       fclose(_file);
+      for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++)
+	delete ((*it));
+      for (Mol_it it = _mols.begin(); it != _mols.end(); it++)
+	delete ((*it));
+
       return;
     }
 

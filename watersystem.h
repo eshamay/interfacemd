@@ -10,36 +10,14 @@
 #include <libconfig.h++>
 #include <cstdlib>
 #include <iomanip>
+#include <algorithm>
+
 
 // Predicates (defined below)
 template <class T> bool Name_pred (const T t, const std::string name);
 template <class T> bool AtomicPosition_pred (const T t, const std::pair<double,double> extents);
 
 struct WaterSystemParams {
-  /*
-  WaterSystemParams (		// Constructor and initial/default values for system parameters
-		     std::string _output = "temp.dat",
-		     const int _timesteps = 200000,
-		     const bool _avg = false,
-		     const coord _axis = y,
-		     const VecR _ref_axis = VecR (0.0, 1.0, 0.0),
-		     const int _output_freq = 100, const int _restart = 0,
-		     const double _posmin = -20.0, const double _posmax = 150.0, 
-		     const double _posres = 0.1,
-		     const double _angmin = -1.0, const double _angmax = 1.0, 
-		     const double _angres = 0.01,
-		     const double _pbcflip = 20.0
-		     ) :	// The initialization of the system parameters
-  avg(_avg), output_filename(_output), output(fopen(_output.c_str(), "w")),
-    axis(_axis), ref_axis(_ref_axis), output_freq(_output_freq), timesteps(_timesteps), restart(_restart),
-    posmin(_posmin), posmax(_posmax), posres(_posres), 
-    posbins (int((posmax-posmin)/posres)),
-    pbcflip(_pbcflip),
-    angmin(_angmin), angmax(_angmax), angres(_angres),
-    angbins (int((angmax-angmin)/angres))
-  { }
-  */
-
   WaterSystemParams () { }
 
   WaterSystemParams (libconfig::Config::Config& cfg)
@@ -133,8 +111,14 @@ class WaterSystem {
   void OpenFile ();
   void Debug (string msg) const;
 
+  static double AxisPosition (Atom * a) {
+    double pos = a->Position()[axis];
+    pos = (pos > pbcflip) ? pos : pos + MDSystem::Dimensions()[axis];
+    return pos;
+  }
+
   void LoadAll ();							// Loads all the molecules and atoms in the system into the containers
-  void FindWaters ();						// Find all the waters
+  void FindWaters (const std::string name = "h2o");	// Find all the waters
   void FindMols (const string name);		// find all molecules with this name
   void FlipWaters (const coord axis = y);
   void SliceAtoms (const double low, const double high);
@@ -178,7 +162,6 @@ class WaterSystem {
 	return names.end() != std::find(names.begin(), names.end(), atom->Name());
       }
   };
-
 
 
 
@@ -302,26 +285,33 @@ void WaterSystem<T>::LoadAll () {
   int_mols.clear();
   int_atoms.clear();
 
-  Molecule * pmol;
+  Mol_ptr_vec mols = sys->Molecules();
+  // copy the molecules and atoms into each container
+  std::copy(mols.begin(), mols.end(), std::back_inserter(sys_mols));
+  std::copy(mols.begin(), mols.end(), std::back_inserter(int_mols));
 
-  // go through the system
-  for (int i = 0; i < sys->NumMols(); i++) {
+  std::copy(sys->begin(), sys->end(), std::back_inserter(sys_atoms));
+  std::copy(sys->begin(), sys->end(), std::back_inserter(int_atoms));
+  /*
+  for (Mol_it it = sys->Molecules().begin(); it != sys->Molecules.end(); it++) {
+    //int i = 0; i < sys->NumMols(); i++) {
     // grab each molecule to be added
-    pmol = sys->Molecules(i);
-    int_mols.push_back (pmol);
-    sys_mols.push_back (pmol);
+    int_mols.push_back (*it);
+    sys_mols.push_back (*it);
+
     // and then add all of its atoms
-    RUN2(pmol->Atoms()) {
-      int_atoms.push_back (pmol->Atoms(j));
-      sys_atoms.push_back (pmol->Atoms(j));
+    for (Atom_it jt = (*it)->Atoms().begin(); jt != (*it)->Atoms().end(); jt++) {
+      int_atoms.push_back(*jt);
+      sys_atoms.push_back(*jt);
     }
   }
+  */
 
   return;
 }
 
 template <class T>
-void WaterSystem<T>::FindWaters () {
+void WaterSystem<T>::FindWaters (const std::string name) {
 
   int_wats.clear();
   int_atoms.clear();
@@ -335,7 +325,7 @@ void WaterSystem<T>::FindWaters () {
     pmol = sys->Molecules(i);
 
     // we're only looking at waters for SFG analysis right now
-    if (pmol->Name() != "h2o") continue;
+    if (pmol->Name() != name) continue;
 
     // first thing we do is grab a water molecule to work with
     water = static_cast<Water *>(pmol);

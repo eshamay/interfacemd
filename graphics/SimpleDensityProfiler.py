@@ -1,50 +1,62 @@
-from ColumnDataFile import ColumnDataFile as CDF
+import numpy
+import csv
+
 from DensityFitter import DensityFitter as DF
 
 import matplotlib.pyplot as plt
-import matplotlib.text
-import matplotlib.patches
 
-import re
-
-ATOMS = ['O', 'C18', 'C17']
-# Area of the interface
-XSIZE = 33.168
-YSIZE = 33.512
-XRANGE = [-10.0,10.0]
-YRANGE = [0.0,2.0]
-# line color/style and labels
-LINESTYLES = {'O':['black',r'H$_2$O'], 'C':['blue',r'CCl$_4$'], 'NA':['#088618',r'Na'], 'N':['#a10f05',r'NO$_3$'], 'SI':['#6805a1',r'SO$_4$'], 'S':['#6805a1',r'SO$_4$'], 'Cl':['#6e6f00',r'Cl']}
+XSIZE = 3.0
+YSIZE = 3.0
 BIN_WIDTH = 0.1
 
+XRANGE = [-20.0, 110.0]
+YRANGE = [0.0, 25.0]
 class DensityProfiler:
 
-	def __init__(self,file):
+	def __init__(self,file,atoms):
 		self.file = file
+		self.atoms = atoms
 
 		# crunch through the density data
-		self.data = CDF(file)
+		d = [data for data in self.import_text(self.file, ' ')]
 
+		# grab the atom names
+		self.keys = d[0][1:]
+
+		# parse all the data file
+  		self.data = self.parse_data(d[1:])
+  	
 		# and scale it to be in units of g/mL instead of number density
 		self.ScaleDataToDensity()
 
+	def import_text(self,filename,separator):
+		for line in csv.reader(open(filename), delimiter=separator, skipinitialspace=True):
+			if line:
+				yield line
+
+  	def parse_data(self,data):
+		# Data coming in will be in string format - it needs to be converted to float
+		row_convert = lambda element: float(element)
+  		nan_convert = lambda element: element if not numpy.isnan(element) else 0.0
+  		set_convert = lambda row: map(nan_convert, map(row_convert, row))
+  		data = map(set_convert, data)
+  		return data
+
 	# scale each data set to adjust the number density to density in terms of g/mL
 	def ScaleDataToDensity(self):
-		molecular_weight = {'O':18.01, 'C':12.00, 'NA':22.99, 'N':62.00, 'S':96.06, 'Cl':35.45, 'SI':28.0855}
+		molecular_weight = {'O':18.01, 'OW':18.01, 'HW':1.00, 'C':12.00, 'NA':22.99, 'N':62.00, 'S':96.06, 'Cl':35.45, 'SI':28.0855}
 		# A scaling factor to further alter the lineshape vertical scale
-		scale = {'O':1.0, 'C':1.0, 'NA':10.0, 'N':5.0, 'S':5.0, 'Cl':5.0, 'SI':1.0}
+		scale = {'O':1.0, 'OW':1.0, 'HW':1.0, 'C':1.0, 'NA':10.0, 'N':5.0, 'S':5.0, 'Cl':5.0, 'SI':1.0}
 
-		conversion = 1.0/(XSIZE*YSIZE*BIN_WIDTH * 0.602)
-		for k,v in self.data.iteritems():
-			if k in ATOMS:
-				c = self.StripNameDigits(k)
-				self.data[k] = map(lambda x: x * molecular_weight[c] * scale[c] * conversion, v)
+		# conversion for the differential volume and number density to g/mL
+		conversion = 1.0/(XSIZE*YSIZE*BIN_WIDTH * 602)
+  		for key in self.keys:
+			name = key.strip('0123456789')
+			ind = self.keys.index(key)
+  			if name in molecular_weight:
+				self.data[ind] = map(lambda x: x * molecular_weight[name] * scale[name] * conversion, self.data[ind])
 
 		return
-
-	# strips digits from atom names
-	def StripNameDigits(self, name):
-		return [item for item in re.split('[0-9]', name)][0]
 
 	def PlotData(self):
 
@@ -54,21 +66,21 @@ class DensityProfiler:
 		# some of the prelim stuff for our figure
 		ax = self.fig.add_subplot(1,1,1)
 
-		x = self.data['Position']
+		x = [d[0] for d in self.data]
 
 		# take care of plotting the fitting functions for the water and then shifting the axis to the GDS location
-		self.PlotWaterFit(ax, x, self.data['O'], 'k-')
-		x = self.ShiftAxis(x,self.shift)
+		#self.PlotWaterFit(ax, x, self.data['O'], 'k-')
+		#x = self.ShiftAxis(x,self.shift)
 
 		# plot the desired atomic densities
-		for atom in ATOMS:
-			datum = self.data[atom]
+		for atom in [key for key in self.keys if key in self.atoms]:
+			print atom
 
-			# strip the name down to the atom without any other digits
-			atom = self.StripNameDigits(atom)
+			ind = self.keys.index(atom)+1
+			datum = [d[ind] for d in self.data]
 
 			# plot the data
-			ax.plot(x, datum, color=LINESTYLES[atom][0], linestyle='--', linewidth=5, label=LINESTYLES[atom][1])
+			ax.plot(x, datum, linestyle='--', linewidth=3, label=atom)
 
 		# Do some labeling of the water data curve extrema (max/min, peaks/troughs, etc) for various reasons
 		#self.LabelWaterExtrema(ax,x,self.data['O'])

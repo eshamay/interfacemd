@@ -79,9 +79,9 @@ class Analyzer : public WaterSystem<T> {
     }
 
     void LoadNext () { this->sys->LoadNext(); }
-    Atom_ptr_vec& Atoms () { return int_atoms; } 
-    Mol_ptr_vec& Molecules () { return int_mols; }
-    Water_ptr_vec& Waters () { return int_wats; }
+    Atom_ptr_vec& Atoms () { return WaterSystem<T>::int_atoms; } 
+    Mol_ptr_vec& Molecules () { return WaterSystem<T>::int_mols; }
+    Water_ptr_vec& Waters () { return WaterSystem<T>::int_wats; }
 
     // analysis loop functions
     virtual void Setup () { return; }
@@ -223,9 +223,9 @@ int Analyzer<T>::PositionBin (const double position) {
 
   // check for flipping due to periodic boundaries
   double pos = position;
-  if (pos < pbcflip) 
-    pos += MDSystem::Dimensions()[axis];
-  return (Bin (pos, posmin, posres));
+  if (pos < WaterSystem<T>::wsp.pbcflip) 
+    pos += MDSystem::Dimensions()[WaterSystem<T>::wsp.axis];
+  return (Bin (pos, WaterSystem<T>::wsp.posmin, posres));
 
 }
 
@@ -241,10 +241,10 @@ int Analyzer<T>::PositionBin (const Atom * patom) {
 #ifdef AVG
   // here the bin will be selected based on the distance to a given interface. Negative distances are inside the water phase, positive are in the CCl4
   double distance = (position > middle) ? position - int_high : int_low - position;
-  int bin = Bin (distance, posmin, posres);
+  int bin = Bin (distance, WaterSystem<T>::wsp.posmin, posres);
 #else
   //if (position < START or position > END) continue;		// only bin stuff within the bounds that have been set up
-  int bin = Bin (position, posmin, posres);
+  int bin = Bin (position, WaterSystem<T>::wsp.posmin, posres);
 #endif
 
   return bin;
@@ -258,17 +258,18 @@ double Analyzer<T>::Position (const Atom * patom) {
 
 template <class T> 
 double Analyzer<T>::Position (const VecR& v) {
-  double position = v[axis];
+  double position = v[WaterSystem<T>::wsp.axis];
   return Analyzer<T>::Position(position);
 }
 
 template <class T> 
 double Analyzer<T>::Position (const double d) {
   double pos = d;
-  if (pos < pbcflip) pos += MDSystem::Dimensions()[axis];
+  if (pos < WaterSystem<T>::wsp.pbcflip) pos += MDSystem::Dimensions()[WaterSystem<T>::wsp.axis];
   return pos;
 }
 
+template <>
 void Analyzer<AmberSystem>::_InitializeSystem () {
   this->sys = new AmberSystem(
       wsp.config_file->lookup("system.files.prmtop"),
@@ -277,7 +278,7 @@ void Analyzer<AmberSystem>::_InitializeSystem () {
   return;
 }
 
-
+template <>
 void Analyzer<GMXSystem>::_InitializeSystem () {
   std::string trr = wsp.config_file->lookup("system.files.gmx-trrfile");
   std::string gro = wsp.config_file->lookup("system.files.gmx-grofile");
