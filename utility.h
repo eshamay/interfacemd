@@ -8,6 +8,7 @@
 #include <iterator>
 #include <iostream>
 #include <cctype>
+#include <cstdio>
 
 /*
    void DEBUGMSG (const std::string msg)

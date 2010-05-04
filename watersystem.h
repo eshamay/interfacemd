@@ -134,12 +134,6 @@ class WaterSystem {
 
   void UpdateGraph () { _graph.UpdateGraph (int_atoms); }
 
-  void PrintAtoms (const Atom_ptr_vec& atoms) const
-  {
-    for (Atom_it it = atoms.begin(); it != atoms.end(); it++) 
-    { (*it)->Print(); }
-  }
-
  protected:
 
   T * sys;

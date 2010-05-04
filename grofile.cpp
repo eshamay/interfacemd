@@ -16,12 +16,12 @@ void GROFile::_ParseSystem () {
   char resname[5];
   char atomname[5];
   Molecule * newmol = new Molecule();
-  Atom * newatom;
 
   for (int i = 0; i < _natoms; i++) {
     // read a line of the file to get all the parameters
     fscanf (_file, 
-	"%5d%5s%5s%*5d%*8.3f%*8.3f%*8.3f%*8.4f%*8.4f%*8.4f", 
+	//"%5d%5s%5s%*5d%*8.3f%*8.3f%*8.3f%*8.4f%*8.4f%*8.4f", 
+	"%5d%5s%5s%*5d%*8f%*8f%*8f%*8f%*8f%*8f", 
 	&newresnum, resname, atomname);
     fgets (title, 500, _file);
     _atoms[i] = new Atom (std::string(atomname), VecR());
@@ -39,7 +39,7 @@ void GROFile::_ParseSystem () {
   _mols.push_back(newmol);
   fgets (title, 500, _file);
 
-  int bx, by, bz;
+  float bx, by, bz;
   fscanf (_file, " %f %f %f ", &bx, &by, &bz);
   _box_size.Set(bx, by, bz);
 

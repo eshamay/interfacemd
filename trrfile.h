@@ -1,7 +1,7 @@
 #ifndef TRRFILE_H_
 #define TRRFILE_H_
 
-#define __cplusplus 1
+#define CPLUSPLUS 1
 
 #include <iostream>
 #include "xdrfile/xdrfile.h"

@@ -7,6 +7,8 @@
 #include "atom.h"
 #include "h2o.h"
 
+#include <map>
+#include <string>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_utility.hpp>
 #include <boost/property_map/property_map.hpp>
@@ -109,7 +111,7 @@ public:
 	} coordination;
 	// And hopefully that covers all the bonding coordination types :)
 
-	typedef std::map<coordination, std::string> coord_map;
+	typedef std::map< coordination, std::string> coord_map;
 
 	void SysType (std::string sys_type) { _sys_type = sys_type; }
 	void UpdateGraph (const Atom_ptr_vec& atoms);

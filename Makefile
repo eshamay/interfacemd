@@ -1,23 +1,20 @@
 SRCLIB	 	= $(HOME)/work/src
 
-MPILIBS		= $(MPI)/lib/libmpi.so $(MPI)/lib/libmpi_cxx.so
-
 FTENSOR		= $(SRCLIB)/include/FTensor-1.1pre25
 
 BOOST		= /common/src/boost_1_41_0
+#BOOST		= /usr/include
 
-XDRDIR		= /common/src/xdrfile-1.1b/cl1-intel
 XDRLIB		= $(XDRDIR)/lib
 XDRINC		= $(XDRDIR)/include
 
 CINCLUDE	= -I$(SRCLIB) -I/usr/include -I/usr/local/include -I$(BOOST) -I$(XDRINC)
-CLIBS		= -L$(MKL) -L$(XDRLIB) #-lmkl_lapack -lmkl -lguide -lpthread
-CPPFLAGS	= $(CINCLUDE) -L$(XDRLIB) -lconfig++
+CPPFLAGS	= $(CINCLUDE) -L$(XDRDIR)/lib -lconfig++
 #CXX			= mpiCC -g
 CXXDEBUG	= -g3 -ggdb -Wall -D_GLIBCXX_DEBUG
 CXXOPTIMIZE = -O2 -finline-functions -finline -funroll-loops
 #CXXFLAGS	= -ftemplate-depth-100 -Drestrict= $(CXXOPTIMIZE)
-CXXFLAGS    = -ftemplate-depth-100 -Drestrict= $(CXXDEBUG) #-wd981,1599,1572,383
+CXXFLAGS    = -ftemplate-depth-100 -Drestrict= -Wno-deprecated $(CXXDEBUG) #-wd981,1599,1572,383
 CXX			= g++ $(CXXFLAGS)
 #CXX			= icpc $(CXXFLAGS)
 MPICXX		= mpiCC -g -I$(MPI)/include

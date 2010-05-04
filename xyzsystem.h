@@ -1,7 +1,7 @@
 #ifndef XYZSYSTEM_H_
 #define XYZSYSTEM_H_
 
-#include <algorithm>
+#include <ext/algorithm>
 #include "mdsystem.h"
 #include "xyzfile.h"
 #include "wannier.h"

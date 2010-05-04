@@ -50,8 +50,18 @@ class ChargeAnalyzer : public Analyzer<T> {
 
     void Analysis () {
       // bin each atom's position in the system
-      //printf ("%d\n", this->sys_atoms.size());
-      std::for_each(this->sys_atoms.begin(), this->sys_atoms.end(), binner);
+      Atom_ptr_vec& atoms = this->sys_atoms;
+
+      class AtomPrinter {
+	public:
+	  void operator () (Atom * t) { t->Print(); }
+      };
+
+      AtomPrinter ap;
+
+      //std::for_each(atoms.begin(), atoms.end(), ap);
+
+      std::for_each(atoms.begin(), atoms.end(), binner);
       return;
     }
 

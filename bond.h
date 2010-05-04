@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <math.h>
+#include <string>
 
 const double OHBONDLENGTH = 1.3;				// used to be 1.1
 const double HBONDLENGTH  = 2.5;				// used to be 2.46
