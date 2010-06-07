@@ -13,7 +13,7 @@ class Analyzer : public WaterSystem<T> {
     int	output_freq;
 
     void _OutputHeader () const;
-    void _OutputStatus (const int timestep) const;
+    void _OutputStatus (const int timestep);
     void _CheckOutputFile ();
 
     void _EmptyFunction () const { return; } /* A simple empty function that does nothing to the system */
@@ -174,12 +174,13 @@ void Analyzer<T>::_CheckOutputFile () {
 }
 
 template <class T> 
-void Analyzer<T>::_OutputStatus (const int timestep) const
+void Analyzer<T>::_OutputStatus (const int timestep)
 {
   if (!(timestep % (this->output_freq * 10)))
     cout << endl << timestep << "/" << this->timesteps << " ) ";
-  if (!(timestep % this->output_freq))
+  if (!(timestep % this->output_freq)) {
     cout << "*";
+  }
 
   fflush (stdout);
   return;

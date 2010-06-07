@@ -1,7 +1,7 @@
 #include "morita.h"
 
-SFGAnalyzer::SFGAnalyzer (WaterSystemParams& params)
-  :	Analyzer (params),
+SFGAnalyzer::SFGAnalyzer (WaterSystemParams& wsp)
+  :	Analyzer<AmberSystem> (wsp),
 	sfg (SFGCalculator(&this->_graph)),
 	Molecular_Beta (Complex_vec (0, complex<double>(0.0,0.0))),
 	TimestepChi (Complex_vec (0, complex<double>(0.0,0.0))),
@@ -17,31 +17,35 @@ SFGAnalyzer::SFGAnalyzer (WaterSystemParams& params)
 }
 
 void SFGAnalyzer::Setup () {
+
+  // Load up all the water molecules and atoms
+  this->LoadWaters();
+
+  // keep only the waters within a given region of the slab for analysis
+  std::pair<double,double> extents = std::make_pair<double,double> (
+	  WaterSystem<AmberSystem>::posmin,
+	  WaterSystem<AmberSystem>::posmax
+	  );
+  this->SliceWaters(int_wats, extents);
+
   return;
 }
 
 void SFGAnalyzer::Analysis () {
 
-
   TimestepChi.clear();	// it's a new timestep
   firstmol = true;		// every timestep we will have to go through all the molecules again
-
-  // first find all the waters in the system
-  FindWaters();
-  // first let's find all the waters in the interface
-  SLICE_BY_POSITION(int_wats, Water *, 60.0, 80.0);
-
 
   // and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
   UpdateGraph ();
 
   // only grab the OH-waters for now
-  //this->SliceWaterCoordination (OOH);
+  //this->SliceWaterCoordination (OH);
 
   Water * water;
-  for (int mol = 0; mol < (int)int_wats.size(); mol++) {
+  for (Mol_it mol = int_wats.begin(); mol != int_wats.end(); mol++) {
 
-	water = int_wats[mol];
+	water = static_cast<Water *>(*mol);
 
 	Molecular_Beta.clear();
 
@@ -70,6 +74,11 @@ void SFGAnalyzer::Analysis () {
   // we collect the data for each timestep into the running total
   CollectChi (TimestepChi, TotalChi);
 
+  // reload the interface waters once in a while because they tend to move in and out of the interfacial region
+  if (!(numMolsProcessed % 20000)) {
+	this->Setup();
+  }
+
   return;
 }
 
@@ -85,12 +94,14 @@ void SFGAnalyzer::CollectChi (Complex_vec& newchi, Complex_vec& totalchi) {
 
 
 // take each of the interfacial waters and flip the molecules such that they are mirrored about a plane that runs through the oxygen and is normal to the given axis.
+/*
 void SFGAnalyzer::FlipWaters (const coord axis) {
   RUN (int_wats) {
 	int_wats[i]->Flip(axis);
   }
   return;
 }
+*/
 
 // output data to the file
 void SFGAnalyzer::DataOutput (const unsigned int timestep) {
@@ -119,10 +130,16 @@ void SFGAnalyzer::PostAnalysis ()
 
 int main () {
 
+  libconfig::Config cfg;
+  cfg.readFile("system.cfg");
 
-  WaterSystemParams params ("Morita-SFG.dat", 100000);
+  std::string filename = cfg.lookup("analysis.sfg.filename");
+  libconfig::Setting &analysis = cfg.lookup("analysis");
+  analysis.add("filename", libconfig::Setting::TypeString) = filename;
 
-  SFGAnalyzer analyzer (params);
+  WaterSystemParams wsp (cfg);
+
+  SFGAnalyzer analyzer (wsp);
 
   analyzer.SystemAnalysis ();
 

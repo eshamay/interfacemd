@@ -7,7 +7,7 @@
 
 typedef std::vector< complex<double> > Complex_vec;
 
-class SFGAnalyzer : public Analyzer 
+class SFGAnalyzer : public Analyzer<AmberSystem>
 {
 
   public:

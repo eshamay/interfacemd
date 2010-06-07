@@ -66,11 +66,8 @@ class MoritaSFG:
 		self.files = files
 
 		# file i/o to get the data
-		self.sfgdata = []
 		self.h2o = SFGData(files[0])
-
-		for file in self.files[1:]:
-			self.sfgdata.append(SFGData(file))
+		self.sfgdata = [SFGData(f) for f in self.files[1:]]
 
 		self.InitPlot()
 
@@ -81,10 +78,11 @@ class MoritaSFG:
 
 			self.PlotChi(dat,ax)
 			self.SetTicksAndLabels(dat,ax)
-			#self.ShowLegend(ax)
+			self.ShowLegend(ax)
 
 			plt.xlim(2800,3800)
-			plt.ylim(0.0,1.1)
+			#plt.ylim(-2.3,1.2)
+
 		plt.show()
 
 	def InitPlot(self):
@@ -97,10 +95,9 @@ class MoritaSFG:
 			self.axs.append(self.fig.add_subplot(2,2,i+1))
 			plt.title(NAMES[self.sfgdata[i].SystemName()], size=30)
 			self.axs[i].set_yticklabels(())
-			self.axs[i].set_ylabel(r'$\left|\chi^{(2)}\right|^2 (a.u.)$', size=35)
+			#self.axs[i].set_ylabel(r'$\left|\chi^{(2)}\right|^2 (a.u.)$', size=35)
+			self.axs[i].set_ylabel(r'$\chi^{(2)} (a.u.)$', size=35)
 			
-				
-
 		return
 
 		'''
@@ -163,8 +160,7 @@ class MoritaSFG:
 		comp = map(lambda r,i: complex(r,i), re, new_imag)
 		chi = map(lambda c: real(c*c.conjugate()), comp)
 
-		return chi
-
+		return (re,new_imag,chi)
 
 	def NormalizeListToMax(self,dat):
 		max_peak = max(dat)
@@ -190,47 +186,38 @@ class MoritaSFG:
 
 	# plot the chi-squared lineshape
 	def PlotChi(self,dat,ax):
-		cut_freq = 0.0
-		low_freq = 0.0
-		line_color = 'k-'
+		CUTFREQ = {'NaCl':3600.0, 'NaNO3':3600.0, 'Na2SO4':3630.0}
+		LOWFREQ = {'NaCl':1500.0, 'NaNO3':2000.0, 'Na2SO4':1000.0}
+		SCALE = {'NaCl':1.4, 'NaNO3':1.5, 'Na2SO4':0.7}
+		COLOR = {'NaCl':'g-', 'NaNO3':'r-', 'Na2SO4':'purple'}
 
-	  	scale = 1.0
-		if dat.SystemName() == 'NaCl':
-			cut_freq = 3600.0
-			low_freq = 1500.0
-		  	scale = 1.4
-			line_color = 'g-'
-		elif dat.SystemName() == 'NaNO3':
-			cut_freq = 3600.0
-			low_freq = 2000.0
-		  	scale = 1.5
-			line_color = 'r-'
-		elif dat.SystemName() == 'Na2SO4':
-			cut_freq = 3630.0
-			low_freq = 1000.0
-		  	scale = 0.7
-			line_color = 'purple'
+		cut_freq = CUTFREQ[dat.SystemName()]
+		low_freq = LOWFREQ[dat.SystemName()]
+		scale = SCALE[dat.SystemName()]
+		line_color = COLOR[dat.SystemName()]
 
+  	# scale the chi
+		h2o_chi = self.NormalizeListToMax(self.h2o.Chi())
+		h2o_real = self.h2o.Real()
+		h2o_imag = self.h2o.Imag()
 
-  		# scale the chi
-		h2o = self.h2o.Chi()
-		h2o = self.NormalizeListToMax(h2o)
+		real = self.ScaleChi (dat, scale)[0]
+		imag = self.ScaleChi (dat, scale)[1]
+		chi = self.NormalizeListToMax(self.ScaleChi (dat, scale)[2])
 
-		chi = self.ScaleChi (dat, scale)
-		chi = self.NormalizeListToMax(chi)
+		# scale the frequencies
+		dat_freq = self.StretchFreq (dat.Freq(), low_freq, cut_freq)
 
-  		# scale the frequencies
-  		dat_freq = self.StretchFreq (dat.Freq(), low_freq, cut_freq)
 		if dat.SystemName() == 'NaNO3':
 			dat_freq = self.MoveXAxis(dat_freq,37)
-
   		#dat_freq = dat.Freq()
   		h2o_freq = self.StretchFreq (self.h2o.Freq(), 2000, 3600.0)
   		#h2o_freq = self.h2o.Freq()
 
 		#ax.plot(dat.Freq(), dat.Chi(), 'b:', linewidth=4, label=dat.SystemName()) #label=r'$|\chi|^{2}$')
-		ax.plot(dat_freq, chi, line_color, linewidth=4, label=dat.SystemName()) #label=r'$|\chi|^{2}$')
-		ax.plot(h2o_freq, h2o, 'k:', linewidth=4, label=r'H$_2$O')
+		ax.plot(dat_freq, real, 'r-', linewidth=4, label=r'Re $\chi^{(2)}$')
+		ax.plot(dat_freq, imag, 'b-', linewidth=4, label=r'Im $\chi^{(2)}$')
+		#ax.plot(h2o_freq, h2o_real, 'k:', linewidth=4, label=r'H$_2$O')
 
 
 	def SetTicksAndLabels(self,dat,ax):

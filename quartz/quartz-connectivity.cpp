@@ -4,10 +4,13 @@
 
 int main () {
 
-  PDBFile pdb ("bc-slab.pdb");
+  PDBFile pdb ("octadecane.pdb");
   //MDSystem::Dimensions(VecR(29.868, 100.0, 27.792));
 
   Atom_ptr_vec& atoms = pdb.Atoms();
+	for (Atom_it it = atoms.begin(); it != atoms.end(); it ++) {
+		(*it)->Print();
+	}
 
   printf ("!entry.qtz.unit.connectivity table  int atom1x  int atom2x  int flags\n");
   /* cycle through each atom in order of the pdb file */

@@ -3,7 +3,7 @@
 
 int main () {
 
-  PDBFile pdb ("quartz-slab.pdb");
+  PDBFile pdb ("octadecane.pdb");
   //MDSystem::Dimensions(VecR(29.868, 100.0, 27.792));
 
   Atom_ptr_vec& atoms = pdb.Atoms();

@@ -2,6 +2,7 @@
 #define PDBFILE_H_
 
 #include <string>
+#include <cstring>
 #include <vector>
 #include <iostream>
 #include "mdsystem.h"

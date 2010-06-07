@@ -15,6 +15,11 @@ template <class U>
 class ChargeBinner {
   public:
 
+    ChargeBinner () {
+      _histogram.resize(Analyzer<U>::posbins, 0.0);
+      return;
+    }
+
     // The functor's operation for binning of atomic positions
     void operator() (Atom * t);
 
@@ -27,7 +32,7 @@ class ChargeBinner {
     double AtomCharge (Atom * t);
 };
 
-template <class U> Histogram_1D ChargeBinner<U>::_histogram = Histogram_1D (Analyzer<U>::posbins, 0.0);
+template <class U> Histogram_1D ChargeBinner<U>::_histogram;
 
 /********************************************************************/
 /********************************************************************/
@@ -51,17 +56,8 @@ class ChargeAnalyzer : public Analyzer<T> {
     void Analysis () {
       // bin each atom's position in the system
       Atom_ptr_vec& atoms = this->sys_atoms;
-
-      class AtomPrinter {
-	public:
-	  void operator () (Atom * t) { t->Print(); }
-      };
-
-      AtomPrinter ap;
-
-      //std::for_each(atoms.begin(), atoms.end(), ap);
-
       std::for_each(atoms.begin(), atoms.end(), binner);
+
       return;
     }
 

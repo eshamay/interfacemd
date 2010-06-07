@@ -27,16 +27,17 @@ const  double M		=	(MOXY*MHYD)/(MOXY+MHYD);	// reduced mass of the OH bond/oscil
 
 //here's the constants given in the paper
 const  double k0	=	0.548;		// atomic units (force/length) Eh/ao/ao
-const  double l	=	-1.991;		// atomic units (force/length^2)	Eh/ao/ao/ao... yikes
+const  double l		=	-1.991;		// atomic units (force/length^2)	Eh/ao/ao/ao... yikes
 
 // some very useful conversion factors
-const  double ANG2BOHR			=	1.889726125;					// angstroms to bohr radii
+//const  double ANG2BOHR			=	1.889726125;					// angstroms to bohr radii
+const  double ANG2BOHR			=	1.8897161646320724;					// angstroms to bohr radii
 const  double HARTREE2KCALPMOL	=	627.509;						// from hartree to kcal/mol
 const  double AMBER2ATOMIC		=	1.0/HARTREE2KCALPMOL/ANG2BOHR;	// convert amber forces (kcal/mol/A) into atomic force units
 
 const  double PREFACTOR	=	sqrt(k0/M)*(l/(2.0*k0*k0));		// the prefactor to multiply the bond force for freq shift (in atomic units) (eq 10c)
 const  double HZ2WAVENUMBER	=	3.335641e-11;				// convert from Hz to wavenumbers (cm-1)  (this is 1/c)
-const  double HZ2AU			=	2.418884324306202e-17;			// convert Hz to atomic units of frequency
+const  double HZ2AU			=	2.418884324306202e-17*2.0*M_PI;			// convert Hz to atomic units of frequency
 const  double AU2WAVENUMBER		=	HZ2WAVENUMBER/HZ2AU;			// convert from frequencies in atomic units to cm-1 (note: **not angular frequencies!** For that we need to fix the factor of 2*Pi)
 
 const  double UNCOUPLED_OH_FREQ	= 3706.5/AU2WAVENUMBER;			// the frequency of uncoupled OH bonds in the vapor phase (converted to frequency in atomic units)

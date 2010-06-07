@@ -11,15 +11,22 @@ double ChargeBinner<U>::AtomCharge (Atom * t) {
   double charge;
 
   if (t->Name().find("H") != std::string::npos) charge = 0.365;
+  //else if (t->Name().find("O1") != std::string::npos) charge = -0.65;
+  //else if (t->Name().find("O2") != std::string::npos) charge = -0.65;
+  //else if (t->Name().find("O3") != std::string::npos) charge = -0.65;
+  else if (t->Name().find("S") != std::string::npos) charge = 2.0;
   else if (t->Name().find("O1") != std::string::npos) charge = -1.0;
   else if (t->Name().find("O2") != std::string::npos) charge = -1.0;
   else if (t->Name().find("O3") != std::string::npos) charge = -1.0;
   else if (t->Name().find("O4") != std::string::npos) charge = -1.0;
-  else if (t->Name().find("S") != std::string::npos) charge = 2.0;
   else if (t->Name().find("O") != std::string::npos) charge = -0.73;
+  else if (t->Name().find("Cl1") != std::string::npos) charge = 0.0404;
+  else if (t->Name().find("Cl2") != std::string::npos) charge = 0.0404;
+  else if (t->Name().find("Cl3") != std::string::npos) charge = 0.0404;
+  else if (t->Name().find("Cl4") != std::string::npos) charge = 0.0404;
   else if (t->Name().find("Cl") != std::string::npos) charge = -1.0;
-  else if (t->Name().find("C") != std::string::npos) charge = 0.0;
-  else if (t->Name().find("Na") != std::string::npos) charge = 1.0;
+  else if (t->Name().find("C") != std::string::npos) charge = -0.1616;
+  else if (t->Name().find("NA") != std::string::npos) charge = 1.0;
   else if (t->Name().find("N") != std::string::npos) charge = 0.95;
 
   return charge;
@@ -44,9 +51,6 @@ void ChargeBinner<U>::Output (FILE * output, const int timestep) {
     position = double(pos)*Analyzer<U>::posres + Analyzer<U>::posmin;
     charge = _histogram[pos] / scale;
     fprintf (output, "% 13.5f% 13.5f\n", position, charge);
-
-    // and print the charge value for the given position in it's own column
-    fprintf (output, "% 13.5f\n", charge);
   }
 return;
 }
