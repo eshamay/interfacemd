@@ -94,6 +94,7 @@ class WaterSystem {
 	virtual ~WaterSystem ();
 
 	static WaterSystemParams wsp;
+	static BondGraph graph;
 
 	static double	posmin, posmax;
 	static double	pbcflip;			// location to flip about periodic boundaries
@@ -120,7 +121,7 @@ class WaterSystem {
 	Double_pair ExtentPair (
 		const double low = WaterSystem<AmberSystem>::posmin,
 		const double high = WaterSystem<AmberSystem>::posmax) const {
-	 return std::make_pair<double,double> (low, high);
+	  return std::make_pair<double,double> (low, high);
 	}
 
 	void LoadAll ();							// Loads all the molecules and atoms in the system into the containers
@@ -164,6 +165,8 @@ class WaterSystem {
 	void SliceWaters (Mol_ptr_vec& mols, Double_pair& extents) {
 	  mols.erase(
 		  remove_if(mols.begin(), mols.end(), std::not1(std::bind2nd(WaterInSlice(), extents))), mols.end());
+
+	  this->UpdateAtoms(int_wats, int_atoms);
 	  return;
 	}
 
@@ -247,7 +250,7 @@ class WaterSystem {
 	class WaterCoordination_p : public std::binary_function<Water *, BondGraph::coordination, bool> {
 	  public:
 		bool operator() (const Water * wat, const BondGraph::coordination c) const {
-		  return _graph.WaterCoordination(wat) == c;
+		  return graph.WaterCoordination(wat) == c;
 		}
 	};
 
@@ -266,13 +269,12 @@ class WaterSystem {
 	  return;
 	}
 
-	void UpdateGraph () { _graph.UpdateGraph (int_atoms); }
+	void UpdateGraph () { graph.UpdateGraph (int_atoms); }
 
   protected:
 
 	T * sys;
 
-	BondGraph	_graph;
 };
 
 template<typename T> WaterSystemParams WaterSystem<T>::wsp;
@@ -287,6 +289,8 @@ template<typename T> Mol_ptr_vec WaterSystem<T>::sys_mols;
 template<typename T> Mol_ptr_vec WaterSystem<T>::int_wats;
 template<typename T> Mol_ptr_vec WaterSystem<T>::int_mols;
 template<typename T> Atom_ptr_vec WaterSystem<T>::int_atoms;
+
+template<typename T> BondGraph WaterSystem<T>::graph;
 
   template <class T>
 WaterSystem<T>::WaterSystem (const WaterSystemParams& params)

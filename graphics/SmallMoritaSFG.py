@@ -37,14 +37,10 @@ class MoritaSFG:
 		d['imag'] = data[:,2]
 
 		# complex number representation
-		for j in range(len(d['real'])):
-			c = complex(d['real'][j],d['imag'][j])
-			d['comp'].append(c)
+		d['comp'] = [complex(r,i) for r,i in zip(d['real'], d['imag'])]
 
 		# the total chi-squared lineshapes
-		for c in d['comp']:
-			#chi.append(abs(c)*abs(c))
-			d['chi'].append(real(c*c.conjugate()))
+		d['chi'] = [real(c*c.conjugate()) for c in d['comp']]
 
 		return d
 

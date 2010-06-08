@@ -72,7 +72,7 @@ Atom::~Atom () {
 }
 
 double Atom::operator[] (const coord index) const {
-	double pos;
+	double pos = -1.0;
 
 	switch (index) {
 		case x: pos = _position[x];

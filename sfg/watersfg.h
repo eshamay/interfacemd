@@ -10,7 +10,7 @@
 
 #include <complex>
 #include <math.h>
-#include "mdsystem.h"
+#include "watersystem.h"
 #include "h2o.h"
 #include "graph.h"
 
@@ -90,8 +90,6 @@ class SFGCalculator {
 	std::vector< complex<double> > _Beta;		// hyperpolarizability of a given water (in the molecular frame)
 	std::vector< complex<double> > _Chi;		// hyperpolarizability of a given water (in the molecular frame)
 
-	BondGraph * _graph;		// a connectivity matrix for analyzing water-bonding
-
 	// calculate the dipole-dipole interaction potential between two dipoles (muA and muB) separated a distance R
 	double DipolePotential (const VecR& muA, const VecR& muB, const VecR& R);
 
@@ -108,7 +106,7 @@ class SFGCalculator {
   public:
 
 	//SFGCalculator (string polarization, coord axis);		// For loading up the entire system
-	SFGCalculator (BondGraph * graph);		// For loading up the entire system
+	SFGCalculator ();		// For loading up the entire system
 
 	void Reset () { _set = false; }
 

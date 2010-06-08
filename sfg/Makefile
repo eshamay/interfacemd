@@ -15,4 +15,4 @@ test : $(TEST)
 	$(CXX) $(CPPFLAGS) $(TEST) -llapack -lxdrfile -o test
 
 cleansfg :
-	rm -f *.o
+	rm -f *.o test

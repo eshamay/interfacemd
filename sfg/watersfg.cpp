@@ -11,11 +11,8 @@ MatR SFGCalculator::AlphaDeriv2 (alpha_data2);
 VecR SFGCalculator::MuDeriv1 (-0.058, 0.000, 0.157);	// dipole derivative vector from the paper
 VecR SFGCalculator::MuDeriv2 (0.1287, 0.0, -0.1070);	// dipole derivative of the 2nd OH bond, in the frame of the first (found by direction cosine rotation)
 
-
 //SFGCalculator::SFGCalculator (string const polarization, coord const axis) {
-SFGCalculator::SFGCalculator (BondGraph * graph) : _graph(graph) 
-{ }
-
+SFGCalculator::SFGCalculator () { }
 
 /* taken from Eq. 10c from the Morita-Hynes work to calculate the change in frequency of a bond under a force. Returns two frequency shifts due to forces on a molecule */
 void SFGCalculator::FreqShift (Water& water) {
@@ -75,8 +72,8 @@ void SFGCalculator::FreqShift (Water& water) {
    ******************************/
   /* now perform the direct application of the equation Eq.10c */
   // note: the frequency shift is given as an angular frequency (omega) in the equation. Do we need a conversion to Hz style frequency here?
-  _OH1FreqShift = PREFACTOR * ForceOH1 / 2.0/M_PI;		// now in frequency in atomic units
-  _OH2FreqShift = PREFACTOR * ForceOH2 / 2.0/M_PI;
+  _OH1FreqShift = PREFACTOR * ForceOH1;		// now in frequency in atomic units
+  _OH2FreqShift = PREFACTOR * ForceOH2;
 
   //printf ("% 10.3f\t% 10.3f\n", _OH1FreqShift*AU2WAVENUMBER, _OH2FreqShift*AU2WAVENUMBER);
 
@@ -85,8 +82,8 @@ void SFGCalculator::FreqShift (Water& water) {
    * Calculation of the frequency shift due to dipole-dipole interaction with neighboring waters
    *********************************************************************************************/
 
-  //int coord = static_cast<int>(_graph->WaterCoordination(&water));
-  //int N = _graph->NumHBonds(&water);
+  //int coord = static_cast<int>(graph->WaterCoordination(&water));
+  //int N = graph->NumHBonds(&water);
   //if (N > 3) {
   // two OH bonds on the target water, so we will have two sets of shifts from dipole-dipole interactions
   double dipolePotential[2] = {0.0, 0.0};
@@ -106,7 +103,7 @@ void SFGCalculator::FreqShift (Water& water) {
   // Now we go through the calculation of each neighboring H-bonded water (the "source" waters, acting as the "source" of the dipole-dipole interactions) and find the contribution from each OH dipole. First we'll start with source OH's that are bound through the target oxygen. (I'll use the nomenclature of sH to mean source-hydrogen, and tO to mean target oxygen, etc.)
 
   Atom * tO = o_atom;
-  Atom_ptr_vec hbonds = _graph->BondedAtoms(tO, hbond);
+  Atom_ptr_vec hbonds = WaterSystem<AmberSystem>::graph->BondedAtoms(tO, hbond);
   RUN (hbonds) {
 
 	// find the source hydrogen, oxygen, center of mass, oh vector, etc.
@@ -134,7 +131,7 @@ void SFGCalculator::FreqShift (Water& water) {
   // next we go through both of the other target hydrogens and find their H-bonding partners
   Atom * tH = h1_atom;
   // first the partners of H1
-  hbonds = _graph->BondedAtoms(tH, hbond);
+  hbonds = WaterSystem<AmberSystem>::graph->BondedAtoms(tH, hbond);
   RUN (hbonds) {
 	// find the source hydrogen, oxygen, center of mass, oh vector, etc.
 	Atom * sO = hbonds[i];
@@ -164,7 +161,7 @@ void SFGCalculator::FreqShift (Water& water) {
 
   // and now the 2nd target hydrogen
   tH = h2_atom;
-  hbonds = _graph->BondedAtoms(tH, hbond);
+  hbonds = WaterSystem<AmberSystem>::graph->BondedAtoms(tH, hbond);
   RUN (hbonds) {
 	// find the source hydrogen, oxygen, center of mass, oh vector, etc.
 	Atom * sO = hbonds[i];
@@ -224,6 +221,7 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
    * ******************/
 
   double V12 = this->CouplingConstant (water);
+  //double V12 = COUPLING_CONST;
 
   /* As per Dave's code in inter.f: */
   double wt = sqrt(_w1*_w1 + _w2*_w2 - 2.0*_w1*_w2 + 4.0*V12*V12);
@@ -383,11 +381,12 @@ double SFGCalculator::CouplingConstant (Water& water) const {
   double V12 = COUPLING_CONST;
 
   //	int coord = static_cast<int>(_matrix->WaterCoordination(&water));
-  int N = _graph->NumHBonds(&water);
+  int N = WaterSystem<AmberSystem>::graph.NumHBonds(&water);
 
   if (N > 1) {
-	//int N = _graph->NumHBonds(&water);
-	V12 = V12 / sqrt( double(N));
+	//int N = WaterSystem<AmberSystem>::graph->NumHBonds(&water);
+	//V12 = V12 * sqrt(double(N));
+	V12 = V12 * (double)N;
   }
   //printf ("coordination = %d% 10.3f\n", N, V12*AU2WAVENUMBER);
 

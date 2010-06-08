@@ -41,11 +41,13 @@ void BondGraph::_ParseAtoms (const Atom_ptr_vec& atoms) {
 
 	// set all the vertices to contain the proper info
 	Vertex v;
-	RUN (atoms) {
+	int i = 0;
+	for (Atom_it it = atoms.begin(); it != atoms.end(); it++) {
 		v = boost::vertex(i, _graph);
-		v_atom[v] = atoms[i];
-		v_position[v] = atoms[i]->Position();
-		v_name[v] = atoms[i]->Name();
+		v_atom[v] = *it;
+		v_position[v] = (*it)->Position();
+		v_name[v] = (*it)->Name();
+		i++;
 	}
 
 return;
@@ -280,15 +282,17 @@ return (num);
 BondGraph::coordination BondGraph::WaterCoordination (Water const * const wat) const {
 
 	int c = 0;
-	Atom * ap;
-	for (int atom = 0; atom < wat->size(); atom++) {
-		ap = wat->Atoms(atom);
-		int bonds = NumHBonds (ap);
+	//Atom * ap;
+	for (Atom_it atom = wat->begin(); atom != wat->end(); atom++) {
+	//for (int atom = 0; atom < wat->size(); atom++) {
+		//ap = wat->Atoms(atom);
+		//int bonds = NumHBonds (ap);
+		int bonds = NumHBonds (*atom);
 
-		if (ap->Name().find("H") != std::string::npos) {
+		if ((*atom)->Name().find("H") != std::string::npos) {
 			c += 10 * bonds;
 		}
-		if (ap->Name().find("O") != std::string::npos) {
+		if ((*atom)->Name().find("O") != std::string::npos) {
 			c += bonds;
 		}
 	}
