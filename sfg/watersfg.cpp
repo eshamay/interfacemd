@@ -78,116 +78,10 @@ void SFGCalculator::FreqShift (Water& water) {
   //printf ("% 10.3f\t% 10.3f\n", _OH1FreqShift*AU2WAVENUMBER, _OH2FreqShift*AU2WAVENUMBER);
 
 #ifdef	DIPOLE_DIPOLE		// only if adding in the dipole-dipole correction term (which should be pretty small)
-  /*********************************************************************************************
-   * Calculation of the frequency shift due to dipole-dipole interaction with neighboring waters
-   *********************************************************************************************/
+  std::vector<double> dipolePotential (2, 0.0);
+  this->DipoleDipoleContribution (water, dipolePotential);
 
-  //int coord = static_cast<int>(graph->WaterCoordination(&water));
-  //int N = graph->NumHBonds(&water);
-  //if (N > 3) {
-  // two OH bonds on the target water, so we will have two sets of shifts from dipole-dipole interactions
-  double dipolePotential[2] = {0.0, 0.0};
-
-  // the dipole moment derivatives for each OH bond are calculated along the O->H vector, and have a magnitude of the same vector as in the MH paper.
-  // For the dipole moment derivative, we can just take the one from the molecular frame and rotate it out to the lab frame
-  // Originally the dipole moment derivative was assumed to be along the OH bond... as per DSW below:
-  double mu_scale = MU_DERIV_LENGTH;
-  VecR mu1 (oh1->Unit() * mu_scale);	// these are in atomic units
-  VecR mu2 (oh2->Unit() * mu_scale);
-  // But perhaps another idea, if taking the actual dipole deriv. doesn't work, is to take the dot product of the actual one with the OH bond unit vector. (?)
-
-  // find the center of mass locations for both target OH bonds
-  VecR com1 (o + (oh1->Unit() * (OH_COM_LENGTH/ANG2BOHR)));	// this is in Angstroms...
-  VecR com2 (o + (oh2->Unit() * (OH_COM_LENGTH/ANG2BOHR)));
-
-  // Now we go through the calculation of each neighboring H-bonded water (the "source" waters, acting as the "source" of the dipole-dipole interactions) and find the contribution from each OH dipole. First we'll start with source OH's that are bound through the target oxygen. (I'll use the nomenclature of sH to mean source-hydrogen, and tO to mean target oxygen, etc.)
-
-  Atom * tO = o_atom;
-  Atom_ptr_vec hbonds = WaterSystem<AmberSystem>::graph->BondedAtoms(tO, hbond);
-  RUN (hbonds) {
-
-	// find the source hydrogen, oxygen, center of mass, oh vector, etc.
-	Atom * sH = hbonds[i];
-	Water * sH2O = static_cast<Water *>(sH->ParentMolecule());
-	Atom * sO = sH2O->GetAtom("O");
-	VecR sOH (sO->Position().MinVector (sH->Position(), MDSystem::Dimensions()));
-	VecR sCOM (sO->Position() + (sOH.Unit() * (OH_COM_LENGTH/ANG2BOHR)));		// in angstroms
-
-	// now we have to find the center of mass separation vectors, and also the dipole moment derivatives for each of the source OHs
-	VecR sMu (sOH.Unit() * mu_scale);		// in atomic units
-	// The R vectors point from the source to the target
-	VecR R1 (MDSystem::Distance(sCOM,com1));
-	VecR R2 (MDSystem::Distance(sCOM,com2));
-
-	// but we are dealing with atomic units, so let's rescale the R vectors to reflect this
-	R1 *= ANG2BOHR;
-	R2 *= ANG2BOHR;
-
-	dipolePotential[0] += this->DipolePotential (mu1, sMu, R1);		// the result is in atomic units
-	dipolePotential[1] += this->DipolePotential (mu2, sMu, R2);
-  }
-
-
-  // next we go through both of the other target hydrogens and find their H-bonding partners
-  Atom * tH = h1_atom;
-  // first the partners of H1
-  hbonds = WaterSystem<AmberSystem>::graph->BondedAtoms(tH, hbond);
-  RUN (hbonds) {
-	// find the source hydrogen, oxygen, center of mass, oh vector, etc.
-	Atom * sO = hbonds[i];
-	Water * sH2O = static_cast<Water *>(sO->ParentMolecule());
-	Atom * sH1 = sH2O->GetAtom("H1");
-	Atom * sH2 = sH2O->GetAtom("H2");
-	VecR sOH1 (MDSystem::Distance(sO, sH1));		// in angstroms
-	VecR sOH2 (MDSystem::Distance(sO, sH2));
-	VecR sCOM1 (sO->Position() + (sOH1.Unit() * (OH_COM_LENGTH/ANG2BOHR)));		// in angstroms
-	VecR sCOM2 (sO->Position() + (sOH2.Unit() * (OH_COM_LENGTH/ANG2BOHR)));
-
-	// now we have to find the center of mass separation vectors, and also the dipole moment derivatives for each of the source OHs
-	VecR sMu1 (sOH1.Unit() * mu_scale);		// atomic units
-	VecR sMu2 (sOH2.Unit() * mu_scale);
-
-	// The R vectors point from the source to the target
-	VecR R1 (MDSystem::Distance(sCOM1, com1));		// angstroms
-	VecR R2 (MDSystem::Distance(sCOM2, com1));
-
-	// but we are dealing with atomic units, so let's rescale the R vectors to reflect this
-	R1 *= ANG2BOHR;		// converting to atomic units
-	R2 *= ANG2BOHR;
-
-	dipolePotential[0] += this->DipolePotential (mu1, sMu1, R1);
-	dipolePotential[0] += this->DipolePotential (mu1, sMu2, R2);
-  }
-
-  // and now the 2nd target hydrogen
-  tH = h2_atom;
-  hbonds = WaterSystem<AmberSystem>::graph->BondedAtoms(tH, hbond);
-  RUN (hbonds) {
-	// find the source hydrogen, oxygen, center of mass, oh vector, etc.
-	Atom * sO = hbonds[i];
-	Water * sH2O = static_cast<Water *>(sO->ParentMolecule());
-	Atom * sH1 = sH2O->GetAtom("H1");
-	Atom * sH2 = sH2O->GetAtom("H2");
-	VecR sOH1 (MDSystem::Distance(sO, sH1));		// angstroms
-	VecR sOH2 (MDSystem::Distance(sO, sH2));
-	VecR sCOM1 (sO->Position() + (sOH1.Unit() * (OH_COM_LENGTH/ANG2BOHR)));		// in angstroms
-	VecR sCOM2 (sO->Position() + (sOH2.Unit() * (OH_COM_LENGTH/ANG2BOHR)));		// in angstroms
-
-	// now we have to find the center of mass separation vectors, and also the dipole moment derivatives for each of the source OHs
-	VecR sMu1 (sOH1.Unit() * mu_scale);		// a.u.
-	VecR sMu2 (sOH2.Unit() * mu_scale);
-
-	// The R vectors point from the source to the target
-	VecR R1 (MDSystem::Distance(sCOM1, com2));		// angstroms
-	VecR R2 (MDSystem::Distance(sCOM2, com2));
-
-	// but we are dealing with atomic units, so let's rescale the R vectors to reflect this
-	R1 *= ANG2BOHR;		// converting to a.u.
-	R2 *= ANG2BOHR;
-
-	dipolePotential[1] += this->DipolePotential (mu2, sMu1, R1);	// in atomic units
-	dipolePotential[1] += this->DipolePotential (mu2, sMu2, R2);
-  }
+  //printf ("%8.3e %8.3e\n", dipolePotential[0] * AU2WAVENUMBER, dipolePotential[1]*AU2WAVENUMBER);
 
   /***********************************************
    * Adding in the dipole-dipole frequency shifts
@@ -370,9 +264,8 @@ std::vector< std::complex<double> >& SFGCalculator::Beta (Water& water, const in
 // calculates the dipole-dipole interaction potential for two dipoles separated by a distance R.
 double SFGCalculator::DipolePotential (const VecR& muA, const VecR& muB, const VecR& R) {
 
-  double potential = 1.0/pow(R.Magnitude(), 3.0) * (muA * muB - 3.0/pow(R.Magnitude(), 2.0) * (muA * R) * (muB * R));
+  return 1.0/pow(R.Magnitude(), 3.0) * ((muA*muB) - 3.0/pow(R.Magnitude(), 2.0) * (muA*R)*(R*muB));
 
-  return (potential);
 }
 
 // A scaling factor of 1/sqrt(N) is applied to the coupling constant to account for how OH intramolecular coupling is red-shifted when in solution. Thus, DSW introduced a factor of 1/sqrt(N), where N is the number of hydrogen bonds on the water molecule. 0 or 1 bond would leave the coupling constant unchanged.
@@ -383,12 +276,110 @@ double SFGCalculator::CouplingConstant (Water& water) const {
   //	int coord = static_cast<int>(_matrix->WaterCoordination(&water));
   int N = WaterSystem<AmberSystem>::graph.NumHBonds(&water);
 
+  //if (N > 6) {
+	//printf ("coordination == %d!\n", N);
+	//exit(1);
+  //}
+
   if (N > 1) {
-	//int N = WaterSystem<AmberSystem>::graph->NumHBonds(&water);
-	//V12 = V12 * sqrt(double(N));
-	V12 = V12 * (double)N;
+	V12 /= sqrt((double)N);
   }
-  //printf ("coordination = %d% 10.3f\n", N, V12*AU2WAVENUMBER);
+  	//printf ("coordination = %d% 10.3f\n", N, V12*AU2WAVENUMBER);
 
   return (V12);
+}
+
+// This calculates the dipole-dipole contribution of a neighboring (source) water molecule to the (target) dipole potential
+// Thus, the arguments are the target H through which H-bonding occurs, the pre-calculated target dipole derivative, and the dipole potential container that is being used to track the added contributions
+void SFGCalculator::HDipoleDipoleContribution (
+	const Atom * tH, 
+	const VecR& t_mu, 
+	const VecR& t_com, 
+	const int oh_num,
+	std::vector<double>& dipolePotential) 
+{
+  // Go through one of the target hydrogens and find their H-bonding partners
+  Atom_ptr_vec hbonds = WaterSystem<AmberSystem>::graph.BondedAtoms(tH, hbond);
+  for (Atom_it sO = hbonds.begin(); sO != hbonds.end(); sO++) {
+	// find the source hydrogen, oxygen, center of mass, oh vector, etc.
+	Water * sH2O = static_cast<Water *>((*sO)->ParentMolecule());
+	VecR sOH1 (MDSystem::Distance(*sO, sH2O->GetAtom("H1")));		// in angstroms
+	VecR sOH2 (MDSystem::Distance(*sO, sH2O->GetAtom("H2")));
+	VecR sCOM1 ((*sO)->Position() + (sOH1.Unit() * (OH_COM_LENGTH/ANG2BOHR)));		// in angstroms
+	VecR sCOM2 ((*sO)->Position() + (sOH2.Unit() * (OH_COM_LENGTH/ANG2BOHR)));
+
+	// now we have to find the center of mass separation vectors, and also the dipole moment derivatives for each of the source OHs
+	VecR sMu1 (sOH1.Unit() * MU_DERIV_LENGTH);		// atomic units
+	VecR sMu2 (sOH2.Unit() * MU_DERIV_LENGTH);
+
+	// The R vectors point from the source to the target
+	VecR R1 (MDSystem::Distance(sCOM1, t_com));		// angstroms
+	VecR R2 (MDSystem::Distance(sCOM2, t_com));
+
+	// but we are dealing with atomic units, so let's rescale the R vectors to reflect this
+	R1 *= ANG2BOHR;		// converting to atomic units
+	R2 *= ANG2BOHR;
+
+	dipolePotential[oh_num] += this->DipolePotential (t_mu, sMu1, R1);
+	dipolePotential[oh_num] += this->DipolePotential (t_mu, sMu2, R2);
+  }
+  return;
+}
+
+void SFGCalculator::DipoleDipoleContribution (Water& water, std::vector<double>& dipolePotential) {
+  /*********************************************************************************************
+   * Calculation of the frequency shift due to dipole-dipole interaction with neighboring waters
+   *********************************************************************************************/
+
+  //int coord = static_cast<int>(graph->WaterCoordination(&water));
+  //int N = graph->NumHBonds(&water);
+  //if (N > 3) {
+  // two OH bonds on the target water, so we will have two sets of shifts from dipole-dipole interactions
+
+  // the dipole moment derivatives for each OH bond are calculated along the O->H vector, and have a magnitude of the same vector as in the MH paper.
+  // For the dipole moment derivative, we can just take the one from the molecular frame and rotate it out to the lab frame
+  // Originally the dipole moment derivative was assumed to be along the OH bond... as per DSW below:
+  VecR oh1_unit (water.OH1()->Unit());
+  VecR oh2_unit (water.OH2()->Unit());
+
+  VecR mu1 (oh1_unit * MU_DERIV_LENGTH);	// these are in atomic units
+  VecR mu2 (oh2_unit * MU_DERIV_LENGTH);
+  // But perhaps another idea, if taking the actual dipole deriv. doesn't work, is to take the dot product of the actual one with the OH bond unit vector. (?)
+
+  // find the center of mass locations for both target OH bonds
+  VecR com1 (water.O()->Position() + (oh1_unit * OH_COM_LENGTH/ANG2BOHR));	// this is in Angstroms...
+  VecR com2 (water.O()->Position() + (oh2_unit * OH_COM_LENGTH/ANG2BOHR));
+
+  // Now we go through the calculation of each neighboring H-bonded water (the "source" waters, acting as the "source" of the dipole-dipole interactions) and find the contribution from each OH dipole. First we'll start with source OH's that are bound through the target oxygen. (I'll use the nomenclature of sH to mean source-hydrogen, and tO to mean target oxygen, etc.)
+
+  Atom_ptr_vec hbonds = WaterSystem<AmberSystem>::graph.BondedAtoms(water.O(), hbond);	// all the H's H-bonding to the target O
+  for (Atom_it sH = hbonds.begin(); sH != hbonds.end(); sH++) {
+
+	// find the source hydrogen, oxygen, center of mass, oh vector, etc.
+	Water * sH2O = static_cast<Water *>((*sH)->ParentMolecule());
+	Atom * sO = sH2O->GetAtom("O");
+
+	VecR sOH (MDSystem::Distance (sO, *sH));
+	//VecR sOH (sO->Position().MinVector (sH->Position(), MDSystem::Dimensions()));	// source OH vector
+	VecR sCOM (sO->Position() + (sOH.Unit() * (OH_COM_LENGTH/ANG2BOHR)));		// source OH center of mass in angstroms
+
+	// now we have to find the center of mass separation vectors, and also the dipole moment derivatives for each of the source OHs
+	VecR sMu (sOH.Unit() * MU_DERIV_LENGTH);		// in atomic units
+	// The R vectors point from the source to the target
+	VecR R1 (MDSystem::Distance(sCOM,com1));
+	VecR R2 (MDSystem::Distance(sCOM,com2));
+
+	// but we are dealing with atomic units, so let's rescale the R vectors to reflect this
+	R1 *= ANG2BOHR;
+	R2 *= ANG2BOHR;
+
+	dipolePotential[0] += this->DipolePotential (mu1, sMu, R1);		// the result is in atomic units
+	dipolePotential[1] += this->DipolePotential (mu2, sMu, R2);
+  }
+
+  HDipoleDipoleContribution (water.H1(), mu1, com1, 0, dipolePotential);
+  HDipoleDipoleContribution (water.H2(), mu2, com2, 1, dipolePotential);
+  //}
+
+  return;
 }

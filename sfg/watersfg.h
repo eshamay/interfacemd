@@ -15,8 +15,7 @@
 #include "graph.h"
 
 /***** Set this if using the dipole-dipole correction term *****/
-//#define DIPOLE_DIPOLE
-
+#define DIPOLE_DIPOLE
 
 /* system constants as defined in the morita-hynes paper */
 /* Note: I think morita-hynes use atomic units (bohrs, hartrees, and the like) so we'll work in those*/
@@ -31,22 +30,22 @@ const  double l		=	-1.991;		// atomic units (force/length^2)	Eh/ao/ao/ao... yike
 
 // some very useful conversion factors
 //const  double ANG2BOHR			=	1.889726125;					// angstroms to bohr radii
-const  double ANG2BOHR			=	1.8897161646320724;					// angstroms to bohr radii
-const  double HARTREE2KCALPMOL	=	627.509;						// from hartree to kcal/mol
-const  double AMBER2ATOMIC		=	1.0/HARTREE2KCALPMOL/ANG2BOHR;	// convert amber forces (kcal/mol/A) into atomic force units
+const double ANG2BOHR			=	1.8897161646320724;					// angstroms to bohr radii
+const double HARTREE2KCALPMOL	=	627.509;						// from hartree to kcal/mol
+const double AMBER2ATOMIC		=	1.0/HARTREE2KCALPMOL/ANG2BOHR;	// convert amber forces (kcal/mol/A) into atomic force units
 
-const  double PREFACTOR	=	sqrt(k0/M)*(l/(2.0*k0*k0));		// the prefactor to multiply the bond force for freq shift (in atomic units) (eq 10c)
-const  double HZ2WAVENUMBER	=	3.335641e-11;				// convert from Hz to wavenumbers (cm-1)  (this is 1/c)
-const  double HZ2AU			=	2.418884324306202e-17*2.0*M_PI;			// convert Hz to atomic units of frequency
-const  double AU2WAVENUMBER		=	HZ2WAVENUMBER/HZ2AU;			// convert from frequencies in atomic units to cm-1 (note: **not angular frequencies!** For that we need to fix the factor of 2*Pi)
+const double PREFACTOR	=	sqrt(k0/M)*(l/(2.0*k0*k0));		// the prefactor to multiply the bond force for freq shift (in atomic units) (eq 10c)
+const double HZ2WAVENUMBER	=	3.335641e-11;				// convert from Hz to wavenumbers (cm-1)  (this is 1/c)
+const double HZ2AU			=	2.418884324306202e-17*2.0*M_PI;			// convert Hz to atomic units of frequency
+const double AU2WAVENUMBER		=	HZ2WAVENUMBER/HZ2AU;			// convert from frequencies in atomic units to cm-1 (note: **not angular frequencies!** For that we need to fix the factor of 2*Pi)
 
-const  double UNCOUPLED_OH_FREQ	= 3706.5/AU2WAVENUMBER;			// the frequency of uncoupled OH bonds in the vapor phase (converted to frequency in atomic units)
-const  double COUPLING_CONST		= 49.5/AU2WAVENUMBER;				// Coupling const taken from the energy gap of the sym + antisym stretches (V12 in atomic units)
+const double UNCOUPLED_OH_FREQ	= 3706.5/AU2WAVENUMBER;			// the frequency of uncoupled OH bonds in the vapor phase (converted to frequency in atomic units)
+const double COUPLING_CONST		= 49.5/AU2WAVENUMBER;				// Coupling const taken from the energy gap of the sym + antisym stretches (V12 in atomic units)
 
 // Value of the magnitude of the dipole moment derivative (square root of the sum of the squares)
-const  double MU_DERIV_MAGNITUDE = sqrt(-0.058*-0.058 + 0.157*0.157);
+const double MU_DERIV_MAGNITUDE = sqrt(-0.058*-0.058 + 0.157*0.157);
 // Length of a rigid SPC/E OH-bond
-const  double OH_LENGTH = 1.000*ANG2BOHR;	// in atomic units
+const double OH_LENGTH = 1.000*ANG2BOHR;	// in atomic units
 const double OH_COM_LENGTH = MHYD*OH_LENGTH/(MHYD+MOXY);	// distance to the center of mass of the OH bond from the oxygen (atomic units of length)
 const  double MU_DERIV_LENGTH = MU_DERIV_MAGNITUDE * OH_COM_LENGTH;		// length of the differential dipole moment element used in calculating the dipole-dipole interaction energy (in atomic units)
 
@@ -92,8 +91,19 @@ class SFGCalculator {
 
 	// calculate the dipole-dipole interaction potential between two dipoles (muA and muB) separated a distance R
 	double DipolePotential (const VecR& muA, const VecR& muB, const VecR& R);
+	// calculates the contribution to an OH-dipole from neighboring waters bound through a water-H
+	void HDipoleDipoleContribution (
+		const Atom * tH, 
+		const VecR& t_mu, 
+		const VecR& t_com, 
+		const int oh_num,
+		std::vector<double>& dipolePotential
+		);
+	// calculates the total dipole-dipole potential contribution from neighboring waters
+	void DipoleDipoleContribution (Water& water, std::vector<double>& dipolePotential);
 
 	double CouplingConstant (Water& water) const;
+
 
 	void FreqShift (Water& water);		// Calculate the frequency shift on a given water-OH bond
 

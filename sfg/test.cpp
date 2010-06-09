@@ -13,20 +13,25 @@ void Test::Setup () {
 
   this->LoadAll();
   this->LoadWaters();
-  
-  printf ("\nfirst\n");
-  printf ("%d / %d atoms\n", (int)int_atoms.size(), (int)sys_atoms.size());
-  printf ("%d / %d mols\n", (int)int_wats.size(), (int)sys_mols.size());
 
-  std::pair<double,double> extents = this->ExtentPair();
-  this->SliceWaters(int_wats, extents);
-  this->UpdateAtoms (int_wats, int_atoms);
+  class tform : public std::unary_function<Atom *,Atom *> {
+	public:
+	  Atom * operator() (Atom * atom) {
+		atom->Print();
+		return atom;
+	  }
+  };
 
-  printf ("second\n");
-  printf ("%d / %d atoms\n", (int)int_atoms.size(), (int)sys_atoms.size());
-  printf ("%d / %d mols\n", (int)int_wats.size(), (int)sys_mols.size());
-  //printf ("atoms named: %s\n", int_atoms[0]->Name().c_str());
+  std::vector<Atom *> bools;
+  std::transform(
+	  int_atoms.begin(), 
+	  int_atoms.end(), 
+	  bools.begin(), 
+	  tform()
+	  );
 
+  //Water * wat = static_cast<Water *>(int_wats[0]);
+  //wat->Print();
   return;
 }
 
@@ -43,7 +48,7 @@ int main () {
 
   Test t (wsp);
 
-  t.SystemAnalysis ();
+  //t.SystemAnalysis ();
 
   return 0;
 }

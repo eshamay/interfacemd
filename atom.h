@@ -88,6 +88,21 @@ class Atom {
     int MolID () const		{ return _molid; }
     Molecule * ParentMolecule () const { return _pmolecule; }
     void Print () const;
+
+	class NameIs_p : public std::binary_function<Atom *,std::string,bool> {
+	  public:
+		bool operator() (const Atom * atom, const std::string name) const {
+		  return atom->Name() == name;
+		}
+	};
+
+	class FixResidue : public std::binary_function<Atom *, std::string, void> {
+	  public:
+		void operator() (Atom * atom, const std::string name) const {
+		  atom->Residue(name);
+		}
+	};
+
 };
 
 typedef std::vector<Atom *> Atom_ptr_vec;

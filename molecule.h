@@ -50,7 +50,7 @@ class Molecule {
     bool Unset () { _set = false; return (_set); }
 
     // Controls
-    void Shift (VecR shift);				// Shift the origin of the entire molecule
+    void Shift (VecR& shift);				// Shift the origin of the entire molecule
     void clear ();							// Erases the molecule data
     VecR UpdateCenterOfMass ();				// recalculates the center of mass when coordinates are updated
 
@@ -114,42 +114,42 @@ class Molecule {
     void AddHydrogen (Atom * const atom);					// same as adding an atom but renames accordingly
     void RemoveAtom (Atom * const atom);
     void FixAtom (Atom * const atom);
-    void Rename (const string name);
+	void Rename (const string name);
 
-    Molecule * Merge (Molecule * mol);				// merges two molecules
-    //int operator+= (Molecule& mol);					// Joins two molecules
+	Molecule * Merge (Molecule * mol);				// merges two molecules
+	//int operator+= (Molecule& mol);					// Joins two molecules
 
-    // Some stuff to work with wannier centers
-    void AddWannier (VecR& wannier) { _wanniers.push_back(wannier); } // adds a wannier center into the molecule
-    void ClearWanniers () { _wanniers.clear(); }	// clear out the entire list
+	// Some stuff to work with wannier centers
+	void AddWannier (VecR& wannier) { _wanniers.push_back(wannier); } // adds a wannier center into the molecule
+	void ClearWanniers () { _wanniers.clear(); }	// clear out the entire list
 
-    //void ClearHBonds ();
-    // return all the Hbonds that this molecule is involved in
-    //std::vector<Atom *> HBonds () const;
-    //int NumHBonds () const { return this->HBonds().size(); }
+	//void ClearHBonds ();
+	// return all the Hbonds that this molecule is involved in
+	//std::vector<Atom *> HBonds () const;
+	//int NumHBonds () const { return this->HBonds().size(); }
 
 
-    // some functions to manipulate the molecule's position/orientation (symmetry operations)
-    void Reflect (coord const axis, double const plane = 0.0);
-    void Rotate (VecR origin, VecR axis, double angle);
+	// some functions to manipulate the molecule's position/orientation (symmetry operations)
+	void Reflect (coord const axis, double const plane = 0.0);
+	void Rotate (VecR& origin, VecR& axis, double angle);
 
-    // A couple cool things used to manipulate matrices and vectors (don't know why this is in here, but hell, it works for now)
-    // Constructs a rotation matrix (direction cosince matrix) from given euler angles to rotate *FROM THE LAB FRAME* to the molecule frame
-    void RotateToLab (double vector[3]) const;
-    void RotateToLab (double vector[][3]) const;
+	// A couple cool things used to manipulate matrices and vectors (don't know why this is in here, but hell, it works for now)
+	// Constructs a rotation matrix (direction cosince matrix) from given euler angles to rotate *FROM THE LAB FRAME* to the molecule frame
+	void RotateToLab (double vector[3]) const;
+	void RotateToLab (double vector[][3]) const;
 
-    // Constructs a rotation matrix to rotate *TO THE LAB FRAME* from the molecule-fixed frame
-    void RotateToMol (double vector[3]) const;
-    void RotateToMol (double matrix[][3]) const;
+	// Constructs a rotation matrix to rotate *TO THE LAB FRAME* from the molecule-fixed frame
+	void RotateToMol (double vector[3]) const;
+	void RotateToMol (double matrix[][3]) const;
 
-    // Performs matrix (3x3) multiplication (rotation) on a vector (3x1)
-    void RotateVector (double rotation[][3], double vector[]) const;
+	// Performs matrix (3x3) multiplication (rotation) on a vector (3x1)
+	void RotateVector (double rotation[][3], double vector[]) const;
 
-    // Performs matrix rotation (i.e. matrix multiplication)
-    void RotateMatrix (double rotation[][3], double matrix[][3]) const;
+	// Performs matrix rotation (i.e. matrix multiplication)
+	void RotateMatrix (double rotation[][3], double matrix[][3]) const;
 
-    // get the rotation matrix to rotate a molecule to lab-frame coordinates
-    MatR const & DCMToLab (const coord axis = z);
+	// get the rotation matrix to rotate a molecule to lab-frame coordinates
+	MatR const & DCMToLab (const coord axis = z);
 };
 
 typedef std::vector<Molecule *> Mol_ptr_vec;

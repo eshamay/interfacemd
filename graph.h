@@ -13,7 +13,7 @@
 #include <boost/graph/graph_utility.hpp>
 #include <boost/property_map/property_map.hpp>
 
-
+//#define ANGLE_CRITERIA
 
 /* The idea of a connectivity matrix is the same as mapping the connections between different members of a system. In this case, we're dealing with atoms in a system, and the connections are defined by the distances between the atoms. We're going to employ a few tricks here in order to make data retrieval a bit more succinct, and also to store more information into one matrix.
 
@@ -36,7 +36,7 @@ class BondGraph {
 private:
 	static const double OHBONDLENGTH;
 	static const double HBONDLENGTH;
-	static const double HBONDANGLE;
+	static const double HBONDANGLECOS;
 	static const double NOBONDLENGTH;
 	static const double NHBONDLENGTH;
 
@@ -88,6 +88,10 @@ private:
 	void _RemoveBond (const Vertex& vi, const Vertex& vj);
 	void _RemoveBond (Atom const * const a1, Atom const * const a2);
 	Vertex_it _FindVertex (Atom const * const ap) const;
+
+	// predicate for testing if an atom pair is an OH
+	bool _OHCombo_p (const std::string name1, const std::string name2) const;
+	bool _SameAtomName_p (const std::string name1, const std::string name2) const;
 
 	static Graph _graph;
 	std::string	_sys_type;
