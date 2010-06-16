@@ -252,4 +252,3 @@ void Water::CalcEulerAngles (const coord axis) {
 
   return;
 }
-

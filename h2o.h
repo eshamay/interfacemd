@@ -67,7 +67,7 @@ public:
 
 	VecR const * OH1 () const { return &_oh1; }
 	VecR const * OH2 () const { return &_oh2; }
-	double Angle () const { return acos(_oh1 < _oh2) * 180.0/M_PI; }
+	double Angle () const { return (_oh1 < _oh2); }	// returns the cos of the H-O-H angle
 
 	VecR MolecularAxis (); 
 };
@@ -75,4 +75,16 @@ public:
 typedef std::vector<Water *> Water_ptr_vec;
 typedef std::vector<Water> Water_vec;
 
+/* various things that we can do to water! */
+
+namespace water {
+
+  class Angle : public std::unary_function<Water *, double> {
+	public:
+	  double operator() (const Water * wat) const {
+		return wat->Angle();
+	  }
+  };
+
+}
 #endif

@@ -119,8 +119,8 @@ void SFGCalculator::WaterEigenSystem (Water& water) {
 
   /* As per Dave's code in inter.f: */
   double wt = sqrt(_w1*_w1 + _w2*_w2 - 2.0*_w1*_w2 + 4.0*V12*V12);
-  _ws = 0.5*(_w1+_w2 - wt);
-  _wa = 0.5*(_w1+_w2 + wt);
+  _ws = 0.5*(_w1+_w2 - wt) * 2.0*M_PI;
+  _wa = 0.5*(_w1+_w2 + wt) * 2.0*M_PI;
 
   // let's set the symmetric frequency to be lower than the anti-symmetric
   /*
@@ -196,11 +196,16 @@ void SFGCalculator::PolarizabilityAndDipoleDerivs (Water& water, const int s1, c
   // pull together all the combinations of the derivative terms for an average value
   _AlphaDerivS += _C1s * rotAlpha1(s1,s1) + _C2s * rotAlpha2(s1,s1);
   _AlphaDerivS += _C1s * rotAlpha1(s2,s2) + _C2s * rotAlpha2(s2,s2);
-  _AlphaDerivS /= 2.0;
+  // adding in the extra Alphaderiv cross-terms (x,z) & (z,x)...
+  _AlphaDerivS += _C1s * rotAlpha1(s1,s2) + _C2s * rotAlpha2(s1,s2);
+  _AlphaDerivS += _C1s * rotAlpha1(s2,s1) + _C2s * rotAlpha2(s2,s1);
+  _AlphaDerivS /= 4.0;	 // and doing the requisite scaling
 
   _AlphaDerivA += _C1a * rotAlpha1(s1,s1) + _C2a * rotAlpha2(s1,s1);
   _AlphaDerivA += _C1a * rotAlpha1(s2,s2) + _C2a * rotAlpha2(s2,s2);
-  _AlphaDerivA /= 2.0;
+  _AlphaDerivA += _C1a * rotAlpha1(s1,s2) + _C2a * rotAlpha2(s1,s2);
+  _AlphaDerivA += _C1a * rotAlpha1(s2,s1) + _C2a * rotAlpha2(s2,s1);
+  _AlphaDerivA /= 4.0;
 
   // vector rotation into the lab frame is easy - just multiply by the rotation matrix
   VecR rotMu1 (_DCM * (MuDeriv1 * scale1));

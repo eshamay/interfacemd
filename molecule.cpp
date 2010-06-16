@@ -113,15 +113,6 @@ void Molecule::AddHydrogen (Atom * const atom) {
 void Molecule::RemoveAtom (Atom * const atom) {
 
   _atoms.erase(std::find(_atoms.begin(), _atoms.end(), atom));
-  // This will remove the atom from the molecule's atom-list
-  /*
-  RUN (_atoms) {
-	if (atom == _atoms[i]) {
-	  _atoms.erase(_atoms.begin() + i);
-	  break;
-	}
-  }
-  */
 
   this->UpdateCenterOfMass();
 
@@ -144,7 +135,9 @@ void Molecule::RemoveAtom (Atom * const atom) {
 void Molecule::Rename (const std::string name) {
 
   this->_name = name;
-  std::for_each(_atoms.begin(), _atoms.end(), std::bind2nd(Atom::FixResidue(), name));
+  for (Atom_it atom = _atoms.begin(); atom != _atoms.end(); atom++) {
+	(*atom)->Residue(name);
+  }
 
   return;
 }

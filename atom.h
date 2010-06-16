@@ -96,13 +96,6 @@ class Atom {
 		}
 	};
 
-	class FixResidue : public std::binary_function<Atom *, std::string, void> {
-	  public:
-		void operator() (Atom * atom, const std::string name) const {
-		  atom->Residue(name);
-		}
-	};
-
 };
 
 typedef std::vector<Atom *> Atom_ptr_vec;
