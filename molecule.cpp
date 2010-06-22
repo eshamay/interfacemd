@@ -57,7 +57,7 @@ Atom * Molecule::operator[] (const std::string atomname) const {
 
   // error checking
   if (it == _atoms.end()) {
-	printf ("\nFrom Molecule::operator[]\n\"The atom name '%s' was not found in the following molecule:\"\n", atomname.c_str());
+	printf ("\nFrom Molecule::operator[]\n\"The atom named '%s' was not found in the following molecule:\"\n", atomname.c_str());
 	this->Print();
 	exit(1);
   }
@@ -316,9 +316,9 @@ VecR Molecule::CalcDipole () {
   _dipole.Zero();
 
   // the dipole is just a sum of the position vectors multiplied by the charges (classical treatment)
-  RUN (_atoms) {
-	VecR r = _atoms[i]->Position() - _centerofmass;
-	_dipole += r * _atoms[i]->Charge();
+  for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
+	VecR r = (*it)->Position() - _centerofmass;
+	_dipole += r * (*it)->Charge();
   }
 
   // wannier centers have a charge of -2

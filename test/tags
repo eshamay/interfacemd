@@ -3,64 +3,90 @@
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.7	//
-AMBER2ATOMIC	../watersfg.h	/^const double AMBER2ATOMIC		=	1.0\/HARTREE2KCALPMOL\/ANG2BOHR;	\/\/ convert amber forces (kcal\/mol\/A) into atomic force units$/;"	v
+!_TAG_PROGRAM_VERSION	5.8	//
 AMBERMPISYS_H_	../ambermpisys.h	2;"	d
+AMBERSYSTEM	../Makefile	/^AMBERSYSTEM	= $(SRCLIB)\/ambersystem.o $(SRCLIB)\/crdfile.o $(SRCLIB)\/forcefile.o $(SRCLIB)\/topfile.o$/;"	m
 AMBERSYSTEM_H_	../ambersystem.h	2;"	d
 AMBERWATERSYSTEM_H_	../amberwatersystem.h	2;"	d
 ANALYSIS_H_	../analysis.h	2;"	d
-ANG2BOHR	../watersfg.h	/^const double ANG2BOHR			=	1.889726125;					\/\/ angstroms to bohr radii$/;"	v
 ATOM_H_	../atom.h	2;"	d
-AU2WAVENUMBER	../watersfg.h	/^const double AU2WAVENUMBER		=	HZ2WAVENUMBER\/HZ2AU;			\/\/ convert from frequencies in atomic units to cm-1 (note: **not angular frequencies!** For that we need to fix the factor of 2*Pi)$/;"	v
 A_HOO	../hno3analysis.h	/^const double A_HOO = 35.0;			\/\/ The angle of the H-O...O above which we don't have an H-bond.$/;"	v
 Add	../histogram.h	/^	int Add (ValueType const value) 			\/\/ Increment the histogram bin for the given value$/;"	f	class:Histogram
+AddAtom	../molecule.cpp	/^void Molecule::AddAtom (Atom * const atom) {$/;"	f	class:Molecule
+AddEdge	../node.cpp	/^void Node::AddEdge (Edge * e) {$/;"	f	class:Node
+AddHydrogen	../molecule.cpp	/^void Molecule::AddHydrogen (Atom * const atom) {$/;"	f	class:Molecule
 AddWannier	../molecule.h	/^	void AddWannier (VecR& wannier) { _wanniers.push_back(wannier); } \/\/ adds a wannier center into the molecule$/;"	f	class:Molecule
-Adj_it	../graph.h	/^typedef boost::graph_traits<Graph>::adjacency_iterator Adj_it;$/;"	t
+Adj_it	../graph.h	/^	typedef boost::graph_traits<Graph>::adjacency_iterator Adj_it;$/;"	t	class:BondGraph
+AdjacencyMatrix	../adjacencymatrix.cpp	/^AdjacencyMatrix::AdjacencyMatrix () :$/;"	f	class:AdjacencyMatrix
+AdjacencyMatrix	../adjacencymatrix.cpp	/^AdjacencyMatrix::AdjacencyMatrix (const Atom_ptr_vec& atoms) :$/;"	f	class:AdjacencyMatrix
 AdjacencyMatrix	../adjacencymatrix.h	/^class AdjacencyMatrix {$/;"	c
 AdjacencyMatrix	../connectmatrix.h	/^class AdjacencyMatrix {$/;"	c
+Alkane	../alkane.cpp	/^Alkane::Alkane () $/;"	f	class:Alkane
+Alkane	../alkane.cpp	/^Alkane::Alkane (const Molecule& molecule) $/;"	f	class:Alkane
+Alkane	../alkane.h	/^class Alkane: public CarbonChain {$/;"	c
+Alkane_ptr_vec	../alkane.h	/^typedef std::vector<Alkane *> Alkane_ptr_vec;$/;"	t
+Alkane_vec	../alkane.h	/^typedef std::vector<Alkane> Alkane_vec;$/;"	t
 Alpha	../h2o.h	/^	MatR const & Alpha () const { return _alpha; }$/;"	f	class:Water
-AlphaDeriv1	../watersfg.h	/^	MatR AlphaDeriv1;			\/\/ polarizability deriv matrix for the first OH bond in the frame of the 1st OH bond$/;"	m	class:SFGCalculator
-AlphaDeriv2	../watersfg.h	/^	MatR AlphaDeriv2;			\/\/ polarizability deriv matrix of the 2nd OH in the frame of the 1st OH (through unitary transformation)$/;"	m	class:SFGCalculator
+AmberSystem	../ambersystem.cpp	/^AmberSystem::AmberSystem (const std::string prmtop, const std::string mdcrd, const std::string mdvel = "")$/;"	f	class:AmberSystem
 AmberSystem	../ambersystem.h	/^	AmberSystem () { }$/;"	f	class:AmberSystem
 AmberSystem	../ambersystem.h	/^class AmberSystem : public MDSystem {$/;"	c
 AmberWaterSystem	../amberwatersystem.h	/^	AmberWaterSystem (const WaterSystemParams& params, std::string const prmtop, std::string const mdcrd, std::string mdvel)$/;"	f	class:AmberWaterSystem
 AmberWaterSystem	../amberwatersystem.h	/^class AmberWaterSystem : public WaterSystem<AmberSystem> {$/;"	c
-Analysis	../analysis.h	/^	virtual void Analysis () { return; }$/;"	f	class:Analyzer
-Analyzer	../analysis.h	/^Analyzer::Analyzer (WaterSystemParams& params)$/;"	f	class:Analyzer
-Analyzer	../analysis.h	/^class Analyzer : public WaterSystem<AmberSystem> {$/;"	c
-Angle	../h2o.h	/^	double Angle () const { return acos(_oh1 < _oh2) * 180.0\/M_PI; }$/;"	f	class:Water
-AngleBin	../analysis.h	/^	static int AngleBin (const double angle) {$/;"	f	class:Analyzer
+Analysis	../analysis.h	/^    virtual void Analysis () { return; }$/;"	f	class:Analyzer
+Analyzer	../analysis.h	/^Analyzer<T>::Analyzer (const WaterSystemParams& params)$/;"	f	class:Analyzer
+Analyzer	../analysis.h	/^class Analyzer : public WaterSystem<T> {$/;"	c
+Angle	../h2o.h	/^	double Angle () const { return (_oh1 < _oh2); }	\/\/ returns the cos of the H-O-H angle$/;"	f	class:Water
+AngleBin	../analysis.h	/^    static int AngleBin (const double angle) {$/;"	f	class:Analyzer
+Atom	../atom.cpp	/^Atom::Atom () :$/;"	f	class:Atom
+Atom	../atom.cpp	/^Atom::Atom (VecR position) :$/;"	f	class:Atom
+Atom	../atom.cpp	/^Atom::Atom (const Atom& oldAtom) :$/;"	f	class:Atom
+Atom	../atom.cpp	/^Atom::Atom (std::string name, VecR position) :$/;"	f	class:Atom
+Atom	../atom.cpp	/^Atom::Atom (std::string name, VecR position, VecR force) :$/;"	f	class:Atom
 Atom	../atom.h	/^class Atom {$/;"	c
 AtomNames	../topfile.h	/^	std::vector<std::string>& AtomNames () { return _atomnames; }$/;"	f	class:TOPFile
-AtomPair_t	../rdf.h	/^typedef pair<Atom *, Atom *> AtomPair_t;$/;"	t
-Atom_it	../atom.h	/^typedef std::vector<Atom>::iterator Atom_it;$/;"	t
-Atom_ptr_it	../atom.h	/^typedef std::vector<Atom *>::iterator Atom_ptr_it;$/;"	t
+AtomPositionInSlice	../watersystem.h	/^	class AtomPositionInSlice : public std::binary_function<Atom *, Double_pair&, bool> {$/;"	c	class:WaterSystem
+Atom_it	../atom.h	/^typedef Atom_ptr_vec::const_iterator Atom_it;$/;"	t
 Atom_ptr_vec	../atom.h	/^typedef std::vector<Atom *> Atom_ptr_vec;$/;"	t
-Atom_ptr_vec	../graph.h	/^typedef std::vector<Atom *> Atom_ptr_vec;$/;"	t
+Atom_ptr_vec	../gmxsystem.h	/^typedef std::vector<Atom *> Atom_ptr_vec;$/;"	t
+Atom_ptr_vec	../graph.h	/^	typedef std::vector<Atom *> Atom_ptr_vec;$/;"	t	class:BondGraph
 Atom_ptr_vec	../mdsystem.h	/^typedef std::vector<Atom *> Atom_ptr_vec;$/;"	t
-Atom_vec	../atom.h	/^typedef std::vector<Atom> Atom_vec;$/;"	t
 Atoms	../ambermpisys.h	/^	Atom * Atoms (int index) { return &_atoms[index]; }$/;"	f	class:MPIMolSystem
-Atoms	../mdsystem.h	/^	Atom * Atoms (const int index) { return _atoms[index]; }$/;"	f	class:MDSystem
-Atoms	../mdsystem.h	/^	Atom_ptr_vec& Atoms () { return _atoms; }$/;"	f	class:MDSystem
-Atoms	../molecule.h	/^	Atom * Atoms (int index) const		{ return _atoms[index]; }$/;"	f	class:Molecule
-Atoms	../molecule.h	/^	Atom_ptr_vec Atoms () const			{ return _atoms; }			\/\/ returns the molecule's atom list$/;"	f	class:Molecule
-Atoms	../pdbfile.h	/^	Atom * Atoms (int index) { return _atoms[index]; }$/;"	f	class:PDBFile
+Atoms	../analysis.h	/^    Atom_ptr_vec& Atoms () { return WaterSystem<T>::int_atoms; } $/;"	f	class:Analyzer
+Atoms	../grofile.h	/^    Atom_ptr_vec& Atoms() { return _atoms; }$/;"	f	class:GROFile
+Atoms	../mdsystem.h	/^    Atom * Atoms (const int index) { return _atoms[index]; }$/;"	f	class:MDSystem
+Atoms	../mdsystem.h	/^    Atom_ptr_vec& Atoms () { return _atoms; }$/;"	f	class:MDSystem
+Atoms	../molecule.h	/^    Atom * Atoms (int index) const		{ return _atoms[index]; }$/;"	f	class:Molecule
+Atoms	../molecule.h	/^    Atom_ptr_vec Atoms () const			{ return _atoms; }$/;"	f	class:Molecule
 Atoms	../xyzfile.h	/^	std::vector<Atom *>& Atoms () { return _atoms; }$/;"	f	class:XYZFile
+AxisPosition	../watersystem.h	/^	static double AxisPosition (Atom * a) {$/;"	f	class:WaterSystem
 BLOCK_HIGH	../ambermpisys.h	10;"	d
 BLOCK_LOW	../ambermpisys.h	9;"	d
 BLOCK_OWNER	../ambermpisys.h	12;"	d
 BLOCK_SIZE	../ambermpisys.h	11;"	d
 BONDGRAPH_H_	../bondgraph.h	2;"	d
 BOND_H_	../bond.h	2;"	d
+BOOST	../Makefile	/^BOOST		= \/common\/src\/boost_1_41_0$/;"	m
 BOXFILLER_H_	../boxfiller.h	2;"	d
-Bin	../analysis.h	/^	static int Bin (const double value, const double min, const double res) {$/;"	f	class:Analyzer
+Bin	../analysis.h	/^    static int Bin (const double value, const double min, const double res) {$/;"	f	class:Analyzer
 Bin	../histogram.h	/^	int Bin (ValueType const value) const {		\/\/ Returns the bin that the value would go into$/;"	f	class:Histogram
+Bin	../utility.h	/^    bins Bin (const T& a, const T& b) const$/;"	f	class:Histogram2D
+Bin	../utility.h	/^    int Bin (const T t) const { return int ((t - _min)\/_res); }$/;"	f	class:Histogram1D
+BinAtomPairData	../rdf.h	/^void RDF2DMachine<T>::BinAtomPairData (const NamePair& name_pair, const T a1, const T a2) $/;"	f	class:RDF2DMachine
+BinAtomPairData	../rdf.h	/^void RDFMachine<T>::BinAtomPairData (const NamePair& name_pair, const T a1, const T a2) $/;"	f	class:RDFMachine
 BinSize	../histogram.h	/^	ValueType BinSize () const { return _binSize; }$/;"	f	class:Histogram
+Bisector	../h2o.cpp	/^VecR Water::Bisector () {$/;"	f	class:Water
 BlockHigh	../ambermpisys.h	/^	int BlockHigh (int n) { return BLOCK_HIGH(_id, _p, n); }$/;"	f	class:MPIMolSystem
 BlockLow	../ambermpisys.h	/^	int BlockLow (int n) { return BLOCK_LOW(_id, _p, n); }$/;"	f	class:MPIMolSystem
 BlockSize	../ambermpisys.h	/^	int BlockSize (int n) { return BLOCK_SIZE(_id, _p, n); }$/;"	f	class:MPIMolSystem
+Bond	../bond.cpp	/^Bond::Bond () :$/;"	f	class:Bond
+Bond	../bond.cpp	/^Bond::Bond (const Bond& oldBond) :$/;"	f	class:Bond
+Bond	../bond.cpp	/^Bond::Bond (double length, bondtype btype) :$/;"	f	class:Bond
 Bond	../bond.h	/^class Bond {$/;"	c
+BondGraph	../bondgraph.cpp	/^BondGraph::BondGraph () :$/;"	f	class:BondGraph
+BondGraph	../bondgraph.cpp	/^BondGraph::BondGraph (Atom_ptr_vec& atoms) :$/;"	f	class:BondGraph
 BondGraph	../bondgraph.h	/^class BondGraph {$/;"	c
+BondGraph	../graph.cpp	/^BondGraph::BondGraph ()$/;"	f	class:BondGraph
+BondGraph	../graph.cpp	/^BondGraph::BondGraph (const Atom_ptr_vec& atoms, std::string sys) :$/;"	f	class:BondGraph
 BondGraph	../graph.h	/^class BondGraph {$/;"	c
 BondTrajectory	../wateranalyzer.h	/^vector<double> WaterAnalyzer::BondTrajectory (string atomName1, string atomName2, double bondlengthmax) {$/;"	f	class:WaterAnalyzer
 Bond_matrix	../adjacencymatrix.h	/^typedef std::vector< Bond_vec > Bond_matrix;$/;"	t
@@ -68,39 +94,63 @@ Bond_ptr_matrix	../adjacencymatrix.h	/^typedef std::vector< Bond_ptr_vec > Bond_
 Bond_ptr_vec	../adjacencymatrix.h	/^typedef std::vector<Bond *> Bond_ptr_vec;$/;"	t
 Bond_ptr_vec	../bond.h	/^typedef std::vector<Bond *> Bond_ptr_vec;$/;"	t
 Bond_vec	../adjacencymatrix.h	/^typedef std::vector<Bond> Bond_vec;$/;"	t
+BondedAtoms	../adjacencymatrix.cpp	/^Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap) {$/;"	f	class:AdjacencyMatrix
+BondedAtoms	../adjacencymatrix.cpp	/^Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap, bondtype const b) {$/;"	f	class:AdjacencyMatrix
+BondedAtoms	../adjacencymatrix.cpp	/^Atom_ptr_vec AdjacencyMatrix::BondedAtoms (Atom const * const ap, bondtype const b, const std::string name) {$/;"	f	class:AdjacencyMatrix
+BondedAtoms	../graph.cpp	/^  Atom_ptr_vec BondGraph::BondedAtoms$/;"	f	class:BondGraph
 BondedAtoms	../xyzsystem.h	/^	Atom_ptr_vec BondedAtoms (Atom const * const atom) const { return _graph.BondedAtoms (atom); }$/;"	f	class:XYZSystem
+Bonds	../adjacencymatrix.cpp	/^Bond_ptr_vec AdjacencyMatrix::Bonds (Atom const * const ap) {$/;"	f	class:AdjacencyMatrix
+BoxFiller	../boxfiller.cpp	/^BoxFiller::BoxFiller (string paramfile, string pdbfile, double spacing) : _pdb(PDBFile(pdbfile)) {$/;"	f	class:BoxFiller
 BoxFiller	../boxfiller.h	/^class BoxFiller {$/;"	c
-C1	../moritasfg2002.h	/^const double C1 =  0.1396,$/;"	v
-C2	../moritasfg2002.h	/^			 C2 = -0.1196,$/;"	v
-C3	../moritasfg2002.h	/^			 C3 = -0.0164,$/;"	v
-C4	../moritasfg2002.h	/^			 C4 = -0.0288,$/;"	v
-C5	../moritasfg2002.h	/^			 C5 = -0.0516,$/;"	v
-C6	../moritasfg2002.h	/^			 C6 =  0.0532,$/;"	v
-C7	../moritasfg2002.h	/^			 C7 = -0.0699,$/;"	v
-C8	../moritasfg2002.h	/^			 C8 =  0.0169,$/;"	v
-C9	../moritasfg2002.h	/^			 C9 =  0.1142;$/;"	v
+BuildMatrix	../adjacencymatrix.cpp	/^void AdjacencyMatrix::BuildMatrix () {$/;"	f	class:AdjacencyMatrix
 CARBONCHAIN_H_	../carbonchain.h	2;"	d
+CINCLUDE	../Makefile	/^CINCLUDE	= -I$(SRCLIB) -I\/usr\/include -I\/usr\/local\/include -I$(BOOST) -I$(XDRINC)$/;"	m
 CONNECTMATRIX_H_	../adjacencymatrix.h	2;"	d
 CONNECTMATRIX_H_	../connectmatrix.h	2;"	d
-COUPLING_CONST	../watersfg.h	/^const double COUPLING_CONST		= 49.5\/AU2WAVENUMBER;				\/\/ Coupling const taken from the energy gap of the sym + antisym stretches (V12 in atomic units)$/;"	v
+CPLUSPLUS	../gmxsystem.h	4;"	d
+CPLUSPLUS	../trrfile.h	4;"	d
+CPPFLAGS	../Makefile	/^CPPFLAGS	= $(CINCLUDE) -L$(XDRDIR)\/lib -lconfig++$/;"	m
 CRDFILE_H_	../crdfile.h	2;"	d
+CRDFile	../crdfile.cpp	/^CRDFile::CRDFile (std::string const crdpath, int const c_size) :$/;"	f	class:CRDFile
 CRDFile	../crdfile.h	/^	CRDFile () { }$/;"	f	class:CRDFile
 CRDFile	../crdfile.h	/^class CRDFile {$/;"	c
-Carbon	../carbonchain.h	/^		Atom * Carbon (int index) { return (_carbons[index]); }$/;"	f	class:CarbonChain
+CXX	../Makefile	/^CXX			= g++ $(CXXFLAGS)$/;"	m
+CXXDEBUG	../Makefile	/^CXXDEBUG	= -g3 -ggdb -Wall -D_GLIBCXX_DEBUG$/;"	m
+CXXFLAGS	../Makefile	/^CXXFLAGS	= -ftemplate-depth-100 -Wall -Drestrict= $(CXXOPTIMIZE)$/;"	m
+CXXOPTIMIZE	../Makefile	/^CXXOPTIMIZE = -O2 -finline-functions -finline -funroll-loops$/;"	m
+CalcDipole	../molecule.cpp	/^VecR Molecule::CalcDipole () {$/;"	f	class:Molecule
+CalcEulerAngles	../h2o.cpp	/^void Water::CalcEulerAngles (const coord axis) {$/;"	f	class:Water
+CalcNO2Dipole	../hno3.cpp	/^bool NitricAcid::CalcNO2Dipole () {$/;"	f	class:NitricAcid
+Carbon	../carbonchain.h	/^    Atom * Carbon (int index) { return (_carbons[index]); }$/;"	f	class:CarbonChain
+CarbonChain	../carbonchain.cpp	/^CarbonChain::CarbonChain (const Molecule& molecule) $/;"	f	class:CarbonChain
+CarbonChain	../carbonchain.cpp	/^CarbonChain::CarbonChain (int numCarbons) $/;"	f	class:CarbonChain
 CarbonChain	../carbonchain.h	/^class CarbonChain : public Molecule {$/;"	c
 CarbonChain_ptr_vec	../carbonchain.h	/^typedef std::vector<CarbonChain *> CarbonChain_ptr_vec;$/;"	t
 CarbonChain_vec	../carbonchain.h	/^typedef std::vector<CarbonChain> CarbonChain_vec;$/;"	t
-Carbons	../carbonchain.h	/^		vector<Atom *>& Carbons () { return (_carbons); }$/;"	f	class:CarbonChain
-CenterOfMass	../molecule.h	/^	VecR CenterOfMass () const		{ return _centerofmass; }$/;"	f	class:Molecule
-Charge	../atom.h	/^	double Charge () const 	{ return _charge; }$/;"	f	class:Atom
+Carbons	../alkane.cpp	/^Atom_ptr_vec Carbons() {$/;"	f
+Carbons	../carbonchain.h	/^    Atom_ptr_vec& Carbons () { return (_carbons); }$/;"	f	class:CarbonChain
+CenterOfMass	../molecule.h	/^    VecR CenterOfMass () const		{ return _centerofmass; }$/;"	f	class:Molecule
+Charge	../atom.h	/^    double Charge () const 	{ return _charge; }$/;"	f	class:Atom
 Charges	../topfile.h	/^	std::vector<double>& Charges () 	{ return _charges; }$/;"	f	class:TOPFile
+CheckLimits	../utility.h	/^    bool CheckLimits (const T& a, const T& b) const$/;"	f	class:Histogram2D
 Clear	../histogram.h	/^void Histogram::Histogram Clear () {$/;"	f
+ClearBonds	../adjacencymatrix.cpp	/^void AdjacencyMatrix::ClearBonds () {$/;"	f	class:AdjacencyMatrix
 ClearWanniers	../molecule.h	/^	void ClearWanniers () { _wanniers.clear(); }	\/\/ clear out the entire list$/;"	f	class:Molecule
+ClosestAtoms	../connectmatrix.cpp	/^std::vector<Atom *> ConnectivityMatrix::ClosestAtoms (const int input, const string atomname, const int number) const {$/;"	f	class:ConnectivityMatrix
+ComplexDataFile	../complexdatafile.cpp	/^ComplexDataFile::ComplexDataFile (const char * pathname) {$/;"	f	class:ComplexDataFile
 ComplexDataFile	../complexdatafile.h	/^class ComplexDataFile {$/;"	c
+ConnectivityMatrix	../connectmatrix.cpp	/^ConnectivityMatrix::ConnectivityMatrix (std::vector<Atom *>& atoms) : _atoms(atoms) {$/;"	f	class:ConnectivityMatrix
+CoordName	../connectmatrix.cpp	/^const string CoordName (coordination coord) {$/;"	f
 CoordTrajectories	../wateranalyzer.h	/^vector< vector<trajectory> > WaterAnalyzer::CoordTrajectories () {$/;"	f	class:WaterAnalyzer
 Coords	../ambersystem.h	/^	VecR& Coords (int index)	{ return _coords[index]; }$/;"	f	class:AmberSystem
 Coords	../crdfile.h	/^	const std::vector<VecR>& Coords () const { return _coords; }$/;"	f	class:CRDFile
+Coords	../trrfile.h	/^    VecR& Coords (const int index) { return _coords[index]; }$/;"	f	class:TRRFile
+Coords	../trrfile.h	/^    VecR_vec& Coords () { return _coords; }$/;"	f	class:TRRFile
 Coords	../wannier.h	/^	const std::vector<VecR>& Coords () const { return _coords; }$/;"	f	class:WannierFile
+Count	../utility.h	/^    double Count () const { return _access_count; }$/;"	f	class:Histogram1D
+Count	../utility.h	/^    double Count (const T& i) const { return counts[(i-min.first)\/resolution.first]; }$/;"	f	class:Histogram2D
+CovalentBond	../adjacencymatrix.cpp	/^bool AdjacencyMatrix::CovalentBond (bondtype const b) const {$/;"	f	class:AdjacencyMatrix
+CovalentBonds	../connectmatrix.cpp	/^std::vector<Atom *> ConnectivityMatrix::CovalentBonds (const Atom * atom) const {$/;"	f	class:ConnectivityMatrix
 CovalentBonds	../xyzsystem.h	/^	Atom_ptr_vec CovalentBonds (Atom const * const atom) const { return _graph.BondedAtoms(atom, covalent); }$/;"	f	class:XYZSystem
 Current	../ambersystem.h	/^	int 	Current ()		const 	{ return _coords.Current(); }$/;"	f	class:AmberSystem
 Current	../crdfile.h	/^	int Current () 	const { return _frame; }$/;"	f	class:CRDFile
@@ -109,143 +159,198 @@ Current	../pdbfile.h	/^	int Current () { return _currentstep; }$/;"	f	class:PDBF
 Current	../wannier.h	/^	int Current () 	const { return _frame; }$/;"	f	class:WannierFile
 Current	../xyzfile.h	/^	int Current () const { return _currentstep; }$/;"	f	class:XYZFile
 Current	../xyzsystem.h	/^	int Current ()		const { return _coords.Current(); }$/;"	f	class:XYZSystem
-D1	../moritasfg2002.h	/^const double D1 = 4.6077,$/;"	v
-D2	../moritasfg2002.h	/^			 D2 = 4.8894,$/;"	v
-D3	../moritasfg2002.h	/^			 D3 = 5.5062,$/;"	v
-D4	../moritasfg2002.h	/^			 D4 = 1.6890,$/;"	v
-D5	../moritasfg2002.h	/^			 D5 = 1.6102,$/;"	v
-D6	../moritasfg2002.h	/^			 D6 = 7.3812,$/;"	v
-D7	../moritasfg2002.h	/^			 D7 = 3.4710;$/;"	v
+DCMToLab	../molecule.cpp	/^MatR const & Molecule::DCMToLab (const coord axis) {$/;"	f	class:Molecule
+DCMToLabMorita	../h2o.cpp	/^MatR const & Water::DCMToLabMorita (const coord axis, const int bond) {$/;"	f	class:Water
+DCMToLabOrder	../h2o.cpp	/^MatR const & Water::DCMToLabOrder () {$/;"	f	class:Water
 DEBUG	../xyzsystem.h	10;"	d
+DECANE_H_	../alkane.h	2;"	d
 DECANE_H_	../decane.h	2;"	d
 DIPOLEPARM_H_	../dipoleparm.h	2;"	d
-DR	../rdf.h	26;"	d
-DataOutput	../analysis.h	/^	virtual void DataOutput (const unsigned int timestep) { return; }$/;"	f	class:Analyzer
-Dbl_mtr	../moritasfg2002.h	/^typedef std::vector< std::vector< double > > Dbl_mtr;$/;"	t
+D_REMOVE_IF	../utility.h	245;"	d
+DataOutput	../analysis.h	/^    virtual void DataOutput (const unsigned int timestep) { return; }$/;"	f	class:Analyzer
+DataPoint	../complexdatafile.cpp	/^std::complex<double> ComplexDataFile::DataPoint (const double data) {$/;"	f	class:ComplexDataFile
+Decane	../decane.cpp	/^Decane::Decane () $/;"	f	class:Decane
+Decane	../decane.cpp	/^Decane::Decane (const Molecule& molecule) $/;"	f	class:Decane
 Decane	../decane.h	/^class Decane: public CarbonChain {$/;"	c
 Decane_ptr_vec	../decane.h	/^typedef std::vector<Decane *> Decane_ptr_vec;$/;"	t
 Decane_vec	../decane.h	/^typedef std::vector<Decane> Decane_vec;$/;"	t
 Degree	../node.h	/^	int Degree () const { return edges.size(); }$/;"	f	class:Node
-Dimensions	../mdsystem.h	/^	static VecR Dimensions () { return _dimensions; }$/;"	f	class:MDSystem
-Dimensions	../mdsystem.h	/^	static void Dimensions (const VecR& dimensions) { MDSystem::_dimensions = dimensions; }$/;"	f	class:MDSystem
+Determinant	../matrixr.cpp	/^double MatR::Determinant () const {$/;"	f	class:MatR
+Dimensions	../mdsystem.h	/^    static VecR Dimensions () { return _dimensions; }$/;"	f	class:MDSystem
+Dimensions	../mdsystem.h	/^    static void Dimensions (const VecR& dimensions) { MDSystem::_dimensions = dimensions; }$/;"	f	class:MDSystem
 Dims	../ambersystem.h	/^	VecR	Dims () 		const 	{ return _coords.Dims(); }		\/\/ returns the system size.$/;"	f	class:AmberSystem
 Dims	../crdfile.h	/^	const VecR& Dims () const { return _dims; }$/;"	f	class:CRDFile
 Dipole	../dipoleparm.h	/^	VecR Dipole (double r1, double r2, double theta) {$/;"	f	class:WaterDipoleParms
 Dipole	../h2o.h	/^	VecR const & Dipole () const { return _dipole; }			\/\/ calculates the dipole (from a parameterized source)$/;"	f	class:Water
-Dipole	../molecule.h	/^	VecR Dipole () const { return _dipole; }		\/\/ return the dipole of the molecule$/;"	f	class:Molecule
+Dipole	../molecule.h	/^	void Dipole (VecR& dip) { _dipole = dip; }$/;"	f	class:Molecule
+Dipole	../molecule.h	/^    VecR& Dipole () const { return _dipole; }		\/\/ return the dipole of the molecule$/;"	f	class:Molecule
 DipoleCorrelation	../wateranalyzer.h	/^trajectory WaterAnalyzer::DipoleCorrelation () {$/;"	f	class:WaterAnalyzer
+DipoleFieldTensor	../dipolefieldtensor.cpp	/^DipoleFieldTensor::DipoleFieldTensor (double const * const r) {$/;"	f	class:DipoleFieldTensor
 DipoleFieldTensor	../dipolefieldtensor.h	/^class DipoleFieldTensor {$/;"	c
 Distance	../adjacencymatrix.h	/^	double Distance (Atom const * const a1, Atom const * const a2) {$/;"	f	class:AdjacencyMatrix
+Distance	../connectmatrix.cpp	/^double ConnectivityMatrix::Distance (const Atom * atom1, const Atom * atom2) const {$/;"	f	class:ConnectivityMatrix
+Distance	../graph.cpp	/^  double BondGraph::Distance (Atom const * const a1, Atom const * const a2) const {$/;"	f	class:BondGraph
+Distance	../mdsystem.cpp	/^VecR MDSystem::Distance (const Atom * atom1, const Atom * atom2) {$/;"	f	class:MDSystem
+Distance	../mdsystem.cpp	/^VecR MDSystem::Distance (const VecR& v1, const VecR& v2) {$/;"	f	class:MDSystem
 Distance_matrix	../adjacencymatrix.h	/^typedef std::vector< std::vector< VecR > > Distance_matrix;$/;"	t
 Double_matrix	../matrixr.h	/^typedef std::vector< Double_vector >	Double_matrix;$/;"	t
+Double_pair	../watersystem.h	/^	typedef std::pair<double,double> Double_pair;$/;"	t	class:WaterSystem
 Double_vector	../vecr.h	/^typedef std::vector<double>	Double_vector;$/;"	t
-END_FREQ	../watersfg.h	/^const double END_FREQ			= 3800.0\/AU2WAVENUMBER;$/;"	v
-Edge	../graph.h	/^typedef boost::graph_traits<Graph>::edge_descriptor Edge;$/;"	t
+Edge	../graph.h	/^	typedef boost::graph_traits<Graph>::edge_descriptor Edge;$/;"	t	class:BondGraph
 EdgeProperties	../bondgraph.h	/^struct EdgeProperties {$/;"	s
-EdgeProperties	../graph.h	/^	EdgeProperties (const double b_length, const bondtype b_type) : distance(b_length), btype(b_type) { }$/;"	f	struct:EdgeProperties
-EdgeProperties	../graph.h	/^struct EdgeProperties {$/;"	s
-Edge_it	../graph.h	/^typedef boost::graph_traits<Graph>::edge_iterator Edge_it;$/;"	t
+EdgeProperties	../graph.h	/^	  EdgeProperties (const double b_length, const bondtype b_type) : distance(b_length), btype(b_type) { }$/;"	f	struct:BondGraph::EdgeProperties
+EdgeProperties	../graph.h	/^	struct EdgeProperties {$/;"	s	class:BondGraph
+Edge_it	../graph.h	/^	typedef boost::graph_traits<Graph>::edge_iterator Edge_it;$/;"	t	class:BondGraph
 Element	../dipolefieldtensor.h	/^	double const Element (int const row, int const col) const { return _tensor[col*3+row]; }$/;"	f	class:DipoleFieldTensor
-EqualPairs	../utility.h	/^bool EqualPairs (T& pair1, T& pair2) {$/;"	f
+Element	../utility.h	/^    int Element (const int x, const int y) const { return _histogram[x][y]; }$/;"	f	class:Histogram2D
+EqualPairs	../utility.h	/^struct EqualPairs : public std::binary_function<T,T,bool> $/;"	s
 EulerAngles	../h2o.h	/^	double EulerAngles[3];				\/\/ euler angles as defined in "The Raman Effect" Appendix A5 (theta, phi, chi)$/;"	m	class:Water
-EulerAngles	../molecule.h	/^	double * EulerAngles () 		{ return _eulerangles; }$/;"	f	class:Molecule
+EulerAngles	../molecule.h	/^    double * EulerAngles () 		{ return _eulerangles; }$/;"	f	class:Molecule
 EulerMatrix	../h2o.h	/^	MatR EulerMatrix;					\/\/ The euler rotation matrix$/;"	m	class:Water
+ExtentPair	../watersystem.h	/^	Double_pair ExtentPair ($/;"	f	class:WaterSystem
+FLATTEN_PAIRLIST	../utility.h	68;"	d
 FORCEFILE_H_	../forcefile.h	2;"	d
-FOR_EACH	../utility.h	42;"	d
-FREQ_STEP	../watersfg.h	/^const double FREQ_STEP			= 1.0\/AU2WAVENUMBER;		\/\/ step size when calculating the spectra$/;"	v
+FOR_EACH	../utility.h	259;"	d
+FTENSOR	../Makefile	/^FTENSOR		= $(SRCLIB)\/include\/FTensor-1.1pre25$/;"	m
 File	../topfile.h	/^	FILE * File () const { return _topfile; }$/;"	f	class:TOPFile
 FindEulerAngles	../backup.h	/^void Water::FindEulerAngles () {$/;"	f	class:Water
+FindFlag	../topfile.cpp	/^void TOPFile::FindFlag (std::string flag) {$/;"	f	class:TOPFile
 FindInterfaces	../ambermpisys.h	/^vector<double> MPIMolSystem::FindInterfaces (string atomName, string residue) {$/;"	f	class:MPIMolSystem
 FindInterfaces	../interfaces.h	/^vector<double> FindInterfaces (string atomName, string residue) {$/;"	f
-FindInterfacialWaters	../watersystem.h	/^void WaterSystem<T>::FindInterfacialWaters () {$/;"	f	class:WaterSystem
-FindMols	../watersystem.h	/^void WaterSystem<T>::FindMols (const string name) {$/;"	f	class:WaterSystem
-FindWaters	../watersystem.h	/^void WaterSystem<T>::FindWaters () {$/;"	f	class:WaterSystem
-First	../pdbfile.h	/^	int First () { return _initstep; }$/;"	f	class:PDBFile
-FlipWaters	../watersystem.h	/^void WaterSystem<T>::FlipWaters (const coord axis) {$/;"	f	class:WaterSystem
-Force	../atom.h	/^	const VecR& Force () const		{ return _force; }$/;"	f	class:Atom
-Force	../atom.h	/^	void Force (const VecR& force) { _force = force; }$/;"	f	class:Atom
-Force	../atom.h	/^	void Force (coord const axis, double const value) { _force.Set (axis, value); }$/;"	f	class:Atom
-Force	../atom.h	/^	void Force (double X, double Y, double Z) { _force.Set(X, Y, Z); }$/;"	f	class:Atom
+FindWaterCoordination	../connectmatrix.cpp	/^coordination ConnectivityMatrix::FindWaterCoordination (const Water& water) const {$/;"	f	class:ConnectivityMatrix
+FixAtom	../molecule.cpp	/^void Molecule::FixAtom (Atom * const atom) {$/;"	f	class:Molecule
+Flip	../h2o.cpp	/^void Water::Flip (const coord axis) {$/;"	f	class:Water
+Force	../atom.h	/^    const VecR& Force () const		{ return _force; }$/;"	f	class:Atom
+Force	../atom.h	/^    void Force (const VecR& force) { _force = force; }$/;"	f	class:Atom
+Force	../atom.h	/^    void Force (coord const axis, double const value) { _force.Set (axis, value); }$/;"	f	class:Atom
+Force	../atom.h	/^    void Force (double X, double Y, double Z) { _force.Set(X, Y, Z); }$/;"	f	class:Atom
+ForceFile	../forcefile.cpp	/^ForceFile::ForceFile (std::string const forcepath, int const c_size) :$/;"	f	class:ForceFile
 ForceFile	../forcefile.h	/^class ForceFile {$/;"	c
 Forces	../ambersystem.h	/^	VecR& Forces (int index)	{ return _forces[index]; }$/;"	f	class:AmberSystem
 Forces	../forcefile.h	/^	const std::vector<VecR>& Forces () const { return _forces; }$/;"	f	class:ForceFile
-GAMMA	../watersfg.h	/^const double GAMMA				= 2.0\/AU2WAVENUMBER;				\/\/ the "damping parameter" first shown in Eq. 3 scaled down to some value (between 2 and 22 cm-1 as Dave put it)$/;"	v
-GAMMA_SQ	../watersfg.h	/^const double GAMMA_SQ			= GAMMA*GAMMA;				\/\/ ...squared$/;"	v
+Forces	../trrfile.h	/^    VecR& Forces (const int index) { return _forces[index]; }$/;"	f	class:TRRFile
+GMXSYS	../Makefile	/^GMXSYS	= $(SRCLIB)\/trrfile.o $(SRCLIB)\/grofile.o $(SRCLIB)\/gmxsystem.o$/;"	m
+GMXSYSTEM_H_	../gmxsystem.h	2;"	d
+GMXSystem	../gmxsystem.cpp	/^GMXSystem::GMXSystem (const char * trr_filepath, const char * gro_filepath)$/;"	f	class:GMXSystem
+GMXSystem	../gmxsystem.h	/^class GMXSystem : public MDSystem {$/;"	c
 GRAPH_H_	../graph.h	2;"	d
+GROFILE_H_	../grofile.h	2;"	d
+GROFile	../grofile.h	/^    GROFile (const std::string path) :$/;"	f	class:GROFile
+GROFile	../grofile.h	/^class GROFile {$/;"	c
+GetAtom	../molecule.cpp	/^Atom * Molecule::GetAtom (const string atomname) const {$/;"	f	class:Molecule
+GetBond	../adjacencymatrix.cpp	/^Bond * AdjacencyMatrix::GetBond (Atom const * const a1, Atom const * const a2) {$/;"	f	class:AdjacencyMatrix
 GetH	../hno3.h	/^	Atom * GetH () const { return _h; }$/;"	f	class:NitricAcid
 GetOH	../hno3.h	/^	Atom * GetOH () const { return _oh; }$/;"	f	class:NitricAcid
 GetThread	../thread.h	/^	pthread_t * GetThread () const { return _thread; }$/;"	f	class:Thread
 Graph	../bondgraph.h	/^typedef boost::adjacency_list<listS, listS, bidirectionalS, VertexProperties, EdgeProperties> Graph;$/;"	t
-Graph	../graph.h	/^typedef boost::adjacency_list<listS, listS, undirectedS, VertexProperties, EdgeProperties> Graph;$/;"	t
+Graph	../graph.h	/^	typedef boost::adjacency_list<listS, listS, undirectedS, VertexProperties, EdgeProperties> Graph;$/;"	t	class:BondGraph
 H	../bond.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon3
 H	../bondgraph.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon1
 H	../connectmatrix.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon5
-H	../graph.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon7
+H	../graph.h	/^	  H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:BondGraph::__anon8
+H1	../h2o.h	/^	Atom * H1 () { return _h1; }$/;"	f	class:Water
+H2	../h2o.h	/^	Atom * H2 () { return _h2; }$/;"	f	class:Water
 H2O_H_	../h2o.h	2;"	d
 H3O_H_	../h3o.h	2;"	d
-HARTREE2KCALPMOL	../watersfg.h	/^const double HARTREE2KCALPMOL	=	627.509;						\/\/ from hartree to kcal\/mol$/;"	v
 HBONDANGLE	../bond.h	/^const double HBONDANGLE	= 30.0*M_PI\/180.0;		\/\/ bonding angle has to be less than this value to be considered an H-bond$/;"	v
 HBONDANGLE	../bondgraph.h	/^const double HBONDANGLE	= 30.0*M_PI\/180.0;		\/\/ bonding angle has to be less than this value to be considered an H-bond$/;"	v
 HBONDANGLE	../connectmatrix.h	/^const double HBONDANGLE	= 0.866025;		\/\/ cos(theta) has to be less than this value to be considered an H-bond$/;"	v
-HBONDANGLE	../graph.h	/^const double HBONDANGLE	= 30.0*M_PI\/180.0;		\/\/ bonding angle has to be less than this value to be considered an H-bond$/;"	v
+HBONDANGLECOS	../graph.cpp	/^const double BondGraph::HBONDANGLECOS	= cos(30.0*M_PI\/180.0);		\/\/ bonding angle has to be bigger than this cos (i.e. smaller than ~30 degrees$/;"	m	class:BondGraph	file:
+HBONDANGLECOS	../graph.h	/^	static const double HBONDANGLECOS;$/;"	m	class:BondGraph
 HBONDLENGTH	../bond.h	/^const double HBONDLENGTH  = 2.5;				\/\/ used to be 2.46$/;"	v
 HBONDLENGTH	../bondgraph.h	/^const double HBONDLENGTH  = 2.5;				\/\/ used to be 2.46$/;"	v
 HBONDLENGTH	../connectmatrix.h	/^const double HBONDLENGTH  = 2.46;$/;"	v
-HBONDLENGTH	../graph.h	/^const double HBONDLENGTH  = 2.5;				\/\/ used to be 2.46$/;"	v
+HBONDLENGTH	../graph.cpp	/^const double BondGraph::HBONDLENGTH  = 2.3;				\/\/ used to be 2.46$/;"	m	class:BondGraph	file:
+HBONDLENGTH	../graph.h	/^	static const double HBONDLENGTH;$/;"	m	class:BondGraph
+HBonds	../adjacencymatrix.cpp	/^Bond_ptr_vec AdjacencyMatrix::HBonds (Atom const * const ap) {$/;"	f	class:AdjacencyMatrix
 HH	../bond.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon3
 HH	../bondgraph.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon1
 HH	../connectmatrix.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon5
-HH	../graph.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon7
+HH	../graph.h	/^	  HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:BondGraph::__anon8
 HHH	../bond.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon3
 HHH	../bondgraph.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon1
 HHH	../connectmatrix.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon5
-HHH	../graph.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon7
+HHH	../graph.h	/^	  HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:BondGraph::__anon8
 HHHH	../bond.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon3
 HHHH	../bondgraph.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon1
 HHHH	../connectmatrix.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon5
-HHHH	../graph.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon7
+HHHH	../graph.h	/^	  HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:BondGraph::__anon8
 HISTOGRAM_H_	../histogram.h	2;"	d
 HNO3ANALYSIS_H_	../hno3analysis.h	2;"	d
 HNO3_H_	../hno3.h	2;"	d
-HZ2AU	../watersfg.h	/^const double HZ2AU			=	2.418884324306202e-17;			\/\/ convert Hz to atomic units of frequency$/;"	v
-HZ2WAVENUMBER	../watersfg.h	/^const double HZ2WAVENUMBER	=	3.335641e-11;				\/\/ convert from Hz to wavenumbers (cm-1)  (this is 1\/c)$/;"	v
 Histogram	../histogram.h	/^Histogram::Histogram (ValueType const min, ValueType const max, ValueType const binsize)	$/;"	f	class:Histogram
 Histogram	../histogram.h	/^class Histogram {$/;"	c
-Histogram_t	../rdf.h	/^typedef vector<int> Histogram_t;$/;"	t
+Histogram1D	../utility.h	/^    Histogram1D (const T min, const T max, const T res) $/;"	f	class:Histogram1D
+Histogram1D	../utility.h	/^class Histogram1D : public std::unary_function<T,bool>$/;"	c
+Histogram2D	../utility.h	/^    Histogram2D (const pair_t& minima, const pair_t& maxima, const pair_t& resolutions) $/;"	f	class:Histogram2D
+Histogram2D	../utility.h	/^class Histogram2D : public std::binary_function<T,T,bool>$/;"	c
+Histogram_t	../rdf.h	/^typedef std::vector<double> Histogram_t;$/;"	t
+Histogram_t	../utility.h	/^    typedef std::vector<double> Histogram_t;$/;"	t	class:Histogram2D
+Hydronium	../h3o.cpp	/^Hydronium::Hydronium () : Molecule()$/;"	f	class:Hydronium
 Hydronium	../h3o.h	/^class Hydronium: public Molecule {$/;"	c
+Hydroxide	../oh.cpp	/^Hydroxide::Hydroxide () : Molecule()$/;"	f	class:Hydroxide
 Hydroxide	../oh.h	/^class Hydroxide: public Molecule {$/;"	c
+ID	../adjacencymatrix.cpp	/^int AdjacencyMatrix::ID (Atom const * const ap) const {$/;"	f	class:AdjacencyMatrix
 ID	../ambermpisys.h	/^	int ID () const 			{ return _id; }$/;"	f	class:MPIMolSystem
-ID	../atom.h	/^	int ID () const 		{ return _ID; }$/;"	f	class:Atom
-ID	../atom.h	/^	void ID (int id) { _ID = id; }$/;"	f	class:Atom
-Interface_Location_Histogram	../analysis.h	/^vector< vector<double> > Analyzer::Interface_Location_Histogram ($/;"	f	class:Analyzer
+ID	../atom.h	/^    int ID () const 		{ return _ID; }$/;"	f	class:Atom
+ID	../atom.h	/^    void ID (int id) { _ID = id; }$/;"	f	class:Atom
+InBounds	../utility.h	/^    bool InBounds (const T t) const { return (t >= _min && t <= _max); }$/;"	f	class:Histogram1D
+Index	../matrixr.cpp	/^double MatR::Index (coord const row, coord const col) const {	\/\/ Return the element$/;"	f	class:MatR
+Index	../matrixr.cpp	/^double MatR::Index (int const row, int const col) const {	\/\/ Return the element$/;"	f	class:MatR
+Inserter	../utility.h	/^  Inserter(C& c) : in(c) {}$/;"	f	struct:Inserter
+Inserter	../utility.h	/^struct Inserter {$/;"	s
+Inverse	../matrixr.cpp	/^MatR MatR::Inverse () const {$/;"	f	class:MatR
+IsName	../watersystem.h	/^	  class IsName : public std::binary_function<U, std::string, bool> {$/;"	c	class:WaterSystem
+IsWater_p	../watersystem.h	/^	class IsWater_p : public std::unary_function<Molecule *, bool> {$/;"	c	class:WaterSystem
 Join	../thread.h	/^void * Thread<T>::Join () {$/;"	f	class:Thread
+KeepAtomsInSlice	../watersystem.h	/^	void KeepAtomsInSlice (Atom_ptr_vec& atoms, Double_pair& extents) {$/;"	f	class:WaterSystem
+KeepByName	../watersystem.h	/^	  void KeepByName (U& u, std::string& name) {$/;"	f	class:WaterSystem
+KeepByNames	../watersystem.h	/^	  void KeepByNames (U& u, std::vector<string>& names) {$/;"	f	class:WaterSystem
+KeepWaterByCoordination	../watersystem.h	/^	void KeepWaterByCoordination (Mol_ptr_vec& mols, const BondGraph::coordination c) {$/;"	f	class:WaterSystem
 Last	../pdbfile.h	/^	int Last () { return _laststep; }$/;"	f	class:PDBFile
 LoadAll	../watersystem.h	/^void WaterSystem<T>::LoadAll () {$/;"	f	class:WaterSystem
+LoadFirst	../ambersystem.cpp	/^void AmberSystem::LoadFirst () {$/;"	f	class:AmberSystem
+LoadFirst	../crdfile.cpp	/^void CRDFile::LoadFirst() {$/;"	f	class:CRDFile
+LoadFirst	../forcefile.cpp	/^void ForceFile::LoadFirst() {$/;"	f	class:ForceFile
+LoadFirst	../gmxsystem.cpp	/^void GMXSystem::LoadFirst() {$/;"	f	class:GMXSystem
+LoadFirst	../pdbfile.cpp	/^void PDBFile::LoadFirst() {$/;"	f	class:PDBFile
+LoadFirst	../trrfile.cpp	/^void TRRFile::LoadFirst () {$/;"	f	class:TRRFile
+LoadFirst	../wannier.cpp	/^void WannierFile::LoadFirst() {$/;"	f	class:WannierFile
+LoadFirst	../xyzfile.cpp	/^void XYZFile::LoadFirst() {$/;"	f	class:XYZFile
+LoadFirst	../xyzsystem.cpp	/^void XYZSystem::LoadFirst () {$/;"	f	class:XYZSystem
+LoadLast	../pdbfile.cpp	/^void PDBFile::LoadLast () {$/;"	f	class:PDBFile
 LoadNext	../ambermpisys.h	/^void MPIMolSystem::LoadNext () {$/;"	f	class:MPIMolSystem
+LoadNext	../ambersystem.cpp	/^void AmberSystem::LoadNext () {$/;"	f	class:AmberSystem
+LoadNext	../analysis.h	/^    void LoadNext () { this->sys->LoadNext(); }$/;"	f	class:Analyzer
+LoadNext	../crdfile.cpp	/^void CRDFile::LoadNext () {$/;"	f	class:CRDFile
+LoadNext	../forcefile.cpp	/^void ForceFile::LoadNext () {$/;"	f	class:ForceFile
+LoadNext	../gmxsystem.cpp	/^void GMXSystem::LoadNext() {$/;"	f	class:GMXSystem
+LoadNext	../pdbfile.cpp	/^void PDBFile::LoadNext () {$/;"	f	class:PDBFile
+LoadNext	../trrfile.cpp	/^void TRRFile::LoadNext () {$/;"	f	class:TRRFile
+LoadNext	../wannier.cpp	/^void WannierFile::LoadNext () {$/;"	f	class:WannierFile
+LoadNext	../xyzfile.cpp	/^void XYZFile::LoadNext () {$/;"	f	class:XYZFile
+LoadNext	../xyzsystem.cpp	/^void XYZSystem::LoadNext () {$/;"	f	class:XYZSystem
+LoadSection	../topfile.cpp	/^void TOPFile::LoadSection(std::string flag) {$/;"	f	class:TOPFile
+LoadWaters	../watersystem.h	/^	void LoadWaters () {$/;"	f	class:WaterSystem
 Loaded	../forcefile.h	/^	bool Loaded ()	{ return _loaded; }$/;"	f	class:ForceFile
 Loaded	../wannier.h	/^	bool Loaded ()	const { return _loaded; }	\/\/ find out if the file is loaded\/exists$/;"	f	class:WannierFile
-M	../watersfg.h	/^const double M		=	(MOXY*MHYD)\/(MOXY+MHYD);	\/\/ reduced mass of the OH bond\/oscillator$/;"	v
-MAKE_FUNCTOR	../utility.h	32;"	d
-MAKE_PREDICATE	../utility.h	39;"	d
-MAP	../utility.h	50;"	d
-MAP_TO	../utility.h	46;"	d
+MAKE_FUNCTOR	../utility.h	249;"	d
+MAKE_PREDICATE	../utility.h	256;"	d
+MAP	../utility.h	267;"	d
+MAP_TO	../utility.h	263;"	d
 MATRIXR_H_	../matrixr.h	2;"	d
+MDSYSTEM	../Makefile	/^MDSYSTEM = $(SRCLIB)\/vecr.o $(SRCLIB)\/matrixr.o $(SRCLIB)\/atom.o $(SRCLIB)\/molecule.o $(SRCLIB)\/mdsystem.o $(SRCLIB)\/h2o.o $(SRCLIB)\/hno3.o $(SRCLIB)\/bond.o $(SRCLIB)\/oh.o $(SRCLIB)\/h3o.o $(SRCLIB)\/decane.o $(SRCLIB)\/carbonchain.o $/;"	m
 MDSYSTEM_H_	../mdsystem.h	2;"	d
 MDSystem	../mdsystem.h	/^class MDSystem {$/;"	c
-MHYD	../watersfg.h	/^const double MHYD	=	(MPROT*1.0+1.0);		\/\/ and mass of a hydrogen$/;"	v
 MIN_TRAJ_SIZE	../wateranalyzer.h	411;"	d
 MOLECULE_H_	../molecule.h	2;"	d
-MOL_IT	../molecule.h	/^typedef std::vector<Molecule>::iterator MOL_IT;$/;"	t
-MORITASFG2002_H_	../moritasfg2002.h	2;"	d
-MOXY	../watersfg.h	/^const double MOXY	=	(MPROT*8.0+8.0);		\/\/ mass of an oxygen atom in atomic units$/;"	v
+MPICXX	../Makefile	/^MPICXX		= mpiCC -g -I$(MPI)\/include$/;"	m
 MPIMolSystem	../ambermpisys.h	/^MPIMolSystem::MPIMolSystem (int *argc, char ***argv, string prmtop, string mdcrd, string mdvel) {$/;"	f	class:MPIMolSystem
 MPIMolSystem	../ambermpisys.h	/^class MPIMolSystem {$/;"	c
-MPROT	../watersfg.h	/^const double MPROT	=	1836.153;				\/\/ in atomic units, this is the mass of a proton. Mass of electron = 1.0$/;"	v
-MU_DERIV_LENGTH	../watersfg.h	/^const double MU_DERIV_LENGTH = MU_DERIV_MAGNITUDE * OH_COM_LENGTH;		\/\/ length of the differential dipole moment element used in calculating the dipole-dipole interaction energy (in atomic units)$/;"	v
-MU_DERIV_MAGNITUDE	../watersfg.h	/^const double MU_DERIV_MAGNITUDE = sqrt(-0.058*-0.058 + 0.157*0.157);$/;"	v
 Magnitude	../dipoleparm.h	/^	double Magnitude (double r1, double r2, double theta) { return _Data(r1, r2, theta)[3]; }$/;"	f	class:WaterDipoleParms
-Mass	../atom.h	/^	double Mass () const 	{ return _mass; }$/;"	f	class:Atom
-Mass	../molecule.h	/^	double Mass () const 			{ return _mass; }					\/\/ Returns the molecular mass$/;"	f	class:Molecule
+Magnitude	../vecr.cpp	/^double VecR::Magnitude () const {$/;"	f	class:VecR
+Mass	../atom.h	/^    double Mass () const 	{ return _mass; }$/;"	f	class:Atom
+Mass	../molecule.h	/^    double Mass () const 			{ return _mass; }					\/\/ Returns the molecular mass$/;"	f	class:Molecule
 Masses	../topfile.h	/^	std::vector<double>& Masses () 	{ return _masses; }$/;"	f	class:TOPFile
 Master	../ambermpisys.h	/^	bool Master () const 		{ return _master; }$/;"	f	class:MPIMolSystem
 MatR	../matrixr.h	/^	MatR () : _matrix(3, Double_vector(3)) { }$/;"	f	class:MatR
@@ -255,40 +360,48 @@ MatR	../matrixr.h	/^	MatR (double * const elements) : _matrix(3, Double_vector(3
 MatR	../matrixr.h	/^class MatR {$/;"	c
 Matrix	../matrixr.h	/^	Double_matrix& Matrix() { return _matrix; }$/;"	f	class:MatR
 Max	../histogram.h	/^	ValueType Max () const { return _max; }$/;"	f	class:Histogram
+Max	../utility.h	/^    int Max () const { return _max; }$/;"	f	class:Histogram1D
+Merge	../molecule.cpp	/^Molecule * Molecule::Merge (Molecule * mol) {$/;"	f	class:Molecule
 Min	../histogram.h	/^	ValueType Min () const { return _min; }$/;"	f	class:Histogram
-MolID	../atom.h	/^	int MolID () const		{ return _molid; }$/;"	f	class:Atom
-MolID	../atom.h	/^	void MolID (const int mol) { _molid = mol; }	\/\/ sets the ID of the molecule containing this atom$/;"	f	class:Atom
-MolID	../molecule.h	/^	int MolID () const				{ return _ID; }$/;"	f	class:Molecule
-MolID	../molecule.h	/^	void MolID (int ID) { _ID = ID; }$/;"	f	class:Molecule
+Min	../utility.h	/^    int Min () const { return _min; }$/;"	f	class:Histogram1D
+MinDistance	../molecule.cpp	/^double Molecule::MinDistance (Molecule& mol) {$/;"	f	class:Molecule
+MolID	../atom.h	/^    int MolID () const		{ return _molid; }$/;"	f	class:Atom
+MolID	../atom.h	/^    void MolID (const int mol) { _molid = mol; }	\/\/ sets the ID of the molecule containing this atom$/;"	f	class:Atom
+MolID	../molecule.h	/^    int MolID () const				{ return _ID; }$/;"	f	class:Molecule
+MolID	../molecule.h	/^    void MolID (int ID) { _ID = ID; }$/;"	f	class:Molecule
 MolNames	../topfile.h	/^	std::vector<std::string>& MolNames () { return _molnames; }$/;"	f	class:TOPFile
 MolPointers	../topfile.h	/^	std::vector<int>& MolPointers () { return _molpointers; }$/;"	f	class:TOPFile
 MolSizes	../topfile.h	/^	std::vector<int>& MolSizes ()	{ return _molsizes; }$/;"	f	class:TOPFile
+Mol_it	../molecule.h	/^typedef Mol_ptr_vec::const_iterator Mol_it;$/;"	t
+Mol_ptr_vec	../gmxsystem.h	/^typedef std::vector<Molecule *> Mol_ptr_vec;$/;"	t
 Mol_ptr_vec	../mdsystem.h	/^typedef std::vector<Molecule *> Mol_ptr_vec;$/;"	t
 Mol_ptr_vec	../molecule.h	/^typedef std::vector<Molecule *> Mol_ptr_vec;$/;"	t
-Mol_vec	../molecule.h	/^typedef std::vector<Molecule> Mol_vec;$/;"	t
+MolecularAxis	../h2o.cpp	/^VecR Water::MolecularAxis () {$/;"	f	class:Water
 MolecularAxis	../h3o.h	/^	VecR MolecularAxis () { return _z; }$/;"	f	class:Hydronium
 MolecularAxis	../hno3.h	/^	VecR MolecularAxis () { return _z; }$/;"	f	class:Nitrate
 MolecularAxis	../hno3.h	/^	VecR MolecularAxis () { return _z; }$/;"	f	class:NitricAcid
-MolecularAxis	../molecule.h	/^	virtual VecR MolecularAxis () { return _z; }$/;"	f	class:Molecule
+MolecularAxis	../molecule.h	/^    virtual VecR MolecularAxis () { return _z; }$/;"	f	class:Molecule
 MolecularAxis	../oh.h	/^	VecR MolecularAxis () { return _oh; }$/;"	f	class:Hydroxide
-Molecular_Axis_Orientation_Histogram	../analysis.h	/^vector<int> Analyzer::Molecular_Axis_Orientation_Histogram ($/;"	f	class:Analyzer
+MolecularPlaneVector	../hno3.cpp	/^VecR NitricAcid::MolecularPlaneVector () {$/;"	f	class:NitricAcid
+Molecule	../molecule.cpp	/^Molecule::Molecule () :$/;"	f	class:Molecule
+Molecule	../molecule.cpp	/^Molecule::Molecule (const Molecule& oldMol) :$/;"	f	class:Molecule
 Molecule	../molecule.h	/^class Molecule {$/;"	c
+MoleculeDensity	../density.cpp	/^vector<int> MoleculeDensity ( AmberSystem& sys, double const start, double const end, double const binsize, const coord axis, string atomname) {$/;"	f
 Molecules	../ambermpisys.h	/^	Molecule * Molecules (int index) { return &_mols[index]; }$/;"	f	class:MPIMolSystem
-Molecules	../mdsystem.h	/^	Mol_ptr_vec& Molecules () { return _mols; }$/;"	f	class:MDSystem
-Molecules	../mdsystem.h	/^	Molecule * Molecules (int index) { return _mols[index]; }$/;"	f	class:MDSystem
-Molecules	../pdbfile.h	/^	vector<Molecule *>& Molecules () { return _molecules; }$/;"	f	class:PDBFile
-MoritaSFG	../moritasfg2002.h	/^	MoritaSFG () : _T_set(false) { ; }$/;"	f	class:MoritaSFG
-MoritaSFG	../moritasfg2002.h	/^class MoritaSFG {$/;"	c
-MuDeriv1	../watersfg.h	/^	VecR MuDeriv1;				\/\/ dipole derivative vector from the paper$/;"	m	class:SFGCalculator
-MuDeriv2	../watersfg.h	/^	VecR MuDeriv2;				\/\/ dipole derivative of the 2nd OH bond in the frame of the first$/;"	m	class:SFGCalculator
+Molecules	../analysis.h	/^    Mol_ptr_vec& Molecules () { return WaterSystem<T>::int_mols; }$/;"	f	class:Analyzer
+Molecules	../grofile.h	/^    Mol_ptr_vec& Molecules() { return _mols; }$/;"	f	class:GROFile
+Molecules	../mdsystem.h	/^    Mol_ptr_vec& Molecules () { return _mols; }$/;"	f	class:MDSystem
+Molecules	../mdsystem.h	/^    Molecule * Molecules (int index) { return _mols[index]; }$/;"	f	class:MDSystem
 MyVertex	../bondgraph.h	/^typedef boost::graph_traits<Graph>::vertex_descriptor MyVertex;$/;"	t
 MyVertex_it	../bondgraph.h	/^typedef boost::graph_traits<Graph>::vertex_iterator MyVertex_it;$/;"	t
 NHBONDLENGTH	../bond.h	/^const double NHBONDLENGTH = 1.3;		\/\/ uhmm... check this?$/;"	v
 NHBONDLENGTH	../bondgraph.h	/^const double NHBONDLENGTH = 1.3;		\/\/ uhmm... check this?$/;"	v
 NHBONDLENGTH	../connectmatrix.h	/^const double NHBONDLENGTH = 1.3;		\/\/ uhmm... check this?$/;"	v
-NHBONDLENGTH	../graph.h	/^const double NHBONDLENGTH = 1.3;		\/\/ uhmm... check this?$/;"	v
+NHBONDLENGTH	../graph.cpp	/^const double BondGraph::NHBONDLENGTH = 1.3;		\/\/ uhmm... check this?$/;"	m	class:BondGraph	file:
+NHBONDLENGTH	../graph.h	/^	static const double NHBONDLENGTH;$/;"	m	class:BondGraph
 NO1	../hno3.h	/^	VecR const * NO1 () { return &_no1; }$/;"	f	class:Nitrate
 NO2	../hno3.h	/^	VecR const * NO2 () { return &_no2; }$/;"	f	class:Nitrate
+NO2Bisector	../hno3.cpp	/^VecR NitricAcid::NO2Bisector () {$/;"	f	class:NitricAcid
 NO2Dipole	../hno3.h	/^	VecR NO2Dipole () const { return _no2dipole; }$/;"	f	class:NitricAcid
 NO2Wanniers	../hno3.h	/^	const std::vector<VecR>& NO2Wanniers () const { return _no2wanniers; }$/;"	f	class:NitricAcid
 NO3	../hno3.h	/^	VecR const * NO3 () { return &_no3; }$/;"	f	class:Nitrate
@@ -296,39 +409,51 @@ NO3Rotation	../wateranalyzer.h	/^trajectory WaterAnalyzer::NO3Rotation () {$/;"	
 NOBONDLENGTH	../bond.h	/^const double NOBONDLENGTH = 2.0;$/;"	v
 NOBONDLENGTH	../bondgraph.h	/^const double NOBONDLENGTH = 2.0;$/;"	v
 NOBONDLENGTH	../connectmatrix.h	/^const double NOBONDLENGTH = 2.0;$/;"	v
-NOBONDLENGTH	../graph.h	/^const double NOBONDLENGTH = 2.0;$/;"	v
+NOBONDLENGTH	../graph.cpp	/^const double BondGraph::NOBONDLENGTH = 2.0;$/;"	m	class:BondGraph	file:
+NOBONDLENGTH	../graph.h	/^	static const double NOBONDLENGTH;$/;"	m	class:BondGraph
 NO_BOND	../wateranalyzer.h	9;"	d
-NUM_STEP	../watersfg.h	/^const double NUM_STEP			= (END_FREQ-START_FREQ)\/FREQ_STEP;$/;"	v
-Name	../atom.h	/^	std::string Name () const 	{ return (_name); }$/;"	f	class:Atom
-Name	../atom.h	/^	void Name (const std::string name) { _name = name; }$/;"	f	class:Atom
-Name	../molecule.h	/^	string Name () const			{ return _name; }$/;"	f	class:Molecule
-Name	../molecule.h	/^	void Name (string name) { _name = name; }	\/\/ set the molecule's name$/;"	f	class:Molecule
+Name	../atom.h	/^    std::string Name () const 	{ return (_name); }$/;"	f	class:Atom
+Name	../atom.h	/^    void Name (const std::string name) { _name = name; }$/;"	f	class:Atom
+Name	../molecule.h	/^    string Name () const			{ return _name; }$/;"	f	class:Molecule
+Name	../molecule.h	/^    void Name (string name) { _name = name; }	\/\/ set the molecule's name$/;"	f	class:Molecule
+NameInList	../watersystem.h	/^	  class NameInList : public std::binary_function<U, std::vector<string>,bool> {$/;"	c	class:WaterSystem
+NameIs_p	../atom.h	/^	class NameIs_p : public std::binary_function<Atom *,std::string,bool> {$/;"	c	class:Atom
+NamePair	../rdf.h	/^typedef std::pair<std::string, std::string> NamePair;$/;"	t
+NamePairList	../rdf.h	/^typedef std::vector<NamePair> NamePairList;$/;"	t
+Nitrate	../hno3.cpp	/^Nitrate::Nitrate () : Molecule () {$/;"	f	class:Nitrate
 Nitrate	../hno3.h	/^class Nitrate: public Molecule {$/;"	c
+NitricAcid	../hno3.cpp	/^NitricAcid::NitricAcid () : Molecule () {$/;"	f	class:NitricAcid
 NitricAcid	../hno3.h	/^class NitricAcid: public Molecule {$/;"	c
+Node	../node.cpp	/^Node::Node () {$/;"	f	class:Node
 Node	../node.h	/^class Node {$/;"	c
 Node_it	../node.h	/^typedef std::list<Node *>::iterator Node_it;$/;"	t
 Node_ptr_list	../node.h	/^typedef std::list<Node *> Node_ptr_list;$/;"	t
 Normal	../h2o.h	/^	VecR Normal () const { return _y; }$/;"	f	class:Water
 NumAtoms	../ambermpisys.h	/^	int NumAtoms () { return _numAtoms; }$/;"	f	class:MPIMolSystem
-NumAtoms	../mdsystem.h	/^	const int NumAtoms ()	const { return (int)_atoms.size(); }$/;"	f	class:MDSystem
+NumAtoms	../grofile.h	/^    int NumAtoms () const { return _natoms; }$/;"	f	class:GROFile
+NumAtoms	../mdsystem.h	/^    int NumAtoms ()	const { return (int)_atoms.size(); }$/;"	f	class:MDSystem
 NumAtoms	../topfile.h	/^	int NumAtoms () const { return _numAtoms; }$/;"	f	class:TOPFile
 NumBins	../histogram.h	/^	int NumBins () const { return _numBins; }$/;"	f	class:Histogram
 NumBonds	../adjacencymatrix.h	/^	int NumBonds (Atom const * const ap) {$/;"	f	class:AdjacencyMatrix
+NumHBonds	../adjacencymatrix.cpp	/^int AdjacencyMatrix::NumHBonds (Water const * const wat) {$/;"	f	class:AdjacencyMatrix
 NumHBonds	../adjacencymatrix.h	/^	int NumHBonds (Atom const * const ap) {$/;"	f	class:AdjacencyMatrix
+NumHBonds	../graph.cpp	/^int BondGraph::NumHBonds (Atom const * const ap) const {$/;"	f	class:BondGraph
+NumHBonds	../graph.cpp	/^int BondGraph::NumHBonds (Water const * const wat) const {$/;"	f	class:BondGraph
 NumMols	../ambermpisys.h	/^	int NumMols () { return _numMols; }$/;"	f	class:MPIMolSystem
-NumMols	../mdsystem.h	/^	const int NumMols () const { return _mols.size(); }$/;"	f	class:MDSystem
+NumMols	../mdsystem.h	/^    int NumMols () const { return _mols.size(); }$/;"	f	class:MDSystem
 NumMols	../topfile.h	/^	int NumMols () const { return _numMols; }$/;"	f	class:TOPFile
-NumSteps	../mdsystem.h	/^	const int NumSteps () { return _numTimeSteps; }$/;"	f	class:MDSystem
 NumSteps	../xyzfile.h	/^	int NumSteps () const { return _numSteps; }$/;"	f	class:XYZFile
-NumSteps	../xyzsystem.h	/^	const int NumSteps () const { return _coords.NumSteps(); }		\/\/ number of timesteps in the xyzfile$/;"	f	class:XYZSystem
+NumSteps	../xyzsystem.h	/^	int NumSteps () const { return _coords.NumSteps(); }		\/\/ number of timesteps in the xyzfile$/;"	f	class:XYZSystem
+NumberDensity	../density.cpp	/^vector<int> NumberDensity (AmberSystem& sys, double const start, double const end, double const binsize, coord const axis) {$/;"	f
 O	../bond.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon3
 O	../bondgraph.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon1
 O	../connectmatrix.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon5
-O	../graph.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon7
+O	../graph.h	/^	  UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:BondGraph::__anon8
+O	../h2o.h	/^	Atom * O () { return _o; }$/;"	f	class:Water
 OH	../bond.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon3
 OH	../bondgraph.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon1
 OH	../connectmatrix.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon5
-OH	../graph.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon7
+OH	../graph.h	/^	  H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:BondGraph::__anon8
 OH	../hno3.h	/^	VecR& OH () { return _voh; }$/;"	f	class:NitricAcid
 OH	../oh.h	/^	VecR const * OH () const { return &_oh; }$/;"	f	class:Hydroxide
 OH1	../h2o.h	/^	VecR const * OH1 () const { return &_oh1; }$/;"	f	class:Water
@@ -339,274 +464,402 @@ OH3	../h3o.h	/^	VecR const * OH3 () const { return &_oh3; }$/;"	f	class:Hydroniu
 OHBONDLENGTH	../bond.h	/^const double OHBONDLENGTH = 1.3;				\/\/ used to be 1.1$/;"	v
 OHBONDLENGTH	../bondgraph.h	/^const double OHBONDLENGTH = 1.3;				\/\/ used to be 1.1$/;"	v
 OHBONDLENGTH	../connectmatrix.h	/^const double OHBONDLENGTH = 1.0;$/;"	v
-OHBONDLENGTH	../graph.h	/^const double OHBONDLENGTH = 1.3;				\/\/ used to be 1.1$/;"	v
+OHBONDLENGTH	../graph.cpp	/^const double BondGraph::OHBONDLENGTH = 1.1;				\/\/ used to be 1.1$/;"	m	class:BondGraph	file:
+OHBONDLENGTH	../graph.h	/^	static const double OHBONDLENGTH;$/;"	m	class:BondGraph
 OHH	../bond.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon3
 OHH	../bondgraph.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon1
 OHH	../connectmatrix.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon5
-OHH	../graph.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon7
+OHH	../graph.h	/^	  HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:BondGraph::__anon8
 OHHH	../bond.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon3
 OHHH	../bondgraph.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon1
 OHHH	../connectmatrix.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon5
-OHHH	../graph.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon7
+OHHH	../graph.h	/^	  HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:BondGraph::__anon8
 OHHHH	../bond.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon3
 OHHHH	../bondgraph.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon1
 OHHHH	../connectmatrix.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon5
-OHHHH	../graph.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon7
-OH_COM_LENGTH	../watersfg.h	/^const double OH_COM_LENGTH = MHYD*OH_LENGTH\/(MHYD+MOXY);	\/\/ distance to the center of mass of the OH bond from the oxygen (atomic units of length)$/;"	v
+OHHHH	../graph.h	/^	  HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:BondGraph::__anon8
 OH_H_	../oh.h	2;"	d
-OH_LENGTH	../watersfg.h	/^const double OH_LENGTH = 1.000*ANG2BOHR;	\/\/ in atomic units$/;"	v
 OO	../bond.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon3
 OO	../bondgraph.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon1
 OO	../connectmatrix.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon5
-OO	../graph.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon7
+OO	../graph.h	/^	  UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:BondGraph::__anon8
 OOH	../bond.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon3
 OOH	../bondgraph.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon1
 OOH	../connectmatrix.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon5
-OOH	../graph.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon7
+OOH	../graph.h	/^	  H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:BondGraph::__anon8
 OOHH	../bond.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon3
 OOHH	../bondgraph.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon1
 OOHH	../connectmatrix.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon5
-OOHH	../graph.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon7
+OOHH	../graph.h	/^	  HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:BondGraph::__anon8
 OOHHH	../bond.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon3
 OOHHH	../bondgraph.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon1
 OOHHH	../connectmatrix.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon5
-OOHHH	../graph.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon7
+OOHHH	../graph.h	/^	  HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:BondGraph::__anon8
 OOHHHH	../bond.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon3
 OOHHHH	../bondgraph.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon1
 OOHHHH	../connectmatrix.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon5
-OOHHHH	../graph.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon7
+OOHHHH	../graph.h	/^	  HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:BondGraph::__anon8
 OOO	../bond.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon3
 OOO	../bondgraph.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon1
 OOO	../connectmatrix.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon5
-OOO	../graph.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon7
+OOO	../graph.h	/^	  UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:BondGraph::__anon8
 OOOH	../bond.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon3
 OOOH	../bondgraph.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon1
 OOOH	../connectmatrix.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon5
-OOOH	../graph.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon7
+OOOH	../graph.h	/^	  H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:BondGraph::__anon8
 OOOHH	../bond.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon3
 OOOHH	../bondgraph.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon1
 OOOHH	../connectmatrix.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon5
-OOOHH	../graph.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon7
+OOOHH	../graph.h	/^	  HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:BondGraph::__anon8
 OOOHHH	../bond.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon3
 OOOHHH	../bondgraph.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon1
 OOOHHH	../connectmatrix.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon5
-OOOHHH	../graph.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon7
+OOOHHH	../graph.h	/^	  HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:BondGraph::__anon8
 OOOHHHH	../bond.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon3
 OOOHHHH	../bondgraph.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon1
 OOOHHHH	../connectmatrix.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon5
-OOOHHHH	../graph.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon7
+OOOHHHH	../graph.h	/^	  HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:BondGraph::__anon8
 OOOO	../bond.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon3
 OOOO	../bondgraph.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon1
 OOOO	../connectmatrix.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon5
-OOOO	../graph.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon7
+OOOO	../graph.h	/^	  UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:BondGraph::__anon8
 OOOOH	../bond.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon3
 OOOOH	../bondgraph.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon1
 OOOOH	../connectmatrix.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon5
-OOOOH	../graph.h	/^	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:__anon7
+OOOOH	../graph.h	/^	  H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			\/\/ 1 H$/;"	e	enum:BondGraph::__anon8
 OOOOHH	../bond.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon3
 OOOOHH	../bondgraph.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon1
 OOOOHH	../connectmatrix.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon5
-OOOOHH	../graph.h	/^	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:__anon7
+OOOOHH	../graph.h	/^	  HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		\/\/ 2 Hs$/;"	e	enum:BondGraph::__anon8
 OOOOHHH	../bond.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon3
 OOOOHHH	../bondgraph.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon1
 OOOOHHH	../connectmatrix.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon5
-OOOOHHH	../graph.h	/^	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:__anon7
+OOOOHHH	../graph.h	/^	  HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	\/\/ 3 Hs$/;"	e	enum:BondGraph::__anon8
 OOOOHHHH	../bond.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon3
 OOOOHHHH	../bondgraph.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon1
 OOOOHHHH	../connectmatrix.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon5
-OOOOHHHH	../graph.h	/^	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:__anon7
+OOOOHHHH	../graph.h	/^	  HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44$/;"	e	enum:BondGraph::__anon8
+Output	../rdf.h	/^void RDF2DMachine<T>::Output (FILE * output) const$/;"	f	class:RDF2DMachine
+Output	../rdf.h	/^void RDFMachine<T>::Output (FILE * output) const$/;"	f	class:RDFMachine
+PAIR_IN_LIST	../utility.h	47;"	d
 PARAMS	../boxfiller.h	10;"	d
 PDBFILE	../boxfiller.h	11;"	d
 PDBFILE_H_	../pdbfile.h	2;"	d
-PDBFile	../pdbfile.h	/^class PDBFile {$/;"	c
-PMOL_IT	../molecule.h	/^typedef std::vector<Molecule *>::iterator PMOL_IT;$/;"	t
-PREFACTOR	../watersfg.h	/^const double PREFACTOR	=	sqrt(k0\/M)*(l\/(2.0*k0*k0));		\/\/ the prefactor to multiply the bond force for freq shift (in atomic units) (eq 10c)$/;"	v
-ParentMolecule	../atom.h	/^	Molecule * ParentMolecule () const { return _pmolecule; }$/;"	f	class:Atom
-ParentMolecule	../atom.h	/^	void ParentMolecule (Molecule * mol) { _pmolecule = mol; }	\/\/ sets a pointer to the molecule that contains the atom$/;"	f	class:Atom
-Position	../atom.h	/^	const VecR& Position () const	{ return _position; }$/;"	f	class:Atom
-Position	../atom.h	/^	void Position (const VecR& position) { _position = position; }$/;"	f	class:Atom
-Position	../atom.h	/^	void Position (coord const axis, double const value) { _position.Set (axis, value); }$/;"	f	class:Atom
-Position	../atom.h	/^	void Position (double X, double Y, double Z) { _position.Set(X, Y, Z); }$/;"	f	class:Atom
-PositionBin	../analysis.h	/^int Analyzer::PositionBin (const Atom * patom) {$/;"	f	class:Analyzer
-PositionBin	../analysis.h	/^int Analyzer::PositionBin (const double position) {$/;"	f	class:Analyzer
-PostAnalysis	../analysis.h	/^	virtual void PostAnalysis () { return; }$/;"	f	class:Analyzer
+PDBFile	../pdbfile.cpp	/^PDBFile::PDBFile () {$/;"	f	class:PDBFile
+PDBFile	../pdbfile.cpp	/^PDBFile::PDBFile (string path) {$/;"	f	class:PDBFile
+PDBFile	../pdbfile.cpp	/^PDBFile::PDBFile (vector<Molecule *>& mols) {$/;"	f	class:PDBFile
+PDBFile	../pdbfile.h	/^class PDBFile : public MDSystem {$/;"	c
+PairListMember	../utility.h	/^Iter PairListMember (const typename std::iterator_traits<Iter>::value_type& p, Iter first, Iter last)$/;"	f
+ParentMolecule	../atom.h	/^    Molecule * ParentMolecule () const { return _pmolecule; }$/;"	f	class:Atom
+ParentMolecule	../atom.h	/^    void ParentMolecule (Molecule * mol) { _pmolecule = mol; }	\/\/ sets a pointer to the molecule that contains the atom$/;"	f	class:Atom
+ParseAtomPairs	../rdf.h	/^  void ParseAtomPairs (libconfig::Config * cfg) {$/;"	f	struct:RDFParameters
+Population	../utility.h	/^    double Population (const T t) const { $/;"	f	class:Histogram1D
+Population	../utility.h	/^    double Population (const T& a, const T& b) const $/;"	f	class:Histogram2D
+Position	../analysis.h	/^double Analyzer<T>::Position (const Atom * patom) {$/;"	f	class:Analyzer
+Position	../analysis.h	/^double Analyzer<T>::Position (const VecR& v) {$/;"	f	class:Analyzer
+Position	../analysis.h	/^double Analyzer<T>::Position (const double d) {$/;"	f	class:Analyzer
+Position	../atom.h	/^    const VecR& Position () const	{ return _position; }$/;"	f	class:Atom
+Position	../atom.h	/^    void Position (const VecR& position) { _position = position; }$/;"	f	class:Atom
+Position	../atom.h	/^    void Position (coord const axis, double const value) { _position.Set (axis, value); }$/;"	f	class:Atom
+Position	../atom.h	/^    void Position (double X, double Y, double Z) { _position.Set(X, Y, Z); }$/;"	f	class:Atom
+Position	../molecule.h	/^    VecR Position () const			{ return _centerofmass; }$/;"	f	class:Molecule
+PositionBin	../analysis.h	/^int Analyzer<T>::PositionBin (const Atom * patom) {$/;"	f	class:Analyzer
+PositionBin	../analysis.h	/^int Analyzer<T>::PositionBin (const double position) {$/;"	f	class:Analyzer
+PostAnalysis	../analysis.h	/^    virtual void PostAnalysis () { return; }$/;"	f	class:Analyzer
+Print	../atom.cpp	/^void Atom::Print () const {$/;"	f	class:Atom
+Print	../grofile.cpp	/^void GROFile::Print () const {$/;"	f	class:GROFile
+Print	../matrixr.cpp	/^void MatR::Print () const {$/;"	f	class:MatR
+Print	../molecule.cpp	/^void Molecule::Print () const {$/;"	f	class:Molecule
+Print	../trrfile.cpp	/^void TRRFile::Print (const VecR_vec& vec) const {$/;"	f	class:TRRFile
+Print	../vecr.cpp	/^void VecR::Print () const {$/;"	f	class:VecR
+PrintBox	../trrfile.cpp	/^void TRRFile::PrintBox () const {$/;"	f	class:TRRFile
+PrintCRDFile	../ambersystem.cpp	/^void AmberSystem::PrintCRDFile () const {$/;"	f	class:AmberSystem
+PrintInfo	../trrfile.cpp	/^void TRRFile::PrintInfo () const {$/;"	f	class:TRRFile
+PrintNO2	../hno3.cpp	/^void NitricAcid::PrintNO2 () const {$/;"	f	class:NitricAcid
 PrintParameters	../watersystem.h	/^  void PrintParameters () {$/;"	f	struct:WaterSystemParams
+PrintParams	../rdf.h	/^  void PrintParams () const {$/;"	f	struct:RDFParameters
 Procs	../ambermpisys.h	/^	int Procs () const 			{ return _p; }$/;"	f	class:MPIMolSystem
-PropertyMap	../graph.h	/^template <class T, class Property_T> struct PropertyMap$/;"	s
-Q_H_eq	../moritasfg2002.h	/^const double Q_H_eq		= 0.3285;		\/\/ charge units (atomic units?)$/;"	v
-Q_O_eq	../moritasfg2002.h	/^const double Q_O_eq		= -0.6570;$/;"	v
+PropertyMap	../graph.h	/^	template <class T, class Property_T> struct PropertyMap$/;"	s	class:BondGraph
 RANDOM	../boxfiller.h	13;"	d
-RDF	../rdf.h	/^vector<double> RDF (string atomName1, string atomName2, vector<Atom *>& sys) {$/;"	f
 RDF	../wateranalyzer.h	/^vector<double> WaterAnalyzer::RDF (string atomName1, string atomName2) {$/;"	f	class:WaterAnalyzer
-RDFMachine	../rdf.h	/^class RDFMachine {$/;"	c
-REMOVE_IF	../utility.h	28;"	d
-RUN	../utility.h	9;"	d
-RUN2	../utility.h	12;"	d
+RDF2DMachine	../rdf.h	/^RDF2DMachine<T>::RDF2DMachine (const RDFParameters& params) $/;"	f	class:RDF2DMachine
+RDF2DMachine	../rdf.h	/^class RDF2DMachine : public RDFProcessor<T> {$/;"	c
+RDF2D_map	../rdf.h	/^typedef std::map<NamePair, Histogram2D<double> > RDF2D_map;$/;"	t
+RDFMachine	../rdf.h	/^RDFMachine<T>::RDFMachine (const RDFParameters& rdfparams)$/;"	f	class:RDFMachine
+RDFMachine	../rdf.h	/^class RDFMachine : public RDFProcessor<T> {$/;"	c
+RDFParameters	../rdf.h	/^  RDFParameters () { return; }$/;"	f	struct:RDFParameters
+RDFParameters	../rdf.h	/^  RDFParameters (libconfig::Config * config_file)$/;"	f	struct:RDFParameters
+RDFParameters	../rdf.h	/^struct RDFParameters {$/;"	s
+RDFProcessor	../rdf.h	/^    RDFProcessor (const RDFParameters& params)$/;"	f	class:RDFProcessor
+RDFProcessor	../rdf.h	/^class RDFProcessor : public std::binary_function<T,T,bool> {$/;"	c
+RDF_map	../rdf.h	/^typedef std::map<NamePair, Histogram1D<double> > RDF_map;$/;"	t
+RUN	../utility.h	238;"	d
+RUN2	../utility.h	241;"	d
 R_OH	../hno3analysis.h	/^const double R_OH = 2.45;			\/\/ This is the max value of an H-bond length (from rdf data)$/;"	v
 R_OH_H3O_mean	../hno3analysis.h	/^const double R_OH_H3O_mean = 1.029;	  \/\/ same but for hydronium$/;"	v
 R_OH_HNO3_mean	../hno3analysis.h	/^const double R_OH_HNO3_mean = 1.016;  \/\/ avg OH distance on the NO3 according to Hynes... should be recalculate for each simulation.$/;"	v
 R_OO	../hno3analysis.h	/^const double R_OO = 3.5;			\/\/ These values are the maximums for defining H-bonds between the acceptor water and hno3.$/;"	v
-R_eq	../moritasfg2002.h	/^const double R_eq 		= 0.9575;		\/\/ in angstroms$/;"	v
+Reflect	../molecule.cpp	/^void Molecule::Reflect (coord const axis, double const plane) {$/;"	f	class:Molecule
 Remove	../histogram.h	/^	int Remove (ValueType const value)			\/\/ Decrement the associated bin for the value given$/;"	f	class:Histogram
-Reset	../watersfg.h	/^	void Reset () { _set = false; }$/;"	f	class:SFGCalculator
-Residue	../atom.h	/^	std::string Residue () const { return _residue; }$/;"	f	class:Atom
-Residue	../atom.h	/^	void Residue (std::string residue) { _residue = residue; }$/;"	f	class:Atom
+RemoveAtom	../molecule.cpp	/^void Molecule::RemoveAtom (Atom * const atom) {$/;"	f	class:Molecule
+RemoveAtomsInSlice	../watersystem.h	/^	void RemoveAtomsInSlice (Atom_ptr_vec& atoms, Double_pair& extents) {$/;"	f	class:WaterSystem
+RemoveByName	../watersystem.h	/^	  void RemoveByName (U& u, std::string& name) {$/;"	f	class:WaterSystem
+RemoveByNames	../watersystem.h	/^	  void RemoveByNames (U& u, std::vector<string>& names) {$/;"	f	class:WaterSystem
+RemoveEdge	../node.cpp	/^void Node::RemoveEdge (Edge * e) {$/;"	f	class:Node
+RemoveEdges	../node.cpp	/^void Node::RemoveEdges () {$/;"	f	class:Node
+Rename	../molecule.cpp	/^void Molecule::Rename (const std::string name) {$/;"	f	class:Molecule
+Residue	../atom.h	/^    std::string Residue () const { return _residue; }$/;"	f	class:Atom
+Residue	../atom.h	/^    void Residue (std::string residue) { _residue = residue; }$/;"	f	class:Atom
+Resolution	../utility.h	/^    int Resolution () const { return _res; }$/;"	f	class:Histogram1D
 Return	../thread.h	/^	void * Return () const { return _return; }$/;"	f	class:Thread
-SFGCalculator	../watersfg.h	/^class SFGCalculator {$/;"	c
+Rotate	../molecule.cpp	/^void Molecule::Rotate (VecR& origin, VecR& axis, double angle) {$/;"	f	class:Molecule
+RotateMatrix	../molecule.cpp	/^void Molecule::RotateMatrix (double rotation[][3], double matrix[][3]) const {$/;"	f	class:Molecule
+RotateToLab	../molecule.cpp	/^void Molecule::RotateToLab (double matrix[][3]) const {$/;"	f	class:Molecule
+RotateToLab	../molecule.cpp	/^void Molecule::RotateToLab (double vector[3]) const {$/;"	f	class:Molecule
+RotateToMol	../molecule.cpp	/^void Molecule::RotateToMol (double matrix[][3]) const {$/;"	f	class:Molecule
+RotateToMol	../molecule.cpp	/^void Molecule::RotateToMol (double vector[3]) const {$/;"	f	class:Molecule
+RotateVector	../molecule.cpp	/^void Molecule::RotateVector (double rotation[][3], double vector[3]) const {$/;"	f	class:Molecule
 SPACING	../boxfiller.h	12;"	d
-START_FREQ	../watersfg.h	/^const double START_FREQ			= 2800.0\/AU2WAVENUMBER;$/;"	v
+SRCLIB	../Makefile	/^SRCLIB	 	= $(HOME)\/work\/src$/;"	m
+Seek	../pdbfile.cpp	/^void PDBFile::Seek (int step) {$/;"	f	class:PDBFile
+Seek	../xyzfile.cpp	/^void XYZFile::Seek (int step) {$/;"	f	class:XYZFile
+Seek	../xyzsystem.cpp	/^void XYZSystem::Seek (int step) {$/;"	f	class:XYZSystem
+Set	../matrixr.cpp	/^void MatR::Set (coord const row, coord const col, double const val) {	\/\/ Set the element$/;"	f	class:MatR
+Set	../matrixr.cpp	/^void MatR::Set (double * const data) {$/;"	f	class:MatR
+Set	../matrixr.cpp	/^void MatR::Set (int const row, int const col, double const val) {	\/\/ Set the element$/;"	f	class:MatR
 Set	../matrixr.h	/^	void	Set (const MatR& input)$/;"	f	class:MatR
-Set	../molecule.h	/^	bool Set () { _set = true; return (_set); }$/;"	f	class:Molecule
+Set	../molecule.h	/^    bool Set () { _set = true; return (_set); }$/;"	f	class:Molecule
 Set	../vecr.h	/^	void Set (const coord axis, const double val) { _coords[axis] = val; }$/;"	f	class:VecR
 Set	../vecr.h	/^	void Set (double X, double Y, double Z) {$/;"	f	class:VecR
+SetAtoms	../alkane.cpp	/^void Alkane::SetAtoms () {$/;"	f	class:Alkane
+SetAtoms	../decane.cpp	/^void Decane::SetAtoms () {$/;"	f	class:Decane
+SetAtoms	../h2o.cpp	/^void Water::SetAtoms () {$/;"	f	class:Water
+SetAtoms	../h3o.cpp	/^void Hydronium::SetAtoms () {$/;"	f	class:Hydronium
+SetAtoms	../hno3.cpp	/^void Nitrate::SetAtoms () {$/;"	f	class:Nitrate
+SetAtoms	../hno3.cpp	/^void NitricAcid::SetAtoms () {$/;"	f	class:NitricAcid
+SetAtoms	../oh.cpp	/^void Hydroxide::SetAtoms () {$/;"	f	class:Hydroxide
+SetBond	../adjacencymatrix.cpp	/^void AdjacencyMatrix::SetBond (int x, int y, const double blength, const bondtype btype) {$/;"	f	class:AdjacencyMatrix
 SetBond	../adjacencymatrix.h	/^	void SetBond (Atom const * const a1, Atom const * const a2, const bondtype btype) {$/;"	f	class:AdjacencyMatrix
-Setup	../analysis.h	/^	virtual void Setup () { return; }$/;"	f	class:Analyzer
-SliceWaterCoordination	../watersystem.h	/^void WaterSystem<T>::SliceWaterCoordination (const coordination coord) {$/;"	f	class:WaterSystem
-SliceWaters	../watersystem.h	/^void WaterSystem<T>::SliceWaters (const double low, const double high) {$/;"	f	class:WaterSystem
+SetBondLengths	../h2o.cpp	/^void Water::SetBondLengths () {$/;"	f	class:Water
+SetBondType	../bond.cpp	/^void Bond::SetBondType (const bondtype btype) {$/;"	f	class:Bond
+SetCharge	../atom.cpp	/^void Atom::SetCharge () {$/;"	f	class:Atom
+SetMass	../atom.cpp	/^void Atom::SetMass () {$/;"	f	class:Atom
+SetMoritaAxes	../h2o.cpp	/^void Water::SetMoritaAxes (const int Zbond) {$/;"	f	class:Water
+SetOrderAxes	../h2o.cpp	/^void Water::SetOrderAxes () {$/;"	f	class:Water
+Setup	../analysis.h	/^    virtual void Setup () { return; }$/;"	f	class:Analyzer
+Shift	../atom.h	/^    void Shift (VecR shift)			\/\/ shift the atom's position$/;"	f	class:Atom
+Shift	../molecule.cpp	/^void Molecule::Shift (VecR& shift) {$/;"	f	class:Molecule
+Shove	../utility.h	/^    void Shove (const int a, const int b)$/;"	f	class:Histogram2D
+Size	../utility.h	/^    int Size () const { return _size; }$/;"	f	class:Histogram1D
+SliceWaters	../watersystem.h	/^	void SliceWaters (Mol_ptr_vec& mols, Double_pair& extents) {$/;"	f	class:WaterSystem
 Stat	../ambermpisys.h	/^	MPI_Status * Stat () 		{ return &_stat; }$/;"	f	class:MPIMolSystem
 SysDipoleCorrelation	../wateranalyzer.h	/^trajectory WaterAnalyzer::SysDipoleCorrelation () {$/;"	f	class:WaterAnalyzer
 SysType	../graph.h	/^	void SysType (std::string sys_type) { _sys_type = sys_type; }$/;"	f	class:BondGraph
 System	../wateranalyzer.h	/^	WaterSystem&	System() { return _sys; }$/;"	f	class:WaterAnalyzer
-SystemAnalysis	../analysis.h	/^void Analyzer::SystemAnalysis ()$/;"	f	class:Analyzer
+SystemAnalysis	../analysis.h	/^void Analyzer<T>::SystemAnalysis ()$/;"	f	class:Analyzer
+SystemDipole	../xyzsystem.cpp	/^VecR XYZSystem::SystemDipole () {$/;"	f	class:XYZSystem
 THREAD_H_	../thread.h	2;"	d
 TOPFILE_H_	../topfile.h	2;"	d
+TOPFile	../topfile.cpp	/^TOPFile::TOPFile () {$/;"	f	class:TOPFile
+TOPFile	../topfile.cpp	/^TOPFile::TOPFile (const TOPFile& topfile) :$/;"	f	class:TOPFile
+TOPFile	../topfile.cpp	/^TOPFile::TOPFile (std::string path) :$/;"	f	class:TOPFile
 TOPFile	../topfile.h	/^class TOPFile {$/;"	c
+TRRFILE_H_	../trrfile.h	2;"	d
+TRRFile	../trrfile.h	/^    TRRFile (char * path) : $/;"	f	class:TRRFile
+TRRFile	../trrfile.h	/^class TRRFile {$/;"	c
 Tensor	../dipolefieldtensor.h	/^	double const * Tensor () { return _tensor; }$/;"	f	class:DipoleFieldTensor
-Theta_eq	../moritasfg2002.h	/^const double Theta_eq 	= 104.51;		\/\/ in degrees$/;"	v
 Thread	../thread.h	/^	Thread () {}$/;"	f	class:Thread
 Thread	../thread.h	/^Thread<T>::Thread (fct_ptr f, void * arg) $/;"	f	class:Thread
 Thread	../thread.h	/^class Thread {$/;"	c
-Ttensor	../moritasfg2002.h	/^typedef std::vector< std::vector< MatR > > Ttensor;$/;"	t
-Type	../graph.h	/^	typedef typename boost::property_map<Graph, T Property_T::*>::type Type;$/;"	t	struct:PropertyMap
+Trace	../matrixr.cpp	/^double MatR::Trace () const {$/;"	f	class:MatR
+Transpose	../matrixr.cpp	/^MatR MatR::Transpose () const {$/;"	f	class:MatR
+Type	../graph.h	/^	  typedef typename boost::property_map<Graph, T Property_T::*>::type Type;$/;"	t	struct:BondGraph::PropertyMap
 UNBOUND	../bond.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon3
 UNBOUND	../bondgraph.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon1
 UNBOUND	../connectmatrix.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon5
-UNBOUND	../graph.h	/^	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:__anon7
-UNCOUPLED_OH_FREQ	../watersfg.h	/^const double UNCOUPLED_OH_FREQ	= 3706.5\/AU2WAVENUMBER;			\/\/ the frequency of uncoupled OH bonds in the vapor phase (converted to frequency in atomic units)$/;"	v
-Unset	../molecule.h	/^	bool Unset () { _set = false; return (_set); }$/;"	f	class:Molecule
-UpdateGraph	../watersystem.h	/^  void UpdateGraph () { graph.UpdateGraph (int_atoms); }$/;"	f	class:WaterSystem
+UNBOUND	../graph.h	/^	  UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			\/\/ no H$/;"	e	enum:BondGraph::__anon8
+UNIQUE_PAIRLIST_ELEMENTS	../utility.h	72;"	d
+Unit	../vecr.cpp	/^VecR VecR::Unit () const {$/;"	f	class:VecR
+Unset	../molecule.h	/^    bool Unset () { _set = false; return (_set); }$/;"	f	class:Molecule
+UpdateAtoms	../watersystem.h	/^	void UpdateAtoms (const Mol_ptr_vec& mols, Atom_ptr_vec& atoms) {$/;"	f	class:WaterSystem
+UpdateCenterOfMass	../molecule.cpp	/^VecR Molecule::UpdateCenterOfMass () {$/;"	f	class:Molecule
+UpdateGraph	../graph.cpp	/^void BondGraph::UpdateGraph (const Atom_ptr_vec& atoms) {$/;"	f	class:BondGraph
+UpdateGraph	../watersystem.h	/^	void UpdateGraph () { graph.UpdateGraph (int_atoms); }$/;"	f	class:WaterSystem
+UpdateMatrix	../adjacencymatrix.cpp	/^void AdjacencyMatrix::UpdateMatrix (const Atom_ptr_vec& atoms, std::string const sys) {$/;"	f	class:AdjacencyMatrix
+UpdateMatrix	../connectmatrix.cpp	/^void ConnectivityMatrix::UpdateMatrix () {$/;"	f	class:ConnectivityMatrix
 VECR_H_	../vecr.h	2;"	d
+VecR	../vecr.cpp	/^VecR::VecR (const Double_vector& vec) : _coords(vec) {$/;"	f	class:VecR
+VecR	../vecr.cpp	/^VecR::VecR (const VecR& oldVec) : _coords(oldVec._coords) {$/;"	f	class:VecR
+VecR	../vecr.cpp	/^VecR::VecR (const double * vec) : _coords(3,0.0) {$/;"	f	class:VecR
+VecR	../vecr.cpp	/^VecR::VecR (const double X, const double Y, const double Z) : _coords(3,0.0) {$/;"	f	class:VecR
+VecR	../vecr.cpp	/^VecR::VecR() : _coords(3) {$/;"	f	class:VecR
 VecR	../vecr.h	/^class VecR {$/;"	c
-Vertex	../graph.h	/^typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;$/;"	t
+VecR_it	../vecr.h	/^typedef std::vector<VecR>::const_iterator VecR_it;$/;"	t
+VecR_vec	../vecr.h	/^typedef std::vector<VecR> VecR_vec;$/;"	t
+Vector_CoM_To_End	../carbonchain.cpp	/^VecR CarbonChain::Vector_CoM_To_End () {$/;"	f	class:CarbonChain
+Velocities	../trrfile.h	/^    VecR& Velocities (const int index) { return _vels[index]; }$/;"	f	class:TRRFile
+Vertex	../graph.h	/^	typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;$/;"	t	class:BondGraph
 VertexProperties	../bondgraph.h	/^struct VertexProperties {$/;"	s
-VertexProperties	../graph.h	/^struct VertexProperties {$/;"	s
-Vertex_it	../graph.h	/^typedef boost::graph_traits<Graph>::vertex_iterator Vertex_it;$/;"	t
+VertexProperties	../graph.h	/^	struct VertexProperties {$/;"	s	class:BondGraph
+Vertex_it	../graph.h	/^	typedef boost::graph_traits<Graph>::vertex_iterator Vertex_it;$/;"	t	class:BondGraph
 WANNIER_BOND	../wannier.h	9;"	d
 WANNIER_H_	../wannier.h	2;"	d
-WATERSFG_H_	../watersfg.h	2;"	d
+WATERSYSTEM	../Makefile	/^WATERSYSTEM	= $(MDSYSTEM) $(XYZSYSTEM) $(AMBERSYSTEM) $(GMXSYS)$/;"	m
 WATERSYSTEM_H_	../watersystem.h	2;"	d
+WannierFile	../wannier.cpp	/^WannierFile::WannierFile (std::string wannierpath) {$/;"	f	class:WannierFile
 WannierFile	../wannier.h	/^	WannierFile () { }$/;"	f	class:WannierFile
 WannierFile	../wannier.h	/^class WannierFile {$/;"	c
-Wanniers	../molecule.h	/^	const std::vector<VecR>& Wanniers ()		const { return _wanniers; }$/;"	f	class:Molecule
+Wanniers	../molecule.h	/^    const std::vector<VecR>& Wanniers ()		const { return _wanniers; }$/;"	f	class:Molecule
 Wanniers	../xyzsystem.h	/^	const std::vector<VecR>& Wanniers () const { return _wanniers.Coords(); }$/;"	f	class:XYZSystem
+Water	../h2o.cpp	/^Water::Water () : Molecule ()$/;"	f	class:Water
+Water	../h2o.cpp	/^Water::Water (const Molecule& molecule) : Molecule(molecule) {$/;"	f	class:Water
 Water	../h2o.h	/^class Water: public Molecule {$/;"	c
 WaterAnalyzer	../wateranalyzer.h	/^	WaterAnalyzer (WaterSystem& system) : _sys(system) {}		\/\/ Constructor that grabs the system and loads it up$/;"	f	class:WaterAnalyzer
 WaterAnalyzer	../wateranalyzer.h	/^class WaterAnalyzer {$/;"	c
+WaterCoordination	../adjacencymatrix.cpp	/^coordination AdjacencyMatrix::WaterCoordination (Water const * const wat) {$/;"	f	class:AdjacencyMatrix
+WaterCoordination	../graph.cpp	/^BondGraph::coordination BondGraph::WaterCoordination (Water const * const wat) const {$/;"	f	class:BondGraph
+WaterCoordination_p	../watersystem.h	/^	class WaterCoordination_p : public std::binary_function<Water *, BondGraph::coordination, bool> {$/;"	c	class:WaterSystem
+WaterDipoleParms	../dipoleparm.cpp	/^WaterDipoleParms::WaterDipoleParms (string parmpath="dipoleparm.dat") {$/;"	f	class:WaterDipoleParms
 WaterDipoleParms	../dipoleparm.h	/^class WaterDipoleParms {$/;"	c
+WaterInSlice	../watersystem.h	/^	class WaterInSlice : public std::binary_function<Molecule *, Double_pair, bool> {$/;"	c	class:WaterSystem
 WaterSystem	../watersystem.h	/^WaterSystem<T>::WaterSystem (const WaterSystemParams& params)$/;"	f	class:WaterSystem
 WaterSystem	../watersystem.h	/^class WaterSystem {$/;"	c
-WaterSystemParams	../watersystem.h	/^  WaterSystemParams (		\/* Constructor and initial\/default values for system parameters *\/$/;"	f	struct:WaterSystemParams
+WaterSystemParams	../watersystem.h	/^  WaterSystemParams () { }$/;"	f	struct:WaterSystemParams
+WaterSystemParams	../watersystem.h	/^  WaterSystemParams (libconfig::Config::Config& cfg)$/;"	f	struct:WaterSystemParams
 WaterSystemParams	../watersystem.h	/^struct WaterSystemParams {$/;"	s
 Water_ptr_vec	../h2o.h	/^typedef std::vector<Water *> Water_ptr_vec;$/;"	t
 Water_vec	../h2o.h	/^typedef std::vector<Water> Water_vec;$/;"	t
+Waters	../analysis.h	/^    Water_ptr_vec& Waters () { return WaterSystem<T>::int_wats; }$/;"	f	class:Analyzer
 WorldComm	../ambermpisys.h	/^	MPI_Comm WorldComm () const { return _worldcomm; }$/;"	f	class:MPIMolSystem
-X	../atom.h	/^	double X () const 		{ return _position[x]; }$/;"	f	class:Atom
-X	../atom.h	/^	void X (double val) { _position.X(val); }			\/\/ for setting the atom's position$/;"	f	class:Atom
-X	../molecule.h	/^	VecR X () const					{ return _x; }$/;"	f	class:Molecule
-X	../molecule.h	/^	void X (VecR& x_axis) { _x = x_axis; }$/;"	f	class:Molecule
+WritePDB	../pdbfile.cpp	/^void PDBFile::WritePDB (vector<Molecule *>& sys) {$/;"	f	class:PDBFile
+X	../atom.h	/^    double X () const 		{ return _position[x]; }$/;"	f	class:Atom
+X	../atom.h	/^    void X (double val) { _position.X(val); }			$/;"	f	class:Atom
+X	../molecule.h	/^    VecR X () const					{ return _x; }$/;"	f	class:Molecule
+X	../molecule.h	/^    void X (VecR& x_axis) { _x = x_axis; }$/;"	f	class:Molecule
 X	../vecr.h	/^	void X (const double val) { _coords[x] = val; }$/;"	f	class:VecR
+XDRINC	../Makefile	/^XDRINC		= $(XDRDIR)\/include$/;"	m
+XDRLIB	../Makefile	/^XDRLIB		= $(XDRDIR)\/lib$/;"	m
 XYZFILE_H_	../xyzfile.h	2;"	d
+XYZFile	../xyzfile.cpp	/^XYZFile::XYZFile (std::string path) {$/;"	f	class:XYZFile
 XYZFile	../xyzfile.h	/^	XYZFile () {}$/;"	f	class:XYZFile
 XYZFile	../xyzfile.h	/^class XYZFile {$/;"	c
+XYZSYSTEM	../Makefile	/^XYZSYSTEM = $(SRCLIB)\/xyzsystem.o $(SRCLIB)\/xyzfile.o $(SRCLIB)\/wannier.o $(SRCLIB)\/graph.o$/;"	m
 XYZSYSTEM_H_	../xyzsystem.h	2;"	d
+XYZSystem	../xyzsystem.cpp	/^XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath) :$/;"	f	class:XYZSystem
 XYZSystem	../xyzsystem.h	/^	XYZSystem () { _graph.SysType("xyz"); }$/;"	f	class:XYZSystem
 XYZSystem	../xyzsystem.h	/^class XYZSystem : public MDSystem {$/;"	c
 XYZWATERSYSTEM_H_	../xyzwatersystem.h	2;"	d
 XYZWaterSystem	../xyzwatersystem.h	/^	XYZWaterSystem (const WaterSystemParams& params, std::string const xyzfilepath, const VecR& size, std::string const wanniers = "")$/;"	f	class:XYZWaterSystem
 XYZWaterSystem	../xyzwatersystem.h	/^class XYZWaterSystem : public WaterSystem<XYZSystem> {$/;"	c
-Y	../atom.h	/^	double Y () const		{ return _position[y]; }$/;"	f	class:Atom
-Y	../atom.h	/^	void Y (double val) { _position.Y(val); }$/;"	f	class:Atom
-Y	../molecule.h	/^	VecR Y () const					{ return _y; }$/;"	f	class:Molecule
-Y	../molecule.h	/^	void Y (VecR& y_axis) { _y = y_axis; }$/;"	f	class:Molecule
+Y	../atom.h	/^    double Y () const		{ return _position[y]; }$/;"	f	class:Atom
+Y	../atom.h	/^    void Y (double val) { _position.Y(val); }$/;"	f	class:Atom
+Y	../molecule.h	/^    VecR Y () const					{ return _y; }$/;"	f	class:Molecule
+Y	../molecule.h	/^    void Y (VecR& y_axis) { _y = y_axis; }$/;"	f	class:Molecule
 Y	../vecr.h	/^	void Y (const double val) { _coords[y] = val; }$/;"	f	class:VecR
-Z	../atom.h	/^	double Z () const 		{ return _position[z]; }$/;"	f	class:Atom
-Z	../atom.h	/^	void Z (double val) { _position.Z(val); }$/;"	f	class:Atom
-Z	../molecule.h	/^	VecR Z () const					{ return _z; }$/;"	f	class:Molecule
-Z	../molecule.h	/^	void Z (VecR& z_axis) { _z = z_axis; }$/;"	f	class:Molecule
+Z	../atom.h	/^    double Z () const 		{ return _position[z]; }$/;"	f	class:Atom
+Z	../atom.h	/^    void Z (double val) { _position.Z(val); }$/;"	f	class:Atom
+Z	../molecule.h	/^    VecR Z () const					{ return _z; }$/;"	f	class:Molecule
+Z	../molecule.h	/^    void Z (VecR& z_axis) { _z = z_axis; }$/;"	f	class:Molecule
 Z	../vecr.h	/^	void Z (const double val) { _coords[z] = val; }$/;"	f	class:VecR
 ZCoordHistogram	../wateranalyzer.h	/^vector< vector<int> > WaterAnalyzer::ZCoordHistogram ( double DZ ) {$/;"	f	class:WaterAnalyzer
 Zero	../matrixr.h	/^	void Zero () {								\/\/ Zero all elements of a matrix$/;"	f	class:MatR
-_A	../moritasfg2002.h	/^	MatR					_A;$/;"	m	class:MoritaSFG
-_AlphaDerivA	../watersfg.h	/^	double _AlphaDerivA, _AlphaDerivS;$/;"	m	class:SFGCalculator
-_AlphaDerivS	../watersfg.h	/^	double _AlphaDerivA, _AlphaDerivS;$/;"	m	class:SFGCalculator
-_Beta	../watersfg.h	/^	std::vector< complex<double> > _Beta;		\/\/ hyperpolarizability of a given water (in the molecular frame)$/;"	m	class:SFGCalculator
-_C1a	../watersfg.h	/^	double _C1a, _C2a;		\/\/ and the anti-symmetric case$/;"	m	class:SFGCalculator
-_C1s	../watersfg.h	/^	double _C1s, _C2s;		\/\/ The coefficients that are solved for in the matrix equation (Eq. 8) for the symmetric case$/;"	m	class:SFGCalculator
-_C2a	../watersfg.h	/^	double _C1a, _C2a;		\/\/ and the anti-symmetric case$/;"	m	class:SFGCalculator
-_C2s	../watersfg.h	/^	double _C1s, _C2s;		\/\/ The coefficients that are solved for in the matrix equation (Eq. 8) for the symmetric case$/;"	m	class:SFGCalculator
-_CheckOutputFile	../analysis.h	/^void Analyzer::_CheckOutputFile () {$/;"	f	class:Analyzer
-_Chi	../watersfg.h	/^	std::vector< complex<double> > _Chi;		\/\/ hyperpolarizability of a given water (in the molecular frame)$/;"	m	class:SFGCalculator
-_DCM	../molecule.h	/^	MatR			_DCM;				\/\/ the direction cosine matrix for rotating the molecule to the lab frame$/;"	m	class:Molecule
-_DCM	../watersfg.h	/^	MatR _DCM;				\/\/ rotation matrix for moving from the water molecular frame to the lab frame$/;"	m	class:SFGCalculator
+Zero	../vecr.cpp	/^void VecR::Zero () {$/;"	f	class:VecR
+_CheckOutputFile	../analysis.h	/^void Analyzer<T>::_CheckOutputFile () {$/;"	f	class:Analyzer
+_ClearAtoms	../graph.cpp	/^void BondGraph::_ClearAtoms () {$/;"	f	class:BondGraph
+_ClearBonds	../graph.cpp	/^void BondGraph::_ClearBonds () {$/;"	f	class:BondGraph
+_DCM	../molecule.h	/^    MatR			_DCM;				\/\/ the direction cosine matrix for rotating the molecule to the lab frame$/;"	m	class:Molecule
 _DENSITY_H_	../density.h	2;"	d
-_EmptyFunction	../analysis.h	/^	void _EmptyFunction () const { return; } \/* A simple empty function that does nothing to the system *\/$/;"	f	class:Analyzer
-_ID	../atom.h	/^	int    _ID;	\/\/ some numerical identifier in case the atom is in an ordered list$/;"	m	class:Atom
-_ID	../molecule.h	/^	int				_ID;				\/\/ A numerical ID for the molecule$/;"	m	class:Molecule
+_Data	../dipoleparm.cpp	/^double * WaterDipoleParms::_Data (double r1, double r2, double theta) {$/;"	f	class:WaterDipoleParms
+_EmptyFunction	../analysis.h	/^    void _EmptyFunction () const { return; } \/* A simple empty function that does nothing to the system *\/$/;"	f	class:Analyzer
+_FillBoxLattice	../boxfiller.cpp	/^void BoxFiller::_FillBoxLattice () {$/;"	f	class:BoxFiller
+_FillBoxRandom	../boxfiller.cpp	/^void BoxFiller::_FillBoxRandom () {$/;"	f	class:BoxFiller
+_FindBonds	../connectmatrix.cpp	/^void ConnectivityMatrix::_FindBonds (Atom * atom1, Atom * atom2) {$/;"	f	class:ConnectivityMatrix
+_FindEulerAngles	../molecule.cpp	/^void Molecule::_FindEulerAngles () {$/;"	f	class:Molecule
+_FindLastStep	../pdbfile.cpp	/^int PDBFile::_FindLastStep () {$/;"	f	class:PDBFile
+_FindSteps	../xyzfile.cpp	/^void XYZFile::_FindSteps () {$/;"	f	class:XYZFile
+_FindVertex	../graph.cpp	/^BondGraph::Vertex_it BondGraph::_FindVertex (Atom const * const ap) const {$/;"	f	class:BondGraph
+_FixSharedAtoms	../adjacencymatrix.cpp	/^void AdjacencyMatrix::_FixSharedAtoms () {$/;"	f	class:AdjacencyMatrix
+_FixSharedAtoms	../graph.cpp	/^  void BondGraph::_FixSharedAtoms () {$/;"	f	class:BondGraph
+_FormCovalentBond	../connectmatrix.cpp	/^void ConnectivityMatrix::_FormCovalentBond (const Atom * atom1, const Atom * atom2) {$/;"	f	class:ConnectivityMatrix
+_FormHBond	../connectmatrix.cpp	/^void ConnectivityMatrix::_FormHBond (Atom * atom1, Atom * atom2) {$/;"	f	class:ConnectivityMatrix
+_GetBond	../graph.cpp	/^  BondGraph::Edge BondGraph::_GetBond (Atom const * const a1, Atom const * const a2) const {$/;"	f	class:BondGraph
+_GetBond	../graph.cpp	/^  BondGraph::Edge BondGraph::_GetBond (const Vertex& vi, const Vertex& vj) const {$/;"	f	class:BondGraph
+_ID	../atom.h	/^    int    _ID;	\/\/ some numerical identifier in case the atom is in an ordered list$/;"	m	class:Atom
+_ID	../molecule.h	/^    int				_ID;				\/\/ A numerical ID for the molecule$/;"	m	class:Molecule
 _ID	../wannier.h	/^	int				_ID;$/;"	m	class:WannierFile
 _InitAtoms	../ambermpisys.h	/^void MPIMolSystem::_InitAtoms () {$/;"	f	class:MPIMolSystem
+_InitParams	../boxfiller.cpp	/^void BoxFiller::_InitParams () {$/;"	f	class:BoxFiller
+_InitializeSystem	../analysis.h	/^void Analyzer<AmberSystem>::_InitializeSystem () {$/;"	f	class:Analyzer
+_InitializeSystem	../analysis.h	/^void Analyzer<GMXSystem>::_InitializeSystem () {$/;"	f	class:Analyzer
 _LINALG_	../matrixr.h	12;"	d
 _MPIFinalize	../ambermpisys.h	/^void MPIMolSystem::_MPIFinalize () {$/;"	f	class:MPIMolSystem
 _MPISystemInit	../ambermpisys.h	/^void MPIMolSystem::_MPISystemInit (int *argc, char ***argv) {$/;"	f	class:MPIMolSystem
 _MolSystemInit	../ambermpisys.h	/^void MPIMolSystem::_MolSystemInit (string prmtop, string mdcrd, string mdvel) {$/;"	f	class:MPIMolSystem
-_MuDerivA	../watersfg.h	/^	double _MuDerivA, _MuDerivS;			\/\/ the total mu derivative with the eigenvector weighting from Eq 7.$/;"	m	class:SFGCalculator
-_MuDerivS	../watersfg.h	/^	double _MuDerivA, _MuDerivS;			\/\/ the total mu derivative with the eigenvector weighting from Eq 7.$/;"	m	class:SFGCalculator
-_N	../moritasfg2002.h	/^	int						_N;		\/\/ number of waters$/;"	m	class:MoritaSFG
-_OH1FreqShift	../watersfg.h	/^	double _OH1FreqShift, _OH2FreqShift;		\/\/ The two frequency shift values calculated from the forces on the OH bonds$/;"	m	class:SFGCalculator
-_OH2FreqShift	../watersfg.h	/^	double _OH1FreqShift, _OH2FreqShift;		\/\/ The two frequency shift values calculated from the forces on the OH bonds$/;"	m	class:SFGCalculator
-_OutputHeader	../analysis.h	/^void Analyzer::_OutputHeader () const {$/;"	f	class:Analyzer
-_OutputStatus	../analysis.h	/^void Analyzer::_OutputStatus (const int timestep) const$/;"	f	class:Analyzer
+_OHCombo_p	../graph.cpp	/^bool BondGraph::_OHCombo_p (const std::string name1, const std::string name2) const {$/;"	f	class:BondGraph
+_OutputHeader	../analysis.h	/^void Analyzer<T>::_OutputHeader () const {$/;"	f	class:Analyzer
+_OutputStatus	../analysis.h	/^void Analyzer<T>::_OutputStatus (const int timestep)$/;"	f	class:Analyzer
+_ParseAtom	../pdbfile.cpp	/^Atom *PDBFile::_ParseAtom (const char *atomEntry) {$/;"	f	class:PDBFile
+_ParseAtomInformation	../ambersystem.cpp	/^void AmberSystem::_ParseAtomInformation () {$/;"	f	class:AmberSystem
+_ParseAtomVectors	../ambersystem.cpp	/^void AmberSystem::_ParseAtomVectors () {$/;"	f	class:AmberSystem
+_ParseAtoms	../bondgraph.cpp	/^void BondGraph::_ParseAtoms (std::vector<Atom *>& atoms) {$/;"	f	class:BondGraph
+_ParseAtoms	../graph.cpp	/^void BondGraph::_ParseAtoms (const Atom_ptr_vec& atoms) {$/;"	f	class:BondGraph
+_ParseBonds	../graph.cpp	/^void BondGraph::_ParseBonds () {$/;"	f	class:BondGraph
+_ParseDistances	../bondgraph.cpp	/^void BondGraph::_ParseDistances () {$/;"	f	class:BondGraph
+_ParseFile	../complexdatafile.cpp	/^void ComplexDataFile::_ParseFile () {$/;"	f	class:ComplexDataFile
+_ParseMolecules	../ambersystem.cpp	/^void AmberSystem::_ParseMolecules () {$/;"	f	class:AmberSystem
+_ParseMolecules	../gmxsystem.cpp	/^void GMXSystem::_ParseMolecules () {$/;"	f	class:GMXSystem
+_ParseMolecules	../pdbfile.cpp	/^void PDBFile::_ParseMolecules()$/;"	f	class:PDBFile
+_ParseMolecules	../xyzsystem.cpp	/^void XYZSystem::_ParseMolecules () {$/;"	f	class:XYZSystem
 _ParseMols	../ambermpisys.h	/^void MPIMolSystem::_ParseMols () {$/;"	f	class:MPIMolSystem
-_T	../moritasfg2002.h	/^	Dbl_mtr					_T;		\/\/ Dipole field tensor$/;"	m	class:MoritaSFG
-_T_set	../moritasfg2002.h	/^	bool					_T_set;$/;"	m	class:MoritaSFG
+_ParseNitrates	../xyzsystem.cpp	/^void XYZSystem::_ParseNitrates () {$/;"	f	class:XYZSystem
+_ParseSystem	../grofile.cpp	/^void GROFile::_ParseSystem () {$/;"	f	class:GROFile
+_ParseWanniers	../xyzsystem.cpp	/^void XYZSystem::_ParseWanniers () {$/;"	f	class:XYZSystem
+_ParseWaters	../xyzsystem.cpp	/^void XYZSystem::_ParseWaters () {$/;"	f	class:XYZSystem
+_RemoveBond	../graph.cpp	/^  void BondGraph::_RemoveBond (Atom const * const a1, Atom const * const a2) {$/;"	f	class:BondGraph
+_RemoveBond	../graph.cpp	/^  void BondGraph::_RemoveBond (const Vertex& vi, const Vertex& vj) {$/;"	f	class:BondGraph
+_SameAtomName_p	../graph.cpp	/^bool BondGraph::_SameAtomName_p (const std::string name1, const std::string name2) const {$/;"	f	class:BondGraph
+_SetBond	../graph.cpp	/^void BondGraph::_SetBond (const Vertex& vi, const Vertex& vj, const double bondlength, const bondtype btype) {$/;"	f	class:BondGraph
 _UpdateCoords	../ambermpisys.h	/^void MPIMolSystem::_UpdateCoords () {$/;"	f	class:MPIMolSystem
 __RDF_H_	../rdf.h	2;"	d
-__UTIL_H_	../utility.h	2;"	d
+__UTIL_H	../utility.h	2;"	d
+_access_count	../utility.h	/^    double _access_count;$/;"	m	class:Histogram1D
 _alpha	../h2o.h	/^	MatR _alpha;					\/\/ polarizability of the molecule$/;"	m	class:Water
-_alpha	../moritasfg2002.h	/^	Dbl_mtr					_alpha;	\/\/ polarizabilities of the waters$/;"	m	class:MoritaSFG
-_alphe_eff	../moritasfg2002.h	/^	Dbl_mtr					_alphe_eff;		\/\/ effective polarizability taking into account the local-field$/;"	m	class:MoritaSFG
 _arg	../thread.h	/^	T * _arg;	$/;"	m	class:Thread
-_atom_pairs	../rdf.h	/^	static vector<AtomPair_t> _atom_pairs;$/;"	m	class:RDFMachine
 _atomnames	../topfile.h	/^	std::vector<std::string> _atomnames;		\/\/ The listing of the atoms in the file$/;"	m	class:TOPFile
 _atoms	../adjacencymatrix.h	/^	Atom_ptr_vec	_atoms;		\/\/ the atoms in the system$/;"	m	class:AdjacencyMatrix
 _atoms	../ambermpisys.h	/^	vector<Atom> _atoms;$/;"	m	class:MPIMolSystem
 _atoms	../connectmatrix.h	/^	Atom **		_atoms;			\/\/ the atoms in the system$/;"	m	class:AdjacencyMatrix
-_atoms	../mdsystem.h	/^	Atom_ptr_vec	_atoms;		\/\/ the atoms in the system$/;"	m	class:MDSystem
-_atoms	../molecule.h	/^	Atom_ptr_vec 		_atoms;				\/\/ the list of the atoms in the molecule$/;"	m	class:Molecule
-_atoms	../pdbfile.h	/^	vector<Atom *> _atoms;$/;"	m	class:PDBFile
+_atoms	../grofile.h	/^    Atom_ptr_vec _atoms;$/;"	m	class:GROFile
+_atoms	../mdsystem.h	/^    Atom_ptr_vec	_atoms;		\/\/ the atoms in the system$/;"	m	class:MDSystem
+_atoms	../molecule.h	/^    Atom_ptr_vec 		_atoms;				\/\/ the list of the atoms in the molecule$/;"	m	class:Molecule
 _atoms	../xyzfile.h	/^	std::vector<Atom *> _atoms;		\/\/ The listing of the atoms in the file$/;"	m	class:XYZFile
 _attr	../thread.h	/^	pthread_attr_t	* _attr;$/;"	m	class:Thread
 _binSize	../histogram.h	/^	ValueType _binSize;$/;"	m	class:Histogram
+_box	../trrfile.h	/^    matrix _box;$/;"	m	class:TRRFile
 _boxSize	../boxfiller.h	/^	VecR	_boxSize;	\/\/ system size$/;"	m	class:BoxFiller
+_box_size	../grofile.h	/^    VecR _box_size;$/;"	m	class:GROFile
 _built	../adjacencymatrix.h	/^	bool 			_built;		\/\/ has the matrix been built to the current size?$/;"	m	class:AdjacencyMatrix
-_carbons	../carbonchain.h	/^		vector<Atom *> _carbons;		\/* An ordered listing of all the carbons in$/;"	m	class:CarbonChain
-_centerofmass	../molecule.h	/^	VecR			_centerofmass;		\/\/ calculate by 1\/M * Sum(m[i]*r[i])	where M = total mass, m[i] and r[i] are atom mass and pos$/;"	m	class:Molecule
-_charge	../atom.h	/^		   _charge;$/;"	m	class:Atom
-_charge	../molecule.h	/^	double			_charge;$/;"	m	class:Molecule
+_carbons	../carbonchain.h	/^    vector<Atom *> _carbons;			\/* An ordered listing of all the carbons in$/;"	m	class:CarbonChain
+_centerofmass	../molecule.h	/^    VecR			_centerofmass;		\/\/ calculate by 1\/M * Sum(m[i]*r[i])	where M = total mass, m[i] and r[i] are atom mass and pos$/;"	m	class:Molecule
+_charge	../atom.h	/^	   _charge;$/;"	m	class:Atom
+_charge	../molecule.h	/^    double			_charge;$/;"	m	class:Molecule
 _charges	../topfile.h	/^	std::vector<double> _charges;		\/\/ atomic charges$/;"	m	class:TOPFile
 _complex	../complexdatafile.h	/^	std::vector<std::complex<double> > 	_complex;$/;"	m	class:ComplexDataFile
 _coords	../ambersystem.h	/^	CRDFile		_coords;$/;"	m	class:AmberSystem
 _coords	../crdfile.h	/^	std::vector<VecR>	_coords;	\/\/ atomic coordinates$/;"	m	class:CRDFile
+_coords	../trrfile.h	/^    VecR_vec _coords, _vels, _forces;$/;"	m	class:TRRFile
 _coords	../vecr.h	/^	Double_vector	_coords;$/;"	m	class:VecR
 _coords	../wannier.h	/^	std::vector<VecR>	_coords;	\/\/ atomic coordinates$/;"	m	class:WannierFile
-_coords	../xyzsystem.h	/^	XYZFile				_coords;			\/\/ Atomlist parsed from an xyz file$/;"	m	class:XYZSystem
+_coords	../xyzsystem.h	/^	XYZFile				_coords;		\/\/ Atomlist parsed from an xyz file$/;"	m	class:XYZSystem
 _currentstep	../pdbfile.h	/^		_currentstep;$/;"	m	class:PDBFile
 _currentstep	../xyzfile.h	/^	int _currentstep, _firstStep, _lastStep, _numSteps,$/;"	m	class:XYZFile
 _data	../complexdatafile.h	/^	std::vector<double>			_data;$/;"	m	class:ComplexDataFile
 _data	../dipoleparm.h	/^	double			****_data;		\/\/ pointer arrays that will get us the data we need$/;"	m	class:WaterDipoleParms
 _data	../histogram.h	/^	ValueType * _data;$/;"	m	class:Histogram
-_dimensions	../mdsystem.h	/^	static VecR		_dimensions;		\/\/ system dimensions - size$/;"	m	class:MDSystem
+_dimensions	../mdsystem.cpp	/^VecR MDSystem::_dimensions = VecR ();$/;"	m	class:MDSystem	file:
+_dimensions	../mdsystem.h	/^    static VecR		_dimensions;		\/\/ system dimensions - size$/;"	m	class:MDSystem
 _dims	../crdfile.h	/^	VecR			_dims;		\/\/ Dimensions of the system (box size)$/;"	m	class:CRDFile
-_dipole	../molecule.h	/^	VecR			_dipole;			\/\/ the molecular dipole$/;"	m	class:Molecule
+_dipole	../molecule.h	/^    VecR			_dipole;			\/\/ the molecular dipole$/;"	m	class:Molecule
 _dipparms	../h2o.h	/^	static WaterDipoleParms _dipparms;		\/\/ The water dipole parameter file$/;"	m	class:Water
 _distance	../dipolefieldtensor.h	/^	double _distance;	\/\/ scalar distance between the two molecules$/;"	m	class:DipoleFieldTensor
 _dr	../dipoleparm.h	/^	double			_dr[3];				\/\/ bin size$/;"	m	class:WaterDipoleParms
@@ -618,27 +871,32 @@ _eof	../crdfile.h	/^	bool			_eof;		\/\/ end of file marker for the coord file$/;
 _eof	../forcefile.h	/^	bool			_eof;		\/\/ end of file marker for the force file$/;"	m	class:ForceFile
 _eof	../wannier.h	/^	bool			_eof;		\/\/ end of file marker for the coord file$/;"	m	class:WannierFile
 _errcode	../thread.h	/^	int _errcode;$/;"	m	class:Thread
-_eulerangles	../molecule.h	/^	double			_eulerangles[3];	\/\/ the three euler angles theta, phi, chi$/;"	m	class:Molecule
+_eulerangles	../molecule.h	/^    double			_eulerangles[3];	\/\/ the three euler angles theta, phi, chi$/;"	m	class:Molecule
+_f	../trrfile.h	/^    rvec *_x, *_v, *_f;$/;"	m	class:TRRFile
 _file	../complexdatafile.h	/^	std::ifstream				_file;$/;"	m	class:ComplexDataFile
 _file	../crdfile.h	/^	FILE 			*_file;$/;"	m	class:CRDFile
 _file	../dipoleparm.h	/^	FILE 			*_file;$/;"	m	class:WaterDipoleParms
 _file	../forcefile.h	/^	FILE 			*_file;$/;"	m	class:ForceFile
+_file	../grofile.h	/^    FILE * _file;$/;"	m	class:GROFile
 _file	../pdbfile.h	/^	FILE *_file;				\/\/ the PDB file listing all the atom coordinates$/;"	m	class:PDBFile
+_file	../trrfile.h	/^    XDRFILE * _file;$/;"	m	class:TRRFile
 _file	../wannier.h	/^	FILE *			_file;$/;"	m	class:WannierFile
 _file	../xyzfile.h	/^	FILE *_file;				\/\/ the XYZ file listing all the atom coordinates$/;"	m	class:XYZFile
 _firstStep	../xyzfile.h	/^	int _currentstep, _firstStep, _lastStep, _numSteps,$/;"	m	class:XYZFile
-_force	../atom.h	/^	VecR _force; \/\/ the external force on the atom at any given point in time$/;"	m	class:Atom
+_force	../atom.h	/^    VecR _force; \/\/ the external force on the atom at any given point in time$/;"	m	class:Atom
 _forces	../ambermpisys.h	/^	double * _forces;$/;"	m	class:MPIMolSystem
 _forces	../ambersystem.h	/^	ForceFile	_forces;$/;"	m	class:AmberSystem
 _forces	../forcefile.h	/^	std::vector<VecR>	_forces;	\/\/ atomic coordinates$/;"	m	class:ForceFile
+_forces	../trrfile.h	/^    VecR_vec _coords, _vels, _forces;$/;"	m	class:TRRFile
 _frame	../crdfile.h	/^	int 			_frame;		\/\/ The current frame (number of timesteps processed)$/;"	m	class:CRDFile
 _frame	../forcefile.h	/^	int 			_frame;		\/\/ The current frame (number of timesteps processed)$/;"	m	class:ForceFile
+_frame	../trrfile.h	/^    int _frame;$/;"	m	class:TRRFile
 _frame	../wannier.h	/^	int 			_frame;		\/\/ The current frame (number of timesteps processed)$/;"	m	class:WannierFile
 _function	../thread.h	/^	void * (* _function) (void *);$/;"	m	class:Thread
 _graph	../bondgraph.h	/^	Graph	_graph;$/;"	m	class:BondGraph
 _graph	../graph.h	/^	static Graph _graph;$/;"	m	class:BondGraph
-_graph	../watersfg.h	/^	BondGraph * _graph;		\/\/ a connectivity matrix for analyzing water-bonding$/;"	m	class:SFGCalculator
-_graph	../xyzsystem.h	/^	BondGraph			_graph;			\/\/ a really useful graph for playing with atoms and bonds$/;"	m	class:XYZSystem
+_graph	../xyzsystem.h	/^	BondGraph		_graph;			\/\/ a really useful graph for playing with atoms and bonds$/;"	m	class:XYZSystem
+_gro	../gmxsystem.h	/^    GROFile _gro;$/;"	m	class:GMXSystem
 _h	../hno3.h	/^	Atom *_oh, *_n, *_h, *_o1, *_o2;		\/\/ Pointers to the various atoms in the nitric acid. These are static for no$/;"	m	class:NitricAcid
 _h	../oh.h	/^	Atom *_o, *_h;			\/\/ pointers to the atoms for easy access$/;"	m	class:Hydroxide
 _h1	../h2o.h	/^	Atom *_o, *_h1, *_h2;			\/\/ pointers to the atoms for easy access$/;"	m	class:Water
@@ -646,17 +904,19 @@ _h1	../h3o.h	/^	Atom *_o, *_h1, *_h2, *_h3;			\/\/ pointers to the atoms for eas
 _h2	../h2o.h	/^	Atom *_o, *_h1, *_h2;			\/\/ pointers to the atoms for easy access$/;"	m	class:Water
 _h2	../h3o.h	/^	Atom *_o, *_h1, *_h2, *_h3;			\/\/ pointers to the atoms for easy access$/;"	m	class:Hydronium
 _h3	../h3o.h	/^	Atom *_o, *_h1, *_h2, *_h3;			\/\/ pointers to the atoms for easy access$/;"	m	class:Hydronium
+_histogram	../utility.h	/^    std::vector<Histogram_t> _histogram;		\/\/ 2-d container\/histogram$/;"	m	class:Histogram2D
+_histogram	../utility.h	/^    std::vector<histo_element_t> _histogram;$/;"	m	class:Histogram1D
 _id	../ambermpisys.h	/^	int _id, _p;		\/\/ mpi rank of the process, and total number of processes$/;"	m	class:MPIMolSystem
 _id	../thread.h	/^	int _id;$/;"	m	class:Thread
 _initialized	../xyzfile.h	/^	bool _initialized;				\/\/ To tell wether or not a file has been loaded$/;"	m	class:XYZFile
-_initstep	../pdbfile.h	/^	int _initstep,				\/\/ the first frame listed in the file$/;"	m	class:PDBFile
+_lambda	../trrfile.h	/^    float _lambda;$/;"	m	class:TRRFile
 _lastStep	../xyzfile.h	/^	int _currentstep, _firstStep, _lastStep, _numSteps,$/;"	m	class:XYZFile
-_laststep	../pdbfile.h	/^		_laststep,$/;"	m	class:PDBFile
+_laststep	../pdbfile.h	/^	int _laststep,$/;"	m	class:PDBFile
 _loaded	../forcefile.h	/^	bool			_loaded;$/;"	m	class:ForceFile
 _loaded	../pdbfile.h	/^	int _loaded;				\/\/ To tell wether or not a file has been loaded$/;"	m	class:PDBFile
 _loaded	../wannier.h	/^	bool			_loaded;	\/\/ tells wether or not the wannier file is being used or not (or if it exists)$/;"	m	class:WannierFile
-_mass	../atom.h	/^	double _mass,$/;"	m	class:Atom
-_mass	../molecule.h	/^	double			_mass;				\/\/ Total molecular mass$/;"	m	class:Molecule
+_mass	../atom.h	/^    double _mass,$/;"	m	class:Atom
+_mass	../molecule.h	/^    double			_mass;				\/\/ Total molecular mass$/;"	m	class:Molecule
 _masses	../topfile.h	/^	std::vector<double> _masses;			\/\/ atomic masses$/;"	m	class:TOPFile
 _master	../ambermpisys.h	/^	bool _master;	\/\/ sets the alias for the master$/;"	m	class:MPIMolSystem
 _matrix	../adjacencymatrix.h	/^	Bond_matrix		_matrix;	\/\/ the actual data structure for storing connection data$/;"	m	class:AdjacencyMatrix
@@ -664,22 +924,26 @@ _matrix	../connectmatrix.h	/^	double **	_matrix;		\/\/ the actual data structure
 _matrix	../matrixr.h	/^	Double_matrix	_matrix;$/;"	m	class:MatR
 _max	../dipoleparm.h	/^	double			_max[3];$/;"	m	class:WaterDipoleParms
 _max	../histogram.h	/^	ValueType _max;$/;"	m	class:Histogram
+_max	../utility.h	/^    T _min, _max, _res;$/;"	m	class:Histogram1D
 _min	../dipoleparm.h	/^	double			_min[3];			\/\/ min and max values of the bins for the three parameters$/;"	m	class:WaterDipoleParms
 _min	../histogram.h	/^	ValueType _min;$/;"	m	class:Histogram
+_min	../utility.h	/^    T _min, _max, _res;$/;"	m	class:Histogram1D
 _molPlane	../hno3.h	/^	VecR _molPlane;$/;"	m	class:Nitrate
 _molPlane	../hno3.h	/^	VecR _molPlane;$/;"	m	class:NitricAcid
-_molecules	../pdbfile.h	/^	vector<Molecule *> _molecules;		\/\/ The listing of the molecules in the file$/;"	m	class:PDBFile
-_molid	../atom.h	/^	int	   _molid;			   \/\/ the molecule that contains this atom$/;"	m	class:Atom
+_molid	../atom.h	/^    int	   _molid;			   \/\/ the molecule that contains this atom$/;"	m	class:Atom
 _molnames	../topfile.h	/^	std::vector<std::string> _molnames;		\/\/ molecule names$/;"	m	class:TOPFile
 _molpointers	../topfile.h	/^	std::vector<int>	_molpointers;	\/\/ prmtop pointers to each molecule (the location in the prmtop file, not c-style)$/;"	m	class:TOPFile
 _mols	../ambermpisys.h	/^	vector<Molecule> _mols;$/;"	m	class:MPIMolSystem
 _mols	../boxfiller.h	/^	vector<Molecule>	_mols;$/;"	m	class:BoxFiller
-_mols	../mdsystem.h	/^	Mol_ptr_vec		_mols;		\/\/ the molecules in the system$/;"	m	class:MDSystem
+_mols	../grofile.h	/^    Mol_ptr_vec _mols;$/;"	m	class:GROFile
+_mols	../mdsystem.h	/^    Mol_ptr_vec		_mols;		\/\/ the molecules in the system$/;"	m	class:MDSystem
 _molsizes	../topfile.h	/^	std::vector<int>	_molsizes;		\/\/ the number of atoms in each molecule$/;"	m	class:TOPFile
 _n	../hno3.h	/^	Atom *_n, *_o1, *_o2, *_o3;		\/\/ Pointers to the various atoms in the nitric acid. These are static for no$/;"	m	class:Nitrate
 _n	../hno3.h	/^	Atom *_oh, *_n, *_h, *_o1, *_o2;		\/\/ Pointers to the various atoms in the nitric acid. These are static for no$/;"	m	class:NitricAcid
-_name	../atom.h	/^	std::string _name,$/;"	m	class:Atom
-_name	../molecule.h	/^	string			_name;				\/\/ some text ID or name for the molecule$/;"	m	class:Molecule
+_name	../atom.h	/^    std::string _name,$/;"	m	class:Atom
+_name	../molecule.h	/^    string			_name;				\/\/ some text ID or name for the molecule$/;"	m	class:Molecule
+_natoms	../grofile.h	/^    int _natoms;$/;"	m	class:GROFile
+_natoms	../trrfile.h	/^    int	_natoms;$/;"	m	class:TRRFile
 _no1	../hno3.h	/^	VecR	_no1, _no2, _no3;		\/\/ vectors of the N-O bonds$/;"	m	class:Nitrate
 _no2	../hno3.h	/^	VecR	_no1, _no2, _no3;		\/\/ vectors of the N-O bonds$/;"	m	class:Nitrate
 _no2dipole	../hno3.h	/^	VecR _no2dipole;$/;"	m	class:NitricAcid
@@ -693,7 +957,6 @@ _numMols	../ambermpisys.h	/^	int			_numMols;		\/\/ number of molecules in the sy
 _numMols	../pdbfile.h	/^	int _numMols;$/;"	m	class:PDBFile
 _numMols	../topfile.h	/^	int _numMols;$/;"	m	class:TOPFile
 _numSteps	../xyzfile.h	/^	int _currentstep, _firstStep, _lastStep, _numSteps,$/;"	m	class:XYZFile
-_numTimeSteps	../mdsystem.h	/^	int				_numTimeSteps;		\/\/ number of timesteps in the MD data files$/;"	m	class:MDSystem
 _num_bins	../dipoleparm.h	/^	int 			_num_bins[3];		\/\/ number of bins for each of the three parameters$/;"	m	class:WaterDipoleParms
 _numatoms	../xyzfile.h	/^		_numatoms;				\/\/ total number of centers to process from the file for the frame$/;"	m	class:XYZFile
 _o	../h2o.h	/^	Atom *_o, *_h1, *_h2;			\/\/ pointers to the atoms for easy access$/;"	m	class:Water
@@ -712,28 +975,34 @@ _oh2	../h2o.h	/^	VecR _oh1, _oh2;				\/\/ Both of the OH vectors$/;"	m	class:Wat
 _oh2	../h3o.h	/^	VecR _oh1, _oh2, _oh3;				\/\/ Both of the OH vectors$/;"	m	class:Hydronium
 _oh3	../h3o.h	/^	VecR _oh1, _oh2, _oh3;				\/\/ Both of the OH vectors$/;"	m	class:Hydronium
 _p	../ambermpisys.h	/^	int _id, _p;		\/\/ mpi rank of the process, and total number of processes$/;"	m	class:MPIMolSystem
-_p	../moritasfg2002.h	/^	VecR					_p;		\/\/ vector of dipoles of all the waters$/;"	m	class:MoritaSFG
 _params	../boxfiller.h	/^	FILE * _params;$/;"	m	class:BoxFiller
+_params	../rdf.h	/^    static RDFParameters _params;$/;"	m	class:RDFProcessor
+_params	../rdf.h	/^template <class T> RDFParameters RDFProcessor<T>::_params;$/;"	m	class:RDFProcessor
 _parsed	../xyzsystem.h	/^	bool _parsed;$/;"	m	class:XYZSystem
 _path	../pdbfile.h	/^	string _path;$/;"	m	class:PDBFile
+_path	../trrfile.h	/^    char * _path;$/;"	m	class:TRRFile
 _path	../xyzfile.h	/^	std::string _path;$/;"	m	class:XYZFile
 _pdb	../boxfiller.h	/^	PDBFile _pdb;		\/\/ pdb file containing all the atoms\/molecules$/;"	m	class:BoxFiller
-_pmolecule	../atom.h	/^	Molecule * _pmolecule;$/;"	m	class:Atom
-_position	../atom.h	/^	VecR _position;				\/\/ Particle position$/;"	m	class:Atom
+_pmolecule	../atom.h	/^    Molecule * _pmolecule;$/;"	m	class:Atom
+_position	../atom.h	/^    VecR _position;				\/\/ Particle position$/;"	m	class:Atom
 _positions	../ambermpisys.h	/^	double * _positions;$/;"	m	class:MPIMolSystem
 _r	../dipolefieldtensor.h	/^	double const * _r;	\/\/ distance vector (x,y,z) between 2 molecules$/;"	m	class:DipoleFieldTensor
-_rdfs	../rdf.h	/^	static map<AtomPair, Histogram> _rdfs;$/;"	m	class:RDFMachine
-_residue	../atom.h	/^		   _residue;$/;"	m	class:Atom
+_rdfs	../rdf.h	/^    static RDF2D_map _rdfs;$/;"	m	class:RDF2DMachine
+_rdfs	../rdf.h	/^    static RDF_map _rdfs;$/;"	m	class:RDFMachine
+_rdfs	../rdf.h	/^template <class T> RDF2D_map RDF2DMachine<T>::_rdfs;$/;"	m	class:RDF2DMachine
+_rdfs	../rdf.h	/^template <class T> RDF_map RDFMachine<T>::_rdfs;$/;"	m	class:RDFMachine
+_res	../utility.h	/^    T _min, _max, _res;$/;"	m	class:Histogram1D
+_residue	../atom.h	/^      _residue;$/;"	m	class:Atom
 _residueNames	../boxfiller.h	/^	vector<string>	_residueNames;$/;"	m	class:BoxFiller
 _residueNum	../boxfiller.h	/^	vector<int>		_residueNum;$/;"	m	class:BoxFiller
 _return	../thread.h	/^	void *_return;$/;"	m	class:Thread
 _set	../hno3.h	/^	bool _set;								\/\/ to let us know if the atom have been set in the molecule$/;"	m	class:Nitrate
 _set	../hno3.h	/^	bool _set;								\/\/ to let us know if the atom have been set in the molecule$/;"	m	class:NitricAcid
-_set	../molecule.h	/^	bool			_set;				\/\/ just a little helper to see if the atoms of the molecule have been set or for any other special purpose$/;"	m	class:Molecule
-_set	../watersfg.h	/^	bool 	_set;			\/\/ set when the water molecule has already gone through prelim calculations that don't need to be repeated for each calculation of Beta$/;"	m	class:SFGCalculator
+_set	../molecule.h	/^    bool			_set;				\/\/ just a little helper to see if the atoms of the molecule have been set or for any other special purpose$/;"	m	class:Molecule
 _size	../adjacencymatrix.h	/^	unsigned int 	_size;$/;"	m	class:AdjacencyMatrix
 _size	../crdfile.h	/^	int 			_size;		\/\/ number of atoms in the system$/;"	m	class:CRDFile
 _size	../forcefile.h	/^	int 			_size;		\/\/ number of atoms in the system$/;"	m	class:ForceFile
+_size	../utility.h	/^    int _size;$/;"	m	class:Histogram1D
 _size	../wannier.h	/^	int 			_size;		\/\/ number of lines to process from the wannier file per frame$/;"	m	class:WannierFile
 _spacing	../boxfiller.h	/^	double	_spacing;$/;"	m	class:BoxFiller
 _stat	../ambermpisys.h	/^	MPI_Status _stat;$/;"	m	class:MPIMolSystem
@@ -742,174 +1011,265 @@ _sys	../wateranalyzer.h	/^	WaterSystem&			_sys;		\/\/ the water system that will
 _sys_type	../graph.h	/^	std::string	_sys_type;$/;"	m	class:BondGraph
 _tensor	../dipolefieldtensor.h	/^	double _tensor[9];	\/\/ The internal elements of the dipole field tensor$/;"	m	class:DipoleFieldTensor
 _thread	../thread.h	/^	pthread_t	* _thread;$/;"	m	class:Thread
+_time	../trrfile.h	/^    float _time;$/;"	m	class:TRRFile
+_title	../grofile.h	/^    std::string _title;$/;"	m	class:GROFile
 _topfile	../ambersystem.h	/^	TOPFile		_topfile;$/;"	m	class:AmberSystem
 _topfile	../topfile.h	/^	FILE * _topfile;			\/\/ The associated topology file output by AMBER$/;"	m	class:TOPFile
+_total_volume	../rdf.h	/^    static double _total_volume;	\/\/ the sphere of bonding distances in which we're calculating RDFs$/;"	m	class:RDFProcessor
+_total_volume	../rdf.h	/^template <class T> double RDFProcessor<T>::_total_volume;$/;"	m	class:RDFProcessor
+_trr	../gmxsystem.h	/^    TRRFile _trr;$/;"	m	class:GMXSystem
 _unparsed	../xyzsystem.h	/^	Atom_ptr_vec _unparsed;$/;"	m	class:XYZSystem
+_v	../trrfile.h	/^    rvec *_x, *_v, *_f;$/;"	m	class:TRRFile
+_vels	../trrfile.h	/^    VecR_vec _coords, _vels, _forces;$/;"	m	class:TRRFile
 _voh	../hno3.h	/^	VecR _voh;$/;"	m	class:NitricAcid
-_w1	../watersfg.h	/^	double _w1, _w2;		\/\/ Shifted frequency values from the gas phase vibration frequency$/;"	m	class:SFGCalculator
-_w2	../watersfg.h	/^	double _w1, _w2;		\/\/ Shifted frequency values from the gas phase vibration frequency$/;"	m	class:SFGCalculator
-_wa	../watersfg.h	/^	double _ws, _wa;		\/\/ The two normal mode (symmetric and antisymmetric) frequencies of the water molecule$/;"	m	class:SFGCalculator
-_wanniers	../molecule.h	/^	std::vector<VecR>	_wanniers;			\/\/ the wannier centers in the molecule$/;"	m	class:Molecule
+_wanniers	../molecule.h	/^    std::vector<VecR>	_wanniers;			\/\/ the wannier centers in the molecule$/;"	m	class:Molecule
 _wanniers	../xyzsystem.h	/^	WannierFile 		_wanniers;		\/\/ The wannier centers$/;"	m	class:XYZSystem
-_wats	../moritasfg2002.h	/^	std::vector<Water *>	_wats;	\/\/ waters of the system$/;"	m	class:MoritaSFG
 _worldcomm	../ambermpisys.h	/^	MPI_Comm _worldcomm;$/;"	m	class:MPIMolSystem
-_ws	../watersfg.h	/^	double _ws, _wa;		\/\/ The two normal mode (symmetric and antisymmetric) frequencies of the water molecule$/;"	m	class:SFGCalculator
-_x	../molecule.h	/^	VecR			_x, _y, _z;			\/\/ molecular frame axes$/;"	m	class:Molecule
-_y	../molecule.h	/^	VecR			_x, _y, _z;			\/\/ molecular frame axes$/;"	m	class:Molecule
-_z	../molecule.h	/^	VecR			_x, _y, _z;			\/\/ molecular frame axes$/;"	m	class:Molecule
-angbins	../analysis.h	/^	static int		angbins;$/;"	m	class:Analyzer
-angbins	../analysis.h	/^int		Analyzer::angbins;$/;"	m	class:Analyzer
+_x	../molecule.h	/^    VecR			_x, _y, _z;			\/\/ molecular frame axes$/;"	m	class:Molecule
+_x	../trrfile.h	/^    rvec *_x, *_v, *_f;$/;"	m	class:TRRFile
+_y	../molecule.h	/^    VecR			_x, _y, _z;			\/\/ molecular frame axes$/;"	m	class:Molecule
+_z	../molecule.h	/^    VecR			_x, _y, _z;			\/\/ molecular frame axes$/;"	m	class:Molecule
+angbins	../analysis.h	/^    static int		angbins;$/;"	m	class:Analyzer
+angbins	../analysis.h	/^template <class T> int		Analyzer<T>::angbins;$/;"	m	class:Analyzer
 angbins	../watersystem.h	/^  int angbins;$/;"	m	struct:WaterSystemParams
-angmax	../analysis.h	/^	static double 	angmin, angmax, angres;$/;"	m	class:Analyzer
-angmax	../analysis.h	/^double	Analyzer::angmax;$/;"	m	class:Analyzer
+angmax	../analysis.h	/^    static double 	angmin, angmax, angres;$/;"	m	class:Analyzer
+angmax	../analysis.h	/^template <class T> double	Analyzer<T>::angmax;$/;"	m	class:Analyzer
 angmax	../watersystem.h	/^  double angmin, angmax, angres; \/* For generating histograms to bin angle data (min, max, bin width\/resolution) *\/$/;"	m	struct:WaterSystemParams
-angmin	../analysis.h	/^	static double 	angmin, angmax, angres;$/;"	m	class:Analyzer
-angmin	../analysis.h	/^double 	Analyzer::angmin;$/;"	m	class:Analyzer
+angmin	../analysis.h	/^    static double 	angmin, angmax, angres;$/;"	m	class:Analyzer
+angmin	../analysis.h	/^template <class T> double 	Analyzer<T>::angmin;$/;"	m	class:Analyzer
 angmin	../watersystem.h	/^  double angmin, angmax, angres; \/* For generating histograms to bin angle data (min, max, bin width\/resolution) *\/$/;"	m	struct:WaterSystemParams
-angres	../analysis.h	/^	static double 	angmin, angmax, angres;$/;"	m	class:Analyzer
-angres	../analysis.h	/^double	Analyzer::angres;$/;"	m	class:Analyzer
+angres	../analysis.h	/^    static double 	angmin, angmax, angres;$/;"	m	class:Analyzer
+angres	../analysis.h	/^template <class T> double	Analyzer<T>::angres;$/;"	m	class:Analyzer
 angres	../watersystem.h	/^  double angmin, angmax, angres; \/* For generating histograms to bin angle data (min, max, bin width\/resolution) *\/$/;"	m	struct:WaterSystemParams
+apis	../watersystem.h	/^		AtomPositionInSlice apis;$/;"	m	class:WaterSystem::WaterInSlice
 atom	../bondgraph.h	/^	Atom * atom;$/;"	m	struct:VertexProperties
-atom	../graph.h	/^	Atom * atom;$/;"	m	struct:VertexProperties
+atom	../graph.h	/^	  Atom * atom;$/;"	m	struct:BondGraph::VertexProperties
 avg	../watersystem.h	/^  bool avg;			\/* Will averaging of two interfaces be performed? Can also be used for other functionality *\/$/;"	m	struct:WaterSystemParams
+axis	../watersystem.h	/^	static coord axis;				\/\/ axis normal to the infterface$/;"	m	class:WaterSystem
 axis	../watersystem.h	/^  coord axis;			\/* The reference axis (generally normal to the interface *\/$/;"	m	struct:WaterSystemParams
-axis	../watersystem.h	/^  static coord axis;					\/\/ axis normal to the infterface$/;"	m	class:WaterSystem
 axis	../watersystem.h	/^template<typename T> coord WaterSystem<T>::axis;$/;"	m	class:WaterSystem
+b_length	../graph.cpp	/^BondGraph::PropertyMap<double,BondGraph::EdgeProperties>::Type BondGraph::b_length = get(&EdgeProperties::distance, _graph);$/;"	m	class:BondGraph	file:
 b_length	../graph.h	/^	static PropertyMap<double,EdgeProperties>::Type 		b_length;$/;"	m	class:BondGraph
+b_type	../graph.cpp	/^BondGraph::PropertyMap<bondtype,BondGraph::EdgeProperties>::Type BondGraph::b_type = get(&EdgeProperties::btype, _graph);$/;"	m	class:BondGraph	file:
 b_type	../graph.h	/^	static PropertyMap<bondtype,EdgeProperties>::Type 		b_type;$/;"	m	class:BondGraph
+begin	../mdsystem.h	/^    Atom_it begin () { return _atoms.begin(); }$/;"	f	class:MDSystem
+begin	../molecule.h	/^    Atom_it begin() const {$/;"	f	class:Molecule
+begin	../rdf.h	/^  namepair_it begin () { return name_pairs.begin(); }$/;"	f	struct:RDFParameters
+bin	../utility.h	/^    typedef unsigned int bin;$/;"	t	class:Histogram2D
+bins	../utility.h	/^    typedef std::pair<bin,bin> bins;$/;"	t	class:Histogram2D
 bond	../bond.h	/^	bondtype bond;	 	\/\/ bond type (covalent, hydrogen-bond, or unbonded)$/;"	m	class:Bond
 bondlength	../bond.h	/^	double	bondlength;	\/\/ bond length$/;"	m	class:Bond
 bondtype	../bond.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	t	typeref:enum:__anon4
 bondtype	../bondgraph.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded, covalent} bondtype;$/;"	t	typeref:enum:__anon2
 bondtype	../connectmatrix.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded} bondtype;$/;"	t	typeref:enum:__anon6
-bondtype	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	t	typeref:enum:__anon8
+bondtype	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	t	typeref:enum:__anon7
 btype	../bondgraph.h	/^	bondtype	btype;$/;"	m	struct:EdgeProperties
-btype	../graph.h	/^	bondtype	btype;$/;"	m	struct:EdgeProperties
+btype	../graph.h	/^	  bondtype	btype;$/;"	m	struct:BondGraph::EdgeProperties
+clear	../molecule.cpp	/^void Molecule::clear () {$/;"	f	class:Molecule
+config_file	../watersystem.h	/^  libconfig::Config * config_file;	\/* Configuration file *\/$/;"	m	struct:WaterSystemParams
 coord	../vecr.h	/^enum coord {x=0, y=1, z=2};$/;"	g
 coord_map	../bond.h	/^typedef std::map<coordination, std::string> coord_map;$/;"	t
 coord_map	../connectmatrix.h	/^typedef std::map<coordination, string> coord_map;$/;"	t
-coord_map	../graph.h	/^typedef std::map<coordination, std::string> coord_map;$/;"	t
+coord_map	../graph.h	/^	typedef std::map< coordination, std::string> coord_map;$/;"	t	class:BondGraph
 coordination	../bond.h	/^} coordination;$/;"	t	typeref:enum:__anon3
 coordination	../bondgraph.h	/^} coordination;$/;"	t	typeref:enum:__anon1
 coordination	../connectmatrix.h	/^} coordination;$/;"	t	typeref:enum:__anon5
-coordination	../graph.h	/^} coordination;$/;"	t	typeref:enum:__anon7
+coordination	../graph.h	/^	} coordination;$/;"	t	class:BondGraph	typeref:enum:BondGraph::__anon8
+counts	../utility.h	/^    std::vector<double> counts;					\/\/ A running total of each time a bin was updated in the 1st dimension of the histogram i.e. access count$/;"	m	class:Histogram2D
 covalent	../bond.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon4
 covalent	../bondgraph.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded, covalent} bondtype;$/;"	e	enum:__anon2
-covalent	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon8
+covalent	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon7
 distance	../bondgraph.h	/^	double 		distance;$/;"	m	struct:EdgeProperties
-distance	../graph.h	/^	double 		distance;$/;"	m	struct:EdgeProperties
+distance	../graph.h	/^	  double 		distance;$/;"	m	struct:BondGraph::EdgeProperties
+double_pair	../rdf.h	/^typedef std::pair<double, double> double_pair;$/;"	t
 edges	../node.h	/^	Edge_ptr_list edges;		\/\/ all the edges connecting to this node$/;"	m	class:Node
 element	../matrixr.h	/^enum element {xx=0, yx=1, zx=2, xy=3, yy=4, zy=5, xz=6, yz=7, zz=8};$/;"	g
+end	../mdsystem.h	/^    Atom_it end () { return _atoms.end(); }$/;"	f	class:MDSystem
+end	../molecule.h	/^    Atom_it end() const {$/;"	f	class:Molecule
+end	../rdf.h	/^  namepair_it end () { return name_pairs.end(); }$/;"	f	struct:RDFParameters
 eof	../ambersystem.h	/^	bool eof () { return _coords.eof(); }$/;"	f	class:AmberSystem
 eof	../crdfile.h	/^	bool eof () 	const { return _eof; }$/;"	f	class:CRDFile
 eof	../forcefile.h	/^	bool eof () 	{ return _eof; }$/;"	f	class:ForceFile
 eof	../wannier.h	/^	bool eof () 	const { return _eof; }		\/\/ have we reached the end of the file?$/;"	f	class:WannierFile
 fct_ptr	../thread.h	/^typedef void* (*fct_ptr)(void *);$/;"	t
-graph	../watersystem.h	/^  BondGraph	graph;$/;"	m	class:WaterSystem
+graph	../watersystem.h	/^	static BondGraph graph;$/;"	m	class:WaterSystem
+graph	../watersystem.h	/^template<typename T> BondGraph WaterSystem<T>::graph;$/;"	m	class:WaterSystem
 hbond	../bond.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon4
 hbond	../bondgraph.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded, covalent} bondtype;$/;"	e	enum:__anon2
 hbond	../connectmatrix.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded} bondtype;$/;"	e	enum:__anon6
-hbond	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon8
-int_atoms	../watersystem.h	/^  static Atom_ptr_vec	int_atoms;		\/\/ interfacial water atoms (or as above)$/;"	m	class:WaterSystem
+hbond	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon7
+histo_element_t	../utility.h	/^    typedef double histo_element_t;$/;"	t	class:Histogram1D
+in	../utility.h	/^  std::back_insert_iterator<C> in;$/;"	m	struct:Inserter
+int_atoms	../watersystem.h	/^	static Atom_ptr_vec	int_atoms;		\/\/ interfacial water atoms (or as above)$/;"	m	class:WaterSystem
 int_atoms	../watersystem.h	/^template<typename T> Atom_ptr_vec WaterSystem<T>::int_atoms;$/;"	m	class:WaterSystem
-int_high	../watersystem.h	/^  static double int_low, int_high, middle;		\/\/ the positions of analysis cutoffs$/;"	m	class:WaterSystem
-int_low	../watersystem.h	/^  static double int_low, int_high, middle;		\/\/ the positions of analysis cutoffs$/;"	m	class:WaterSystem
-int_mols	../watersystem.h	/^  static Mol_ptr_vec 	int_mols;$/;"	m	class:WaterSystem
+int_high	../watersystem.h	/^	static double int_low, int_high, middle;	\/\/ the positions of analysis cutoffs$/;"	m	class:WaterSystem
+int_low	../watersystem.h	/^	static double int_low, int_high, middle;	\/\/ the positions of analysis cutoffs$/;"	m	class:WaterSystem
+int_mols	../watersystem.h	/^	static Mol_ptr_vec 	int_mols;$/;"	m	class:WaterSystem
 int_mols	../watersystem.h	/^template<typename T> Mol_ptr_vec WaterSystem<T>::int_mols;$/;"	m	class:WaterSystem
-int_wats	../watersystem.h	/^  static Water_ptr_vec	int_wats;		\/\/ interfacial waters, or just all the waters in the system depending on the function call$/;"	m	class:WaterSystem
-int_wats	../watersystem.h	/^template<typename T> Water_ptr_vec WaterSystem<T>::int_wats;$/;"	m	class:WaterSystem
-k0	../watersfg.h	/^const double k0	=	0.548;		\/\/ atomic units (force\/length) Eh\/ao\/ao$/;"	v
-l	../watersfg.h	/^const double l	=	-1.991;		\/\/ atomic units (force\/length^2)	Eh\/ao\/ao\/ao... yikes$/;"	v
-maxdistance	../rdf.h	25;"	d
-middle	../watersystem.h	/^  static double int_low, int_high, middle;		\/\/ the positions of analysis cutoffs$/;"	m	class:WaterSystem
-name	../graph.h	/^	std::string name;$/;"	m	struct:VertexProperties
+int_wats	../watersystem.h	/^	static Mol_ptr_vec	int_wats;		\/\/ interfacial waters, or just all the waters in the system depending on the function call$/;"	m	class:WaterSystem
+int_wats	../watersystem.h	/^template<typename T> Mol_ptr_vec WaterSystem<T>::int_wats;$/;"	m	class:WaterSystem
+main	../complexdatafile.cpp	/^int main (int argc, char **argv) {$/;"	f
+make_inserter	../utility.h	/^Inserter<C> make_inserter(C& c)$/;"	f
+max	../utility.h	/^    pair_t max;						\/\/ maximum value the histogram can bin in each dimension$/;"	m	class:Histogram2D
+middle	../watersystem.h	/^	static double int_low, int_high, middle;	\/\/ the positions of analysis cutoffs$/;"	m	class:WaterSystem
+min	../utility.h	/^    pair_t min;						\/\/ minimum values for each dimension$/;"	m	class:Histogram2D
+name	../graph.h	/^	  std::string name;$/;"	m	struct:BondGraph::VertexProperties
+name_pairs	../rdf.h	/^  NamePairList name_pairs;$/;"	m	struct:RDFParameters
+namepair_it	../rdf.h	/^  typedef NamePairList::const_iterator namepair_it;$/;"	t	struct:RDFParameters
 next	../bondgraph.h	/^	MyVertex_it vi, vi_end, next;$/;"	m	class:BondGraph
 nhbond	../bond.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon4
 nhbond	../bondgraph.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded, covalent} bondtype;$/;"	e	enum:__anon2
 nhbond	../connectmatrix.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded} bondtype;$/;"	e	enum:__anon6
-nhbond	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon8
+nhbond	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon7
 nobond	../bond.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon4
 nobond	../bondgraph.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded, covalent} bondtype;$/;"	e	enum:__anon2
 nobond	../connectmatrix.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded} bondtype;$/;"	e	enum:__anon6
-nobond	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon8
-numAtoms	../pdbfile.h	/^	int numAtoms () { return _numAtoms; }$/;"	f	class:PDBFile
-numCarbonChains	../carbonchain.h	/^		static int numCarbonChains;			\/\/ total number of waters in the system$/;"	m	class:CarbonChain
+nobond	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon7
+numAlkanes	../alkane.cpp	/^int Alkane::numAlkanes = 0;$/;"	m	class:Alkane	file:
+numAlkanes	../alkane.h	/^    static int numAlkanes;			\/\/ total number of waters in the system$/;"	m	class:Alkane
+numCarbonChains	../carbonchain.cpp	/^int CarbonChain::numCarbonChains = 0;$/;"	m	class:CarbonChain	file:
+numCarbonChains	../carbonchain.h	/^    static int numCarbonChains;			\/\/ total number of carbon chains in the system$/;"	m	class:CarbonChain
+numDecanes	../decane.cpp	/^int Decane::numDecanes = 0;$/;"	m	class:Decane	file:
 numDecanes	../decane.h	/^		static int numDecanes;			\/\/ total number of waters in the system$/;"	m	class:Decane
+numHydroniums	../h3o.cpp	/^int Hydronium::numHydroniums = 0;$/;"	m	class:Hydronium	file:
 numHydroniums	../h3o.h	/^	static int numHydroniums;			\/\/ total number of waters in the system$/;"	m	class:Hydronium
+numHydroxides	../oh.cpp	/^int Hydroxide::numHydroxides = 0;$/;"	m	class:Hydroxide	file:
 numHydroxides	../oh.h	/^	static int numHydroxides;			\/\/ total number of waters in the system$/;"	m	class:Hydroxide
-numMolecules	../molecule.h	/^	static int numMolecules;$/;"	m	class:Molecule
-numMols	../pdbfile.h	/^	int numMols () { return _numMols; }$/;"	f	class:PDBFile
+numMolecules	../molecule.cpp	/^int Molecule::numMolecules = 0;$/;"	m	class:Molecule	file:
+numMolecules	../molecule.h	/^    static int numMolecules;$/;"	m	class:Molecule
+numNitrates	../hno3.cpp	/^int Nitrate::numNitrates = 0;$/;"	m	class:Nitrate	file:
 numNitrates	../hno3.h	/^	static int numNitrates;$/;"	m	class:Nitrate
+numNitricAcids	../hno3.cpp	/^int NitricAcid::numNitricAcids = 0;$/;"	m	class:NitricAcid	file:
 numNitricAcids	../hno3.h	/^	static int numNitricAcids;$/;"	m	class:NitricAcid
+numWaters	../h2o.cpp	/^int Water::numWaters = 0;$/;"	m	class:Water	file:
 numWaters	../h2o.h	/^	static int numWaters;			\/\/ total number of waters in the system$/;"	m	class:Water
+num_bonds	../bond.cpp	/^int Bond::num_bonds = 0;$/;"	m	class:Bond	file:
 num_bonds	../bond.h	/^	static int num_bonds;$/;"	m	class:Bond
+num_nodes	../node.cpp	/^int Node::num_nodes = 0;$/;"	m	class:Node	file:
 num_nodes	../node.h	/^	static int num_nodes;$/;"	m	class:Node
 num_threads	../thread.h	/^	static int num_threads;$/;"	m	class:Thread
 num_threads	../thread.h	/^template <class T> int Thread<T>::num_threads = 0;$/;"	m	class:Thread
 ohbond	../bond.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon4
 ohbond	../bondgraph.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded, covalent} bondtype;$/;"	e	enum:__anon2
 ohbond	../connectmatrix.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded} bondtype;$/;"	e	enum:__anon6
-ohbond	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon8
+ohbond	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon7
+operator %	../vecr.cpp	/^VecR VecR::operator% (const VecR& input) const {$/;"	f	class:VecR
+operator ()	../atom.h	/^		bool operator() (const Atom * atom, const std::string name) const {$/;"	f	class:Atom::NameIs_p
+operator ()	../h2o.h	/^	  void operator() (Water * wat) {$/;"	f	class:water::setBondLengths
+operator ()	../matrixr.cpp	/^double MatR::operator() (coord const row, coord const col) const {$/;"	f	class:MatR
+operator ()	../matrixr.cpp	/^double MatR::operator() (int const row, int const col) const {$/;"	f	class:MatR
+operator ()	../rdf.h	/^void RDFProcessor<T>::operator() (const T atom1, const T atom2)$/;"	f	class:RDFProcessor
+operator ()	../utility.h	/^    bool operator() (const T t) {$/;"	f	class:Histogram1D
+operator ()	../utility.h	/^    void operator() (const T& a, const T& b) {$/;"	f	class:Histogram2D
+operator ()	../utility.h	/^  bool operator() (const T& lhs, const T& rhs) const $/;"	f	struct:EqualPairs
+operator ()	../utility.h	/^  void operator()(const std::pair<typename C::value_type, typename C::value_type>& p)$/;"	f	struct:Inserter
+operator ()	../vecr.cpp	/^double VecR::operator() (const coord index) const {$/;"	f	class:VecR
+operator ()	../vecr.cpp	/^double VecR::operator() (const int index) const {$/;"	f	class:VecR
+operator ()	../watersystem.h	/^		  bool operator() (const U u, const std::string name) const$/;"	f	class:WaterSystem::IsName
+operator ()	../watersystem.h	/^		  bool operator() (const U u, const std::vector<string>& names) const$/;"	f	class:WaterSystem::NameInList
+operator ()	../watersystem.h	/^		bool operator() (Atom * atom, const Double_pair& extents) const$/;"	f	class:WaterSystem::AtomPositionInSlice
+operator ()	../watersystem.h	/^		bool operator() (const Molecule * mol) const$/;"	f	class:WaterSystem::IsWater_p
+operator ()	../watersystem.h	/^		bool operator() (const Molecule * wat, const Double_pair& extents) const$/;"	f	class:WaterSystem::WaterInSlice
+operator ()	../watersystem.h	/^		bool operator() (const Water * wat, const BondGraph::coordination c) const {$/;"	f	class:WaterSystem::WaterCoordination_p
+operator *	../matrixr.cpp	/^MatR MatR::operator* (const MatR& input) const {		\/\/ Matrix rotation\/multiplication$/;"	f	class:MatR
+operator *	../matrixr.cpp	/^VecR MatR::operator* (const VecR& input) const {		\/\/ Vector rotation\/matrix-vector inner product$/;"	f	class:MatR
+operator *	../vecr.cpp	/^VecR VecR::operator* (const double input) const {$/;"	f	class:VecR
+operator *	../vecr.cpp	/^double VecR::operator* (const VecR& input) const {$/;"	f	class:VecR
+operator *=	../vecr.cpp	/^void VecR::operator*= (const double input) {$/;"	f	class:VecR
+operator +	../matrixr.cpp	/^MatR MatR::operator+ (const MatR& input) const {$/;"	f	class:MatR
+operator +	../vecr.cpp	/^VecR VecR::operator+ (const VecR& input) const {$/;"	f	class:VecR
+operator +=	../vecr.cpp	/^void VecR::operator+= (const VecR& input) {$/;"	f	class:VecR
+operator +=	../vecr.cpp	/^void VecR::operator+= (const double input) {$/;"	f	class:VecR
+operator -	../vecr.cpp	/^VecR VecR::operator- (const VecR& input) const {$/;"	f	class:VecR
+operator -=	../vecr.cpp	/^void VecR::operator-= (const VecR& input) {$/;"	f	class:VecR
+operator -=	../vecr.cpp	/^void VecR::operator-= (const double input) {$/;"	f	class:VecR
+operator /	../vecr.cpp	/^VecR VecR::operator\/ (const double input) const {$/;"	f	class:VecR
+operator /=	../vecr.cpp	/^void VecR::operator\/= (const double input) {$/;"	f	class:VecR
+operator <	../vecr.cpp	/^double VecR::operator< (const VecR& input) const {$/;"	f	class:VecR
 operator =	../matrixr.h	/^	void 	operator= (const MatR& input) {				\/\/ assignment$/;"	f	class:MatR
+operator =	../vecr.cpp	/^VecR& VecR::operator= (const VecR& input) {$/;"	f	class:VecR
+operator ==	../vecr.cpp	/^bool VecR::operator== (const VecR& input) const {$/;"	f	class:VecR
+operator []	../atom.cpp	/^double Atom::operator[] (const coord index) const {$/;"	f	class:Atom
 operator []	../crdfile.h	/^	VecR& operator[] (int index) { return _coords[index]; }$/;"	f	class:CRDFile
 operator []	../forcefile.h	/^	VecR& operator[] (int index) { return _forces[index]; }$/;"	f	class:ForceFile
-operator []	../mdsystem.h	/^	Atom * operator[] (int index) { return _atoms[index]; }$/;"	f	class:MDSystem
-operator []	../molecule.h	/^	Atom * operator[] (int index) const { return _atoms[index]; }	\/\/ retrieve an atom by array index$/;"	f	class:Molecule
-operator []	../pdbfile.h	/^	Molecule *operator[] (int index) { return _molecules[index]; }$/;"	f	class:PDBFile
+operator []	../grofile.h	/^    Atom * operator[] (const int index) { return _atoms[index]; }$/;"	f	class:GROFile
+operator []	../mdsystem.h	/^    Atom * operator[] (int index) { return _atoms[index]; }$/;"	f	class:MDSystem
+operator []	../molecule.cpp	/^Atom * Molecule::operator[] (const std::string atomname) const {$/;"	f	class:Molecule
+operator []	../molecule.h	/^    Atom * operator[] (int index) const { return _atoms[index]; }	\/\/ retrieve an atom by array index$/;"	f	class:Molecule
+operator []	../vecr.cpp	/^double VecR::operator[] (const coord index) const {$/;"	f	class:VecR
+operator []	../vecr.cpp	/^double VecR::operator[] (const int index) const {$/;"	f	class:VecR
 operator []	../wannier.h	/^	VecR& operator[] (int index) { return _coords[index]; }$/;"	f	class:WannierFile
 operator []	../xyzfile.h	/^	Atom * operator[] (int index) { return _atoms[index]; }$/;"	f	class:XYZFile
-operator []	../xyzsystem.h	/^	Atom * operator[] (int index) {$/;"	f	class:XYZSystem
-output	../analysis.h	/^	FILE * output;$/;"	m	class:Analyzer
+output	../analysis.h	/^    FILE * output;$/;"	m	class:Analyzer
 output	../watersystem.h	/^  FILE * output;		\/* The file name and stream of the data output *\/$/;"	m	struct:WaterSystemParams
-output_filename	../analysis.h	/^	std::string output_filename;$/;"	m	class:Analyzer
+output_filename	../analysis.h	/^    std::string output_filename;$/;"	m	class:Analyzer
 output_filename	../watersystem.h	/^  std::string output_filename;$/;"	m	struct:WaterSystemParams
-output_freq	../analysis.h	/^	int	output_freq;$/;"	m	class:Analyzer
+output_freq	../analysis.h	/^    int	output_freq;$/;"	m	class:Analyzer
 output_freq	../watersystem.h	/^  int output_freq;		\/* How often data is output to disk and info is posted to the screen *\/$/;"	m	struct:WaterSystemParams
+pair_t	../utility.h	/^    typedef std::pair<T,T>	pair_t;$/;"	t	class:Histogram2D
+pbcflip	../watersystem.h	/^	static double	pbcflip;			\/\/ location to flip about periodic boundaries$/;"	m	class:WaterSystem
 pbcflip	../watersystem.h	/^  double pbcflip;$/;"	m	struct:WaterSystemParams
-pbcflip	../watersystem.h	/^  static double	pbcflip;			\/\/ location to flip about periodic boundaries$/;"	m	class:WaterSystem
 pbcflip	../watersystem.h	/^template<typename T> double WaterSystem<T>::pbcflip;$/;"	m	class:WaterSystem
-posbins	../analysis.h	/^	static int		posbins;$/;"	m	class:Analyzer
-posbins	../analysis.h	/^int		Analyzer::posbins;$/;"	m	class:Analyzer
+posbins	../analysis.h	/^    static int		posbins;$/;"	m	class:Analyzer
+posbins	../analysis.h	/^template <class T> int		Analyzer<T>::posbins;$/;"	m	class:Analyzer
 posbins	../watersystem.h	/^  int posbins;			 \/* The number of bins in the position histograms *\/$/;"	m	struct:WaterSystemParams
 position	../bondgraph.h	/^	VecR position;$/;"	m	struct:VertexProperties
-position	../graph.h	/^	VecR position;$/;"	m	struct:VertexProperties
+position	../graph.h	/^	  VecR position;$/;"	m	struct:BondGraph::VertexProperties
+position_max	../rdf.h	/^  double position_max;$/;"	m	struct:RDFParameters
+position_min	../rdf.h	/^  double position_min;$/;"	m	struct:RDFParameters
+position_res	../rdf.h	/^  double position_res;$/;"	m	struct:RDFParameters
+posmax	../watersystem.h	/^	static double	posmin, posmax;$/;"	m	class:WaterSystem
 posmax	../watersystem.h	/^  double posmin, posmax, posres; \/* For generating histograms position data histograms *\/$/;"	m	struct:WaterSystemParams
-posmax	../watersystem.h	/^  static double	posmin, posmax;$/;"	m	class:WaterSystem
 posmax	../watersystem.h	/^template<typename T> double WaterSystem<T>::posmax;$/;"	m	class:WaterSystem
+posmin	../watersystem.h	/^	static double	posmin, posmax;$/;"	m	class:WaterSystem
 posmin	../watersystem.h	/^  double posmin, posmax, posres; \/* For generating histograms position data histograms *\/$/;"	m	struct:WaterSystemParams
-posmin	../watersystem.h	/^  static double	posmin, posmax;$/;"	m	class:WaterSystem
 posmin	../watersystem.h	/^template<typename T> double WaterSystem<T>::posmin;$/;"	m	class:WaterSystem
-posres	../analysis.h	/^	static double	posres;$/;"	m	class:Analyzer
-posres	../analysis.h	/^double	Analyzer::posres;$/;"	m	class:Analyzer
+posres	../analysis.h	/^    static double	posres;$/;"	m	class:Analyzer
+posres	../analysis.h	/^template <class T> double	Analyzer<T>::posres;$/;"	m	class:Analyzer
 posres	../watersystem.h	/^  double posmin, posmax, posres; \/* For generating histograms position data histograms *\/$/;"	m	struct:WaterSystemParams
-ref_axis	../analysis.h	/^	static VecR ref_axis;$/;"	m	class:Analyzer
-ref_axis	../analysis.h	/^VecR	Analyzer::ref_axis;$/;"	m	class:Analyzer
+q_pt	../hno3analysis.cpp	/^double q_pt (XYZSystem& sys, Molecule * hno3) {$/;"	f
+rdf_max	../rdf.h	/^  double rdf_max;$/;"	m	struct:RDFParameters
+rdf_min	../rdf.h	/^  double rdf_min;$/;"	m	struct:RDFParameters
+rdf_res	../rdf.h	/^  double rdf_res;$/;"	m	struct:RDFParameters
+ref_axis	../analysis.h	/^    static VecR ref_axis;$/;"	m	class:Analyzer
+ref_axis	../analysis.h	/^template <class T> VecR		Analyzer<T>::ref_axis;$/;"	m	class:Analyzer
 ref_axis	../watersystem.h	/^  VecR ref_axis;$/;"	m	struct:WaterSystemParams
-restart	../analysis.h	/^	static unsigned int restart;$/;"	m	class:Analyzer
-restart	../analysis.h	/^unsigned int Analyzer::restart;$/;"	m	class:Analyzer
+resolution	../utility.h	/^    pair_t resolution;				\/\/ resolution for each dimension$/;"	m	class:Histogram2D
+restart	../analysis.h	/^    static unsigned int restart;$/;"	m	class:Analyzer
+restart	../analysis.h	/^template <class T> unsigned int Analyzer<T>::restart;$/;"	m	class:Analyzer
 restart	../watersystem.h	/^  int timesteps, restart;	\/* Number of timesteps to process, and restart = number of timesteps to skip *\/$/;"	m	struct:WaterSystemParams
+setBondLengths	../h2o.h	/^  class setBondLengths : public std::unary_function<Water *,void> {$/;"	c	namespace:water
 size	../crdfile.h	/^	int size () 	const { return _size; }$/;"	f	class:CRDFile
 size	../forcefile.h	/^	int size () 	{ return _size; }$/;"	f	class:ForceFile
-size	../mdsystem.h	/^	const int size () const { return (int)_atoms.size(); }$/;"	f	class:MDSystem
-size	../molecule.h	/^	int size () const				{ return _atoms.size(); }$/;"	f	class:Molecule
-size	../pdbfile.h	/^	int size () { return _numAtoms; }$/;"	f	class:PDBFile
+size	../mdsystem.h	/^    int size () const { return (int)_atoms.size(); }$/;"	f	class:MDSystem
+size	../molecule.h	/^    int size () const				{ return _atoms.size(); }$/;"	f	class:Molecule
+size	../trrfile.h	/^    int size () const { return _natoms; }$/;"	f	class:TRRFile
+size	../utility.h	/^    std::pair<int,int> size;					\/\/ dimensions of the 2-d data (number of histogram bins)$/;"	m	class:Histogram2D
 size	../wannier.h	/^	unsigned int size () 	const { return _size; }$/;"	f	class:WannierFile
 size	../xyzfile.h	/^	size_t size () const { return _atoms.size(); }$/;"	f	class:XYZFile
-sys	../watersystem.h	/^  T * sys;$/;"	m	class:WaterSystem
-timesteps	../analysis.h	/^	static unsigned int timesteps;$/;"	m	class:Analyzer
-timesteps	../analysis.h	/^unsigned int Analyzer::timesteps;$/;"	m	class:Analyzer
+sys	../watersystem.h	/^	T * sys;$/;"	m	class:WaterSystem
+sys_atoms	../watersystem.h	/^	static Atom_ptr_vec	sys_atoms;		\/\/ all atoms\/mols in the system$/;"	m	class:WaterSystem
+sys_atoms	../watersystem.h	/^template<typename T> Atom_ptr_vec WaterSystem<T>::sys_atoms;$/;"	m	class:WaterSystem
+sys_mols	../watersystem.h	/^	static Mol_ptr_vec	sys_mols;$/;"	m	class:WaterSystem
+sys_mols	../watersystem.h	/^template<typename T> Mol_ptr_vec WaterSystem<T>::sys_mols;$/;"	m	class:WaterSystem
+timesteps	../analysis.h	/^    static int 		timesteps;$/;"	m	class:Analyzer
+timesteps	../analysis.h	/^template <class T> int 		Analyzer<T>::timesteps;$/;"	m	class:Analyzer
 timesteps	../watersystem.h	/^  int timesteps, restart;	\/* Number of timesteps to process, and restart = number of timesteps to skip *\/$/;"	m	struct:WaterSystemParams
 trajectory	../wateranalyzer.h	/^typedef vector<double> trajectory;$/;"	t
 unbonded	../bond.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon4
 unbonded	../bondgraph.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded, covalent} bondtype;$/;"	e	enum:__anon2
 unbonded	../connectmatrix.h	/^typedef enum {ohbond, nobond, nhbond, hbond, unbonded} bondtype;$/;"	e	enum:__anon6
-unbonded	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon8
+unbonded	../graph.h	/^typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;$/;"	e	enum:__anon7
+v_atom	../graph.cpp	/^BondGraph::PropertyMap<Atom *,BondGraph::VertexProperties>::Type BondGraph::v_atom = get(&VertexProperties::atom, _graph);$/;"	m	class:BondGraph	file:
 v_atom	../graph.h	/^	static PropertyMap<Atom *,VertexProperties>::Type 		v_atom;$/;"	m	class:BondGraph
+v_name	../graph.cpp	/^BondGraph::PropertyMap<std::string,BondGraph::VertexProperties>::Type BondGraph::v_name = get(&VertexProperties::name, _graph);$/;"	m	class:BondGraph	file:
 v_name	../graph.h	/^	static PropertyMap<std::string,VertexProperties>::Type	v_name;$/;"	m	class:BondGraph
+v_position	../graph.cpp	/^BondGraph::PropertyMap<VecR,BondGraph::VertexProperties>::Type BondGraph::v_position = get(&VertexProperties::position, _graph);$/;"	m	class:BondGraph	file:
 v_position	../graph.h	/^	static PropertyMap<VecR,VertexProperties>::Type 		v_position;$/;"	m	class:BondGraph
 vi	../bondgraph.h	/^	MyVertex_it vi, vi_end, next;$/;"	m	class:BondGraph
 vi_end	../bondgraph.h	/^	MyVertex_it vi, vi_end, next;$/;"	m	class:BondGraph
-wsp	../watersystem.h	/^  static WaterSystemParams wsp;$/;"	m	class:WaterSystem
+water	../h2o.h	/^namespace water {$/;"	n
+wsp	../watersystem.h	/^	static WaterSystemParams wsp;$/;"	m	class:WaterSystem
 wsp	../watersystem.h	/^template<typename T> WaterSystemParams WaterSystem<T>::wsp;$/;"	m	class:WaterSystem
 x	../vecr.h	/^enum coord {x=0, y=1, z=2};$/;"	e	enum:coord
 xx	../matrixr.h	/^enum element {xx=0, yx=1, zx=2, xy=3, yy=4, zy=5, xz=6, yz=7, zz=8};$/;"	e	enum:element
@@ -923,8 +1283,37 @@ z	../vecr.h	/^enum coord {x=0, y=1, z=2};$/;"	e	enum:coord
 zx	../matrixr.h	/^enum element {xx=0, yx=1, zx=2, xy=3, yy=4, zy=5, xz=6, yz=7, zz=8};$/;"	e	enum:element
 zy	../matrixr.h	/^enum element {xx=0, yx=1, zx=2, xy=3, yy=4, zy=5, xz=6, yz=7, zz=8};$/;"	e	enum:element
 zz	../matrixr.h	/^enum element {xx=0, yx=1, zx=2, xy=3, yy=4, zy=5, xz=6, yz=7, zz=8};$/;"	e	enum:element
-~Analyzer	../analysis.h	/^Analyzer::~Analyzer () {$/;"	f	class:Analyzer
+~AdjacencyMatrix	../adjacencymatrix.cpp	/^AdjacencyMatrix::~AdjacencyMatrix () {$/;"	f	class:AdjacencyMatrix
+~Alkane	../alkane.cpp	/^Alkane::~Alkane () {$/;"	f	class:Alkane
+~AmberSystem	../ambersystem.cpp	/^AmberSystem::~AmberSystem () {$/;"	f	class:AmberSystem
+~Analyzer	../analysis.h	/^Analyzer<T>::~Analyzer () {$/;"	f	class:Analyzer
+~Atom	../atom.cpp	/^Atom::~Atom () {$/;"	f	class:Atom
+~Bond	../bond.cpp	/^Bond::~Bond ()$/;"	f	class:Bond
+~BondGraph	../bondgraph.cpp	/^BondGraph::~BondGraph () {$/;"	f	class:BondGraph
+~BondGraph	../graph.cpp	/^BondGraph::~BondGraph () {$/;"	f	class:BondGraph
+~BoxFiller	../boxfiller.cpp	/^BoxFiller::~BoxFiller() { };$/;"	f	class:BoxFiller
+~CRDFile	../crdfile.cpp	/^CRDFile::~CRDFile () {$/;"	f	class:CRDFile
+~CarbonChain	../carbonchain.cpp	/^CarbonChain::~CarbonChain () {$/;"	f	class:CarbonChain
+~Decane	../decane.cpp	/^Decane::~Decane () {$/;"	f	class:Decane
+~DipoleFieldTensor	../dipolefieldtensor.cpp	/^DipoleFieldTensor::~DipoleFieldTensor () {$/;"	f	class:DipoleFieldTensor
+~ForceFile	../forcefile.cpp	/^ForceFile::~ForceFile () {$/;"	f	class:ForceFile
+~GROFile	../grofile.h	/^    ~GROFile () $/;"	f	class:GROFile
 ~Histogram	../histogram.h	/^Histogram::~Histogram () {$/;"	f	class:Histogram
+~Hydronium	../h3o.cpp	/^Hydronium::~Hydronium () {$/;"	f	class:Hydronium
+~Hydroxide	../oh.cpp	/^Hydroxide::~Hydroxide () {$/;"	f	class:Hydroxide
+~MDSystem	../mdsystem.cpp	/^MDSystem::~MDSystem () {$/;"	f	class:MDSystem
 ~MPIMolSystem	../ambermpisys.h	/^MPIMolSystem::~MPIMolSystem () {$/;"	f	class:MPIMolSystem
 ~MatR	../matrixr.h	/^	~MatR () {};$/;"	f	class:MatR
+~Molecule	../molecule.cpp	/^Molecule::~Molecule () {$/;"	f	class:Molecule
+~Nitrate	../hno3.cpp	/^Nitrate::~Nitrate () {$/;"	f	class:Nitrate
+~NitricAcid	../hno3.cpp	/^NitricAcid::~NitricAcid () {$/;"	f	class:NitricAcid
+~Node	../node.cpp	/^Node::~Node () {$/;"	f	class:Node
+~PDBFile	../pdbfile.cpp	/^PDBFile::~PDBFile () {$/;"	f	class:PDBFile
+~TOPFile	../topfile.cpp	/^TOPFile::~TOPFile () {$/;"	f	class:TOPFile
+~TRRFile	../trrfile.h	/^    ~TRRFile () {$/;"	f	class:TRRFile
+~VecR	../vecr.cpp	/^VecR::~VecR () {$/;"	f	class:VecR
+~WannierFile	../wannier.cpp	/^WannierFile::~WannierFile () {$/;"	f	class:WannierFile
+~Water	../h2o.cpp	/^Water::~Water () {$/;"	f	class:Water
 ~WaterSystem	../watersystem.h	/^WaterSystem<T>::~WaterSystem () {$/;"	f	class:WaterSystem
+~XYZFile	../xyzfile.cpp	/^XYZFile::~XYZFile () {$/;"	f	class:XYZFile
+~XYZSystem	../xyzsystem.cpp	/^XYZSystem::~XYZSystem () {$/;"	f	class:XYZSystem

@@ -100,7 +100,8 @@ class Molecule {
     double MinDistance (Molecule& mol);	// calculates the minimum distance between this molecule and another (2 closest atoms)
 
     VecR CalcDipole ();	// calculate the dipole
-    VecR Dipole () const { return _dipole; }		// return the dipole of the molecule
+	virtual void Dipole (VecR& dip) { _dipole = dip; }
+    virtual VecR Dipole () const { return _dipole; }		// return the dipole of the molecule
 
     virtual VecR MolecularAxis () { return _z; }
 

@@ -3,8 +3,15 @@
 
 #include "mdsystem.h"
 #include "ambersystem.h"
+
+#ifdef XYZ_SYS
 #include "xyzsystem.h"
+#endif
+
+#ifdef GROMACS_SYS
 #include "gmxsystem.h"
+#endif
+
 #include "utility.h"
 #include "graph.h"
 #include <libconfig.h++>

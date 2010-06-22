@@ -1,57 +1,35 @@
-#include "test.h"
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/symmetric.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/ublas/io.hpp>
+#include <iostream>
 
-Test::Test (WaterSystemParams& wsp)
-  :	Analyzer<AmberSystem> (wsp)
+#include "../matrixr.h"
+
+using namespace boost::numeric::ublas;
+using std::cout;
+using std::endl;
+
+
+void Print (const symmetric_matrix<double>& t) {
+  for (unsigned i = 0; i < t.size1(); i++) {
+	for (unsigned j = 0; j < t.size2(); j++) {
+	  printf ("% 8.3f", t(i,j));
+	}
+	printf ("\n");
+  }
+  printf ("\n");
+}
+
+int main () 
 {
 
-  this->sys = new AmberSystem("prmtop", "mdcrd", "mdvel");
+  symmetric_matrix<double> m(5,5);
+  m(1,4) = 5.0;
+  m(2,1) = 2.0;
+  m.clear();
 
-  return;
-}
-
-void Test::Setup () {
-
-  //this->LoadAll();
-  //this->LoadWaters();
-
-
-  //std::for_each(int_atoms.begin(), int_atoms.end(), tform);
-
-  //Water * wat = static_cast<Water *>(int_wats[0]);
-  //wat->Print();
-  return;
-}
-
-int main () {
-
-  libconfig::Config cfg;
-  cfg.readFile("system.cfg");
-
-  std::string filename = cfg.lookup("analysis.test.filename");
-  libconfig::Setting &analysis = cfg.lookup("analysis");
-  analysis.add("filename", libconfig::Setting::TypeString) = filename;
-
-  WaterSystemParams wsp (cfg);
-
-  Test t (wsp);
-
-  std::vector<int> v;
-  for (int i = 0; i < 10; i++) {
-	v.push_back(i*10);
-  }
-
-  for (std::vector<int>::const_iterator it = v.begin(); it != v.end(); it++)
-	cout << *it << " ";
-  cout << endl;
-
-  v.erase(std::remove_if(v.begin(), v.end(), std::not1(std::bind1st(std::less<int>(), 30))), v.end());
-  
-  for (std::vector<int>::const_iterator it = v.begin(); it != v.end(); it++)
-	cout << *it << " ";
-  cout << endl;
-
-  //t.SystemAnalysis ();
-
+  Print(m);
   return 0;
 }
-

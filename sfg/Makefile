@@ -3,16 +3,19 @@ include ../Makefile
 MORITAFILES		= $(WATERSYSTEM) watersfg.o morita.o 
 TEST		= $(WATERSYSTEM) test.o
 MPIMORITAFILES		= $(MORITAFILES) ../mpi/mpisys.o
-MORITA2002		= $(WATERSYSTEM) moritasfg2002.o morita2002.o
+MORITA2002		= $(WATERSYSTEM) morita2002.o
 
 morita : $(MORITAFILES)
-	$(CXX) $(CPPFLAGS) $(MORITAFILES) -llapack -lxdrfile -o ../bin/morita
+	$(CXX) $(CPPFLAGS) $(MORITAFILES) -llapack -o ../bin/morita
+
+morita2002 : $(MORITA2002)
+	$(CXX) $(CPPFLAGS) $(MORITA2002) -o ../bin/morita2002
 
 mpimorita : $(MPIMORITAFILES)
 	$(MPICXX) $(CPPFLAGS) $(MPILIBS) $(MPIMORITAFILES) -o ../bin/mpi-morita
 
 test : $(TEST)
-	$(CXX) $(CPPFLAGS) $(TEST) -llapack -lxdrfile -o test
+	$(CXX) $(CPPFLAGS) $(TEST) -o test
 
 cleansfg :
 	rm -f *.o test

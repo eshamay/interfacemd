@@ -279,6 +279,7 @@ void Analyzer<AmberSystem>::_InitializeSystem () {
   return;
 }
 
+#ifdef GROMACS_SYS
 template <>
 void Analyzer<GMXSystem>::_InitializeSystem () {
   std::string trr = wsp.config_file->lookup("system.files.gmx-trrfile");
@@ -286,6 +287,7 @@ void Analyzer<GMXSystem>::_InitializeSystem () {
   this->sys = new GMXSystem(trr.c_str(), gro.c_str());
   return;
 }
+#endif
 
 /*
 // Create a histogram of the angles formed by an axis of a molecule's given reference axis.

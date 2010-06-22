@@ -12,6 +12,7 @@ enum coord {x=0, y=1, z=2};
 class MatR;
 
 typedef std::vector<double>	Double_vector;
+typedef Double_vector::iterator Double_it;
 
 class VecR {
 

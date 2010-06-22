@@ -14,7 +14,7 @@ SFGAnalyzer::SFGAnalyzer (WaterSystemParams& wsp)
 	//sfg (SFGCalculator(&this->_graph))
 {
 
-  this->sys = new AmberSystem("prmtop", "mdcrd", "mdvel");
+  //this->sys = new AmberSystem("prmtop", "mdcrd", "mdvel");
 
   printf ("\n*** Performing an SFG analysis of the system ***\n");
 

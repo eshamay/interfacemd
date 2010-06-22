@@ -36,14 +36,13 @@ public:
 
 	// Functions for analysis
 	void SetAtoms ();
+	void SetBondLengths ();
+
 	VecR Bisector ();		// calculates the bisector (unit vector) of the water
 	VecR Normal () const { return _y; }
 
 	// flip the molecule about a plane (i.e. take its mirror image about a plane) through the oxygen about a given axis
 	void Flip (const coord axis);
-
-	//void CalcDipole ();
-	VecR const & Dipole () const { return _dipole; }			// calculates the dipole (from a parameterized source)
 
 	void SetMoritaAxes (const int bond = 1);		// Determines the molecular-frame axes (a la Morita&Hynes2000) with one bond on the Z-axis, the other in the positive X direction.
 	void SetOrderAxes ();		// sets the molecular axes such that the z-axis is along the C2V axis point from the H's to the O, and the x-axis is in the plane of the molecule
@@ -79,12 +78,10 @@ typedef std::vector<Water> Water_vec;
 
 namespace water {
 
-  class Angle : public std::unary_function<Water *, double> {
+  class setBondLengths : public std::unary_function<Water *,void> {
 	public:
-	  double operator() (const Water * wat) const {
-		return wat->Angle();
+	  void operator() (Water * wat) {
 	  }
   };
-
 }
 #endif

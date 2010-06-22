@@ -22,31 +22,38 @@ Water::Water (const Molecule& molecule) : Molecule(molecule) {
   ++numWaters;
 }
 
+void Water::SetBondLengths () {
+  this->_oh1 = this->_h1->Position() - this->_o->Position();
+  this->_oh2 = this->_h2->Position() - this->_o->Position();
+  return;
+}
+
 void Water::SetAtoms () {
 
   // first let's grab pointers to the three atoms and give them reasonable names
-  _h1 = (Atom *)NULL; _h2 = (Atom *)NULL;
+  this->_h1 = (Atom *)NULL; this->_h2 = (Atom *)NULL;
 
-  RUN (_atoms) {
-    if (_atoms[i]->Name().find("O") != string::npos)
-      _o = _atoms[i];
+  for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
+	if ((*it)->Name().find("O") != string::npos)
+	  this->_o = *it;
+	if ((*it)->Name().find("H") != string::npos) {
+	  if (_h1 == (Atom *)NULL)
+		this->_h1 = *it;
+	  else
+		this->_h2 = *it;
+	}
 
-    if (_atoms[i]->Name().find("H") != string::npos) {
-      if (_h1 == (Atom *)NULL)
-	_h1 = _atoms[i];
-      else
-	_h2 = _atoms[i];
-    }
+	if (*it == (Atom *)NULL) {
+	  std::cout << "problem setting the water atoms! Water::SetAtoms()" << std::endl;
+	}
   }
 
   // we can calculate the two O-H vectors
-  _oh1 = _h1->Position() - _o->Position();
-  _oh2 = _h2->Position() - _o->Position();
+  this->SetBondLengths ();
 
   _set = true;
-  //}
   return;
-  }
+}
 
 // flip the water about a given plane (perpendicular to the given axis) running through the oxygen
 void Water::Flip (const coord axis) {
@@ -88,13 +95,13 @@ void Water::SetMoritaAxes (const int Zbond) {
 
   // try one of the oh bonds as the z-axis
   if (Zbond == 1) {
-    _z = _oh1.Unit();
-    // let's find the y-axis, as it's just the normal to the molecular plane
-    _y = (_oh1 % _oh2).Unit();
+	_z = _oh1.Unit();
+	// let's find the y-axis, as it's just the normal to the molecular plane
+	_y = (_oh1 % _oh2).Unit();
   }
   else if (Zbond == 2) {
-    _z = _oh2.Unit();
-    _y = (_oh2 % _oh1).Unit();
+	_z = _oh2.Unit();
+	_y = (_oh2 % _oh1).Unit();
   }
 
 
@@ -173,7 +180,7 @@ _alpha = alpha_1_rot + alpha_2_rot;
 return;
 }
 #endif
-*/
+ */
 
 // The molecular axes are defined as per Morita&Hynes (2000) where they set one of the OH bonds (oh1) as the molecular z-axis, and the other bond points in the positive x-axis direction. The result is setting DCM as the direction cosine matrix, that, when operating on a vector in the molecular frame will rotate it into lab-frame coordinates
 MatR const & Water::DCMToLabMorita (const coord axis, const int bond) {
@@ -243,9 +250,9 @@ void Water::CalcEulerAngles (const coord axis) {
 
   // and now set up the euler rotation matrix according to the ZXZ convention for euler rotations
   double euler_matrix[9] = {
-    ca*cg-sa*cb*sg, 	sa*cg+ca*cb*sg, 	sb*sg,
-    -ca*sg-sa*cb*cg, 	-sa*sg+ca*cb*cg, 	sb*cg,
-    sb*sa, 				-sb*ca,				cb
+	ca*cg-sa*cb*sg, 	sa*cg+ca*cb*sg, 	sb*sg,
+	-ca*sg-sa*cb*cg, 	-sa*sg+ca*cb*cg, 	sb*cg,
+	sb*sa, 				-sb*ca,				cb
   };
 
   EulerMatrix.Set (euler_matrix);

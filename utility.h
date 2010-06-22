@@ -118,8 +118,8 @@ class Histogram1D : public std::unary_function<T,bool>
 	if (_access_count < 0.0) 
 	{
 	  printf ("weird value started with: %f in the histogram operator()\n", t);
-	  printf ("bin was %d with a population of %d\n", Bin(t), _histogram[Bin(t)]);
-	  printf ("the _access_count is: %d\n", _access_count);
+	  std::cout << "bin was " << Bin(t) << " with a population of " << _histogram[Bin(t)] << std::endl;
+	  std::cout << "the _access_count is: " << _access_count << std::endl;
 	  exit(1);
 	}
 	ret = true;
@@ -129,20 +129,18 @@ class Histogram1D : public std::unary_function<T,bool>
 
     double Count () const { return _access_count; }
     int Size () const { return _size; }
-    int Max () const { return _max; }
-    int Min () const { return _min; }
-    int Resolution () const { return _res; }
+    T Max () const { return _max; }
+    T Min () const { return _min; }
+    T Resolution () const { return _res; }
 
     // returns the population of a single bin given a value
-    double Population (const T t) const { 
+    histo_element_t Population (const T t) const { 
       if (!InBounds(t)) {
 	printf ("Population requested for a value outside of the histogram limits\n");
 	exit(1);
       }
       return _histogram[this->Bin(t)];
     }
-
-
 };
 
 
