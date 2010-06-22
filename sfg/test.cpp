@@ -4,15 +4,16 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <iostream>
+#include "../vecr.h"
 
-#include "../matrixr.h"
+//#include "../matrixr.h"
 
 using namespace boost::numeric::ublas;
 using std::cout;
 using std::endl;
 
 
-void Print (const symmetric_matrix<double>& t) {
+void Print (const matrix<double>& t) {
   for (unsigned i = 0; i < t.size1(); i++) {
 	for (unsigned j = 0; j < t.size2(); j++) {
 	  printf ("% 8.3f", t(i,j));
@@ -25,11 +26,17 @@ void Print (const symmetric_matrix<double>& t) {
 int main () 
 {
 
-  symmetric_matrix<double> m(5,5);
-  m(1,4) = 5.0;
-  m(2,1) = 2.0;
-  m.clear();
+  matrix<double> m (4,3);
 
-  Print(m);
+  VecR u (2.0, 5.0, 3.0);
+  VecR v (u);
+  VecR w;
+  double p[3] = {4.0, 3.0, 7.0};
+  VecR z(p);
+
+  cout << u << endl;
+  u.Zero();
+  cout << u << endl;
+
   return 0;
 }

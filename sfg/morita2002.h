@@ -56,18 +56,18 @@ namespace morita {
   class MoritaH2O : public Water {
 	public:
 
-	  MoritaH2O (const Molecule& molecule) : Water(molecule) { return; }
-	  MoritaH2O (const Molecule * molecule) : Water(*molecule) { return; }
+	  MoritaH2O (const Molecule& molecule) 
+		: Water(molecule), _alpha1(3,3), _alpha2(3,3), _alpha(3,3) { return; }
+	  MoritaH2O (const Molecule * molecule) 
+		: Water(*molecule), _alpha1(3,3), _alpha2(3,3), _alpha(3,3) { return; }
 
 	  void SetDipoleMoment ();
 	  void SetPolarizability ();
 
 	protected:
 
-	  VecR _dipole;
-	  MatR _alpha1, _alpha2;	// polarizabilities of the two OH bonds
-	  MatR _alpha;
-	  MatR _DCM;
+	  matrix<double> _alpha1, _alpha2;	// polarizabilities of the two OH bonds
+	  matrix<double> _alpha;
 
 	  double dR1, dR2, dA;		// displacements of the OH bonds and the HOH angle from their equilibrium values
 	  double X1, X2;
@@ -168,11 +168,19 @@ namespace morita {
 
   namespace utilities {
 
+	template <typename T>
+	  class DeletePointer : public std::unary_function<T,void> {
+		public:
+		  void operator() (T t) { delete t; }
+	  };  // delete pointer
+
+
 	template <typename T, typename U>
 	  class ConvertPointerType : public std::unary_function<T,U> {
 		public:
 		  U operator() (T t) const { return static_cast<U>(t); }
-	  };
+	  };  // convert pointer type
+
 
 	template <typename Iter1, typename Iter2>
 	  void ConvertContainerElementTypes (Iter1 pBegin, Iter1 pEnd, Iter2 pBegin2)
@@ -181,15 +189,16 @@ namespace morita {
 		typedef typename std::iterator_traits<Iter2>::value_type value_t2;
 
 		std::transform(pBegin, pEnd, pBegin2, ConvertPointerType<value_t1, value_t2>());
-	  }
+	  } // convert container element types
+
 
 	template <typename T, typename U>
-	  class ConvertAClass : public std::unary_function<T *,U *> {
+	  class MakeDerivedFromPointer : public std::unary_function<T *,U *> {
 		public:
 		  U * operator() (T * t) const {
-			return new U(t);
+			return new U(*t);
 		  }
-	  };
+	  };  // make derived from pointer
 
 
   } // namespace utilities

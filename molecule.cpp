@@ -13,11 +13,14 @@ Molecule::Molecule () :
 
 // a copy constructor to do a deep copy of a molecule instead of just referencing a pre-existing one.
 Molecule::Molecule (const Molecule& oldMol) :
-	_atoms(oldMol.Atoms()),
+	_atoms(oldMol._atoms),
+	_wanniers(oldMol._wanniers),
 	_set(false),
-	_centerofmass(oldMol.CenterOfMass()),
-	_mass(oldMol.Mass()),
-	_name(oldMol.Name())
+	_centerofmass(oldMol._centerofmass),
+	_mass(oldMol._mass),
+	_name(oldMol._name),
+	_ID (oldMol._ID),
+	_DCM (oldMol._DCM)
 {
 	++numMolecules;
 }

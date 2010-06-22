@@ -6,7 +6,7 @@
 class CarbonChain : public Molecule {
 
   protected:
-    vector<Atom *> _carbons;			/* An ordered listing of all the carbons in
+	std::vector<Atom *> _carbons;			/* An ordered listing of all the carbons in
 						   the molecule */
   public:
     CarbonChain (int numCarbons);			// a default constructor

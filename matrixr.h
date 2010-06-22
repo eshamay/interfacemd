@@ -7,7 +7,7 @@
 #include "utility.h"
 //#include "FTensor.h"
 
-class VecR;
+//class VecR;
 
 #undef _LINALG_
 

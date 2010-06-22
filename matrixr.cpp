@@ -20,7 +20,7 @@ VecR MatR::operator* (const VecR& input) const {		// Vector rotation/matrix-vect
 	for (int j = 0; j < 3; j++) {
 	  val += _matrix[i][j] * input[j];
 	}
-	v._coords[i] = val;
+	v(i) = val;
   }
 
   return (v);

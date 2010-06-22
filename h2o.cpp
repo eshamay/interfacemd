@@ -6,9 +6,8 @@ int Water::numWaters = 0;
 WaterDipoleParms Water::_dipparms ("dipoleparm.dat");
 #endif
 
-Water::Water () : Molecule ()
+Water::Water ()
 {
-  _name = "h2o";
   ++numWaters;
 }
 
@@ -17,7 +16,6 @@ Water::~Water () {
 }
 
 Water::Water (const Molecule& molecule) : Molecule(molecule) {
-
   _name = "h2o";
   ++numWaters;
 }

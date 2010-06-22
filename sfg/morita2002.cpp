@@ -17,12 +17,17 @@ namespace morita {
 
   void SFGAnalyzer::Setup () {
 
+	// load all the waters in the system
 	LoadWaters();
 	int N = int_wats.size();
 
+	std::for_each(_wats.begin(), _wats.end(), utilities::DeletePointer<MoritaH2O*>());
+	_wats.resize(N);
+	std::transform(int_wats.begin(), int_wats.end(), _wats.begin(), utilities::MakeDerivedFromPointer<Molecule, MoritaH2O>());
+
 	_T.resize(N);
 	_p.resize(N, 3);
-	_alpha.resize(N, N);
+	_alpha.resize(3*N, 3*N);
 
   } // Setup
 
@@ -30,17 +35,19 @@ namespace morita {
 
 	// Calculate the tensor 'T' which is formed of 3x3 matrix elements
 	_T.clear();
-	for (unsigned int i = 0; i < int_wats.size()/3; i++) {
-	  for (unsigned int j = i+1; j < int_wats.size()/3; j++) {
-		project(_T, slice(3*i,1,3), slice(3*j,1,3)) = math::DipoleFieldTensor(int_wats[i], int_wats[j]);
+	for (unsigned int i = 0; i < _wats.size()/3; i++) {
+	  for (unsigned int j = i+1; j < _wats.size()/3; j++) {
+		project(_T, slice(3*i,1,3), slice(3*j,1,3)) = math::DipoleFieldTensor(_wats[i], _wats[j]);
 	  }
 	}
 
+	// Calculate the dipole moment of each water, and then constructs the 3Nx3 tensor 'p'.
 	std::for_each (_wats.begin(), _wats.end(), SetDipoleMoment());
-	_p.clear();
-	for (unsigned i = 0; i < int_wats.size(); i++) {
+	for (unsigned i = 0; i < _wats.size(); i++){
+	  row(_p,i) = _wats[i]->Dipole();
+	}
 
-
+	// Set up the polarizability (alpha) matrix similar to the method for the dipole moment
 	std::for_each (_wats.begin(), _wats.end(), SetPolarizability());
 
 
@@ -76,11 +83,11 @@ namespace morita {
 	qH2 = (-dq-qO)/2.0;
 
 	// the dipole vector is thus classically determined (summing position * charge)
-	_dipole.Zero();
-	_dipole += _o->Position() * qO;
-	_dipole += _h1->Position() * qH1;
-	_dipole += _h2->Position() * qH2;
-  }
+	this->_dipole.Zero();
+	this->_dipole += _o->Position() * qO;
+	this->_dipole += _h1->Position() * qH1;
+	this->_dipole += _h2->Position() * qH2;
+  } // Set dipole moment
 
   void MoritaH2O::SetPolarizability () {
 	_alpha1.Zero();
