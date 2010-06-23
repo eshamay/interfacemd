@@ -57,17 +57,17 @@ namespace morita {
 	public:
 
 	  MoritaH2O (const Molecule& molecule) 
-		: Water(molecule), _alpha1(3,3), _alpha2(3,3), _alpha(3,3) { return; }
+		: Water(molecule) { return; }
 	  MoritaH2O (const Molecule * molecule) 
-		: Water(*molecule), _alpha1(3,3), _alpha2(3,3), _alpha(3,3) { return; }
+		: Water(*molecule) { return; }
 
 	  void SetDipoleMoment ();
 	  void SetPolarizability ();
 
 	protected:
 
-	  matrix<double> _alpha1, _alpha2;	// polarizabilities of the two OH bonds
-	  matrix<double> _alpha;
+	  MatR _alpha1, _alpha2;	// polarizabilities of the two OH bonds
+	  MatR _alpha;
 
 	  double dR1, dR2, dA;		// displacements of the OH bonds and the HOH angle from their equilibrium values
 	  double X1, X2;
@@ -83,7 +83,7 @@ namespace morita {
 
 	// dipole field tensor 'T' as used in the morita&hynes paper
 	// it's a square 3Nx3N matrix, where N = number of particles
-	class DipoleFieldTensor : public tensor_t {
+	class DipoleFieldTensor : public tensor::tensor_t {
 	  public:
 		DipoleFieldTensor (const Molecule* wat1, const Molecule* wat2);
 	}; // Dipole field tensor

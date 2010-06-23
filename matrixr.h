@@ -37,17 +37,9 @@ class MatR : public tensor::tensor_t {
 
 	void	Set (const MatR& input);
 
-#ifdef USE__LAPACK
-	MatR 	Inverse () 	 	const;
-	//MatR	Diagonalize ();
 
-
-	// Output
-	std::vector< complex<double> > 	EigenValues ();
-	std::vector<VecR> 				EigenVectors ();
-	void 						CalcEigenSystem ();
-	MatR 						Quaternion ();
-#endif
+	MatR operator* (const MatR& m) const;
+	VecR operator* (const VecR& v) const;		// Vector rotation/matrix-vector inner product
 
 };
 

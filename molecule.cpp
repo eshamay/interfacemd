@@ -506,7 +506,7 @@ MatR const & Molecule::DCMToLab (const coord axis) {
   double rotation_data[9] = {	_x<X, _y<X, _z<X,
 	_x<Y, _y<Y, _z<Y,
 	_x<Z, _y<Z, _z<Z   };
-  _DCM.Set(rotation_data);
+  this->_DCM.Set(rotation_data);
 
   return _DCM;
 }

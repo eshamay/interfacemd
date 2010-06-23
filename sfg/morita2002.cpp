@@ -105,11 +105,11 @@ namespace morita {
 	// These rotations will produce a polarizability tensor that is formed 
 	// in the space-fixed frame (instead of the local or molecular frames
 	// as written in the paper).
-	_DCM = this->DCMToLabMorita(z,1);
-	_alpha = _alpha + (_DCM.Transpose() * _alpha1 * _DCM);
+	this->DCMToLabMorita(z,1);
+	_alpha = _alpha + (this->_DCM.Transpose() * _alpha1);// * this->_DCM);
 
-	_DCM = this->DCMToLabMorita(z,2);
-	_alpha = _alpha + (_DCM.Transpose() * _alpha2 * _DCM);
+	this->DCMToLabMorita(z,2);
+	_alpha = _alpha + (this->_DCM.Transpose() * _alpha2 * this->_DCM);
   }
 
 
@@ -121,7 +121,7 @@ namespace morita {
 
 	DipoleFieldTensor::DipoleFieldTensor (const Molecule* wat1, const Molecule* wat2)
 	  :
-		tensor_t(3,3)
+		tensor::tensor_t(3,3)
 	{
 	  VecR r = MDSystem::Distance (wat1->GetAtom("O"), wat2->GetAtom("O"));
 	  double distance = r.Magnitude();
