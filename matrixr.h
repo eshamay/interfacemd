@@ -38,9 +38,13 @@ class MatR : public tensor::tensor_t {
 	void	Set (const MatR& input);
 
 
+	MatR operator+ (const MatR& m) const;
+	MatR operator- (const MatR& m) const;
 	MatR operator* (const MatR& m) const;
 	VecR operator* (const VecR& v) const;		// Vector rotation/matrix-vector inner product
 
+	MatR Transpose() const;
+	MatR Inverse() const;
 };
 
 #endif

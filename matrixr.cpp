@@ -15,6 +15,19 @@ MatR MatR::operator+ (const MatR& input) const {
 
 */
 
+MatR MatR::operator+ (const MatR& m) const {
+  MatR n(*this);
+  n.plus_assign(m);
+  return n;
+}
+
+MatR MatR::operator- (const MatR& m) const {
+  MatR n(*this);
+  n.minus_assign(m);
+  return n;
+}
+
+
 // multiply a vector by a matrix
 VecR MatR::operator* (const VecR& v) const {		// Vector rotation/matrix-vector inner product
   VecR w;
@@ -37,7 +50,6 @@ void MatR::Set (coord const row, coord const col, double const val) {	// Set the
   (*this)(row,col) = val;
 }
 
-
 void MatR::Set (const MatR& input) {
   for (unsigned i = 0; i < 3; i++) {
 	for (unsigned j = 0; j < 3; j++) {
@@ -47,7 +59,6 @@ void MatR::Set (const MatR& input) {
 }	// set
 
 
-
 // set the matrix using a pre-built array of data
 void MatR::Set (double * const data) {
   for (int i = 0; i < 3; i++) {
@@ -55,4 +66,17 @@ void MatR::Set (double * const data) {
 	  (*this)(i,j) = data[i*3+j];
 	}
   }
+}
+
+
+MatR MatR::Transpose() const {
+  MatR n;
+  n.assign(trans(*this));
+  return n;
+}
+
+MatR MatR::Inverse() const {
+  MatR n;
+  n.assign(this->Inverse());
+  return n;
 }

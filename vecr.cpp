@@ -116,6 +116,6 @@ VecR VecR::Unit () const {
 }
 
 void VecR::Print () const {
-  printf ("% 8.4e\t% 8.4e\t% 8.4e\n", (*this)(0), (*this)(1), (*this)(2));
+  printf ("[% 8.3f% 8.3f% 8.3f ]\n", (*this)(0), (*this)(1), (*this)(2));
 }
 

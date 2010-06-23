@@ -26,7 +26,7 @@ namespace tensor {
 		void 	Zero ();
 		int determinant_sign(const permutation_matrix<std ::size_t>& pm) const;
 		double 	Determinant () const;
-		void 	Inverse (T& inv) const;
+		static void 	Inverse (const T&, T&);
 		double	Trace () const;
 		Tensor<T>	Transpose () const;
 
@@ -52,11 +52,14 @@ namespace tensor {
 
   template <typename T>
 	void Tensor<T>::Zero() {
+	  /*
 	  for (unsigned i = 0; i < this->size1(); i++) {
 		for (unsigned j = 0; j < this->size2(); j++) {
 		  (*this)(i,j) = T(0);
 		} 
 	  }
+	  */
+	  this->clear();
 	}
 
   template <typename T>
@@ -80,18 +83,19 @@ namespace tensor {
    * It uses lu_factorize and lu_substitute in uBLAS to invert a matrix
    */
   template<class T>
-	void Tensor<T>::Inverse (T& inv) const {
+	void Tensor<T>::Inverse (const T& m, T& inv) {
+
 	  // create a working copy of the input
-	  matrix_t mLu(*this);
+	  matrix_t mLu (m);
 
 	  // perform LU-factorization
-	  lu_factorize(mLu);
+	  lu_factorize (mLu);
 
 	  // create identity matrix of "inverse"
-	  inv.assign(id_matrix_t(mLu.size1()));
+	  inv.assign (id_matrix_t (mLu.size1()));
 
 	  // backsubstitute to get the inverse
-	  lu_substitute<matrix_t const, T >(mLu, inv);
+	  lu_substitute<matrix_t const, T > (mLu, inv);
 
 	} // lu_inv
 

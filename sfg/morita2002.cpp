@@ -48,7 +48,7 @@ namespace morita {
 	}
 
 	// Set up the polarizability (alpha) matrix similar to the method for the dipole moment
-	std::for_each (_wats.begin(), _wats.end(), SetPolarizability());
+	//std::for_each (_wats.begin(), _wats.end(), SetPolarizability());
 
 
   } // Analysis
