@@ -5,8 +5,7 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <iostream>
 #include "../vecr.h"
-
-//#include "../matrixr.h"
+#include "../matrixr.h"
 
 using namespace boost::numeric::ublas;
 using std::cout;
@@ -26,7 +25,8 @@ void Print (const matrix<double>& t) {
 int main () 
 {
 
-  matrix<double> m (4,3);
+  double dm[9] = {1.0, 2.0, 3.0, 4, 5, 6, 7, 8, 9};
+  MatR m (dm);
 
   VecR u (2.0, 5.0, 3.0);
   VecR v (u);

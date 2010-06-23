@@ -206,11 +206,11 @@ void Water::CalcEulerAngles (const coord axis) {
   this->DCMToLab (axis);
 
   // here is the direct calculation of the euler angles from the direction cosine matrix. This method comes from wikipedia of all places :)
-  double x3 = _DCM.Index(0,2);
-  double y3 = _DCM.Index(1,2);
-  double z1 = _DCM.Index(2,0);
-  double z2 = _DCM.Index(2,1);
-  double z3 = _DCM.Index(2,2);
+  double x3 = _DCM(0,2);
+  double y3 = _DCM(1,2);
+  double z1 = _DCM(2,0);
+  double z2 = _DCM(2,1);
+  double z3 = _DCM(2,2);
 
   /* If all three axes in the molecular (xyz) and lab (XYZ) frames are aligned, then the euler rotations work by rotating about the body-fixed
    * axes as follows based on the ZXZ convention:

@@ -1,5 +1,6 @@
 #include "matrixr.h"
 
+/*
 MatR MatR::operator+ (const MatR& input) const {
   MatR m;
   double val;
@@ -41,59 +42,39 @@ MatR MatR::operator* (const MatR& input) const {		// Matrix rotation/multiplicat
 
   return (m);
 }
-
-double MatR::operator() (int const row, int const col) const {
-  return (_matrix[row][col]);
-}
-
-double MatR::operator() (coord const row, coord const col) const {
-  return (_matrix[row][col]);
-}
-
-void MatR::Zero () {
-  for (Double_matrix_it it = _matrix.begin(); it != _matrix.end(); it++) {
-	for (Double_it jt = it->begin(); jt != it->end(); jt++) {
-	  *jt = 0.0;
-	}
-  }
-}
-
-void MatR::Identity () {
-  this->Zero();
-  for (int i = 0; i < 3; i++) { this->Set(i,i,1.0); }
-}
-
-double MatR::Index (int const row, int const col) const {	// Return the element
-  return (_matrix[row][col]);
-}
-double MatR::Index (coord const row, coord const col) const {	// Return the element
-  return (_matrix[row][col]);
-}
+*/
 
 void MatR::Set (int const row, int const col, double const val) {	// Set the element
-  _matrix[row][col] = val;
+  (*this)(row,col) = val;
 }
 
 void MatR::Set (coord const row, coord const col, double const val) {	// Set the element
-  _matrix[row][col] = val;
+  (*this)(row,col) = val;
 }
+
+
+void MatR::Set (const MatR& input) {
+  for (unsigned i = 0; i < 3; i++) {
+	for (unsigned j = 0; j < 3; j++) {
+	  (*this)(i,j) = input(i,j);
+	}
+  }
+}	// set
+
+
 
 // set the matrix using a pre-built array of data
 void MatR::Set (double * const data) {
   for (int i = 0; i < 3; i++) {
 	for (int j = 0; j < 3; j++) {
-	  _matrix[i][j] = data[i*3+j];
+	  (*this)(i,j) = data[i*3+j];
 	}
   }
 }
 
-void MatR::Print () const {
-  for (int row=0; row < 3; row++) {
-	for (int col=0; col<3; col++)
-	  printf ("% 8.4f\t", _matrix[row][col]);
-	printf("\n");
-  }
-}
+
+
+
 
 #ifdef USE__LAPACK__
 void MatR::CalcEigenSystem () {
@@ -141,19 +122,8 @@ vector< complex<double> > MatR::EigenValues () {
 
   return (out);
 }
-#endif
 
-MatR MatR::Transpose () const {
-  MatR m;
-  for (unsigned int i = 0; i < 3; i++) {
-	for (unsigned int j = 0; j < 3; j++) {
-	  m.Set(i,j,_matrix[j][i]);
-	}
-  }
-  return (m);
-}
 
-#ifdef USE__LAPACK__
 MatR MatR::Inverse () const {
 
   double G[9];
@@ -214,47 +184,3 @@ MatR MatR::Diagonalize () {
 }
 #endif
 
-double MatR::Trace () const {
-
-  double out = _matrix[0][0] + _matrix[1][1] + _matrix[2][2];
-
-  return(out);
-}
-
-double MatR::Determinant () const {
-
-  double det = 0.0;
-  det += _matrix[0][0]*_matrix[1][1]*_matrix[2][2];
-  det -= _matrix[0][0]*_matrix[1][2]*_matrix[2][1];
-  det += _matrix[0][1]*_matrix[1][2]*_matrix[2][0];
-  det -= _matrix[0][1]*_matrix[1][0]*_matrix[2][2];
-  det += _matrix[0][2]*_matrix[1][0]*_matrix[2][1];
-  det -= _matrix[0][2]*_matrix[1][1]*_matrix[2][0];
-
-  return (det);
-}
-
-
-
-/*
-// This matrix is now rotated to another frame, thus we supply the x, y, and z axes vectors that we want to rotate to.
-MatR MatR::RotateToFrame (VecR const * const frame) const {
-
-VecR _x = frame[0];
-VecR _y = frame[0];
-VecR _z = frame[0];
-
-// here's the lab-frame coordinates that we rotate from
-VecR X (1.0, 0.0, 0.0);
-VecR Y (0.0, 1.0, 0.0);
-VecR Z (0.0, 0.0, 1.0);
-
-// now we build our direction cosine matrix (each element is the cosine of the angle between two axes)
-
-double rotation[9] = { _x<X, _x<Y, _x<Z, _y<X, _y<Y, _y<Z, _z<X, _z<Y, _z<Z };
-
-MatR rot (rotation);
-
-return (rot * (*this));
-}
- */

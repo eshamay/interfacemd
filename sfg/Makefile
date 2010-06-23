@@ -1,7 +1,7 @@
 include ../Makefile
 
 MORITAFILES		= $(WATERSYSTEM) watersfg.o morita.o 
-TEST		= $(WATERSYSTEM) test.o
+TEST		= ../vecr.o ../tensor.o ../matrixr.o test.o
 MPIMORITAFILES		= $(MORITAFILES) ../mpi/mpisys.o
 MORITA2002		= $(WATERSYSTEM) morita2002.o
 

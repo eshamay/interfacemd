@@ -118,21 +118,6 @@ namespace morita {
 
   namespace math {
 
-	using namespace boost::numeric::ublas;
-
-	template <typename T>
-	void Tensor<T>::Print() const
-	{ 
-	  for (unsigned i = 0; i < this->size1(); i++) {
-		for (unsigned j = 0; j < this->size2(); j++) {
-		  printf ("% 8.3f", (*this)(i,j));
-		}
-		printf ("\n");
-	  }
-	  printf ("\n");
-	}	// Print
-
-
 
 	DipoleFieldTensor::DipoleFieldTensor (const Molecule* wat1, const Molecule* wat2)
 	  :
