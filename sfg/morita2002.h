@@ -64,6 +64,8 @@ namespace morita {
 	  void SetDipoleMoment ();
 	  void SetPolarizability ();
 
+	  MatR& Polarizability() { return _alpha; }
+
 	protected:
 
 	  MatR _alpha1, _alpha2;	// polarizabilities of the two OH bonds

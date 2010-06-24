@@ -21,11 +21,12 @@ namespace morita {
 	LoadWaters();
 	int N = int_wats.size();
 
+	// clear out and then reload the new set of waters in the system
 	std::for_each(_wats.begin(), _wats.end(), utilities::DeletePointer<MoritaH2O*>());
 	_wats.resize(N);
 	std::transform(int_wats.begin(), int_wats.end(), _wats.begin(), utilities::MakeDerivedFromPointer<Molecule, MoritaH2O>());
 
-	_T.resize(N);
+	_T.resize(3*N);
 	_p.resize(N, 3);
 	_alpha.resize(3*N, 3*N);
 
@@ -47,8 +48,21 @@ namespace morita {
 	  row(_p,i) = _wats[i]->Dipole();
 	}
 
+	/*
+	for (int i = 0; i < 9; i++)
+	  _wats[i]->Dipole().Print();
+
+	matrix_slice<tensor::tensor_t> s (_p, slice(0,1,9), slice(0,1,3));
+	cout << s << endl;
+	*/
+
 	// Set up the polarizability (alpha) matrix similar to the method for the dipole moment
-	//std::for_each (_wats.begin(), _wats.end(), SetPolarizability());
+	std::for_each (_wats.begin(), _wats.end(), SetPolarizability());
+	for (unsigned int i = 0; i < _wats.size()/3; i++) {
+	  project(_alpha, slice(3*i,1,3), slice(3*i,1,3)) = _wats[i]->Polarizability();
+	}
+
+
 
 
   } // Analysis
@@ -106,7 +120,7 @@ namespace morita {
 	// in the space-fixed frame (instead of the local or molecular frames
 	// as written in the paper).
 	this->DCMToLabMorita(z,1);
-	_alpha = _alpha + (this->_DCM.Transpose() * _alpha1);// * this->_DCM);
+	_alpha = _alpha + (this->_DCM.Transpose() * _alpha1 * this->_DCM);
 
 	this->DCMToLabMorita(z,2);
 	_alpha = _alpha + (this->_DCM.Transpose() * _alpha2 * this->_DCM);

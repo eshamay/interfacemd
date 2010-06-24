@@ -3,10 +3,6 @@
 
 #include "molecule.h"
 
-#ifdef H2O_DIPOLE_PARM
-#include "dipoleparm.h"
-#endif
-
 #include "matrixr.h"
 #include "utility.h"
 
@@ -18,14 +14,6 @@ protected:
 	VecR _oh1, _oh2;				// Both of the OH vectors
 
 	Atom *_o, *_h1, *_h2;			// pointers to the atoms for easy access
-	#ifdef WATER_POLARIZ
-	MatR _alpha;					// polarizability of the molecule
-	#endif
-
-	#ifdef H2O_DIPOLE_PARM
-	static WaterDipoleParms _dipparms;		// The water dipole parameter file
-	#endif
-
 
 public:
 	Water ();	// a default constructor
