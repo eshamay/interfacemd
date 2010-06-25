@@ -15,6 +15,7 @@ enum coord {x=0, y=1, z=2};
 typedef std::vector<double>	Double_vector;
 typedef Double_vector::iterator Double_it;
 
+typedef boost::numeric::ublas::vector<int> int_vector_t;
 typedef boost::numeric::ublas::vector<double> vector_t;
 
 class VecR : public vector_t {

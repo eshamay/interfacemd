@@ -7,7 +7,7 @@ namespace morita {
   SFGAnalyzer::SFGAnalyzer (WaterSystemParams& wsp)
 	: 
 	  Analyzer<AmberSystem> (wsp),
-	  _p(0,0), _alpha(0,0)
+	  _p(0), _alpha(0,0), _IDENT(0), _Talpha(0,0), _ginv(0,0), _h(0,0), _f(0,0)
   
   { return; }
 
@@ -19,16 +19,22 @@ namespace morita {
 
 	// load all the waters in the system
 	LoadWaters();
-	int N = int_wats.size();
 
 	// clear out and then reload the new set of waters in the system
 	std::for_each(_wats.begin(), _wats.end(), utilities::DeletePointer<MoritaH2O*>());
-	_wats.resize(N);
+	_wats.resize(int_wats.size());
 	std::transform(int_wats.begin(), int_wats.end(), _wats.begin(), utilities::MakeDerivedFromPointer<Molecule, MoritaH2O>());
 
-	_T.resize(3*N);
-	_p.resize(N, 3);
-	_alpha.resize(3*N, 3*N);
+	//int N = _wats.size();
+	//cout << "using " << N << " waters" << endl;
+	int N = _wats.size();
+	_wats.resize(300);
+	N = _wats.size();
+
+
+	_T.resize(3*N); _T.clear();
+	_p.resize(3*N); _p.clear();
+	_alpha.resize(3*N, 3*N); _alpha.clear();
 
   } // Setup
 
@@ -38,23 +44,27 @@ namespace morita {
 	_T.clear();
 	for (unsigned int i = 0; i < _wats.size()/3; i++) {
 	  for (unsigned int j = i+1; j < _wats.size()/3; j++) {
+		if (i == j) continue;
 		project(_T, slice(3*i,1,3), slice(3*j,1,3)) = math::DipoleFieldTensor(_wats[i], _wats[j]);
 	  }
 	}
 
 	// Calculate the dipole moment of each water, and then constructs the 3Nx3 tensor 'p'.
 	std::for_each (_wats.begin(), _wats.end(), SetDipoleMoment());
-	for (unsigned i = 0; i < _wats.size(); i++){
-	  row(_p,i) = _wats[i]->Dipole();
+	for (unsigned i = 0; i < _wats.size()/3; i++){
+	  project(_p, slice(3*i,1,3)) = _wats[i]->Dipole();
 	}
 
 	/*
-	for (int i = 0; i < 9; i++)
+	for (int i = 0; i < 3; i++)
 	  _wats[i]->Dipole().Print();
 
-	matrix_slice<tensor::tensor_t> s (_p, slice(0,1,9), slice(0,1,3));
-	cout << s << endl;
-	*/
+	cout << endl;
+	vector_slice<vector_t> s (_p, slice(0,1,9));
+	for (int i = 0; i < 9; i++)
+	  cout << s(i) << endl;
+	 */
+
 
 	// Set up the polarizability (alpha) matrix similar to the method for the dipole moment
 	std::for_each (_wats.begin(), _wats.end(), SetPolarizability());
@@ -62,8 +72,33 @@ namespace morita {
 	  project(_alpha, slice(3*i,1,3), slice(3*i,1,3)) = _wats[i]->Polarizability();
 	}
 
+	// following equation 23 - (1 + T*alpha) f = h.
+	// first here set up 1 + T*alpha
 
+	// do lots of initialization before the calculations
+	int N = 3*_wats.size();
+	_IDENT.resize(N);
+	_Talpha.resize(N,N); _Talpha.clear();
+	_ginv.resize(N,N);	_ginv.clear();
+	_f.resize(N,3);
+	_h.resize(N,3);
+	tensor::tensor_t::BlockIdentity(_h,3);
 
+	_Talpha.assign (prod(_T, _alpha));
+	_ginv.assign (_IDENT);
+	_ginv.plus_assign (_Talpha);	// this is now 1 + T*alpha, a.k.a inverse of g
+
+	// a VERY long operation! avoid this :)
+	//tensor::tensor_t::Inverse(_ginv, _g);
+
+	int_vector_t Pivot(N);
+	int info;
+	int NRHS = 3;
+	//_f.assign(_h);
+	//dgesv_ (&N,&NRHS,&_ginv(0,0),&N,&Pivot(0),&_h(0,0),&N,&info);
+	//pdgesv_ (&N, &NRHS, );
+	
+	_h.Print();
 
   } // Analysis
 
@@ -127,7 +162,7 @@ namespace morita {
   }
 
 
-  
+
 
 
   namespace math {

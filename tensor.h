@@ -11,8 +11,8 @@ namespace tensor {
 
   using namespace boost::numeric::ublas;
 
-  typedef matrix<double> matrix_t;
-  typedef identity_matrix<double> id_matrix_t;
+  typedef matrix<double, column_major> matrix_t;
+  typedef identity_matrix<double, column_major> id_matrix_t;
 
   template <typename T>
 	class Tensor : public T {
@@ -22,12 +22,21 @@ namespace tensor {
 		Tensor (const Tensor<T>& t) : T(t) { }
 		virtual ~Tensor() { }
 
-
+		// clears out the tensor (i.e. sets every element to 0
 		void 	Zero ();
+
 		int determinant_sign(const permutation_matrix<std ::size_t>& pm) const;
+
 		double 	Determinant () const;
-		static void 	Inverse (const T&, T&);
+
+		// Matrix inverse using LU decomposition
+		static void Inverse (const T&, T&);
+
+		// Turn every sub-block within the matrix into an identity matrix
+		static void BlockIdentity (T&, const int blocksize);
+
 		double	Trace () const;
+
 		Tensor<T>	Transpose () const;
 
 		void Print() const;
@@ -35,7 +44,7 @@ namespace tensor {
 
 	}; // tensor
   typedef Tensor<matrix_t>	tensor_t;
-  typedef Tensor<symmetric_matrix<double, upper> > sym_tensor_t;
+  typedef Tensor<symmetric_matrix<double, upper, column_major> > sym_tensor_t;
 
 
   template <typename T>
@@ -61,6 +70,18 @@ namespace tensor {
 	  */
 	  this->clear();
 	}
+
+
+  template <typename T>
+	void Tensor<T>::BlockIdentity (T& m, const int blocksize) {
+	  id_matrix_t id (blocksize,blocksize);
+	  for (unsigned i = 0; i < m.size1()/blocksize; i++) {
+		for (unsigned j = 0; j < m.size2()/blocksize; j++) {
+		  project (m, slice(blocksize*i,1,blocksize), slice(blocksize*j,1,blocksize)) = id;
+		} 
+	  }
+	} // Block Identity
+
 
   template <typename T>
 	Tensor<T> Tensor<T>::Transpose () const {
@@ -141,10 +162,25 @@ namespace tensor {
 	public:
 	  ColumnIdentityMatrix (const int M) : tensor_t(M,3)
 	{
-	  id_matrix_t id (3,3);
-	  for (unsigned i = 0; i < size1()/3; i++)
-		project(*this, slice(3*i,1,3), slice(0,1,3)) = id;
+	  this->_setIdentityMatrices();
 	}
+
+	  void Resize (const int M) { 
+		this->resize(M,3);
+		this->_setIdentityMatrices();
+	  }
+
+	  void clear () { return; }
+
+	private:
+
+	  void _setIdentityMatrices ()
+	  {
+		id_matrix_t id (3,3);
+		for (unsigned i = 0; i < size1()/3; i++)
+		  project(*this, slice(3*i,1,3), slice(0,1,3)) = id;
+	  }
+
   }; // Column Identity Matrix
 
 

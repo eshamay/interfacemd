@@ -8,8 +8,9 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>
-#include <cmath>
 #include <iostream>
+
+#include <mpi.h>
 
 
 
@@ -118,10 +119,16 @@ namespace morita {
 	  void PostAnalysis () { return; }
 
 	private:
-	  Morita_ptr_vec	_wats;
-	  tensor::tensor_t	_p;
-	  tensor::tensor_t	_alpha;
+	  Morita_ptr_vec		_wats;
+	  vector_t				_p;
+	  tensor::tensor_t		_alpha;
 	  tensor::SymmetricMatrix _T;	// system dipole field tensors
+	  tensor::id_matrix_t 	_IDENT;	// a few temporaries for calculating eq 23
+	  tensor::tensor_t		_Talpha;
+	  tensor::tensor_t		_ginv;	
+	  tensor::tensor_t		_h;	
+	  tensor::tensor_t		_f;	
+
   };	// sfg-analyzer
 
 
@@ -162,6 +169,16 @@ namespace morita {
 
 
   } // namespace utilities
+
+
+  // Using the LAPACK solver for some simple systems
+  extern "C" {
+	
+	void dgesv_(int* n, int* nrhs, double* a, int* lda, int* ipiv, double* b, int* ldb, int* info);
+
+	void pdgesv_ (int *n, int *nrhs, double *A, int *ia, int *ja, int *desca, int* ipiv, double *B, int *ib, int *jb, int *descb, int *info); 
+
+  } // extern
 
 
 
