@@ -240,8 +240,8 @@ void Molecule::Rotate (VecR& origin, VecR& axis, double angle) {
 
 void Molecule::Shift (VecR& shift) {
 
-  RUN (_atoms) {
-	_atoms[i]->Shift (shift);
+  for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
+	(*it)->Shift (shift);
   }
 
   return;
@@ -293,8 +293,8 @@ void Molecule::Print () const {
 
   printf ("Residue = %s  (%d)\tmass = % .3f\n", _name.c_str(), _ID, _mass);
 
-  RUN (_atoms) {
-	_atoms[i]->Print();
+  for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
+	(*it)->Print();
   }
   //printf ("wan)\t%d\n", _wanniers.size());
 
@@ -325,8 +325,8 @@ VecR Molecule::CalcDipole () {
   }
 
   // wannier centers have a charge of -2
-  RUN (_wanniers) {
-	_dipole -= (_wanniers[i] - _centerofmass) * 2.0;
+  for (VecR_it it = _wanniers.begin(); it != _wanniers.end(); it++) {
+	_dipole -= (*it - _centerofmass) * 2.0;
   }
 
   return (_dipole);
@@ -338,13 +338,10 @@ double Molecule::MinDistance (Molecule& mol) {
   bool first = true;
   double min = 0.0;
 
-  RUN (_atoms) {
-	RUN2 (mol.Atoms()) {
+  for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
+	for (Atom_it jt = mol.Atoms().begin(); jt != mol.Atoms().end(); jt++) {
 
-	  Atom * atom1 = _atoms[i];
-	  Atom * atom2 = mol.Atoms(j);
-
-	  double temp = (atom1->Position() - atom2->Position()).Magnitude();
+	  double temp = ((*it)->Position() - (*jt)->Position()).Magnitude();
 	  //printf ("%f\n", temp);
 	  if (first) {
 		first = false;
@@ -578,8 +575,9 @@ Molecule * Molecule::Merge (Molecule * mol) {
   // the new molecule's name is yet unknown
   _name = "undefined";
 
-  RUN (mol->Atoms()) {
-	this->AddAtom (mol->Atoms(i));
+
+  for (Atom_it it = mol->Atoms().begin(); it != mol->Atoms().end(); it++) {
+	this->AddAtom (*it);
   }
 
   return (this);

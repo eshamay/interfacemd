@@ -211,7 +211,7 @@ void BondGraph::UpdateGraph (const Atom_ptr_vec& atoms) {
   // clear out the old graph info
   _graph.clear();
   // resize the graph with new vertices
-  RUN (atoms)
+  for (Atom_it it = atoms.begin(); it != atoms.end(); it++)
 	boost::add_vertex(_graph);
   // parse the atom info into the vertices
   this->_ParseAtoms(atoms);
@@ -297,8 +297,8 @@ int BondGraph::NumHBonds (Atom const * const ap) const {
 int BondGraph::NumHBonds (Water const * const wat) const {
 
   int num = 0;
-  RUN (wat->Atoms()) {
-	num += this->NumHBonds(wat->Atoms(i));
+  for (Atom_it it = wat->Atoms().begin(); it != wat->Atoms().end(); it++) {
+	num += this->NumHBonds(*it);
   }
 
   return (num);

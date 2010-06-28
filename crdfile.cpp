@@ -1,5 +1,8 @@
 #include "crdfile.h"
 
+using std::cout;
+using std::endl;
+
 CRDFile::CRDFile (std::string const crdpath, int const c_size) :
 	_file((FILE *)NULL),
 	_size(c_size),

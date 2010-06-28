@@ -233,37 +233,37 @@ class Histogram2D : public std::binary_function<T,T,bool>
 /***************************************** Simplifiers *************************************************************************************************/
 
 // These RUN macros should clean up code for checking through vectors and arrays
-#define RUN(list)   \
-  for (size_t i = 0; i < list.size(); i++)
+//#define RUN(list)   \
+  //for (size_t i = 0; i < list.size(); i++)
 
-#define RUN2(list)  \
-  for (size_t j = 0; j < list.size(); j++)
+//#define RUN2(list)  \
+  //for (size_t j = 0; j < list.size(); j++)
 
 // A destructive remove_if that erases the given list with a new list containing only the elements that don't match the predicate op
-#define D_REMOVE_IF(vec,pred)	\
-  vec.erase (std::remove_if (vec.begin(), vec.end(), pred), vec.end() );
+//#define D_REMOVE_IF(vec,pred)	\
+  //vec.erase (std::remove_if (vec.begin(), vec.end(), pred), vec.end() );
 
 // A general method for making new functors
-#define MAKE_FUNCTOR(name,return_type,arg_type,code)	\
-  class name {	\
-    public:	\
-		return_type operator() (arg_type t) { code }	\
-  };
+//#define MAKE_FUNCTOR(name,return_type,arg_type,code)	\
+  //class name {	\
+    //public:	\
+		//return_type operator() (arg_type t) { code }	\
+  //};
 
 // Creates a new predicate object that has a name as given, and takes a value of the given type (can be an object), and returns the value of the 'code' provided. code must return a boolean for this to work.
-#define MAKE_PREDICATE(name,arg_type,code)	\
-  MAKE_FUNCTOR(name, bool, arg_type, return code;);
+//#define MAKE_PREDICATE(name,arg_type,code)	\
+  //MAKE_FUNCTOR(name, bool, arg_type, return code;);
 
-#define FOR_EACH(list,fn)	\
-  std::for_each (list.begin(), list.end(), fn);
+//#define FOR_EACH(list,fn)	\
+  //std::for_each (list.begin(), list.end(), fn);
 
 // Maps OP onto A and stores the result into B
-#define MAP_TO(A,B,OP)	\
-  std::transform(A.begin(), A.end(), B.begin(), OP);
+//#define MAP_TO(A,B,OP)	\
+  //std::transform(A.begin(), A.end(), B.begin(), OP);
 
 // Maps OP onto A and stores the result back into A - destructive function
-#define MAP(A,OP)	\
-  MAP_TO(A,A,OP);
+//#define MAP(A,OP)	\
+  //MAP_TO(A,A,OP);
 
 
 /************************************** String Manipulation *******************************************/

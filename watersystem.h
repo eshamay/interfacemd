@@ -1,6 +1,10 @@
 #ifndef	WATERSYSTEM_H_
 #define	WATERSYSTEM_H_
 
+#include <boost/mpi.hpp>
+#include <boost/mpi/environment.hpp>
+#include <boost/mpi/communicator.hpp>
+
 #include "mdsystem.h"
 #include "ambersystem.h"
 
@@ -12,7 +16,8 @@
 #include "gmxsystem.h"
 #endif
 
-#include "utility.h"
+
+//#include "utility.h"
 #include "graph.h"
 #include <libconfig.h++>
 #include <cstdlib>
@@ -25,30 +30,45 @@
 struct WaterSystemParams {
   WaterSystemParams () { }
 
-  WaterSystemParams (libconfig::Config::Config& cfg)
+  WaterSystemParams (libconfig::Config::Config * cfg) 
+	: 
+	  config_file (cfg), mpisys(false)
+  { _Initialize(); }
+
+
+  WaterSystemParams (libconfig::Config::Config * cfg, const bool mpisystem)
+	: 
+	  config_file (cfg), mpisys(true)
+  { _Initialize(); }
+
+
+  void _Initialize ()
   {
 	try {
-	  config_file = &cfg;
-	  posmin = (cfg.lookup("analysis.position-range")[0]);
-	  posmax = (cfg.lookup("analysis.position-range")[1]);
+	  posmin = (config_file->lookup("analysis.position-range")[0]);
+	  posmax = (config_file->lookup("analysis.position-range")[1]);
 
-	  avg = cfg.lookup("analysis.averaging");
-	  output_filename = (const char *)cfg.lookup("analysis.filename");
-	  output = fopen(output_filename.c_str(), "w");
-	  axis = (coord)((int)cfg.lookup("analysis.reference-axis"));
+	  avg = config_file->lookup("analysis.averaging");
+
+	  output_filename = (const char *)config_file->lookup("analysis.filename");
+	  if (!mpisys || (mpisys && !mpi_world.rank())) {
+		output = fopen(output_filename.c_str(), "w");
+	  }
+
+	  axis = (coord)((int)config_file->lookup("analysis.reference-axis"));
 	  ref_axis = VecR(
-		  cfg.lookup("analysis.reference-vector")[0], 
-		  cfg.lookup("analysis.reference-vector")[1], 
-		  cfg.lookup("analysis.reference-vector")[2]);
-	  output_freq = cfg.lookup("analysis.output-frequency");
-	  timesteps = cfg.lookup("system.timesteps");
-	  restart = cfg.lookup("analysis.restart-time");
-	  posres = cfg.lookup("analysis.resolution.position");
+		  config_file->lookup("analysis.reference-vector")[0], 
+		  config_file->lookup("analysis.reference-vector")[1], 
+		  config_file->lookup("analysis.reference-vector")[2]);
+	  output_freq = config_file->lookup("analysis.output-frequency");
+	  timesteps = config_file->lookup("system.timesteps");
+	  restart = config_file->lookup("analysis.restart-time");
+	  posres = config_file->lookup("analysis.resolution.position");
 	  posbins  = int((posmax-posmin)/posres);
-	  pbcflip = cfg.lookup("analysis.PBC-flip");
-	  angmin = cfg.lookup("analysis.angle-range")[0];
-	  angmax = cfg.lookup("analysis.angle-range")[1];
-	  angres = cfg.lookup("analysis.resolution.angle");
+	  pbcflip = config_file->lookup("analysis.PBC-flip");
+	  angmin = config_file->lookup("analysis.angle-range")[0];
+	  angmax = config_file->lookup("analysis.angle-range")[1];
+	  angres = config_file->lookup("analysis.resolution.angle");
 	  angbins  = int((angmax-angmin)/angres);
 	}
 	catch(const libconfig::SettingTypeException &stex) {
@@ -59,9 +79,11 @@ struct WaterSystemParams {
 	  std::cerr << "A setting is missing from the configuration file!" << std::endl;
 	  exit(EXIT_FAILURE);
 	}
-  }
+  } // Initialize
 
   libconfig::Config * config_file;	/* Configuration file */
+  boost::mpi::communicator	mpi_world;
+  bool mpisys;
 
   bool avg;			/* Will averaging of two interfaces be performed? Can also be used for other functionality */
 
@@ -100,22 +122,33 @@ class WaterSystem {
 	//WaterSystem (const int argc, const char **argv, const WaterSystemParams& params);
 	virtual ~WaterSystem ();
 
-	static WaterSystemParams wsp;
+	WaterSystemParams wsp;
 	static BondGraph graph;
 
-	static double	posmin, posmax;
-	static double	pbcflip;			// location to flip about periodic boundaries
-	static coord axis;				// axis normal to the infterface
-	static double int_low, int_high, middle;	// the positions of analysis cutoffs
+	double	posmin, posmax;
+	double	pbcflip;			// location to flip about periodic boundaries
+	coord axis;				// axis normal to the infterface
+	double int_low, int_high, middle;	// the positions of analysis cutoffs
 
-	static Atom_ptr_vec	sys_atoms;		// all atoms/mols in the system
-	static Mol_ptr_vec	sys_mols;
-	static Mol_ptr_vec	int_wats;		// interfacial waters, or just all the waters in the system depending on the function call
-	static Mol_ptr_vec 	int_mols;
-	static Atom_ptr_vec	int_atoms;		// interfacial water atoms (or as above)
+	Atom_ptr_vec	sys_atoms;		// all atoms/mols in the system
+	Mol_ptr_vec	sys_mols;
+	Mol_ptr_vec	int_wats;		// interfacial waters, or just all the waters in the system depending on the function call
+	Mol_ptr_vec 	int_mols;
+	Atom_ptr_vec	int_atoms;		// interfacial water atoms (or as above)
 
 	void OpenFile ();
 	void Debug (string msg) const;
+
+	bool MPI_Master () const { return !this->wsp.mpi_world.rank(); }
+	int MPI_Rank () const { return this->wsp.mpi_world.rank(); }
+	int MPI_Size () const { return this->wsp.mpi_world.size(); }
+	void MPI_Print () const { cout << this->MPI_Rank() << "/" << this->MPI_Size() << endl; }
+
+	virtual bool MPIStatus () const 
+	{ return !this->wsp.mpisys || (this->wsp.mpisys && this->MPI_Master()); }
+
+
+
 
 	static double AxisPosition (Atom * a) {
 	  double pos = a->Position()[axis];
@@ -125,11 +158,13 @@ class WaterSystem {
 
 	typedef std::pair<double,double> Double_pair;
 	// quick way to make a pair for the oft-used extents std::pair defaulting to the posmin/posmax in the config file
-	Double_pair ExtentPair (
-		const double low = WaterSystem<AmberSystem>::posmin,
-		const double high = WaterSystem<AmberSystem>::posmax) const {
-	  return std::make_pair<double,double> (low, high);
-	}
+	/*
+	   Double_pair ExtentPair (
+	   const double low = this->posmin,
+	   const double high = this->posmax) const {
+	   return std::make_pair<double,double> (low, high);
+	   }
+	 */
 
 	void LoadAll ();							// Loads all the molecules and atoms in the system into the containers
 	void SliceWaterCoordination (const BondGraph::coordination c);
@@ -284,39 +319,19 @@ class WaterSystem {
 
 };
 
-template<typename T> WaterSystemParams WaterSystem<T>::wsp;
-
-template<typename T> double WaterSystem<T>::posmin;
-template<typename T> double WaterSystem<T>::posmax;
-template<typename T> double WaterSystem<T>::pbcflip;
-template<typename T> coord WaterSystem<T>::axis;
-
-template<typename T> Atom_ptr_vec WaterSystem<T>::sys_atoms;
-template<typename T> Mol_ptr_vec WaterSystem<T>::sys_mols;
-template<typename T> Mol_ptr_vec WaterSystem<T>::int_wats;
-template<typename T> Mol_ptr_vec WaterSystem<T>::int_mols;
-template<typename T> Atom_ptr_vec WaterSystem<T>::int_atoms;
-
 template<typename T> BondGraph WaterSystem<T>::graph;
 
   template <class T>
 WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
-{
-  WaterSystem::wsp = params;
+  :
+	posmin(params.posmin), posmax(params.posmax), pbcflip(params.pbcflip), axis(params.axis), wsp(params)
+{ return; }
 
-  WaterSystem::posmin = params.posmin;
-  WaterSystem::posmax = params.posmax;
-  WaterSystem::pbcflip = params.pbcflip;
-  WaterSystem::axis = params.axis;
-
-  return;
-}
 
 template <class T>
-WaterSystem<T>::~WaterSystem () {
+WaterSystem<T>::~WaterSystem () { return; }
 
-  return;
-}
+
 
 template <class T>
 void WaterSystem<T>::LoadAll () {

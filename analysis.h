@@ -20,134 +20,124 @@ class Analyzer : public WaterSystem<T> {
 
     virtual void _InitializeSystem ();
 
+
   public:
-    Analyzer (const WaterSystemParams& params);
-    virtual ~Analyzer ();
+	Analyzer (const WaterSystemParams& params);
+	virtual ~Analyzer ();
 
 
-    virtual void SystemAnalysis ();
+	virtual void SystemAnalysis ();
 
-    static VecR ref_axis;
+	VecR ref_axis;
 
-    // position boundaries and bin widths for gathering histogram data
-    static double	posres;
-    static int		posbins;
-    static double 	angmin, angmax, angres;
-    static int		angbins;
-    static int 		timesteps;
-    static unsigned int restart;
+	// position boundaries and bin widths for gathering histogram data
+	double	posres;
+	int		posbins;
+	double 	angmin, angmax, angres;
+	int		angbins;
+	unsigned timesteps;
+	unsigned restart;
 
-    /*
-    // create a histogram of the angle between a given molecular axis vector (determined by the axisFunc) and the system's ref_axis. The molecule is chosen by the residue name. The molecules must themselves have the functions for determining the molecular axis vector.
-    template <typename molecule_t>
-      vector<int> Molecular_Axis_Orientation_Histogram (
-	  string moleculeName,
-	  VecR (molecule_t::*axisFunction)()
-	  );
+	/*
+	// create a histogram of the angle between a given molecular axis vector (determined by the axisFunc) and the system's ref_axis. The molecule is chosen by the residue name. The molecules must themselves have the functions for determining the molecular axis vector.
+	template <typename molecule_t>
+	vector<int> Molecular_Axis_Orientation_Histogram (
+	string moleculeName,
+	VecR (molecule_t::*axisFunction)()
+	);
 
-    // Creates a 2-D histogram of position in a slab vs. molecular orientation (calculated by the axis returned by the axisFunction). The vector returned can be accessed by vector[position][angle].
-    // The true angles are not computed, but rather the cosines of the angles formed between the molecular axis and the system-reference axis.
-    template <typename molecule_t>
-      vector< vector<int> > Molecular_Axis_Orientation_Position_Histogram (
-	  string moleculeName,
-	  VecR (molecule_t::*axisFunction)()
-	  );
+	// Creates a 2-D histogram of position in a slab vs. molecular orientation (calculated by the axis returned by the axisFunction). The vector returned can be accessed by vector[position][angle].
+	// The true angles are not computed, but rather the cosines of the angles formed between the molecular axis and the system-reference axis.
+	template <typename molecule_t>
+	vector< vector<int> > Molecular_Axis_Orientation_Position_Histogram (
+	string moleculeName,
+	VecR (molecule_t::*axisFunction)()
+	);
 
-    template <typename molecule_t>
-      vector< vector<double> > Interface_Location_Histogram (
-	  const coord d1, const coord d2,
-	  const string mol_name,
-	  const string atom_name,
-	  vector< vector<double> >& histogram,
-	  vector< vector<int> >& density);
+	template <typename molecule_t>
+	vector< vector<double> > Interface_Location_Histogram (
+	const coord d1, const coord d2,
+	const string mol_name,
+	const string atom_name,
+	vector< vector<double> >& histogram,
+	vector< vector<int> >& density);
 
-    */
+	 */
 
-    // calculate a bin for a histogram
-    static int Bin (const double value, const double min, const double res) {
-      return (int)((value-min)/res);
-    }
+	// calculate a bin for a histogram
+	static int Bin (const double value, const double min, const double res) {
+	  return (int)((value-min)/res);
+	}
 
-    static int PositionBin (const double position);
-    static int PositionBin (const Atom * patom);
-    static double Position (const Atom * patom);
-    static double Position (const VecR& v);
-    static double Position (const double d);
+	static int PositionBin (const double position);
+	static int PositionBin (const Atom * patom);
+	static double Position (const Atom * patom);
+	static double Position (const VecR& v);
+	static double Position (const double d);
 
-    static int AngleBin (const double angle) {
-      return Bin (angle, angmin, angres);
-    }
+	static int AngleBin (const double angle) {
+	  return Bin (angle, angmin, angres);
+	}
 
-    void LoadNext () { this->sys->LoadNext(); }
-    Atom_ptr_vec& Atoms () { return WaterSystem<T>::int_atoms; } 
-    Mol_ptr_vec& Molecules () { return WaterSystem<T>::int_mols; }
-    Water_ptr_vec& Waters () { return WaterSystem<T>::int_wats; }
+	void LoadNext () { 
+	  if (this->MPIStatus()) {
+		this->sys->LoadNext();
+	  }	
+	}  // LoadNext
 
-    // analysis loop functions
-    virtual void Setup () { return; }
-    virtual void Analysis () { return; }
-    virtual void PostAnalysis () { return; }
-    virtual void DataOutput (const unsigned int timestep) { return; }
+
+	Atom_ptr_vec& Atoms () { return int_atoms; } 
+	Mol_ptr_vec& Molecules () { return int_mols; }
+	Water_ptr_vec& Waters () { return int_wats; }
+
+	// analysis loop functions
+	virtual void Setup () { return; }
+	virtual void Analysis () { return; }
+	virtual void PostAnalysis () { return; }
+	virtual void DataOutput (const unsigned int timestep) { return; }
 
 };
 
 
-template <class T> double	Analyzer<T>::posres;
-template <class T> int		Analyzer<T>::posbins;
-
-template <class T> double 	Analyzer<T>::angmin;
-template <class T> double	Analyzer<T>::angmax;
-template <class T> double	Analyzer<T>::angres;
-template <class T> int		Analyzer<T>::angbins;
-
-template <class T> int 		Analyzer<T>::timesteps;
-template <class T> unsigned int Analyzer<T>::restart;
-
-template <class T> VecR		Analyzer<T>::ref_axis;
-
-template <class T> 
+  template <class T> 
 Analyzer<T>::Analyzer (const WaterSystemParams& params)
-
 : WaterSystem<T>(params),
   output_filename(params.output_filename), output(params.output),
-  output_freq(params.output_freq)
+  output_freq(params.output_freq),
+  posres(params.posres), posbins(int((params.posmax - params.posmin)/params.posres)), angmin(params.angmin), angmax(params.angmax), angres(params.angres), angbins(int((params.angmax - params.angmin)/params.angres)), timesteps(params.timesteps), restart(params.restart), ref_axis(params.ref_axis)
 { 
-  Analyzer<T>::posres = params.posres;
-  Analyzer<T>::posbins = int((params.posmax - params.posmin)/params.posres);
 
-  Analyzer<T>::angmin = params.angmin;
-  Analyzer<T>::angmax = params.angmax;
-  Analyzer<T>::angres = params.angres;
-  Analyzer<T>::angbins = int((params.angmax - params.angmin)/params.angres);
+  if (this->MPIStatus()) {
 
-  Analyzer<T>::timesteps = params.timesteps;
-  Analyzer<T>::restart = params.restart;
+	this->_CheckOutputFile();
 
-  Analyzer<T>::ref_axis = params.ref_axis;
+	try {
+	  this->_InitializeSystem();
+	}
+	catch (const libconfig::SettingTypeException &stex) {
+	  std::cerr << "Something wrong with the setting type for the system file names (prmtop, mdcrd, mdvel)" << std::endl;
+	  exit(EXIT_FAILURE);
+	}
+	catch (const libconfig::SettingNotFoundException &snfex)
+	{
+	  std::cerr << "Couldn't find the system file names (prmtop, mdcrd, etc.) in the configuration file" << std::endl;
+	  exit(EXIT_FAILURE);
+	}
 
-  this->_CheckOutputFile();
-
-  try {
-    Analyzer<T>::_InitializeSystem();
+	this->_OutputHeader();
+  }	
+  
+  // MPI-master-only initialization
+  if (this->wsp.mpisys) {
+	MPI::COMM_WORLD.Barrier();
   }
-  catch (const libconfig::SettingTypeException &stex) {
-    std::cerr << "Something wrong with the setting type for the system file names (prmtop, mdcrd, mdvel)" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  catch (const libconfig::SettingNotFoundException &snfex)
-  {
-    std::cerr << "Couldn't find the system file names (prmtop, mdcrd, etc.) in the configuration file" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  this->_OutputHeader();
-}
+}	// constructor
 
 template <class T> 
 void Analyzer<T>::_OutputHeader () const {
 
   printf ("Analysis Parameters:\n\tOutput Filename = \"%s\"\n\tScreen output frequency = 1/%d\n\n\tPosition extents for analysis:\n\t\tMin = % 8.3f\n\t\tMax = % 8.3f\n\t\tPosition Resolution = % 8.3f\n\n\tPrimary Axis = %d\nNumber of timesteps to be analyzed = %d\n",
-      output_filename.c_str(), output_freq, Analyzer<T>::posmin, Analyzer<T>::posmax, Analyzer<T>::posres, int(Analyzer<T>::axis), Analyzer<T>::timesteps);
+	  output_filename.c_str(), output_freq, Analyzer<T>::posmin, Analyzer<T>::posmax, Analyzer<T>::posres, int(Analyzer<T>::axis), Analyzer<T>::timesteps);
 
 #ifdef AVG
   printf ("\n\nThe analysis is averaging about the two interfaces located as:\n\tLow  = % 8.3f\n\tHigh = % 8.3f\n\n", int_low, int_high);
@@ -157,8 +147,10 @@ void Analyzer<T>::_OutputHeader () const {
 
 template <class T> 
 Analyzer<T>::~Analyzer () {
-  delete this->sys;
-  fclose (output);
+  if(this->MPIStatus()) {
+	delete this->sys;
+	fclose (output);
+  }
   return;
 }
 
@@ -166,28 +158,30 @@ template <class T>
 void Analyzer<T>::_CheckOutputFile () {
 
   if (output == (FILE *)NULL) {
-    printf ("WaterSystem::WaterSystem (argc, argv) - couldn't open the data output file!\n");
-    exit(1);
+	printf ("WaterSystem::WaterSystem (argc, argv) - couldn't open the data output file!\n");
+	exit(1);
   }
 
   return;
 }
 
-template <class T> 
+  template <class T> 
 void Analyzer<T>::_OutputStatus (const int timestep)
 {
-  if (!(timestep % (this->output_freq * 10)))
-    cout << endl << timestep << "/" << this->timesteps << " ) ";
-  if (!(timestep % this->output_freq)) {
-    cout << "*";
-  }
+  if (this->MPIStatus()) {
+	if (!(timestep % (this->output_freq * 10)))
+	  cout << endl << timestep << "/" << this->timesteps << " ) ";
+	if (!(timestep % this->output_freq)) {
+	  cout << "*";
+	}
 
-  fflush (stdout);
+	fflush (stdout);
+  }
   return;
 }
 
 // A routine that performs some type of typical/generic analysis of a system
-template <class T> 
+  template <class T> 
 void Analyzer<T>::SystemAnalysis ()
 {
   // do some initial setup
@@ -197,24 +191,27 @@ void Analyzer<T>::SystemAnalysis ()
   // start the analysis - run through each timestep
   for (timestep = 0; timestep < timesteps; timestep++) {
 
-    // Perform the main loop analysis that works on every timestep of the simulation
-    Analysis ();
+	// Perform the main loop analysis that works on every timestep of the simulation
+	Analysis ();
 
-    // load the next timestep
-    LoadNext();
+	// load the next timestep
+	if (this->MPIStatus()) {
+	  LoadNext();
 
-   // output the status of the analysis (to the screen or somewhere useful)
-    _OutputStatus (timestep);
-    // Output the actual data being collected to a file or something for processing later
-    if (!(timestep % (output_freq * 10)) && timestep)
-      DataOutput(timestep);
+	  // output the status of the analysis (to the screen or somewhere useful)
+	  _OutputStatus (timestep);
+	  // Output the actual data being collected to a file or something for processing later
+	  if (!(timestep % (output_freq * 10)) && timestep)
+		DataOutput(timestep);
+	}
   }
 
   // do a little work after the main analysis loop (normalization of a histogram? etc.)
   PostAnalysis ();
 
   // do one final data output to push out the finalized data set
-  DataOutput(timestep);
+  if (this->MPIStatus())
+	DataOutput(timestep);
 
   return;
 }
@@ -224,9 +221,9 @@ int Analyzer<T>::PositionBin (const double position) {
 
   // check for flipping due to periodic boundaries
   double pos = position;
-  if (pos < WaterSystem<T>::wsp.pbcflip) 
-    pos += MDSystem::Dimensions()[WaterSystem<T>::wsp.axis];
-  return (Bin (pos, WaterSystem<T>::wsp.posmin, posres));
+  if (pos < pbcflip) 
+	pos += MDSystem::Dimensions()[axis];
+  return (Bin (pos, posmin, posres));
 
 }
 
@@ -242,10 +239,10 @@ int Analyzer<T>::PositionBin (const Atom * patom) {
 #ifdef AVG
   // here the bin will be selected based on the distance to a given interface. Negative distances are inside the water phase, positive are in the CCl4
   double distance = (position > middle) ? position - int_high : int_low - position;
-  int bin = Bin (distance, WaterSystem<T>::wsp.posmin, posres);
+  int bin = Bin (distance, posmin, posres);
 #else
   //if (position < START or position > END) continue;		// only bin stuff within the bounds that have been set up
-  int bin = Bin (position, WaterSystem<T>::wsp.posmin, posres);
+  int bin = Bin (position, posmin, posres);
 #endif
 
   return bin;
@@ -259,31 +256,31 @@ double Analyzer<T>::Position (const Atom * patom) {
 
 template <class T> 
 double Analyzer<T>::Position (const VecR& v) {
-  double position = v[WaterSystem<T>::wsp.axis];
+  double position = v[axis];
   return Analyzer<T>::Position(position);
 }
 
 template <class T> 
 double Analyzer<T>::Position (const double d) {
   double pos = d;
-  if (pos < WaterSystem<T>::wsp.pbcflip) pos += MDSystem::Dimensions()[WaterSystem<T>::wsp.axis];
+  if (pos < pbcflip) pos += MDSystem::Dimensions()[axis];
   return pos;
 }
 
 template <>
 void Analyzer<AmberSystem>::_InitializeSystem () {
-  this->sys = new AmberSystem(
-      wsp.config_file->lookup("system.files.prmtop"),
-      wsp.config_file->lookup("system.files.mdcrd"),
-      wsp.config_file->lookup("system.files.mdvel"));
+  std::string prmtop = this->wsp.config_file->lookup("system.files.prmtop");
+  std::string mdcrd = this->wsp.config_file->lookup("system.files.mdcrd");
+  std::string mdvel = this->wsp.config_file->lookup("system.files.mdvel");
+  this->sys = new AmberSystem(prmtop, mdcrd, mdvel);
   return;
 }
 
 #ifdef GROMACS_SYS
 template <>
 void Analyzer<GMXSystem>::_InitializeSystem () {
-  std::string trr = wsp.config_file->lookup("system.files.gmx-trrfile");
-  std::string gro = wsp.config_file->lookup("system.files.gmx-grofile");
+  std::string trr = this->wsp.config_file->lookup("system.files.gmx-trrfile");
+  std::string gro = this->wsp.config_file->lookup("system.files.gmx-grofile");
   this->sys = new GMXSystem(trr.c_str(), gro.c_str());
   return;
 }
@@ -316,7 +313,7 @@ histo[anglebin]++;
 
 return (histo);
 }
-*/
+ */
 
 /*
    template <typename molecule_t>
@@ -347,7 +344,7 @@ histo[posbin][anglebin]++;	// Binning into the histogram, ftw
 
 return (histo);
 }
-*/
+ */
 
 /*
 // creates a 2D histogram showing the shape of the plane formed by a given atom of a molecule averaged over a simulation.
@@ -397,7 +394,7 @@ density[d1_bin][d2_bin]++;
 
 return histogram;
 }
-*/
+ */
 
 /*
    class AmberAnalyzer : public Analyzer<AmberSystem> {
@@ -431,5 +428,5 @@ return histogram;
    this->sys = new GMXSystem(trr.c_str(), gro.c_str());
    }
    };
-   */
+ */
 #endif

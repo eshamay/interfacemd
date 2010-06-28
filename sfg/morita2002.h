@@ -1,7 +1,11 @@
+
+#define DEBUG__	1
 #ifndef MORITA2002_H_
 #define MORITA2002_H_
 
-#include "../utility.h"
+#define MPI__	1
+
+//#include "../utility.h"
 #include "../analysis.h"
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
@@ -10,11 +14,6 @@
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <iostream>
 
-#include <mpi.h>
-
-
-
-//#include "../moritasfg2002.h"
 
 namespace morita {
 
@@ -116,9 +115,10 @@ namespace morita {
 	  void Setup ();
 	  void Analysis ();
 	  void DataOutput (const unsigned int timestep);
-	  void PostAnalysis () { return; }
+	  void PostAnalysis ();
 
 	private:
+
 	  Morita_ptr_vec		_wats;
 	  vector_t				_p;
 	  tensor::tensor_t		_alpha;
@@ -173,7 +173,7 @@ namespace morita {
 
   // Using the LAPACK solver for some simple systems
   extern "C" {
-	
+
 	void dgesv_(int* n, int* nrhs, double* a, int* lda, int* ipiv, double* b, int* ldb, int* info);
 
 	void pdgesv_ (int *n, int *nrhs, double *A, int *ia, int *ja, int *desca, int* ipiv, double *B, int *ib, int *jb, int *descb, int *info); 

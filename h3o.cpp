@@ -19,9 +19,9 @@ void Hydronium::SetAtoms () {
 
 		// now set the 3 hydrogens
 		std::vector<Atom *> hydrogens;
-		RUN (_atoms) {
-			if (_atoms[i]->Name() != "H") continue;
-			hydrogens.push_back (_atoms[i]);
+		for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
+			if ((*it)->Name() != "H") continue;
+			hydrogens.push_back ((*it));
 		}
 
 		_h1 = hydrogens[0];

@@ -1,25 +1,29 @@
 SRCLIB	 	= $(HOME)/md/src
 
-CXX			= icpc
+CXX			= mpic++
 
 DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated #-wd981,1599,1572,383
 OPTIMIZE 	= -O2 -finline-functions -finline -funroll-loops -m64
 #CPPFLAGS    = -Wall -Drestrict= -ftemplate-depth-100 $(DEBUG) -L$(HOME)/share/lib
-CPPFLAGS    = -Wall -ftemplate-depth-100 $(OPTIMIZE) 
+CPPFLAGS    = -Wall -ftemplate-depth-100 $(DEBUG) 
 
-LIBS		= -L$(HOME)/share/lib -L$(MPI_HOME)/lib -L$(ATLAS)/lib -lconfig++
 
 ATLAS		= $(HOME)/share/atlas
 BOOST		= $(HOME)/src/boost_1_43_0
+BOOSTLIBS	= -lboost_serialization -lboost_mpi
 LAPACK		= $(HOME)/src/lapack-3.2.1
 LAPACKLIBS	= -lmkl_lapack -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread
 SCALAPACK	= -openmp -Wl,--start-group -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_intel_thread -Wl,--end-group -lpthread -lmpi -lm
 
+LIBS		= -L$(HOME)/share/lib -L$(MPI_HOME)/lib -L$(ATLAS)/lib -L$(BOOST)/stage/lib -lconfig++ $(BOOSTLIBS)
+
 XDRLIB		= $(XDRDIR)/lib
 XDRINC		= $(XDRDIR)/include
 
-CPATH		= :$(SRCLIB):$(HOME)/share/include:$(ATLAS)/include:$(BOOST)#:$(XDRINC)
+CPATH		= :$(SRCLIB):$(HOME)/share/include:$(ATLAS)/include:$(BOOST):$(MPI_HOME)/include
 
+
+#MPI		= $(SRCLIB)/mpihandler.o
 
 MATH	= $(SRCLIB)/vecr.o $(SRCLIB)/matrixr.o 
 

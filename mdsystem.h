@@ -52,6 +52,7 @@ class MDSystem {
 
     // Calculate the distance between two atoms given the periodic boundaries of the system
     static VecR Distance (const Atom * atom1, const Atom * atom2);
+
 };
 
 #include "h2o.h"

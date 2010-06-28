@@ -1,5 +1,8 @@
 #include "topfile.h"
 
+using std::cout;
+using std::endl;
+
 TOPFile::TOPFile (std::string path) :
   _topfile((FILE *)NULL)
 {
@@ -56,7 +59,7 @@ void TOPFile::FindFlag (std::string flag) {
     sscanf (str, " %*s %s", str);
   }
   // then strip the next line which holds a 'format' for the section
-  fgets (str, 1000, _topfile); 		// load the string up
+  fgets (str, 1000, _topfile);
 
   return;
 }

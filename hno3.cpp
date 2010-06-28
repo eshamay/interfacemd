@@ -42,19 +42,19 @@ bool NitricAcid::CalcNO2Dipole () {
 
 	// we've got all the atoms, now let's find the wannier centers that match those atoms of O1, O2, and N
 	_no2wanniers.clear();
-	RUN (_wanniers) {
+	for (VecR_it it = _wanniers.begin(); it != _wanniers.end(); it++) {
 
 		// check for O1 wans
-		double distance = (_o1->Position() - _wanniers[i]).Magnitude();
-		if (distance < WANNIER_BOND) _no2wanniers.push_back (_wanniers[i]);
+		double distance = (_o1->Position() - *it).Magnitude();
+		if (distance < WANNIER_BOND) _no2wanniers.push_back (*it);
 
 		// check for O2 wans
-		distance = (_o2->Position() - _wanniers[i]).Magnitude();
-		if (distance < WANNIER_BOND) _no2wanniers.push_back (_wanniers[i]);
+		distance = (_o2->Position() - *it).Magnitude();
+		if (distance < WANNIER_BOND) _no2wanniers.push_back (*it);
 
 		// check for N wans
-		distance = (_n->Position() - _wanniers[i]).Magnitude();
-		if (distance < WANNIER_BOND) _no2wanniers.push_back (_wanniers[i]);
+		distance = (_n->Position() - *it).Magnitude();
+		if (distance < WANNIER_BOND) _no2wanniers.push_back (*it);
 	}
 
 	// we've got all the atoms and wannier center locations... let's calculate the dipole
@@ -69,8 +69,8 @@ bool NitricAcid::CalcNO2Dipole () {
 	temp = _centerofmass - _o2->Position();
 	_no2dipole += temp * 6.0;
 
-	RUN (_no2wanniers) {
-		_no2dipole -= (_centerofmass - _no2wanniers[i]) * 2.0;
+	for (VecR_it it = _no2wanniers.begin(); it != _no2wanniers.end(); it++) {
+		_no2dipole -= (_centerofmass - *it) * 2.0;
 	}
 
 return true;
@@ -84,9 +84,9 @@ void NitricAcid::PrintNO2 () const {
 	_o1->Print();
 	_o2->Print();
 
-	RUN (_no2wanniers) {
+	for (VecR_it it = _no2wanniers.begin(); it != _no2wanniers.end(); it++) {
 		printf ("wan) ");
-		_no2wanniers[i].Print();
+		it->Print();
 	}
 
 return;
@@ -104,16 +104,17 @@ void NitricAcid::SetAtoms () {
 		std::vector< std::vector<double> > oxygens;
 
 		// we'll go through the three oxygens and find the one closest to the hydrogen - that becomes _oh. The other two then just get set as _o1 and _o2
-		RUN (_atoms) {
+		int i = 0;
+		for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
 
-			if (_atoms[i]->Name().find("O") == string::npos) continue;
+			if ((*it)->Name().find("O") == string::npos) continue;
 
 			std::vector<double> temp;
 			// find the distance from each oxygen to the hydrogen
-			double distance = (_h->Position() - _atoms[i]->Position()).Magnitude();
+			double distance = (_h->Position() - (*it)->Position()).Magnitude();
 			//double distance = _atoms[i]->Position().MinDistance (_h->Position(), Atom::Size());
 			temp.push_back (distance);
-			temp.push_back ((double)i);
+			temp.push_back ((double)i++);
 
 			oxygens.push_back (temp);
 		}
@@ -179,9 +180,9 @@ void Nitrate::SetAtoms () {
 
 		// now set the 3 oxygens
 		std::vector<Atom *> oxygens;
-		RUN (_atoms) {
-			if (_atoms[i]->Name() != "O") continue;
-			oxygens.push_back (_atoms[i]);
+		for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
+			if ((*it)->Name() != "O") continue;
+			oxygens.push_back (*it);
 		}
 
 		_o1 = oxygens[0];
