@@ -28,8 +28,8 @@ namespace morita {
 	//int N = _wats.size();
 	//cout << "using " << N << " waters" << endl;
 	int N = _wats.size();
-	_wats.resize(300);
-	N = _wats.size();
+	//_wats.resize(300);
+	//N = _wats.size();
 
 
 	_T.resize(3*N); _T.clear();
@@ -84,7 +84,8 @@ namespace morita {
 	_h.resize(N,3);
 	tensor::tensor_t::BlockIdentity(_h,3);
 
-	_Talpha.assign (prod(_T, _alpha));
+	//_Talpha.assign (prod(_T, _alpha));
+
 	_ginv.assign (_IDENT);
 	_ginv.plus_assign (_Talpha);	// this is now 1 + T*alpha, a.k.a inverse of g
 
@@ -94,12 +95,7 @@ namespace morita {
 	int_vector_t Pivot(N);
 	int info;
 	int NRHS = 3;
-	//_f.assign(_h);
-	//dgesv_ (&N,&NRHS,&_ginv(0,0),&N,&Pivot(0),&_h(0,0),&N,&info);
-	//pdgesv_ (&N, &NRHS, );
 	
-	_h.Print();
-
   } // Analysis
 
   void SFGAnalyzer::DataOutput (const unsigned int timestep) {

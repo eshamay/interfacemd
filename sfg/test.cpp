@@ -1,27 +1,42 @@
-#include "../matrixr.h"
+#include "test.h"
 
 using std::cout;
 using std::endl;
 
-int main () 
-{
+  int main (int argc, char **argv) 
+  {
 
-  double dm[9] = {2,-1,3,-1,-1,3,1,-2,-1};
-  MatR m(dm);
-  m.Print();
-  //double dn[9] = {8,4,5,6,3,1,9,2,7};
-  //MatR n(dn);
-  //n.Print();
+	// set up the mpi stack
+	boost::mpi::environment env(argc, argv);
+	boost::mpi::communicator world;
 
-  VecR v (-3,-6,-2);
+	int n = 512;
+	tensor::tensor_t A(n,n);
+	tensor::tensor_t B(n,n);
+	tensor::tensor_t C(n,n);
+	tensor::tensor_t D(n,n);
 
-  MatR inv;
-  tensor::Tensor<tensor::matrix_t>::Inverse(m,inv);
-  (inv*v).Print();
 
-  m.Zero();
-  m.Print();
-  cout << m.size1() << " " << m.size2() << endl;
+	if (world.rank() == 0) {
+	  // load the data into the matrices
+	  for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+		  A(i,j) = i+j;
+		  B(i,j) = 3*i+j;
+		}
+	  }
+	}
 
-  return 0;
-}
+	char transa = 'N';
+	char transb = 'N';
+	double scale = 1.0;
+
+	for (int i = 0; i < 128; i++) {
+	  blas::dgemm_ (&transa, &transb, &n, &n, &n, &scale, &A(0,0), &n, &B(0,0), &n, &scale, &C(0,0), &n);
+	  //scalapack::PDGEMM p (A,B,C, world);
+	}
+
+
+
+	return 0;
+  }
