@@ -12,7 +12,7 @@ morita : $(MORITAFILES)
 #gfortran $(MORITA2002) $(LIBS) -llapack -lf77blas -lcblas -latlas -o ../bin/morita2002
 
 morita2002 : $(MORITA2002)
-	icpc $(MORITA2002) $(LIBS) $(SCALAPACK) -o ../bin/morita2002
+	icpc $(MORITA2002) $(LIBS) $(LAPACKLIBS) -o ../bin/morita2002
 
 mpimorita : $(MPIMORITAFILES)
 	$(MPICXX) $(CPPFLAGS) $(MPILIBS) $(MPIMORITAFILES) -o ../bin/mpi-morita

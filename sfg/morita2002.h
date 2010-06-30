@@ -1,7 +1,6 @@
 #ifndef MORITA2002_H_
 #define MORITA2002_H_
 
-//#include "../utility.h"
 #include "../analysis.h"
 #include "../mdmath.h"
 #include <boost/numeric/ublas/vector.hpp>
@@ -11,7 +10,6 @@
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <iostream>
 
-#include <mpi.h>
 
 
 

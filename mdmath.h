@@ -2,11 +2,6 @@
 #define MDMATH_H_
 
 #include "tensor.h"
-#include <boost/mpi.hpp>
-#include <boost/mpi/environment.hpp>
-#include <boost/mpi/communicator.hpp>
-
-#include <iostream>
 
 
 namespace blacs {
@@ -71,6 +66,7 @@ namespace scalapack {
 
   /********** matrix multiplication **********/
   // takes 3 matrices (A, B, and C) and sets C = A*B
+  /*
   class PDGEMM {
 
 	public:
@@ -98,6 +94,7 @@ namespace scalapack {
 	  
 
   }; // pdgemm
+  */
 
 } // scalapack
 
