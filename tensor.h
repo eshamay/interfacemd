@@ -11,8 +11,8 @@ namespace tensor {
 
   using namespace boost::numeric::ublas;
 
-  typedef matrix<double, row_major> matrix_t;
-  typedef identity_matrix<double, row_major> id_matrix_t;
+  typedef matrix<double, column_major> matrix_t;
+  typedef identity_matrix<double, column_major> id_matrix_t;
 
   template <typename T>
 	class Tensor : public T {
@@ -44,7 +44,7 @@ namespace tensor {
 
 	}; // tensor
   typedef Tensor<matrix_t>	tensor_t;
-  typedef Tensor<symmetric_matrix<double, upper, row_major> > sym_tensor_t;
+  typedef Tensor<symmetric_matrix<double, upper, column_major> > sym_tensor_t;
 
 
   template <typename T>
