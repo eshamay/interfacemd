@@ -3,6 +3,7 @@
 
 #include "../analysis.h"
 #include "../mdmath.h"
+#include "sfgunits.h"
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -26,8 +27,8 @@ namespace morita {
    */
 
   /* from the equilibrium values of the spcfw model */
-  const double BONDLENGTH_EQ	= 1.012;		// in angstroms
-  const double ANGLE_EQ 		= 113.24*M_PI/180.0;		// in radians
+  const double BONDLENGTH_EQ	= 1.012 * sfg_units::ANG2BOHR;		// in atomic units
+  const double ANGLE_EQ 		= 113.24;		// in degress
   const double CHARGE_H_EQ		= 0.41;		// charge units (atomic units?)
   const double CHARGE_O_EQ		= -0.82;
 
@@ -123,10 +124,18 @@ namespace morita {
 	  tensor::tensor_t		_alpha;
 	  tensor::SymmetricMatrix _T;	// system dipole field tensors
 	  tensor::id_matrix_t 	_IDENT;	// a few temporaries for calculating eq 23
-	  tensor::tensor_t		_Talpha;
-	  tensor::tensor_t		_ginv;	
-	  tensor::tensor_t		_h;	
+	  tensor::tensor_t		_g;	
 	  tensor::tensor_t		_f;	
+
+	  tensor::tensor_t		_A;		// total system polarizability
+	  VecR					_M;		// total system dipole moment
+
+	  bool	time_zero;
+
+	  void CalculateTensors();
+	  void CalculateTotalDipole ();
+	  void CalculateLocalFieldCorrection ();
+	  void CalculateTotalPolarizability ();
 
   };	// sfg-analyzer
 
@@ -172,7 +181,7 @@ namespace morita {
 
   // Using the LAPACK solver for some simple systems
   extern "C" {
-	
+
 	void dgesv_(int* n, int* nrhs, double* a, int* lda, int* ipiv, double* b, int* ldb, int* info);
 
 	void pdgesv_ (int *n, int *nrhs, double *A, int *ia, int *ja, int *desca, int* ipiv, double *B, int *ib, int *jb, int *descb, int *info); 

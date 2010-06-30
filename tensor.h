@@ -52,7 +52,7 @@ namespace tensor {
 	{ 
 	  for (unsigned i = 0; i < this->size1(); i++) {
 		for (unsigned j = 0; j < this->size2(); j++) {
-		  printf ("% 8.3f", (*this)(i,j));
+		  printf ("% 8.6f", (*this)(i,j));
 		}
 		printf ("\n");
 	  }

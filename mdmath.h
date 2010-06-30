@@ -44,6 +44,17 @@ namespace blas {
 } // namespace blas
 
 
+namespace lapack {
+
+  extern "C" {
+
+	void dgesv_ (int* n, int* nrhs, double* a, int* lda, int* ipiv, double* b, int* ldb, int* info);
+
+  } // extern
+
+} // namespace lapack
+
+
 
 namespace scalapack {
 

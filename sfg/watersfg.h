@@ -13,51 +13,42 @@
 #include "watersystem.h"
 #include "h2o.h"
 #include "graph.h"
+#include "sfgunits.h"
 
 /***** Set this if using the dipole-dipole correction term *****/
 #define DIPOLE_DIPOLE
 
 /* system constants as defined in the morita-hynes paper */
-/* Note: I think morita-hynes use atomic units (bohrs, hartrees, and the like) so we'll work in those*/
-const  double MPROT	=	1836.153;				// in atomic units, this is the mass of a proton. Mass of electron = 1.0
-const  double MOXY	=	(MPROT*8.0+8.0);		// mass of an oxygen atom in atomic units
-const  double MHYD	=	(MPROT*1.0+1.0);		// and mass of a hydrogen
-const  double M		=	(MOXY*MHYD)/(MOXY+MHYD);	// reduced mass of the OH bond/oscillator
 
-//here's the constants given in the paper
-const  double k0	=	0.548;		// atomic units (force/length) Eh/ao/ao
-const  double l		=	-1.991;		// atomic units (force/length^2)	Eh/ao/ao/ao... yikes
+  //here's the constants given in the paper
+  const  double k0	=	0.548;		// atomic units (force/length) Eh/ao/ao
+  const  double l		=	-1.991;		// atomic units (force/length^2)	Eh/ao/ao/ao... yikes
 
-// some very useful conversion factors
-//const  double ANG2BOHR			=	1.889726125;					// angstroms to bohr radii
-const double ANG2BOHR			=	1.8897161646320724;					// angstroms to bohr radii
-const double HARTREE2KCALPMOL	=	627.509;						// from hartree to kcal/mol
-const double AMBER2ATOMIC		=	1.0/HARTREE2KCALPMOL/ANG2BOHR;	// convert amber forces (kcal/mol/A) into atomic force units
+  const  double M		=	(MOXY*MHYD)/(MOXY+MHYD);	// reduced mass of the OH bond/oscillator
+  const double PREFACTOR	=	sqrt(k0/M)*(l/(2.0*k0*k0));		// the prefactor to multiply the bond force for freq shift (in atomic units) (eq 10c)
 
-const double PREFACTOR	=	sqrt(k0/M)*(l/(2.0*k0*k0));		// the prefactor to multiply the bond force for freq shift (in atomic units) (eq 10c)
-const double HZ2WAVENUMBER	=	3.335641e-11;				// convert from Hz to wavenumbers (cm-1)  (this is 1/c)
-const double HZ2AU			=	2.418884324306202e-17*2.0*M_PI;			// convert Hz to atomic units of frequency
-const double AU2WAVENUMBER		=	HZ2WAVENUMBER/HZ2AU;			// convert from frequencies in atomic units to cm-1 (note: **not angular frequencies!** For that we need to fix the factor of 2*Pi)
+  const double UNCOUPLED_OH_FREQ	= 3706.5/AU2WAVENUMBER;			// the frequency of uncoupled OH bonds in the vapor phase (converted to frequency in atomic units)
+  const double COUPLING_CONST		= 49.5/AU2WAVENUMBER;				// Coupling const taken from the energy gap of the sym + antisym stretches (V12 in atomic units)
 
-const double UNCOUPLED_OH_FREQ	= 3706.5/AU2WAVENUMBER;			// the frequency of uncoupled OH bonds in the vapor phase (converted to frequency in atomic units)
-const double COUPLING_CONST		= 49.5/AU2WAVENUMBER;				// Coupling const taken from the energy gap of the sym + antisym stretches (V12 in atomic units)
+  // Value of the magnitude of the dipole moment derivative (square root of the sum of the squares)
+  const double MU_DERIV_MAGNITUDE = sqrt(-0.058*-0.058 + 0.157*0.157);
+  // Length of a rigid SPC/E OH-bond
+  const double OH_LENGTH = 1.000*ANG2BOHR;	// in atomic units
+  const double OH_COM_LENGTH = MHYD*OH_LENGTH/(MHYD+MOXY);	// distance to the center of mass of the OH bond from the oxygen (atomic units of length)
+  const  double MU_DERIV_LENGTH = MU_DERIV_MAGNITUDE * OH_COM_LENGTH;		// length of the differential dipole moment element used in calculating the dipole-dipole interaction energy (in atomic units)
 
-// Value of the magnitude of the dipole moment derivative (square root of the sum of the squares)
-const double MU_DERIV_MAGNITUDE = sqrt(-0.058*-0.058 + 0.157*0.157);
-// Length of a rigid SPC/E OH-bond
-const double OH_LENGTH = 1.000*ANG2BOHR;	// in atomic units
-const double OH_COM_LENGTH = MHYD*OH_LENGTH/(MHYD+MOXY);	// distance to the center of mass of the OH bond from the oxygen (atomic units of length)
-const  double MU_DERIV_LENGTH = MU_DERIV_MAGNITUDE * OH_COM_LENGTH;		// length of the differential dipole moment element used in calculating the dipole-dipole interaction energy (in atomic units)
+  /* Gamma, a "damping parameter" shows up as an arbitrary constant in the lorentzian part of the beta-spectrum. This number is tweaked to calibrate the spectra. DSW used a value of 2.0 and called it good after trying several values. */
+  const  double GAMMA				= 2.0/AU2WAVENUMBER;				// the "damping parameter" first shown in Eq. 3 scaled down to some value (between 2 and 22 cm-1 as Dave put it)
+  const  double GAMMA_SQ			= GAMMA*GAMMA;				// ...squared
 
-/* Gamma, a "damping parameter" shows up as an arbitrary constant in the lorentzian part of the beta-spectrum. This number is tweaked to calibrate the spectra. DSW used a value of 2.0 and called it good after trying several values. */
-const  double GAMMA				= 2.0/AU2WAVENUMBER;				// the "damping parameter" first shown in Eq. 3 scaled down to some value (between 2 and 22 cm-1 as Dave put it)
-const  double GAMMA_SQ			= GAMMA*GAMMA;				// ...squared
+  // frequency limits for calculating the spectra (given in cm-1)
+  const  double START_FREQ			= 2800.0/AU2WAVENUMBER;
+  const  double END_FREQ			= 3800.0/AU2WAVENUMBER;
+  const  double FREQ_STEP			= 1.0/AU2WAVENUMBER;		// step size when calculating the spectra
+  const  double NUM_STEP			= (END_FREQ-START_FREQ)/FREQ_STEP;
 
-// frequency limits for calculating the spectra (given in cm-1)
-const  double START_FREQ			= 2800.0/AU2WAVENUMBER;
-const  double END_FREQ			= 3800.0/AU2WAVENUMBER;
-const  double FREQ_STEP			= 1.0/AU2WAVENUMBER;		// step size when calculating the spectra
-const  double NUM_STEP			= (END_FREQ-START_FREQ)/FREQ_STEP;
+
+
 
 class SFGCalculator {
 

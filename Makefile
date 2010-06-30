@@ -5,14 +5,14 @@ CXX			= icpc -wd981,444,383
 DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated #-wd981,1599,1572,383
 OPTIMIZE 	= -O2 -finline-functions -finline -funroll-loops -m64
 #CPPFLAGS    = -Wall -Drestrict= -ftemplate-depth-100 $(DEBUG) -L$(HOME)/share/lib
-CPPFLAGS    = -Wall -ftemplate-depth-100 $(OPTIMIZE) 
+CPPFLAGS    = -Wall -ftemplate-depth-100 $(DEBUG) 
 
 LIBS		= -L$(HOME)/share/lib -L$(MPI_HOME)/lib -L$(ATLAS)/lib -lconfig++
 
 ATLAS		= $(HOME)/share/atlas
 BOOST		= $(HOME)/src/boost_1_43_0
 LAPACK		= $(HOME)/src/lapack-3.2.1
-LAPACKLIBS	= -lmkl_lapack -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread
+LAPACKLIBS	= -lmkl_lapack -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread
 SCALAPACK	= -openmp -Wl,--start-group -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_intel_thread -Wl,--end-group -lpthread -lmpi -lm
 
 XDRLIB		= $(XDRDIR)/lib
