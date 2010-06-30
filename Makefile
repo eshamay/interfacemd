@@ -1,6 +1,6 @@
 SRCLIB	 	= $(HOME)/md/src
 
-CXX			= mpic++
+CXX			= mpic++ -wd981,869,177,444
 
 DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated #-wd981,1599,1572,383
 OPTIMIZE 	= -O2 -finline-functions -finline -funroll-loops -m64

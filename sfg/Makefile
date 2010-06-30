@@ -1,7 +1,7 @@
 include ../Makefile
 
 MORITAFILES		= $(WATERSYSTEM) watersfg.o morita.o 
-TEST		= ../vecr.o ../matrixr.o test.o
+TEST		= ../mdmath.o test.o
 MPIMORITAFILES		= $(MORITAFILES) ../mpi/mpisys.o
 MORITA2002		= $(AMBERSYSTEM) $(WATER) $(IONS) $(ORGANIC) morita2002.o
 
@@ -18,7 +18,7 @@ mpimorita : $(MPIMORITAFILES)
 	$(MPICXX) $(CPPFLAGS) $(MPILIBS) $(MPIMORITAFILES) -o ../bin/mpi-morita
 
 test : $(TEST)
-	$(CXX) $(CPPFLAGS) $(TEST) -o test
+	mpic++ $(TEST) $(LIBS) $(SCALAPACK) -o test
 
 cleansfg :
 	rm -f *.o test ../bin/morita2002 ../bin/morita

@@ -129,7 +129,8 @@ Analyzer<T>::Analyzer (const WaterSystemParams& params)
   
   // MPI-master-only initialization
   if (this->wsp.mpisys) {
-	MPI::COMM_WORLD.Barrier();
+	this->wsp.mpi_world.barrier();
+	//MPI::COMM_WORLD.Barrier();
   }
 }	// constructor
 

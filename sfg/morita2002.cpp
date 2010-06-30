@@ -8,7 +8,7 @@ namespace morita {
   SFGAnalyzer::SFGAnalyzer (WaterSystemParams& wsp)
 	: 
 	  Analyzer<AmberSystem> (wsp),
-	  _p(0), _alpha(0,0), _IDENT(0), _Talpha(0,0), _ginv(0,0), _h(0,0), _f(0,0)
+	  _p(0), _alpha(0,0), _T(0,0), _IDENT(0), _Talpha(0,0), _ginv(0,0), _h(0,0), _f(0,0)
   { return; }
 
   SFGAnalyzer::~SFGAnalyzer () {
@@ -33,7 +33,7 @@ namespace morita {
 	  //int N = _wats.size();
 	  //cout << "using " << N << " waters" << endl;
 	  N = _wats.size();
-	  _wats.resize(200);
+	  _wats.resize(8);
 	  N = _wats.size();
 	}
 
@@ -41,7 +41,7 @@ namespace morita {
 	if (wsp.mpisys)
 	  boost::mpi::broadcast(wsp.mpi_world,N,0);
 
-	_T.resize(3*N); _T.clear();
+	_T.resize(3*N,3*N); _T.clear();
 	_p.resize(3*N); _p.clear();
 	_alpha.resize(3*N, 3*N); _alpha.clear();
 
@@ -50,20 +50,28 @@ namespace morita {
 
   void SFGAnalyzer::Analysis () {
 
-	int N;
+	int N = 3*_wats.size();
+
 	if (MPIStatus()) {
 	  // Calculate the tensor 'T' which is formed of 3x3 matrix elements
 	  _T.clear();
-	  for (unsigned int i = 0; i < _wats.size()/3; i++) {
-		for (unsigned int j = i+1; j < _wats.size()/3; j++) {
+	  // first do the upper triangle
+	  for (unsigned int i = 0; i < _wats.size(); i++) {
+		for (unsigned int j = i+1; j < _wats.size(); j++) {
 		  if (i == j) continue;
 		  project(_T, bnu::slice(3*i,1,3), bnu::slice(3*j,1,3)) = math::DipoleFieldTensor(_wats[i], _wats[j]);
+		}
+	  }
+	  // because it's symmetric, copy the lower triangle
+	  for (unsigned int i = 0; i < N; i++) {
+		for (unsigned int j = i+1; j < N; j++) {
+		  _T(j,i) = _T(i,j);
 		}
 	  }
 
 	  // Calculate the dipole moment of each water, and then constructs the 3Nx3 tensor 'p'.
 	  std::for_each (_wats.begin(), _wats.end(), SetDipoleMoment());
-	  for (unsigned i = 0; i < _wats.size()/3; i++){
+	  for (unsigned i = 0; i < _wats.size(); i++){
 		project(_p, bnu::slice(3*i,1,3)) = _wats[i]->Dipole();
 	  }
 
@@ -80,7 +88,7 @@ namespace morita {
 
 	  // Set up the polarizability (alpha) matrix similar to the method for the dipole moment
 	  std::for_each (_wats.begin(), _wats.end(), SetPolarizability());
-	  for (unsigned int i = 0; i < _wats.size()/3; i++) {
+	  for (unsigned int i = 0; i < _wats.size(); i++) {
 		project(_alpha, bnu::slice(3*i,1,3), bnu::slice(3*i,1,3)) = _wats[i]->Polarizability();
 	  }
 
@@ -88,11 +96,14 @@ namespace morita {
 	  // first here set up 1 + T*alpha
 
 	  // do lots of initialization before the calculations
-	  N = 3*_wats.size();
 	}
 
-	if (wsp.mpisys)
+	if (wsp.mpisys) {
 	  boost::mpi::broadcast(wsp.mpi_world,N,0);
+	  boost::mpi::broadcast(wsp.mpi_world,&_p(0),N,0);
+	  boost::mpi::broadcast(wsp.mpi_world,&_T(0,0),N*N,0);
+	  boost::mpi::broadcast(wsp.mpi_world,&_alpha(0,0),N*N,0);
+	}
 
 	_IDENT.resize(N);
 	_Talpha.resize(N,N); _Talpha.clear();
@@ -101,8 +112,62 @@ namespace morita {
 	_h.resize(N,3);
 	tensor::tensor_t::BlockIdentity(_h,3);
 
-	if (MPIStatus())
-	  _Talpha.assign (prod(_T, _alpha));
+
+	int grid_rows = 2, grid_cols = wsp.mpi_world.size()/grid_rows;
+	int iam;	// blacs context
+
+	blacs::sl_init_ (&iam, &grid_rows, &grid_cols);
+
+	int my_grid_row, my_grid_col;
+	blacs::blacs_gridinfo_ (&iam, &grid_rows, &grid_cols, &my_grid_row, &my_grid_col);
+
+
+	int block_size = 4;
+	int my_block_rows, my_block_cols;
+	int matrix_start = 0;
+
+	my_block_rows = blacs::numroc_ (&N, &block_size, &my_grid_row, &matrix_start, &grid_rows);
+	my_block_cols = blacs::numroc_ (&N, &block_size, &my_grid_col, &matrix_start, &grid_cols);
+
+	printf ("grid: (%d,%d) -- [%d,%d] -- proc:", my_grid_row, my_grid_col, my_block_rows, my_block_cols); MPI_Print();
+
+
+	// Setup descriptors
+	int desca[9], desct[9], descta[9],
+		ierr;
+
+	blacs::descinit_ (desca, &N, &N, &block_size, &block_size, &matrix_start, &matrix_start, &iam, &my_block_rows, &ierr);
+	blacs::descinit_ (desct, &N, &N, &block_size, &block_size, &matrix_start, &matrix_start, &iam, &my_block_rows, &ierr);
+	blacs::descinit_ (descta, &N, &N, &block_size, &block_size, &matrix_start, &matrix_start, &iam, &my_block_rows, &ierr);
+
+	// Allocate local arrays
+	tensor::tensor_t loc_a (N, N);
+	tensor::tensor_t loc_t (my_block_rows, my_block_cols);
+	tensor::tensor_t loc_ta (my_block_rows, my_block_cols);
+
+	for (int i = 0; i < N; i++) {
+	  for (int j = 0; j < N; j++) {
+		blacs::pdelset_ (&loc_a(0,0), &j, &i, desca, &_alpha(i,j));
+		//blacs::pdelset_ (&loc_t(0,0), &i, &j, desct, &_T(i,j));
+	  }
+	}
+
+	/*
+
+	char transa = 'N', transb = 'N';
+	double alpha = 1.0, beta = 1.0;
+	int k = 1.0;
+	blacs::pdgemm_ (&transa, &transb, &N, &N, &k, &alpha, &loc_a(0,0), &my_block_rows, &my_block_cols, desca, &loc_t(0,0), &my_block_rows, &my_block_cols, desct, &beta, &loc_ta(0,0), &my_block_rows, &my_block_cols, descta);
+
+	*/
+	blacs::blacs_gridexit_ (&iam);
+	//blacs::blacs_exit_ (&ierr);
+
+
+
+
+	/*
+	//_Talpha.assign (prod(_T, _alpha));
 	_ginv.assign (_IDENT);
 	_ginv.plus_assign (_Talpha);	// this is now 1 + T*alpha, a.k.a inverse of g
 
@@ -113,12 +178,9 @@ namespace morita {
 	int info;
 	int NRHS = 3;
 	//_f.assign(_h);
-	//dgesv_ (&N,&NRHS,&_ginv(0,0),&N,&Pivot(0),&_h(0,0),&N,&info);
-	//pdgesv_ (&N, &NRHS, );
 
-	if (MPIStatus())
-	  _h.Print();
 
+	*/
 
   } // Analysis
 

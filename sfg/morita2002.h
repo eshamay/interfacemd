@@ -122,7 +122,7 @@ namespace morita {
 	  Morita_ptr_vec		_wats;
 	  vector_t				_p;
 	  tensor::tensor_t		_alpha;
-	  tensor::SymmetricMatrix _T;	// system dipole field tensors
+	  tensor::tensor_t 		_T;	// system dipole field tensors
 	  tensor::id_matrix_t 	_IDENT;	// a few temporaries for calculating eq 23
 	  tensor::tensor_t		_Talpha;
 	  tensor::tensor_t		_ginv;	
@@ -181,6 +181,48 @@ namespace morita {
   } // extern
 
 
+  namespace blacs {
+
+	extern "C" {
+	  void sl_init_			(int* ictxt, int* nprow, int* npcol);
+	  void blacs_gridinfo_	(int* context, int *nprow, int *npcol, int *myrow, int *mycol);
+	  void blacs_pinfo_		(int* id, int* nprocs);
+	  void blacs_get_		(int* context, int* request, int* value);
+	  int  blacs_gridinit_	(int* context, char * order, int* np_row, int* np_col);
+	  void blacs_gridexit_	(int* context);
+	  void blacs_exit_		(int* error_code);
+
+
+	  /*
+	  void   Cblacs_pinfo( int* mypnum, int* nprocs);
+	  void   Cblacs_get( int context, int request, int* value);
+	  int    Cblacs_gridinit( int* context, char * order, int np_row, int np_col);
+	  void   Cblacs_gridinfo( int context, int*  np_row, int* np_col, int*  my_row, int*  my_col);
+	  void   Cblacs_gridexit( int context);
+	  void   Cblacs_exit( int error_code);
+
+	  double pdlamch_( int *ictxt , char *cmach);
+	  double pdlange_( char *norm, int *m, int *n, double *A, int *ia, int *ja, int *desca, double *work);
+	  */
+
+	  int    numroc_( int *n, int *nb, int *iproc, int *isrcproc, int *nprocs);
+
+	  void   descinit_( int *desc, int *m, int *n, int *mb, int *nb, int *irsrc, int *icsrc,
+		  int *ictxt, int *lld, int *info);
+	  void pdlacpy_( char *uplo, int *m, int *n, double *a, int *ia, int *ja, int *desca,
+		  double *b, int *ib, int *jb, int *descb);
+	  void pdgesv_( int *n, int *nrhs, double *A, int *ia, int *ja, int *desca, int* ipiv,
+		  double *B, int *ib, int *jb, int *descb, int *info);
+	  void pdgemm_( char *TRANSA, char *TRANSB, int * M, int * N, int * K, double * ALPHA,
+		  double * A, int * IA, int * JA, int * DESCA, double * B, int * IB, int * JB, int * DESCB,
+		  double * BETA, double * C, int * IC, int * JC, int * DESCC );
+	  int  indxg2p_( int *indxglob, int *nb, int *iproc, int *isrcproc, int *nprocs);
+	  void pdelset_ (double * array, int * row, int * col, int * desca, double * value);
+
+	}	// extern
+
+
+  } // blacs
 
 }	// namespace morita
 
