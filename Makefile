@@ -3,7 +3,7 @@ SRCLIB	 	= $(HOME)/md/src
 CXX			= icpc -wd981,444,383
 
 DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated #-wd981,1599,1572,383
-OPTIMIZE 	= -O2 -finline-functions -finline -funroll-loops -m64
+OPTIMIZE 	= -fast -finline-functions -finline -funroll-loops -m64
 #CPPFLAGS    = -Wall -Drestrict= -ftemplate-depth-100 $(DEBUG) -L$(HOME)/share/lib
 CPPFLAGS    = -Wall -ftemplate-depth-100 $(DEBUG) 
 

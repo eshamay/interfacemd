@@ -70,10 +70,6 @@ namespace scalapack {
   } // extern
 
 
-  static int izero = 0;
-  static int ione = 1;
-
-
 
   /********** matrix multiplication **********/
   // takes 3 matrices (A, B, and C) and sets C = A*B

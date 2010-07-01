@@ -12,7 +12,6 @@
 #include "gmxsystem.h"
 #endif
 
-#include "utility.h"
 #include "graph.h"
 #include <libconfig.h++>
 #include <cstdlib>

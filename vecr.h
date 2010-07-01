@@ -5,10 +5,6 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <iostream>
-#include <math.h>
-//#include "matrixr.h"
-#include "utility.h"
-//#include "FTensor.h"
 
 enum coord {x=0, y=1, z=2};
 
@@ -76,7 +72,7 @@ public:
 	void Print () const;
 };
 
-//typedef std::vector<VecR> VecR_vec;
-//typedef std::vector<VecR>::const_iterator VecR_it;
+typedef std::vector<VecR> VecR_vec;
+typedef std::vector<VecR>::const_iterator VecR_it;
 
 #endif

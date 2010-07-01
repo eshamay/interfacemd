@@ -5,7 +5,6 @@
 #include "vecr.h"
 #include "molecule.h"
 #include "mdsystem.h"
-#include "utility.h"
 
 
 // A nitric acid class to add a few functions for dealing with nitric acid molecules specifically.

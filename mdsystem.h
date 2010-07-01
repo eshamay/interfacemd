@@ -7,7 +7,6 @@
 #include "vecr.h"
 #include "atom.h"
 #include "molecule.h"
-#include "utility.h"
 
 typedef std::vector<Atom *> Atom_ptr_vec;
 typedef std::vector<Molecule *> Mol_ptr_vec;

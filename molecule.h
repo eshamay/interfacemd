@@ -8,7 +8,6 @@
 #include "matrixr.h"
 #include "atom.h"
 #include "wannier.h"
-#include "utility.h"
 
 using namespace std;
 

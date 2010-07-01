@@ -128,7 +128,11 @@ namespace morita {
 	  tensor::tensor_t		_f;	
 
 	  tensor::tensor_t		_A;		// total system polarizability
-	  VecR					_M;		// total system dipole moment
+	  VecR					_M;		// total system dipole moment (at time zero)
+
+	  tensor::tensor_vec	_vA;	// the tensor A for each timestep
+
+
 
 	  bool	time_zero;
 
@@ -171,7 +175,7 @@ namespace morita {
 	  class MakeDerivedFromPointer : public std::unary_function<T *,U *> {
 		public:
 		  U * operator() (T * t) const {
-			return new U(*t);
+			return new U(t);
 		  }
 	  };  // make derived from pointer
 

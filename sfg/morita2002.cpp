@@ -20,22 +20,30 @@ namespace morita {
 	// load all the waters in the system
 	LoadWaters();
 
+	// find the system center of mass
+	Mol_ptr_vec v;
+	std::copy (int_wats.begin(), int_wats.end(), std::back_inserter(v));
+	VecR com = this->CenterOfMass(v);
+
+	// only use waters found above a particular location in the slab (i.e. center of mass)
+	int_wats.erase(std::remove_if(int_wats.begin(), int_wats.end(), std::bind2nd(AbovePosition(), com[WaterSystem<AmberSystem>::axis])), int_wats.end());
+
 	// clear out and then reload the new set of waters in the system
 	std::for_each(_wats.begin(), _wats.end(), utilities::DeletePointer<MoritaH2O*>());
 	_wats.clear();
+	// convert them to the special morita-waters for analysis
 	std::transform(int_wats.begin(), int_wats.end(), std::back_inserter(_wats), utilities::MakeDerivedFromPointer<Molecule, MoritaH2O>());
 
-	int N = _wats.size();
+	int N = 3*_wats.size();
 
-	_T.resize(3*N); _T.clear();
-	_p.resize(3*N); _p.clear();
-	_alpha.resize(3*N, 3*N); _alpha.clear();
+	_T.resize(N); _T.clear();
+	_p.resize(N); _p.clear();
+	_alpha.resize(N, N); _alpha.clear();
 
   } // Setup
 
-  void SFGAnalyzer::Analysis () {
 
-	_T.clear();
+  void SFGAnalyzer::Analysis () {
 
 	// Sets up the p, alpha, and T tensors by calculating through each water's dipole moment, polarizability, and dipole field contributions
 	this->CalculateTensors();
@@ -55,8 +63,26 @@ namespace morita {
 
   void SFGAnalyzer::DataOutput (const unsigned int timestep) {
 
-  } // Data Output
+	rewind(output);
 
+	// for now, only output the SSP and SPS components of the correlation function
+	double a_sps, m_sps;
+	double a_ssp, m_ssp;
+	for (tensor::tensor_it it = _vA.begin(); it != _vA.end(); it++) {
+	  a_sps = ((*it)(0,1) + (*it)(2,1))/2.0;
+	  a_ssp = ((*it)(0,0) + (*it)(0,2) + (*it)(2,0) + (*it)(2,2))/4.0;
+
+	  m_sps = (_M(0) + _M(2))/2.0;
+	  m_ssp = _M(1);
+
+	  // output one column for sps, one for ssp
+	  fprintf (output, "% 13.8f %13.8f\n",
+		  a_sps * m_sps, a_ssp * m_ssp);
+	}
+
+	this->Setup();
+
+  } // Data Output
 
 
 
@@ -68,6 +94,7 @@ namespace morita {
 	// Set up the polarizability (alpha) matrix similar to the method for the dipole moment
 	std::for_each (_wats.begin(), _wats.end(), SetPolarizability());
 
+	_T.clear();
 	for (unsigned int i = 0; i < _wats.size(); i++) {
 
 	  if (time_zero)
@@ -145,9 +172,10 @@ namespace morita {
 
 	  _A.plus_assign(fa);
 	}
+
+	// push the polarizability tensor into the collection
+	_vA.push_back (_A);
   }
-
-
 
 
   //

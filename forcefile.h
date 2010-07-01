@@ -6,7 +6,6 @@
 #include <vector>
 #include <string>
 #include "vecr.h"
-#include "utility.h"
 
 
 class ForceFile {

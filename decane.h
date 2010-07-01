@@ -2,7 +2,6 @@
 #define DECANE_H_
 
 #include "carbonchain.h"
-#include "utility.h"
 
 // A water class to add a few functions for dealing with water molecules specifically.
 class Decane: public CarbonChain {

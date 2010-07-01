@@ -12,8 +12,8 @@ AmberSystem::AmberSystem (const std::string prmtop, const std::string mdcrd, con
   MDSystem::Dimensions (_coords.Dims());
 
   // and then actually create these bad mamma jammas
-  RUN (_atoms) {
-	_atoms[i] = new Atom ();
+  for (Atom_ptr_vec::iterator it = _atoms.begin(); it != _atoms.end(); it++) {
+	*it = new Atom ();
   }
 
   // and parse all the info out of the topology file into the atoms
@@ -27,22 +27,24 @@ AmberSystem::AmberSystem (const std::string prmtop, const std::string mdcrd, con
 }
 
 AmberSystem::~AmberSystem () {
-  RUN (_mols) {
-	delete _mols[i];
+  for (Mol_ptr_vec::iterator it = _mols.begin(); it != _mols.end(); it++) {
+	delete *it;
   }
-  RUN (_atoms) {
-	delete _atoms[i];
+  for (Atom_ptr_vec::iterator it = _atoms.begin(); it != _atoms.end(); it++) {
+	delete *it;
   }
 }
 
 // While the crdfile holds spatial coordinate information, and the topology file holds atomic information, the data has to be processed into proper atoms in order to play around with them more effectively.
 // This function should only be used once when first loading the system up. This info doesn't change during the course of the MD run
 void AmberSystem::_ParseAtomInformation () {
-  RUN (_atoms) {
-	_atoms[i]->Name (_topfile.AtomNames()[i]);
-	_atoms[i]->SetMass();
-	_atoms[i]->SetCharge();
-	_atoms[i]->ID (i);		// set the atom's index number - because we may need to access ordered/list info elsewhere
+  int i = 0;
+  for (Atom_ptr_vec::iterator it = _atoms.begin(); it != _atoms.end(); it++) {
+	(*it)->Name (_topfile.AtomNames()[i]);
+	(*it)->SetMass();
+	(*it)->SetCharge();
+	(*it)->ID (i);		// set the atom's index number - because we may need to access ordered/list info elsewhere
+	i++;
   }
 
   return;
@@ -120,16 +122,16 @@ void AmberSystem::LoadNext () {
   _coords.LoadNext ();							// load up coordinate information from the file
   if (_forces.Loaded()) _forces.LoadNext ();		// also load the force information while we're at it
   this->_ParseAtomVectors ();
-  RUN (_mols)
-	_mols[i]->Unset();							// this sets a particular flag on a molecule
+  for (Mol_ptr_vec::iterator it = _mols.begin(); it != _mols.end(); it++)
+	(*it)->Unset();							// this sets a particular flag on a molecule
 
   return;
 }
 
 void AmberSystem::PrintCRDFile () const {
 
-  RUN (_atoms) {
-	printf ("  % 4.7f  % 4.7f  % 4.7f", _atoms[i]->Position()[x], _atoms[i]->Position()[y], _atoms[i]->Position()[z]);
+  for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
+	printf ("  % 4.7f  % 4.7f  % 4.7f", (*it)->Position()[x], (*it)->Position()[y], (*it)->Position()[z]);
   }
   printf ("  % 4.7f  % 4.7f  % 4.7f", this->Dims()[x], this->Dims()[y], this->Dims()[z]);
 

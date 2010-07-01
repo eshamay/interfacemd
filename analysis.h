@@ -83,13 +83,26 @@ class Analyzer : public WaterSystem<T> {
     Mol_ptr_vec& Molecules () { return WaterSystem<T>::int_mols; }
     Water_ptr_vec& Waters () { return WaterSystem<T>::int_wats; }
 
+	// calculate the system's center of mass
+	VecR CenterOfMass (const Mol_ptr_vec& mols) const;
+
     // analysis loop functions
     virtual void Setup () { return; }
     virtual void Analysis () { return; }
     virtual void PostAnalysis () { return; }
     virtual void DataOutput (const unsigned int timestep) { return; }
 
-};
+
+  // check if a water molecule is above a certain location in the system
+  class AbovePosition : public std::binary_function <Molecule *, double, bool> {
+	public:
+	  bool operator () (const Molecule * m, const double cutoff) const {
+		return m->GetAtom("O")->Position()[WaterSystem<AmberSystem>::axis] > cutoff;
+	  }
+  };	// above position
+
+
+};	// Analyzer
 
 
 template <class T> double	Analyzer<T>::posres;
@@ -289,6 +302,25 @@ void Analyzer<GMXSystem>::_InitializeSystem () {
 }
 #endif
 
+
+template <class T>
+VecR Analyzer<T>::CenterOfMass (const Mol_ptr_vec& mols) const 
+{
+  double mass = 0.0;
+  VecR com;
+
+  for (Mol_it it = mols.begin(); it != mols.end(); it++) {
+	for (Atom_it jt = (*it)->begin(); jt != (*it)->end(); jt++) {
+	  mass += (*jt)->Mass();
+	  com += (*jt)->Position() * (*jt)->Mass();
+	}
+  }
+  com /= mass;
+  return com;
+}
+
+
+
 /*
 // Create a histogram of the angles formed by an axis of a molecule's given reference axis.
 // The supplied axis function should return the molecular axis vector of the molecule.
@@ -316,7 +348,7 @@ histo[anglebin]++;
 
 return (histo);
 }
-*/
+ */
 
 /*
    template <typename molecule_t>
@@ -347,7 +379,7 @@ histo[posbin][anglebin]++;	// Binning into the histogram, ftw
 
 return (histo);
 }
-*/
+ */
 
 /*
 // creates a 2D histogram showing the shape of the plane formed by a given atom of a molecule averaged over a simulation.
@@ -397,7 +429,7 @@ density[d1_bin][d2_bin]++;
 
 return histogram;
 }
-*/
+ */
 
 /*
    class AmberAnalyzer : public Analyzer<AmberSystem> {
@@ -431,5 +463,5 @@ return histogram;
    this->sys = new GMXSystem(trr.c_str(), gro.c_str());
    }
    };
-   */
+ */
 #endif

@@ -4,7 +4,6 @@
 #include "molecule.h"
 
 #include "matrixr.h"
-#include "utility.h"
 
 // A water class to add a few functions for dealing with water molecules specifically.
 class Water: public Molecule {
@@ -62,14 +61,5 @@ public:
 typedef std::vector<Water *> Water_ptr_vec;
 typedef std::vector<Water> Water_vec;
 
-/* various things that we can do to water! */
 
-namespace water {
-
-  class setBondLengths : public std::unary_function<Water *,void> {
-	public:
-	  void operator() (Water * wat) {
-	  }
-  };
-}
 #endif

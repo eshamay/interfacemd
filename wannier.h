@@ -4,7 +4,6 @@
 #include <vector>
 #include <string>
 #include "vecr.h"
-#include "utility.h"
 
 #define WANNIER_BOND	0.7
 

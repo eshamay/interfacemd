@@ -43,7 +43,11 @@ namespace tensor {
 
 
 	}; // tensor
-  typedef Tensor<matrix_t>	tensor_t;
+  typedef Tensor<matrix_t>				tensor_t;
+  typedef std::vector<tensor_t> 		tensor_vec;
+  typedef tensor_vec::const_iterator 	tensor_it;
+
+
   typedef Tensor<symmetric_matrix<double, upper, column_major> > sym_tensor_t;
 
 

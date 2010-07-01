@@ -240,61 +240,19 @@ void Molecule::Rotate (VecR& origin, VecR& axis, double angle) {
 
 void Molecule::Shift (VecR& shift) {
 
-  RUN (_atoms) {
-	_atoms[i]->Shift (shift);
+  for (Atom_it it = this->begin(); it != this->end(); it++) {
+	(*it)->Shift (shift);
   }
 
   return;
 }
 
-/*
-// note: this is going to CREATE AN ARRAY - make sure to DEALLOCATE (i.e. delete) it after use!!
-double * Molecule::DPositions () const {
-double * positions;
-
-// Each atom has a position vector consisting of three components. So let's allocate space for all these vectors
-positions = new double[_atoms.size() * 3];
-
-// now we assign the value from the atomic positions
-RUN (_atoms) {
-double * pos = _atoms[i]->DPosition();	// this is the position vector of the atom
-
-for (int j = 0; j < 3; j++) {
-positions[i * 3 + j] = pos[j];	// and now we set each element in the output array
-}
-}
-
-return (positions);
-}
-*/
-
-/*
-// Just like the DPositions (), make sure to deallocate the array we create here!
-double * Molecule::DForces () const {
-double * forces;
-
-// Each atom has a position vector consisting of three components. So let's allocate space for all these vectors
-forces = new double[_atoms.size() * 3];
-
-// now we assign the value from the atomic positions
-RUN (_atoms) {
-double * force = _atoms[i]->DForce();	// this is the position vector of the atom
-
-for (int j = 0; j < 3; j++) {
-forces[i * 3 + j] = force[j];	// and now we set each element in the output array
-}
-}
-
-return (forces);
-}
-*/
-
 void Molecule::Print () const {
 
   printf ("Residue = %s  (%d)\tmass = % .3f\n", _name.c_str(), _ID, _mass);
 
-  RUN (_atoms) {
-	_atoms[i]->Print();
+  for (Atom_it it = this->begin(); it != this->end(); it++) {
+	(*it)->Print();
   }
   //printf ("wan)\t%d\n", _wanniers.size());
 
@@ -325,8 +283,8 @@ VecR Molecule::CalcDipole () {
   }
 
   // wannier centers have a charge of -2
-  RUN (_wanniers) {
-	_dipole -= (_wanniers[i] - _centerofmass) * 2.0;
+  for (VecR_it it = _wanniers.begin(); it != _wanniers.end(); it++) {
+	_dipole -= ((*it) - _centerofmass) * 2.0;
   }
 
   return (_dipole);
@@ -338,13 +296,10 @@ double Molecule::MinDistance (Molecule& mol) {
   bool first = true;
   double min = 0.0;
 
-  RUN (_atoms) {
-	RUN2 (mol.Atoms()) {
+  for (Atom_it it = this->begin(); it != this->end(); it++) {
+	for (Atom_it jt = mol.begin(); jt != mol.end(); jt++) {
 
-	  Atom * atom1 = _atoms[i];
-	  Atom * atom2 = mol.Atoms(j);
-
-	  double temp = (atom1->Position() - atom2->Position()).Magnitude();
+	  double temp = ((*it)->Position() - (*jt)->Position()).Magnitude();
 	  //printf ("%f\n", temp);
 	  if (first) {
 		first = false;
@@ -578,8 +533,8 @@ Molecule * Molecule::Merge (Molecule * mol) {
   // the new molecule's name is yet unknown
   _name = "undefined";
 
-  RUN (mol->Atoms()) {
-	this->AddAtom (mol->Atoms(i));
+  for (Atom_it it = mol->begin(); it != mol->end(); it++) {
+	this->AddAtom (*it);
   }
 
   return (this);

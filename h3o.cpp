@@ -15,13 +15,13 @@ Hydronium::~Hydronium () {
 void Hydronium::SetAtoms () {
 
 		// here's the hydrogen and nitrogen atoms
-		_o = (*this)["O"];
+		_o = this->GetAtom("O");
 
 		// now set the 3 hydrogens
 		std::vector<Atom *> hydrogens;
-		RUN (_atoms) {
-			if (_atoms[i]->Name() != "H") continue;
-			hydrogens.push_back (_atoms[i]);
+		for (Atom_it it = this->begin(); it != this->end(); it++) {
+			if ((*it)->Name() != "H") continue;
+			hydrogens.push_back (*it);
 		}
 
 		_h1 = hydrogens[0];
