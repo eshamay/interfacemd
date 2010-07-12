@@ -12,12 +12,13 @@ protected:
 	//double _eulerAngles[2][3];
 	VecR _oh1, _oh2;				// Both of the OH vectors
 
-	Atom *_o, *_h1, *_h2;			// pointers to the atoms for easy access
+	AtomPtr _o, _h1, _h2;			// pointers to the atoms for easy access
 
 public:
 	Water ();	// a default constructor
 	~Water ();	// a destructor
 	Water (const Molecule& molecule);	// copy constructor for casting from a molecule
+	Water (const MolPtr& mol);
 
 	static int numWaters;			// total number of waters in the system
 
@@ -47,9 +48,9 @@ public:
 	MatR const & Alpha () const { return _alpha; }
 	#endif
 
-	Atom * O () { return _o; }
-	Atom * H1 () { return _h1; }
-	Atom * H2 () { return _h2; }
+	AtomPtr O () { return _o; }
+	AtomPtr H1 () { return _h1; }
+	AtomPtr H2 () { return _h2; }
 
 	VecR const * OH1 () const { return &_oh1; }
 	VecR const * OH2 () const { return &_oh2; }
@@ -58,7 +59,8 @@ public:
 	VecR MolecularAxis (); 
 };
 
-typedef std::vector<Water *> Water_ptr_vec;
+typedef boost::shared_ptr<Water> WaterPtr;
+typedef std::vector<WaterPtr> Water_ptr_vec;
 typedef std::vector<Water> Water_vec;
 
 

@@ -1,7 +1,7 @@
 include ../Makefile
 
 MORITAFILES		= $(WATERSYSTEM) watersfg.o morita.o 
-TEST		= ../vecr.o ../matrixr.o test.o
+TEST		= ../mdmath.o ../vecr.o ../matrixr.o test.o
 MPIMORITAFILES		= $(MORITAFILES) ../mpi/mpisys.o
 MORITA2002		= $(AMBERSYSTEM) $(WATER) $(IONS) $(ORGANIC) morita2002.o
 
@@ -12,13 +12,13 @@ morita : $(MORITAFILES)
 #gfortran $(MORITA2002) $(LIBS) -llapack -lf77blas -lcblas -latlas -o ../bin/morita2002
 
 morita2002 : $(MORITA2002)
-	icpc $(MORITA2002) $(LIBS) $(LAPACKLIBS) -o ../bin/morita2002
+	icpc $(MORITA2002) $(LIBS) $(LAPACKLIBS) -lfftw3 -o ../bin/morita2002
 
 mpimorita : $(MPIMORITAFILES)
 	$(MPICXX) $(CPPFLAGS) $(MPILIBS) $(MPIMORITAFILES) -o ../bin/mpi-morita
 
 test : $(TEST)
-	$(CXX) $(CPPFLAGS) $(TEST) -o test
+	icpc $(LAPACKLIBS) $(TEST) -o test
 
 cleansfg :
 	rm -f *.o test

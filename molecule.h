@@ -39,6 +39,8 @@ class Molecule {
     Molecule (const Molecule& oldMol);			// A copy constructor for performing deep copies of a molecule
     virtual ~Molecule ();
 
+	typedef Molecule* MolPtr;
+
     static int numMolecules;
 
     // Input functions
@@ -63,7 +65,7 @@ class Molecule {
 
     /* Dealing with atoms in the molecule */
     Atom_ptr_vec Atoms () const			{ return _atoms; }
-    Atom * Atoms (int index) const		{ return _atoms[index]; }
+    AtomPtr Atoms (int index) const		{ return _atoms[index]; }
 
     Atom_it begin() const {
       return _atoms.begin();
@@ -105,18 +107,18 @@ class Molecule {
     virtual VecR MolecularAxis () { return _z; }
 
     // Operators
-    Atom * operator[] (int index) const { return _atoms[index]; }	// retrieve an atom by array index
-    Atom * operator[] (const string atomname) const;			// retrieve a particular atom using its unique name/ID
-    Atom * GetAtom (const string atomname) const;
+    AtomPtr operator[] (int index) const { return _atoms[index]; }	// retrieve an atom by array index
+    AtomPtr operator[] (const string atomname) const;			// retrieve a particular atom using its unique name/ID
+    AtomPtr GetAtom (const string atomname) const;
     //int operator+= (Atom * newAtom);					// adds an atom into the molecule
 
-    void AddAtom (Atom * const newAtom);					// same as the operator
-    void AddHydrogen (Atom * const atom);					// same as adding an atom but renames accordingly
-    void RemoveAtom (Atom * const atom);
-    void FixAtom (Atom * const atom);
+    void AddAtom (AtomPtr const newAtom);					// same as the operator
+    void AddHydrogen (AtomPtr const atom);					// same as adding an atom but renames accordingly
+    void RemoveAtom (AtomPtr const atom);
+    void FixAtom (AtomPtr const atom);
 	void Rename (const string name);
 
-	Molecule * Merge (Molecule * mol);				// merges two molecules
+	MolPtr Merge (MolPtr mol);				// merges two molecules
 	//int operator+= (Molecule& mol);					// Joins two molecules
 
 	// Some stuff to work with wannier centers
@@ -152,7 +154,8 @@ class Molecule {
 	MatR const & DCMToLab (const coord axis = z);
 };
 
-typedef std::vector<Molecule *> Mol_ptr_vec;
+typedef Molecule::MolPtr MolPtr;
+typedef std::vector<MolPtr> Mol_ptr_vec;
 typedef Mol_ptr_vec::const_iterator Mol_it;
 
 #endif

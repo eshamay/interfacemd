@@ -16,7 +16,12 @@ Water::~Water () {
 }
 
 Water::Water (const Molecule& molecule) : Molecule(molecule) {
-  _name = "h2o";
+  this->Rename("h2o");
+  ++numWaters;
+}
+
+Water::Water (const MolPtr& mol) : Molecule(*mol) {
+  this->Rename("h2o");
   ++numWaters;
 }
 

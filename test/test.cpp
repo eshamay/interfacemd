@@ -11,7 +11,7 @@ Tester::Tester (WaterSystemParams& wsp)
 void Tester::Setup () {
   LoadWaters ();
 
-  Water * wat = new Water (*int_wats[0]);
+  WaterPtr wat (new Water (int_wats[0]));
 
   wat->Print();
   wat->SetAtoms();
@@ -44,8 +44,6 @@ void Tester::Setup () {
   printf ("A*b in the loc then rotated back\n");
   (dcm * Bloc).Print();
 
-
-  delete wat;
 
   return;
 }

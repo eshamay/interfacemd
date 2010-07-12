@@ -15,7 +15,7 @@ private:
 	XYZFile				_coords;		// Atomlist parsed from an xyz file
 	WannierFile 		_wanniers;		// The wannier centers
 	bool _parsed;
-	BondGraph		_graph;			// a really useful graph for playing with atoms and bonds
+	BondGraph			_graph;			// a really useful graph for playing with atoms and bonds
 
 	/* For debugging (and other useful things?) this will keep a list of all the atoms that have been processed into molecules. Any atoms left over at the end of the parsing routine are not included and ... can potentially cause problems */
 	Atom_ptr_vec _unparsed;
@@ -30,8 +30,7 @@ private:
 
 public:
 	// constructors
-	XYZSystem () { _graph.SysType("xyz"); }
-	XYZSystem (string filepath, VecR size, string wannierpath);
+	XYZSystem (std::string filepath, VecR size, std::string wannierpath = "");
 	~XYZSystem ();
 
 	// Controller & Calculation methods

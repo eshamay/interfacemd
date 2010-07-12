@@ -3,6 +3,7 @@
 
 #include "../tensor.h"
 #include "../mdmath.h"
+#include <mkl_boost_ublas_matrix_prod.hpp>
 
 #include <iostream>
 

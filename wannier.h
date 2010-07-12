@@ -13,7 +13,7 @@ class WannierFile {
 protected:
 
 	FILE *			_file;
-	std::vector<VecR>	_coords;	// atomic coordinates
+	VecR_vec		_coords;	// atomic coordinates
 	int 			_size;		// number of lines to process from the wannier file per frame
 	int 			_frame;		// The current frame (number of timesteps processed)
 	int				_ID;
@@ -23,7 +23,6 @@ protected:
 
 public:
 
-	WannierFile () { }
 	WannierFile (std::string wannierpath);
 	~WannierFile ();
 
@@ -32,7 +31,7 @@ public:
 	void LoadNext ();
 
 	// output functions
-	const std::vector<VecR>& Coords () const { return _coords; }
+	const VecR_vec& Coords () const { return _coords; }
 	unsigned int size () 	const { return _size; }
 
 	bool eof () 	const { return _eof; }		// have we reached the end of the file?

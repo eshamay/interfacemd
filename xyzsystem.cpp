@@ -7,7 +7,6 @@ XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath) :
 {
 
 	MDSystem::Dimensions (size);
-	_graph.SysType("xyz");
 
 	this->LoadFirst();
 }

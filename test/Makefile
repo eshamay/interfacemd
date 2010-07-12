@@ -20,12 +20,12 @@ ANGLEPOSITIONHISTO = $(WATERSYSTEM) Angle-Position-Histogram-2D.o
 ROTATE			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o molecule-rotate.cpp
 ANGLEHISTO = $(WATERSYSTEM) angle-histogram.o
 
-TEST		= $(WATERSYSTEM) test.o
+TEST		= $(AMBERSYSTEM) $(WATER) $(IONS) $(ORGANIC) test.o
 
 # $(CXX) $(CPPFLAGS) $(TEST) -lmkl_solver_ilp64 -lmkl_core -lmkl_lapack -lmkl_gnu_thread -lguide -lpthread -o test
 
 test : $(TEST)
-	$(CXX) $(CPPFLAGS) $(TEST) $(LAPACKLIBS) -o test 
+	icpc $(TEST) $(LIBS) $(LAPACKLIBS) -o test
 
 anglehisto: $(ANGLEHISTO)
 	$(CXX) $(CPPFLAGS) $(ANGLEHISTO) -llapack -o ../bin/anglehisto

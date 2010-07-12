@@ -85,19 +85,20 @@ class Analyzer : public WaterSystem<T> {
 
 	// calculate the system's center of mass
 	VecR CenterOfMass (const Mol_ptr_vec& mols) const;
+	template <typename U> VecR CenterOfMass (const std::vector<U>& mols) const;
 
     // analysis loop functions
-    virtual void Setup () { return; }
-    virtual void Analysis () { return; }
-    virtual void PostAnalysis () { return; }
-    virtual void DataOutput (const unsigned int timestep) { return; }
+    virtual void Setup () = 0;
+    virtual void Analysis () = 0;
+    virtual void PostAnalysis () = 0;
+    virtual void DataOutput (const unsigned int timestep) = 0;
 
 
   // check if a water molecule is above a certain location in the system
   class AbovePosition : public std::binary_function <Molecule *, double, bool> {
 	public:
 	  bool operator () (const Molecule * m, const double cutoff) const {
-		return m->GetAtom("O")->Position()[WaterSystem<AmberSystem>::axis] > cutoff;
+		return m->GetAtom("O")->Position()[WaterSystem<T>::axis] > cutoff;
 	  }
   };	// above position
 
@@ -171,7 +172,6 @@ void Analyzer<T>::_OutputHeader () const {
 template <class T> 
 Analyzer<T>::~Analyzer () {
   delete this->sys;
-  fclose (output);
   return;
 }
 
@@ -204,23 +204,23 @@ template <class T>
 void Analyzer<T>::SystemAnalysis ()
 {
   // do some initial setup
-  Setup();
+  this->Setup();
 
   int timestep = 0;
   // start the analysis - run through each timestep
   for (timestep = 0; timestep < timesteps; timestep++) {
 
     // Perform the main loop analysis that works on every timestep of the simulation
-    Analysis ();
+    this->Analysis ();
 
     // load the next timestep
-    LoadNext();
+    this->LoadNext();
 
    // output the status of the analysis (to the screen or somewhere useful)
-    _OutputStatus (timestep);
+    this->_OutputStatus (timestep);
     // Output the actual data being collected to a file or something for processing later
     if (!(timestep % (output_freq * 10)) && timestep)
-      DataOutput(timestep);
+      this->DataOutput(timestep);
   }
 
   // do a little work after the main analysis loop (normalization of a histogram? etc.)
@@ -292,6 +292,18 @@ void Analyzer<AmberSystem>::_InitializeSystem () {
   return;
 }
 
+template <>
+void Analyzer<XYZSystem>::_InitializeSystem () {
+
+  std::string filepath = wsp.config_file->lookup("system.files.xyzfile");
+  VecR dims = VecR ( wsp.config_file->lookup("system.size") );
+  std::string wanniers = wsp.config_file->lookup("system.files.wannier");
+
+  this->sys = new XYZSystem(filepath, dims, wanniers);
+
+  return;
+}
+
 #ifdef GROMACS_SYS
 template <>
 void Analyzer<GMXSystem>::_InitializeSystem () {
@@ -304,12 +316,15 @@ void Analyzer<GMXSystem>::_InitializeSystem () {
 
 
 template <class T>
-VecR Analyzer<T>::CenterOfMass (const Mol_ptr_vec& mols) const 
+template <class U>
+VecR Analyzer<T>::CenterOfMass (const std::vector<U>& mols) const 
 {
   double mass = 0.0;
   VecR com;
 
-  for (Mol_it it = mols.begin(); it != mols.end(); it++) {
+  typedef typename std::vector<U>::const_iterator u_it;
+
+  for (u_it it = mols.begin(); it != mols.end(); it++) {
 	for (Atom_it jt = (*it)->begin(); jt != (*it)->end(); jt++) {
 	  mass += (*jt)->Mass();
 	  com += (*jt)->Position() * (*jt)->Mass();

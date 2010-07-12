@@ -5,7 +5,7 @@ CXX			= icpc -wd981,444,383
 DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated #-wd981,1599,1572,383
 OPTIMIZE 	= -fast -finline-functions -finline -funroll-loops -m64
 #CPPFLAGS    = -Wall -Drestrict= -ftemplate-depth-100 $(DEBUG) -L$(HOME)/share/lib
-CPPFLAGS    = -Wall -ftemplate-depth-100 $(DEBUG) 
+CPPFLAGS    = -Wall -ftemplate-depth-100 $(OPTIMIZE)
 
 LIBS		= -L$(HOME)/share/lib -L$(MPI_HOME)/lib -L$(ATLAS)/lib -lconfig++
 
@@ -18,7 +18,7 @@ SCALAPACK	= -openmp -Wl,--start-group -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_l
 XDRLIB		= $(XDRDIR)/lib
 XDRINC		= $(XDRDIR)/include
 
-CPATH		= :$(SRCLIB):$(HOME)/share/include:$(ATLAS)/include:$(BOOST)#:$(XDRINC)
+#CPATH		= :$(SRCLIB):$(HOME)/share/include:$(ATLAS)/include:$(BOOST)#:$(XDRINC)
 
 
 MATH	= $(SRCLIB)/vecr.o $(SRCLIB)/matrixr.o 

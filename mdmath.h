@@ -2,8 +2,10 @@
 #define MDMATH_H_
 
 #include "tensor.h"
+#include <mkl_blas.h>
+#include <mkl_lapack.h>
 
-
+/*
 namespace blacs {
 
   extern "C" {
@@ -16,7 +18,6 @@ namespace blacs {
 	void blacs_exit_		(int* error_code);
 
 
-	/*
 	   void   Cblacs_pinfo( int* mypnum, int* nprocs);
 	   void   Cblacs_get( int context, int request, int* value);
 	   int    Cblacs_gridinit( int* context, char * order, int np_row, int np_col);
@@ -26,24 +27,12 @@ namespace blacs {
 
 	   double pdlamch_( int *ictxt , char *cmach);
 	   double pdlange_( char *norm, int *m, int *n, double *A, int *ia, int *ja, int *desca, double *work);
-	 */
   }	// extern
 
 } // blacs
+*/
 
-
-namespace blas {
-
-  extern "C" {
-
-	void dgemm_ (char* transa, char* transb, int* m, int* n, int* k, double* alpha, double* A, int* lda, double* B, int* ldb, double* beta, double* C, int* ldc);
-
-  } // extern
-
-
-} // namespace blas
-
-
+/*
 namespace lapack {
 
   extern "C" {
@@ -53,9 +42,11 @@ namespace lapack {
   } // extern
 
 } // namespace lapack
+*/
 
 
 
+/*
 namespace scalapack {
 
   extern "C" {
@@ -71,38 +62,7 @@ namespace scalapack {
 
 
 
-  /********** matrix multiplication **********/
-  // takes 3 matrices (A, B, and C) and sets C = A*B
-  /*
-  class PDGEMM {
-
-	public:
-	  PDGEMM (tensor::tensor_t& A, tensor::tensor_t& B, tensor::tensor_t& C, boost::mpi::communicator& mpi_comm);
-
-	private:
-	  boost::mpi::communicator world;
-
-	  int nrow, ncol, nblock;			// processor grid context * dimensions, submatrix block-size
-
-	  int ma, mb, mc, na, nb, nc;	// matrix sizes (m = rows, n = cols)
-	  char transa, transb;
-	  double alpha, beta;
-
-	  int lnrow, lncol;						// grid location of local process
-	  int lma, lna, lmb, lnb, lmc, lnc;		// local submatrix dimensions
-	  
-	  int ctxt;
-	  int desca[9];
-	  int descb[9];
-	  int descc[9];
-	  int ierr;
-
-	  char scope, top;
-	  
-
-  }; // pdgemm
-  */
-
 } // scalapack
+*/
 
 #endif

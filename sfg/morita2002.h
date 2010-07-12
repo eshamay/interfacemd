@@ -9,7 +9,9 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>
+#include <boost/shared_ptr.hpp>
 #include <iostream>
+#include <fftw3.h>
 
 
 
@@ -53,6 +55,47 @@ namespace morita {
 		D7 = 3.4710;
 
 
+  namespace utilities {
+
+
+	/*
+	   template <typename T>
+	   class DeletePointer : public std::unary_function<T,void> {
+	   public:
+	   void operator() (T t) { delete t; }
+	   };  // delete pointer
+
+
+	   template <typename T, typename U>
+	   class ConvertPointerType : public std::unary_function<T,U> {
+	   public:
+	   U operator() (T t) const { return static_cast<U>(t); }
+	   };  // convert pointer type
+
+
+	   template <typename Iter1, typename Iter2>
+	   void ConvertContainerElementTypes (Iter1 pBegin, Iter1 pEnd, Iter2 pBegin2)
+	   {
+	   typedef typename std::iterator_traits<Iter1>::value_type value_t1;
+	   typedef typename std::iterator_traits<Iter2>::value_type value_t2;
+
+	   std::transform(pBegin, pEnd, pBegin2, ConvertPointerType<value_t1, value_t2>());
+	   } // convert container element types
+
+
+	   template <typename T, typename U>
+	   class MakeDerivedFromPointer : public std::unary_function<T *,U *> {
+	   public:
+	   U * operator() (T * t) const {
+	   return new U(t);
+	   }
+	   };  // make derived from pointer
+	 */
+
+
+  } // namespace utilities
+
+
   // a new water that has all the needed pieces for our calculations
   class MoritaH2O : public Water {
 	public:
@@ -77,33 +120,26 @@ namespace morita {
 	  double qO, qH1, qH2;		// charges calculated from the MoritaHynes 2002 method
   };	// morita-h2o
 
-  typedef std::vector<MoritaH2O *> Morita_ptr_vec;
+  typedef boost::shared_ptr<MoritaH2O>	MoritaH2O_ptr;
+  typedef std::vector<MoritaH2O_ptr> Morita_ptr_vec;
   typedef Morita_ptr_vec::const_iterator Morita_it;
 
 
-  namespace math {
-
-
-	// dipole field tensor 'T' as used in the morita&hynes paper
-	// it's a square 3Nx3N matrix, where N = number of particles
-	class DipoleFieldTensor : public tensor::tensor_t {
-	  public:
-		DipoleFieldTensor (const Molecule* wat1, const Molecule* wat2);
-	}; // Dipole field tensor
-
-
-  } // math
-
-
-
-  class SetDipoleMoment : public std::unary_function<MoritaH2O *,void> {
+  // dipole field tensor 'T' as used in the morita&hynes paper
+  // it's a square 3Nx3N matrix, where N = number of particles
+  class DipoleFieldTensor : public tensor::tensor_t {
 	public:
-	  void operator() (MoritaH2O * wat) { wat->SetDipoleMoment(); }
+	  DipoleFieldTensor (const MoritaH2O_ptr wat1, const MoritaH2O_ptr wat2);
+  }; // Dipole field tensor
+
+  class SetDipoleMoment : public std::unary_function<MoritaH2O_ptr,void> {
+	public:
+	  void operator() (MoritaH2O_ptr& wat) { wat->SetDipoleMoment(); }
   };
 
-  class SetPolarizability : public std::unary_function<MoritaH2O *,void> {
+  class SetPolarizability : public std::unary_function<MoritaH2O_ptr,void> {
 	public:
-	  void operator() (MoritaH2O * wat) { wat->SetPolarizability(); }
+	  void operator() (MoritaH2O_ptr& wat) { wat->SetPolarizability(); }
   };
 
 
@@ -116,10 +152,11 @@ namespace morita {
 	  void Setup ();
 	  void Analysis ();
 	  void DataOutput (const unsigned int timestep);
-	  void PostAnalysis () { return; }
+	  void PostAnalysis ();
 
 	private:
-	  Morita_ptr_vec		_wats;
+	  Morita_ptr_vec		all_wats;
+	  Morita_ptr_vec		cutoff_wats;
 	  vector_t				_p;
 	  tensor::tensor_t		_alpha;
 	  tensor::SymmetricMatrix _T;	// system dipole field tensors
@@ -132,8 +169,6 @@ namespace morita {
 
 	  tensor::tensor_vec	_vA;	// the tensor A for each timestep
 
-
-
 	  bool	time_zero;
 
 	  void CalculateTensors();
@@ -143,44 +178,6 @@ namespace morita {
 
   };	// sfg-analyzer
 
-
-
-  namespace utilities {
-
-	template <typename T>
-	  class DeletePointer : public std::unary_function<T,void> {
-		public:
-		  void operator() (T t) { delete t; }
-	  };  // delete pointer
-
-
-	template <typename T, typename U>
-	  class ConvertPointerType : public std::unary_function<T,U> {
-		public:
-		  U operator() (T t) const { return static_cast<U>(t); }
-	  };  // convert pointer type
-
-
-	template <typename Iter1, typename Iter2>
-	  void ConvertContainerElementTypes (Iter1 pBegin, Iter1 pEnd, Iter2 pBegin2)
-	  {
-		typedef typename std::iterator_traits<Iter1>::value_type value_t1;
-		typedef typename std::iterator_traits<Iter2>::value_type value_t2;
-
-		std::transform(pBegin, pEnd, pBegin2, ConvertPointerType<value_t1, value_t2>());
-	  } // convert container element types
-
-
-	template <typename T, typename U>
-	  class MakeDerivedFromPointer : public std::unary_function<T *,U *> {
-		public:
-		  U * operator() (T * t) const {
-			return new U(t);
-		  }
-	  };  // make derived from pointer
-
-
-  } // namespace utilities
 
 
   // Using the LAPACK solver for some simple systems

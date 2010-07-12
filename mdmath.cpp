@@ -1,6 +1,7 @@
 #include "mdmath.h"
 
 
+/*
 namespace scalapack {
 
 
@@ -72,5 +73,6 @@ namespace scalapack {
   } // pdgemm c-tor
 
 }	// namespace scalapack
+*/
 
 

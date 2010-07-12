@@ -12,33 +12,37 @@ namespace morita {
   { return; }
 
   SFGAnalyzer::~SFGAnalyzer () {
-	for (Morita_it it = _wats.begin(); it != _wats.end(); it++) { delete (*it); }
   }
 
   void SFGAnalyzer::Setup () {
 
-	// load all the waters in the system
-	LoadWaters();
+	if (time_zero) {
+	  // load all the waters in the system
+	  LoadWaters();
+
+	  // all_wats will hold the collection of all waters in the system
+	  for (Mol_it it = int_wats.begin(); it != int_wats.end(); it++) {
+		MoritaH2O_ptr ptr (new MoritaH2O (*it));
+		all_wats.push_back(ptr);
+	  }
+	}
+
+	cutoff_wats.clear();
+	std::copy(all_wats.begin(), all_wats.end(), back_inserter(cutoff_wats));
 
 	// find the system center of mass
-	Mol_ptr_vec v;
-	std::copy (int_wats.begin(), int_wats.end(), std::back_inserter(v));
-	VecR com = this->CenterOfMass(v);
+	VecR com (this->CenterOfMass<MoritaH2O_ptr>(all_wats));
+	double cutoff = com[WaterSystem<AmberSystem>::axis];
 
 	// only use waters found above a particular location in the slab (i.e. center of mass)
-	int_wats.erase(std::remove_if(int_wats.begin(), int_wats.end(), std::bind2nd(AbovePosition(), com[WaterSystem<AmberSystem>::axis])), int_wats.end());
+	std::pair<double,double> slice = make_pair(cutoff,WaterSystem<AmberSystem>::posmax);
+	this->SliceWaters<MoritaH2O_ptr> (cutoff_wats, slice);
 
-	// clear out and then reload the new set of waters in the system
-	std::for_each(_wats.begin(), _wats.end(), utilities::DeletePointer<MoritaH2O*>());
-	_wats.clear();
-	// convert them to the special morita-waters for analysis
-	std::transform(int_wats.begin(), int_wats.end(), std::back_inserter(_wats), utilities::MakeDerivedFromPointer<Molecule, MoritaH2O>());
+	int N = 3*cutoff_wats.size();
 
-	int N = 3*_wats.size();
-
-	_T.resize(N); _T.clear();
-	_p.resize(N); _p.clear();
-	_alpha.resize(N, N); _alpha.clear();
+	_T.clear(); _T.resize(N); 
+	_p.clear(); _p.resize(N); 
+	_alpha.clear(); _alpha.resize(N, N); 
 
   } // Setup
 
@@ -49,8 +53,10 @@ namespace morita {
 	this->CalculateTensors();
 
 	// sums all the water dipole moments to get the total system dipole
-	if (time_zero)
+	if (time_zero) {
 	  this->CalculateTotalDipole();
+	  time_zero = false;
+	}
 
 	// determine the local field correction to each of the molecular polarizabilities
 	this->CalculateLocalFieldCorrection ();
@@ -63,64 +69,104 @@ namespace morita {
 
   void SFGAnalyzer::DataOutput (const unsigned int timestep) {
 
-	rewind(output);
 
 	// for now, only output the SSP and SPS components of the correlation function
 	double a_sps, m_sps;
 	double a_ssp, m_ssp;
+
+	std::vector<double> sps, ssp;
+
+	// *********** time-domain work *********** //
 	for (tensor::tensor_it it = _vA.begin(); it != _vA.end(); it++) {
 	  a_sps = ((*it)(0,1) + (*it)(2,1))/2.0;
 	  a_ssp = ((*it)(0,0) + (*it)(0,2) + (*it)(2,0) + (*it)(2,2))/4.0;
 
 	  m_sps = (_M(0) + _M(2))/2.0;
 	  m_ssp = _M(1);
-
-	  // output one column for sps, one for ssp
-	  fprintf (output, "% 13.8f %13.8f\n",
-		  a_sps * m_sps, a_ssp * m_ssp);
+	  sps.push_back(a_sps*m_sps);
+	  ssp.push_back(a_ssp*m_ssp);
 	}
 
-	this->Setup();
+
+	// ********  fftw work ******** //
+	double *in;
+	fftw_complex *sps_fft, *ssp_fft;
+	fftw_plan p;
+
+	in = (double*) fftw_malloc(sizeof(double)*sps.size());
+
+	// sps transform
+	std::copy(sps.begin(), sps.end(), in);
+	sps_fft = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*sps.size());
+	p = fftw_plan_dft_r2c_1d(sps.size(),in,sps_fft,FFTW_DESTROY_INPUT);
+	fftw_execute(p);
+
+	// ssp transform
+	std::copy(ssp.begin(), ssp.end(), in);
+	ssp_fft = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*ssp.size());
+	p = fftw_plan_dft_r2c_1d(ssp.size(),in,ssp_fft,FFTW_DESTROY_INPUT);
+	fftw_execute(p);
+
+	// output one column each for
+	// time-domain data, real, imaginary, magnitude
+	rewind(output);
+	for (int i = 0; i < sps.size(); i++) {
+	  fprintf (output, "% 23.8f % 23.8f % 23.8f % 23.8f % 23.8f % 23.8f % 23.8f % 23.8f\n",
+		  sps[i], sps_fft[i][0], sps_fft[i][1], sqrt(sps_fft[i][0]*sps_fft[i][0] + sps_fft[i][1]*sps_fft[i][1]),
+		  ssp[i], ssp_fft[i][0], ssp_fft[i][1], sqrt(ssp_fft[i][0]*ssp_fft[i][0] + ssp_fft[i][1]*ssp_fft[i][1])
+		  );
+	}
+
+	fftw_destroy_plan(p);
+	fftw_free(in);
+	fftw_free(sps_fft);
+	fftw_free(ssp_fft);
+
+
+	if (!(timestep == timesteps))
+	  this->Setup();
 
   } // Data Output
 
+  void SFGAnalyzer::PostAnalysis () {
+	return; 
+  }
 
 
   void SFGAnalyzer::CalculateTensors() {
 	// Calculate the dipole moment of each water, and then constructs the 3Nx3 tensor 'p'.
 	if (time_zero)
-	  std::for_each (_wats.begin(), _wats.end(), SetDipoleMoment());
+	  std::for_each (cutoff_wats.begin(), cutoff_wats.end(), SetDipoleMoment());
 
 	// Set up the polarizability (alpha) matrix similar to the method for the dipole moment
-	std::for_each (_wats.begin(), _wats.end(), SetPolarizability());
+	std::for_each (cutoff_wats.begin(), cutoff_wats.end(), SetPolarizability());
 
 	_T.clear();
-	for (unsigned int i = 0; i < _wats.size(); i++) {
+	for (unsigned int i = 0; i < cutoff_wats.size(); i++) {
 
-	  if (time_zero)
-		project(_p, slice(3*i,1,3)) = _wats[i]->Dipole();
+	  if (time_zero) {
+		project(_p, slice(3*i,1,3)) = cutoff_wats[i]->Dipole();
+	  }
 
-	  project(_alpha, slice(3*i,1,3), slice(3*i,1,3)) = _wats[i]->Polarizability();
+	  project(_alpha, slice(3*i,1,3), slice(3*i,1,3)) = cutoff_wats[i]->Polarizability();
 
-	  for (unsigned int j = i+1; j < _wats.size(); j++) {
+	  for (unsigned int j = i+1; j < cutoff_wats.size(); j++) {
 
 		if (i == j) continue;
 
 		// Calculate the tensor 'T' which is formed of 3x3 matrix elements
-		project(_T, slice(3*i,1,3), slice(3*j,1,3)) = math::DipoleFieldTensor(_wats[i], _wats[j]);
+		project(_T, slice(3*i,1,3), slice(3*j,1,3)) = DipoleFieldTensor(cutoff_wats[i], cutoff_wats[j]);
 	  }
 	}
-  }
+  }	// Calculate Tensors
 
 
 
   // take care of the polarization calculations for the first timestep
   void SFGAnalyzer::CalculateTotalDipole () {
 	_M.Zero();
-	for (Morita_it it = _wats.begin(); it != _wats.end(); it++)
+	for (Morita_it it = cutoff_wats.begin(); it != cutoff_wats.end(); it++)
 	  _M.plus_assign((*it)->Dipole());
-
-	time_zero = false;
 
   }	// calculate total dipole
 
@@ -130,27 +176,28 @@ namespace morita {
 	// first here set up 1 + T*alpha, then solve the equation for f with a lapack routine
 
 	// do lots of initialization before the polarizability calculations
-	int N = 3*_wats.size();
+	int N = 3*cutoff_wats.size();
 
 	_IDENT.resize(N);
 	_g.resize(N,N);	_g.clear();
 
 	char trans = 'N';
 	double scale = 1.0;
-	blas::dgemm_ (&trans, &trans, &N, &N, &N, &scale, &_T(0,0), &N, &_alpha(0,0), &N, &scale, &_g(0,0), &N);
+	dgemm (&trans, &trans, &N, &N, &N, &scale, &_T(0,0), &N, &_alpha(0,0), &N, &scale, &_g(0,0), &N);
 
 	_g.plus_assign (_IDENT);	// this is now 1 + T*alpha, a.k.a inverse of g
 
 	// for now, f is 'h', the 3Nx3 block identity tensor
-	_f.resize(N,3); _f.clear();
+	_f.resize(N,3); _f.clear(); 
 	tensor::tensor_t::BlockIdentity(_f,3);
 
 	int nrhs = 3;
 	int ipiv[N];
-	int info;
+	for (int i = 0; i < N; i++) ipiv[i] = 0;
+	int info = 0;
 
 	// now solve for f in the equation g*f = h
-	lapack::dgesv_ (&N, &nrhs, &_g(0,0), &N, ipiv, &_f(0,0), &N, &info);
+	dgesv (&N, &nrhs, &_g(0,0), &N, ipiv, &_f(0,0), &N, &info);
 
   }	// Local field correction
 
@@ -163,7 +210,7 @@ namespace morita {
 	tensor::tensor_t fa (3,3);
 
 	_A.clear();
-	for (int i = 0; i < _wats.size(); i++) {
+	for (int i = 0; i < cutoff_wats.size(); i++) {
 	  // grab the piece of the local field tensor
 	  fs.assign(project (_f, slice (3*i,1,3), slice(0,1,3)));
 	  // and the alpha tensor
@@ -209,6 +256,7 @@ namespace morita {
 	this->_dipole += _o->Position() * qO;
 	this->_dipole += _h1->Position() * qH1;
 	this->_dipole += _h2->Position() * qH2;
+
   } // Set dipole moment
 
 
@@ -238,30 +286,24 @@ namespace morita {
   }
 
 
+  DipoleFieldTensor::DipoleFieldTensor (const MoritaH2O_ptr wat1, const MoritaH2O_ptr wat2)
+	:
+	  tensor::tensor_t(3,3)
+  {
+	VecR r = MDSystem::Distance (wat1->GetAtom("O"), wat2->GetAtom("O"));
+	// work in atomic units (au)
+	double distance = r.Magnitude() * sfg_units::ANG2BOHR;
+	double ir3 = 1.0/pow(distance,3.0);
+	double ir5 = 3.0/pow(distance,5.0);
 
-  namespace math {
-
-
-	DipoleFieldTensor::DipoleFieldTensor (const Molecule* wat1, const Molecule* wat2)
-	  :
-		tensor::tensor_t(3,3)
-	{
-	  VecR r = MDSystem::Distance (wat1->GetAtom("O"), wat2->GetAtom("O"));
-	  // work in atomic units (au)
-	  double distance = r.Magnitude() * sfg_units::ANG2BOHR;
-	  double ir3 = 1.0/pow(distance,3.0);
-	  double ir5 = 3.0/pow(distance,5.0);
-
-	  // calculate T as in eq. 10 of the Morita/Hynes 2002 paper
-	  for (unsigned i = 0; i < 3; i++) {
-		for (unsigned j = 0; j < 3; j++) {
-		  (*this)(i,j) = ir3 - ir5*r[i]*r[j];
-		}
+	// calculate T as in eq. 10 of the Morita/Hynes 2002 paper
+	for (unsigned i = 0; i < 3; i++) {
+	  for (unsigned j = 0; j < 3; j++) {
+		(*this)(i,j) = ir3 - ir5*r[i]*r[j];
 	  }
-	} //DFT::DFT
+	}
+  } //dipole field tensor c-tor
 
-
-  }	// namespace math
 
 } // namespace morita
 

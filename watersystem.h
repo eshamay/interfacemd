@@ -116,7 +116,7 @@ class WaterSystem {
 	void OpenFile ();
 	void Debug (string msg) const;
 
-	static double AxisPosition (Atom * a) {
+	static double AxisPosition (const Atom * a) {
 	  double pos = a->Position()[axis];
 	  pos = (pos > pbcflip) ? pos : pos + MDSystem::Dimensions()[axis];
 	  return pos;
@@ -125,8 +125,8 @@ class WaterSystem {
 	typedef std::pair<double,double> Double_pair;
 	// quick way to make a pair for the oft-used extents std::pair defaulting to the posmin/posmax in the config file
 	Double_pair ExtentPair (
-		const double low = WaterSystem<AmberSystem>::posmin,
-		const double high = WaterSystem<AmberSystem>::posmax) const {
+		const double low = WaterSystem<T>::posmin,
+		const double high = WaterSystem<T>::posmax) const {
 	  return std::make_pair<double,double> (low, high);
 	}
 
@@ -136,7 +136,7 @@ class WaterSystem {
 	// predicate determines if an atom sits within a particular slice of the system
 	class AtomPositionInSlice : public std::binary_function<Atom *, Double_pair&, bool> {
 	  public:
-		bool operator() (Atom * atom, const Double_pair& extents) const
+		bool operator() (const Atom * atom, const Double_pair& extents) const
 		{
 		  double pos = AxisPosition (atom);
 		  return pos > extents.first && pos < extents.second;
@@ -157,24 +157,27 @@ class WaterSystem {
 	}
 
 	// predicate to find if a water molecule is within a region (based on the position of the oxygen atom)
-	class WaterInSlice : public std::binary_function<Molecule *, Double_pair, bool> {
-	  private:
-		AtomPositionInSlice apis;
-	  public:
-		bool operator() (const Molecule * wat, const Double_pair& extents) const
-		{
-		  return apis (wat->GetAtom("O"), extents);
-		}
-	};
+	template <typename U>
+	  class WaterInSlice : public std::binary_function<U, Double_pair, bool> {
+		private:
+		  AtomPositionInSlice apis;
+		public:
+		  bool operator() (const U wat, const Double_pair& extents) const
+		  {
+			return apis (wat->GetAtom("O"), extents);
+		  }
+	  };
 
 	// This slices the water molecules and leaves only those within a given location of the slab. However, it does not do any loading or unloading of the atoms from int_atoms or anything else...
-	void SliceWaters (Mol_ptr_vec& mols, Double_pair& extents) {
+	template <typename U>
+	void SliceWaters (std::vector<U>& mols, Double_pair& extents) {
 	  mols.erase(
-		  remove_if(mols.begin(), mols.end(), std::not1(std::bind2nd(WaterInSlice(), extents))), mols.end());
+		  remove_if(mols.begin(), mols.end(), std::not1(std::bind2nd(WaterInSlice<U>(), extents))), mols.end());
 
-	  this->UpdateAtoms(int_wats, int_atoms);
+	  //this->UpdateAtoms(int_wats, int_atoms);
 	  return;
 	}
+
 
 	// predicate to determine if a molecule is a water
 	class IsWater_p : public std::unary_function<Molecule *, bool> {
@@ -313,7 +316,7 @@ WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
 
 template <class T>
 WaterSystem<T>::~WaterSystem () {
-
+  fclose (WaterSystem<T>::wsp.output);
   return;
 }
 

@@ -6,6 +6,7 @@
 #include "vecr.h"
 
 class Molecule;
+typedef Molecule* MolPtr;
 
 class Atom {
 
@@ -16,7 +17,7 @@ class Atom {
     int    _ID;	// some numerical identifier in case the atom is in an ordered list
     int	   _molid;			   // the molecule that contains this atom
 
-    Molecule * _pmolecule;
+    MolPtr _pmolecule;
 
     double _mass,
 	   _charge;
@@ -33,6 +34,8 @@ class Atom {
     Atom (VecR position);
     Atom (const Atom& oldAtom);				// copy constructor for deep copies
     ~Atom ();
+
+	typedef Atom * AtomPtr;
 
     double operator- (const Atom& input) const;		// operator usage to determine the distance between two atoms
     double operator[] (const coord index) const;	// get the atom's position by coordinate
@@ -76,28 +79,27 @@ class Atom {
     std::string Residue () const { return _residue; }
 
     const VecR& Position () const	{ return _position; }
-    //std::vector<double>& DPosition () { return _position.Coords(); }	// for returning the double array instead of the vector object
 
     const VecR& Force () const		{ return _force; }
-    //double * DForce () 		{ return _force.Coords(); }
 
     double X () const 		{ return _position[x]; }
     double Y () const		{ return _position[y]; }
     double Z () const 		{ return _position[z]; }
     int MolID () const		{ return _molid; }
-    Molecule * ParentMolecule () const { return _pmolecule; }
+    MolPtr ParentMolecule () const { return _pmolecule; }
     void Print () const;
 
-	class NameIs_p : public std::binary_function<Atom *,std::string,bool> {
+	class NameIs_p : public std::binary_function<AtomPtr,std::string,bool> {
 	  public:
-		bool operator() (const Atom * atom, const std::string name) const {
+		bool operator() (const AtomPtr atom, const std::string name) const {
 		  return atom->Name() == name;
 		}
 	};
 
 };
 
-typedef std::vector<Atom *> Atom_ptr_vec;
+typedef Atom::AtomPtr AtomPtr;
+typedef std::vector<AtomPtr> Atom_ptr_vec;
 typedef Atom_ptr_vec::const_iterator Atom_it;
 
 #endif

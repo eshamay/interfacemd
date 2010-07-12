@@ -3,6 +3,7 @@
 
 #include "../utility.h"
 #include "../analysis.h"
+#include <boost/shared_ptr.hpp>
 
 class Tester : public Analyzer<AmberSystem>
 {

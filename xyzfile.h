@@ -11,7 +11,7 @@
 
 class XYZFile {
 
-	std::vector<Atom *> _atoms;		// The listing of the atoms in the file
+	std::vector<AtomPtr> _atoms;		// The listing of the atoms in the file
 
 	FILE *_file;				// the XYZ file listing all the atom coordinates
 	std::string _path;
@@ -23,12 +23,8 @@ class XYZFile {
 
 	void _FindSteps ();			// assuming that each timestep is headed by an "i = ..." line, then we can load info on the first, last, and total timesteps
 
-	/* Internal class methods */
-	//Atom _ParseAtom (Atom * pAtom);
-
 public:
 
-	XYZFile () {}
 	XYZFile (std::string path);
 	~XYZFile ();
 
@@ -41,12 +37,12 @@ public:
 	void Seek (int step);
 
 	// output functions
-	std::vector<Atom *>& Atoms () { return _atoms; }
+	Atom_ptr_vec& Atoms () { return _atoms; }
 	int Current () const { return _currentstep; }
 	int NumSteps () const { return _numSteps; }
 	size_t size () const { return _atoms.size(); }
 
-	Atom * operator[] (int index) { return _atoms[index]; }
+	AtomPtr operator[] (int index) { return _atoms[index]; }
 
 };
 

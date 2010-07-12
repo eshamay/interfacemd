@@ -4,57 +4,58 @@ int Molecule::numMolecules = 0;
 
 // A constructor for an empty molecule
 Molecule::Molecule () :
-	_set(false),
-	_mass(0.0),
-	_name("")
+  _set(false),
+  _mass(0.0),
+  _name("")
 {
-	++numMolecules;
+  ++numMolecules;
 }
 
 // a copy constructor to do a deep copy of a molecule instead of just referencing a pre-existing one.
 Molecule::Molecule (const Molecule& oldMol) :
-	_atoms(oldMol._atoms),
-	_wanniers(oldMol._wanniers),
-	_set(false),
-	_centerofmass(oldMol._centerofmass),
-	_mass(oldMol._mass),
-	_name(oldMol._name),
-	_ID (oldMol._ID),
-	_DCM (oldMol._DCM)
+  _atoms(oldMol._atoms),
+  _wanniers(oldMol._wanniers),
+  _set(false),
+  _centerofmass(oldMol._centerofmass),
+  _mass(oldMol._mass),
+  _name(oldMol._name),
+  _ID (oldMol._ID),
+  _DCM (oldMol._DCM)
 {
-	++numMolecules;
+  this->Rename(oldMol.Name());
+  ++numMolecules;
 }
 
 Molecule::~Molecule () {
-	--numMolecules;
+  --numMolecules;
 }
 
 // Invert the molecule through a point in space. The point is specified by a VecR.
 /* The trick here is to shift the entire system such that the point of inversion is at the origin. The invert each coordinate, and return the system back to it's original location.
-*/
+ */
 /*
-void Molecule::Invert (VecR origin) {
+   void Molecule::Invert (VecR origin) {
 
-	for (int i=0; i < _atoms.size(); i++) {
-		_atoms[i].Shift (origin * -1.0);
-		_atoms[i].Position ( _atoms[i].Position() * -1.0);
-		_atoms[i].Shift (origin);
-	}
-}
-*/
+   for (int i=0; i < _atoms.size(); i++) {
+   _atoms[i].Shift (origin * -1.0);
+   _atoms[i].Position ( _atoms[i].Position() * -1.0);
+   _atoms[i].Shift (origin);
+   }
+   }
+ */
 
 
 /*
-	NOTE::: This is broken - the center of mass is only calculated when the molecule is first formed, and not updated at each timestep - fix this!
+   NOTE::: This is broken - the center of mass is only calculated when the molecule is first formed, and not updated at each timestep - fix this!
 // For adding another atom into the molecule
 int Molecule::operator+= (Atom *atom) {
-	this->AddAtom (atom);
+this->AddAtom (atom);
 return (_atoms.size());
 }
-*/
+ */
 
 // get back the atom pointer to the atom with the given name
-Atom * Molecule::operator[] (const std::string atomname) const {
+AtomPtr Molecule::operator[] (const std::string atomname) const {
 
   Atom_it it = std::find_if(_atoms.begin(), _atoms.end(), std::bind2nd(Atom::NameIs_p(), atomname));
 
@@ -64,25 +65,25 @@ Atom * Molecule::operator[] (const std::string atomname) const {
 	this->Print();
 	exit(1);
   }
-	// note here that the atom may not even exist in the molecule! If you try to operate on that pointer something awefully bad could happen. Before using this method for retrieving atoms, make sure that the calling function checks that it knows what to do with a NULL pointer
-	
-	return(*it);
+  // note here that the atom may not even exist in the molecule! If you try to operate on that pointer something awefully bad could happen. Before using this method for retrieving atoms, make sure that the calling function checks that it knows what to do with a NULL pointer
+
+  return(*it);
 }
 
-Atom * Molecule::GetAtom (const string atomname) const {
-  Atom * patom = (*this)[atomname];
+AtomPtr Molecule::GetAtom (const string atomname) const {
+  AtomPtr patom = (*this)[atomname];
   return(patom);
 }
 
 // same as the operator, but without the syntax
-void Molecule::AddAtom (Atom * const atom) {
+void Molecule::AddAtom (AtomPtr const atom) {
   _atoms.push_back (atom);            // add the central-periodic image of the atom
   this->FixAtom (atom);
   return;
 }
 
 // Instead of adding an atom to a molecule - fix an atom's info in case it was somehow messed up
-void Molecule::FixAtom (Atom * const atom) {
+void Molecule::FixAtom (AtomPtr const atom) {
 
   // now adjust the center of mass to accomodate for the new atom. Also, adjust the total molecular mass.
   this->UpdateCenterOfMass ();
@@ -95,7 +96,7 @@ void Molecule::FixAtom (Atom * const atom) {
   return;
 }
 
-void Molecule::AddHydrogen (Atom * const atom) {
+void Molecule::AddHydrogen (AtomPtr const atom) {
 
   this->AddAtom (atom);
 
@@ -113,14 +114,14 @@ void Molecule::AddHydrogen (Atom * const atom) {
   return;
 }
 
-void Molecule::RemoveAtom (Atom * const atom) {
+void Molecule::RemoveAtom (AtomPtr const atom) {
 
   _atoms.erase(std::find(_atoms.begin(), _atoms.end(), atom));
 
   this->UpdateCenterOfMass();
 
   // note on the atom that it is no longer part of a molecule
-  atom->ParentMolecule ((Molecule *)NULL);
+  atom->ParentMolecule ((MolPtr) NULL);
   atom->Residue ("");
   atom->MolID (-1);
 
@@ -173,7 +174,7 @@ for (int i = 0; i < mol.size(); i++) {
 
 return (_atoms.size());
 }
-*/
+ */
 
 /* This will reflect (invert) about a given axis */
 
@@ -203,7 +204,7 @@ sb = sn / sd;
  *B = point + sb * plane.n;
  return d(point, *B);
 
-*/
+ */
 
 
 void Molecule::Rotate (VecR& origin, VecR& axis, double angle) {
@@ -488,7 +489,7 @@ void Molecule::_FindEulerAngles () {
 
   // Chi is derived from a combination of the x and y components of the rotated z-axis in the reference frame
   _eulerangles[2] = atan2(rotatedZ[y], rotatedZ[x]);	// Chi/Psi (depending on your choice of greek)
-  */
+   */
 
   // Chi is derived from a combination of the x and y components of the rotated z-axis in the reference frame
   _eulerangles[2] = atan2(-_z[y], _z[x]);
@@ -521,10 +522,10 @@ atoms.push_back (atomBonds[j]);
 
 return (atoms);
 }
-*/
+ */
 
 // if given a 2nd molecule, this will merge the current and the new molecules into one larger molecule.
-Molecule * Molecule::Merge (Molecule * mol) {
+MolPtr Molecule::Merge (MolPtr mol) {
 
   printf ("merging two molecules:\n");
   this->Print();

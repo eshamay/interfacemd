@@ -6,13 +6,14 @@
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/lu.hpp>
+#include <mkl_boost_ublas_matrix_prod.hpp>
 
 namespace tensor {
 
   using namespace boost::numeric::ublas;
 
   typedef matrix<double, column_major> matrix_t;
-  typedef identity_matrix<double, column_major> id_matrix_t;
+  typedef identity_matrix<double> id_matrix_t;
 
   template <typename T>
 	class Tensor : public T {
