@@ -8,9 +8,6 @@
 #include "atom.h"
 #include "molecule.h"
 
-typedef std::vector<Atom *> Atom_ptr_vec;
-typedef std::vector<Molecule *> Mol_ptr_vec;
-
 class MDSystem {
 
   protected:
@@ -18,7 +15,6 @@ class MDSystem {
     Mol_ptr_vec		_mols;		// the molecules in the system
 
     static VecR		_dimensions;		// system dimensions - size
-
 
   public:
 
@@ -30,14 +26,16 @@ class MDSystem {
     virtual void _ParseMolecules () = 0;
 
     Mol_ptr_vec& Molecules () { return _mols; }
-    Molecule * Molecules (int index) { return _mols[index]; }
+	Mol_it begin_mols () const { return _mols.begin(); }
+	Mol_it end_mols () const { return _mols.end(); }
+    MolPtr Molecules (int index) { return _mols[index]; }
     int NumMols () const { return _mols.size(); }
 
     Atom_it begin () { return _atoms.begin(); }
     Atom_it end () { return _atoms.end(); }
     Atom_ptr_vec& Atoms () { return _atoms; }
-    Atom * Atoms (const int index) { return _atoms[index]; }
-    Atom * operator[] (int index) { return _atoms[index]; }
+    AtomPtr Atoms (const int index) { return _atoms[index]; }
+    AtomPtr operator[] (int index) { return _atoms[index]; }
     int NumAtoms ()	const { return (int)_atoms.size(); }
 
     int size () const { return (int)_atoms.size(); }
@@ -51,6 +49,9 @@ class MDSystem {
 
     // Calculate the distance between two atoms given the periodic boundaries of the system
     static VecR Distance (const Atom * atom1, const Atom * atom2);
+
+	// calculate a molecule's dipole moment
+	VecR CalcDipole (Molecule * mol);
 };
 
 #include "h2o.h"
@@ -59,5 +60,6 @@ class MDSystem {
 #include "carbonchain.h"
 #include "decane.h"
 #include "oh.h"
+#include "so2.h"
 
 #endif

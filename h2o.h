@@ -20,6 +20,7 @@ public:
 	Water (const Molecule& molecule);	// copy constructor for casting from a molecule
 	Water (const MolPtr& mol);
 
+	typedef Water* WaterPtr;
 	static int numWaters;			// total number of waters in the system
 
 	// Functions for analysis
@@ -59,7 +60,7 @@ public:
 	VecR MolecularAxis (); 
 };
 
-typedef boost::shared_ptr<Water> WaterPtr;
+typedef Water::WaterPtr WaterPtr;
 typedef std::vector<WaterPtr> Water_ptr_vec;
 typedef std::vector<Water> Water_vec;
 

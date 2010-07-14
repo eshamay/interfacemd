@@ -1,11 +1,11 @@
 SRCLIB	 	= $(HOME)/md/src
 
-CXX			= icpc -wd981,444,383
+CXX			= icpc -wd981,444,383,177
 
-DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated #-wd981,1599,1572,383
+DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated -debug #-wd981,1599,1572,383
 OPTIMIZE 	= -fast -finline-functions -finline -funroll-loops -m64
 #CPPFLAGS    = -Wall -Drestrict= -ftemplate-depth-100 $(DEBUG) -L$(HOME)/share/lib
-CPPFLAGS    = -Wall -ftemplate-depth-100 $(OPTIMIZE)
+CPPFLAGS    = -Wall -ftemplate-depth-100 $(DEBUG)
 
 LIBS		= -L$(HOME)/share/lib -L$(MPI_HOME)/lib -L$(ATLAS)/lib -lconfig++
 
@@ -23,19 +23,23 @@ XDRINC		= $(XDRDIR)/include
 
 MATH	= $(SRCLIB)/vecr.o $(SRCLIB)/matrixr.o 
 
-MDSYSTEM = $(MATH) $(SRCLIB)/atom.o $(SRCLIB)/molecule.o $(SRCLIB)/mdsystem.o $(SRCLIB)/graph.o
+MDSYSTEM = $(MATH) $(SRCLIB)/atom.o $(SRCLIB)/molecule.o $(SRCLIB)/mdsystem.o
 
 WATER	= $(SRCLIB)/h2o.o 
 
-IONS	= $(SRCLIB)/hno3.o $(SRCLIB)/h3o.o $(SRCLIB)/oh.o 
+IONS	= $(SRCLIB)/hno3.o $(SRCLIB)/h3o.o $(SRCLIB)/oh.o $(SRCLIB)/so2.o
 
 ORGANIC = $(SRCLIB)/carbonchain.o $(SRCLIB)/decane.o 
 
-XYZSYSTEM = $(MDSYSTEM) $(SRCLIB)/xyzsystem.o $(SRCLIB)/xyzfile.o $(SRCLIB)/wannier.o 
+XYZSYSTEM = $(SRCLIB)/xyzsystem.o $(SRCLIB)/xyzfile.o $(SRCLIB)/wannier.o 
 
-AMBERSYSTEM	= $(MDSYSTEM) $(SRCLIB)/ambersystem.o $(SRCLIB)/crdfile.o $(SRCLIB)/forcefile.o $(SRCLIB)/topfile.o
+AMBERSYSTEM	= $(SRCLIB)/ambersystem.o $(SRCLIB)/crdfile.o $(SRCLIB)/forcefile.o $(SRCLIB)/topfile.o
 
-GMXSYS	= $(MDSYSTEM) $(SRCLIB)/trrfile.o $(SRCLIB)/grofile.o $(SRCLIB)/gmxsystem.o
+GMXSYS	= $(SRCLIB)/trrfile.o $(SRCLIB)/grofile.o $(SRCLIB)/gmxsystem.o
+
+WATERSYSTEM = $(MDSYSTEM) $(AMBERSYSTEM) $(XYZSYSTEM) $(SRCLIB)/graph.o 
+
+ANALYSIS = $(WATERSYSTEM)
 
 clean:
 	rm -f *.o bin/*

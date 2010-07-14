@@ -45,4 +45,28 @@ VecR MDSystem::Distance (const Atom * atom1, const Atom * atom2) {
 	return MDSystem::Distance(atom1->Position(), atom2->Position());
 }
 
+// This should calculate the dipole of a molecule given that we've already generated the wannier centers
+VecR MDSystem::CalcDipole (Molecule * mol) {
+
+  mol->UpdateCenterOfMass();
+
+  VecR dipole;
+
+  // the dipole is just a sum of the position vectors multiplied by the charges (classical treatment)
+  for (Atom_it it = mol->begin(); it != mol->end(); it++) {
+	VecR r (MDSystem::Distance((*it)->Position(), mol->CenterOfMass()));
+	dipole += r * (*it)->Charge();
+  }
+
+  // wannier centers have a charge of -2
+  for (VecR_it it = mol->wanniers_begin(); it != mol->wanniers_end(); it++) {
+	VecR r (MDSystem::Distance(*it, mol->CenterOfMass()));
+	dipole -= (r * 2.0);
+  }
+
+  mol->Dipole(dipole);
+
+  return (dipole);
+}
+
 

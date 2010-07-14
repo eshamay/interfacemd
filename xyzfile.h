@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include "atom.h"
 #include "vecr.h"
-#include "utility.h"
 
 
 class XYZFile {
@@ -38,6 +37,9 @@ public:
 
 	// output functions
 	Atom_ptr_vec& Atoms () { return _atoms; }
+	Atom_it begin () const { return _atoms.begin(); }
+	Atom_it end () const { return _atoms.end(); }
+
 	int Current () const { return _currentstep; }
 	int NumSteps () const { return _numSteps; }
 	size_t size () const { return _atoms.size(); }

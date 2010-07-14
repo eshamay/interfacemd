@@ -65,11 +65,15 @@ void VecR::operator+= (const VecR& input) {
 }
 
 void VecR::operator-= (const double input) {
-  return (*this -= input);
+  for (vector_t::iterator it = this->begin(); it != this->end(); it++)
+	*it -= input;
+  //this->min_assign(input);
+  //(*this -= input);
 }
 
 void VecR::operator-= (const VecR& input) {
-  return (*this -= input);
+  this->minus_assign(input);
+  //(*this -= input);
 }
 
 VecR VecR::operator* (const double input) const {

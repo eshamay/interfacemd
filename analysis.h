@@ -18,7 +18,6 @@ class Analyzer : public WaterSystem<T> {
 
     void _EmptyFunction () const { return; } /* A simple empty function that does nothing to the system */
 
-    virtual void _InitializeSystem ();
 
   public:
     Analyzer (const WaterSystemParams& params);
@@ -69,8 +68,8 @@ class Analyzer : public WaterSystem<T> {
     }
 
     static int PositionBin (const double position);
-    static int PositionBin (const Atom * patom);
-    static double Position (const Atom * patom);
+    static int PositionBin (const AtomPtr patom);
+    static double Position (const AtomPtr patom);
     static double Position (const VecR& v);
     static double Position (const double d);
 
@@ -78,7 +77,9 @@ class Analyzer : public WaterSystem<T> {
       return Bin (angle, angmin, angres);
     }
 
-    void LoadNext () { this->sys->LoadNext(); }
+    void LoadNext ();
+
+
     Atom_ptr_vec& Atoms () { return WaterSystem<T>::int_atoms; } 
     Mol_ptr_vec& Molecules () { return WaterSystem<T>::int_mols; }
     Water_ptr_vec& Waters () { return WaterSystem<T>::int_wats; }
@@ -88,19 +89,21 @@ class Analyzer : public WaterSystem<T> {
 	template <typename U> VecR CenterOfMass (const std::vector<U>& mols) const;
 
     // analysis loop functions
-    virtual void Setup () = 0;
-    virtual void Analysis () = 0;
-    virtual void PostAnalysis () = 0;
-    virtual void DataOutput (const unsigned int timestep) = 0;
+	virtual void Setup () = 0;
+	virtual void Analysis () = 0;
+	virtual void PostAnalysis () = 0;
+	virtual void DataOutput (const unsigned int timestep) = 0;
 
 
-  // check if a water molecule is above a certain location in the system
-  class AbovePosition : public std::binary_function <Molecule *, double, bool> {
-	public:
-	  bool operator () (const Molecule * m, const double cutoff) const {
-		return m->GetAtom("O")->Position()[WaterSystem<T>::axis] > cutoff;
-	  }
-  };	// above position
+	/*
+	// check if a water molecule is above a certain location in the system
+	class WaterAbovePosition : public std::binary_function <MolPtr, double, bool> {
+	  public:
+		bool operator () (const MolPtr m, const double cutoff) const {
+		  return m->GetAtom("O")->Position()[WaterSystem<T>::axis] > cutoff;
+		}
+	};	// above position
+	*/
 
 
 };	// Analyzer
@@ -119,7 +122,7 @@ template <class T> unsigned int Analyzer<T>::restart;
 
 template <class T> VecR		Analyzer<T>::ref_axis;
 
-template <class T> 
+  template <class T> 
 Analyzer<T>::Analyzer (const WaterSystemParams& params)
 
 : WaterSystem<T>(params),
@@ -140,20 +143,6 @@ Analyzer<T>::Analyzer (const WaterSystemParams& params)
   Analyzer<T>::ref_axis = params.ref_axis;
 
   this->_CheckOutputFile();
-
-  try {
-    Analyzer<T>::_InitializeSystem();
-  }
-  catch (const libconfig::SettingTypeException &stex) {
-    std::cerr << "Something wrong with the setting type for the system file names (prmtop, mdcrd, mdvel)" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-  catch (const libconfig::SettingNotFoundException &snfex)
-  {
-    std::cerr << "Couldn't find the system file names (prmtop, mdcrd, etc.) in the configuration file" << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
   this->_OutputHeader();
 }
 
@@ -161,7 +150,7 @@ template <class T>
 void Analyzer<T>::_OutputHeader () const {
 
   printf ("Analysis Parameters:\n\tOutput Filename = \"%s\"\n\tScreen output frequency = 1/%d\n\n\tPosition extents for analysis:\n\t\tMin = % 8.3f\n\t\tMax = % 8.3f\n\t\tPosition Resolution = % 8.3f\n\n\tPrimary Axis = %d\nNumber of timesteps to be analyzed = %d\n",
-      output_filename.c_str(), output_freq, Analyzer<T>::posmin, Analyzer<T>::posmax, Analyzer<T>::posres, int(Analyzer<T>::axis), Analyzer<T>::timesteps);
+	  output_filename.c_str(), output_freq, Analyzer<T>::posmin, Analyzer<T>::posmax, Analyzer<T>::posres, int(Analyzer<T>::axis), Analyzer<T>::timesteps);
 
 #ifdef AVG
   printf ("\n\nThe analysis is averaging about the two interfaces located as:\n\tLow  = % 8.3f\n\tHigh = % 8.3f\n\n", int_low, int_high);
@@ -179,28 +168,45 @@ template <class T>
 void Analyzer<T>::_CheckOutputFile () {
 
   if (output == (FILE *)NULL) {
-    printf ("WaterSystem::WaterSystem (argc, argv) - couldn't open the data output file!\n");
-    exit(1);
+	printf ("WaterSystem::WaterSystem (argc, argv) - couldn't open the data output file!\n");
+	exit(1);
   }
 
   return;
 }
 
-template <class T> 
+  template <class T> 
 void Analyzer<T>::_OutputStatus (const int timestep)
 {
   if (!(timestep % (this->output_freq * 10)))
-    cout << endl << timestep << "/" << this->timesteps << " ) ";
+	cout << endl << timestep << "/" << this->timesteps << " ) ";
   if (!(timestep % this->output_freq)) {
-    cout << "*";
+	cout << "*";
   }
 
   fflush (stdout);
   return;
 }
 
+
+
+template <>
+void Analyzer<XYZSystem>::LoadNext () {
+  this->sys->LoadNext();
+  this->LoadAll();
+  return;
+}
+
+template <>
+void Analyzer<AmberSystem>::LoadNext () {
+  this->sys->LoadNext();
+  return;
+}
+
+
+
 // A routine that performs some type of typical/generic analysis of a system
-template <class T> 
+  template <class T> 
 void Analyzer<T>::SystemAnalysis ()
 {
   // do some initial setup
@@ -210,17 +216,17 @@ void Analyzer<T>::SystemAnalysis ()
   // start the analysis - run through each timestep
   for (timestep = 0; timestep < timesteps; timestep++) {
 
-    // Perform the main loop analysis that works on every timestep of the simulation
-    this->Analysis ();
+	// Perform the main loop analysis that works on every timestep of the simulation
+	this->Analysis ();
 
-    // load the next timestep
-    this->LoadNext();
+	// load the next timestep
+	this->LoadNext();
 
-   // output the status of the analysis (to the screen or somewhere useful)
-    this->_OutputStatus (timestep);
-    // Output the actual data being collected to a file or something for processing later
-    if (!(timestep % (output_freq * 10)) && timestep)
-      this->DataOutput(timestep);
+	// output the status of the analysis (to the screen or somewhere useful)
+	this->_OutputStatus (timestep);
+	// Output the actual data being collected to a file or something for processing later
+	if (!(timestep % (output_freq * 10)) && timestep)
+	  this->DataOutput(timestep);
   }
 
   // do a little work after the main analysis loop (normalization of a histogram? etc.)
@@ -238,14 +244,14 @@ int Analyzer<T>::PositionBin (const double position) {
   // check for flipping due to periodic boundaries
   double pos = position;
   if (pos < WaterSystem<T>::wsp.pbcflip) 
-    pos += MDSystem::Dimensions()[WaterSystem<T>::wsp.axis];
+	pos += MDSystem::Dimensions()[WaterSystem<T>::wsp.axis];
   return (Bin (pos, WaterSystem<T>::wsp.posmin, posres));
 
 }
 
 // Find the position a particular atom fits into for a histogram
 template <class T> 
-int Analyzer<T>::PositionBin (const Atom * patom) {
+int Analyzer<T>::PositionBin (const AtomPtr patom) {
 
   double position = Analyzer<T>::Position(patom);
   //VecR r = patom->Position();
@@ -266,7 +272,7 @@ int Analyzer<T>::PositionBin (const Atom * patom) {
 
 /* Find the periodic-boundary-satistfying location of an atom, vector, or raw coordinate along the reference axis */
 template <class T> 
-double Analyzer<T>::Position (const Atom * patom) {
+double Analyzer<T>::Position (const AtomPtr patom) {
   return Analyzer<T>::Position(patom->Position());
 }
 
@@ -282,37 +288,6 @@ double Analyzer<T>::Position (const double d) {
   if (pos < WaterSystem<T>::wsp.pbcflip) pos += MDSystem::Dimensions()[WaterSystem<T>::wsp.axis];
   return pos;
 }
-
-template <>
-void Analyzer<AmberSystem>::_InitializeSystem () {
-  this->sys = new AmberSystem(
-      wsp.config_file->lookup("system.files.prmtop"),
-      wsp.config_file->lookup("system.files.mdcrd"),
-      wsp.config_file->lookup("system.files.mdvel"));
-  return;
-}
-
-template <>
-void Analyzer<XYZSystem>::_InitializeSystem () {
-
-  std::string filepath = wsp.config_file->lookup("system.files.xyzfile");
-  VecR dims = VecR ( wsp.config_file->lookup("system.size") );
-  std::string wanniers = wsp.config_file->lookup("system.files.wannier");
-
-  this->sys = new XYZSystem(filepath, dims, wanniers);
-
-  return;
-}
-
-#ifdef GROMACS_SYS
-template <>
-void Analyzer<GMXSystem>::_InitializeSystem () {
-  std::string trr = wsp.config_file->lookup("system.files.gmx-trrfile");
-  std::string gro = wsp.config_file->lookup("system.files.gmx-grofile");
-  this->sys = new GMXSystem(trr.c_str(), gro.c_str());
-  return;
-}
-#endif
 
 
 template <class T>
@@ -446,37 +421,4 @@ return histogram;
 }
  */
 
-/*
-   class AmberAnalyzer : public Analyzer<AmberSystem> {
-
-   public:
-   AmberAnalyzer (WaterSystemParams& wsp) :
-   Analyzer<AmberSystem>(wsp)
-   { return; }
-
-   private:
-   virtual void _InitializeSystem () {
-   this->sys = new AmberSystem(
-   wsp.config_file->lookup("system.files.prmtop"),
-   wsp.config_file->lookup("system.files.mdcrd"),
-   wsp.config_file->lookup("system.files.mdvel"));
-   }
-
-   };
-
-   class GMXAnalyzer : public Analyzer<GMXSystem> {
-
-   public:
-   GMXAnalyzer (WaterSystemParams& wsp) :
-   Analyzer<GMXSystem>(wsp)
-   { return; }
-
-   private:
-   virtual void _InitializeSystem () {
-   std::string trr = wsp.config_file->lookup("system.files.gmx-trrfile");
-   std::string gro = wsp.config_file->lookup("system.files.gmx-grofile");
-   this->sys = new GMXSystem(trr.c_str(), gro.c_str());
-   }
-   };
- */
 #endif

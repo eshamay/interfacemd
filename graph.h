@@ -30,8 +30,9 @@ This leaves the bottom-diagonal free to store more information. If two atoms are
 // bond types
 typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;
 
-using namespace std;
 using namespace boost;
+
+
 class BondGraph {
 
 private:
@@ -40,11 +41,12 @@ private:
 	static const double HBONDANGLECOS;
 	static const double NOBONDLENGTH;
 	static const double NHBONDLENGTH;
+	static const double SOBONDLENGTH;
 
 
 	// Vertices are atoms
 	struct VertexProperties {
-	  Atom * atom;
+	  AtomPtr atom;
 	  VecR position;
 	  std::string name;
 	};
@@ -91,8 +93,8 @@ private:
 	Vertex_it _FindVertex (Atom const * const ap) const;
 
 	// predicate for testing if an atom pair is an OH
-	bool _OHCombo_p (const std::string name1, const std::string name2) const;
-	bool _SameAtomName_p (const std::string name1, const std::string name2) const;
+	bool _NameCombo (const std::string name1, const std::string name2, const std::string test1, const std::string test2) const;
+	bool _SameAtomName (const std::string name1, const std::string name2) const;
 
 	static Graph _graph;
 	std::string	_sys_type;

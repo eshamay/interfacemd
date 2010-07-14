@@ -3,21 +3,19 @@
 
 #include "mdsystem.h"
 #include "ambersystem.h"
-
-#ifdef XYZ_SYS
 #include "xyzsystem.h"
-#endif
 
 #ifdef GROMACS_SYS
 #include "gmxsystem.h"
 #endif
 
-#include "graph.h"
 #include <libconfig.h++>
 #include <cstdlib>
 #include <iomanip>
 #include <algorithm>
 #include <functional>
+
+#include "utility.h"
 
 
 // easy way to carry around lots of config-file parameters
@@ -100,7 +98,6 @@ class WaterSystem {
 	virtual ~WaterSystem ();
 
 	static WaterSystemParams wsp;
-	static BondGraph graph;
 
 	static double	posmin, posmax;
 	static double	pbcflip;			// location to flip about periodic boundaries
@@ -109,12 +106,15 @@ class WaterSystem {
 
 	static Atom_ptr_vec	sys_atoms;		// all atoms/mols in the system
 	static Mol_ptr_vec	sys_mols;
-	static Mol_ptr_vec	int_wats;		// interfacial waters, or just all the waters in the system depending on the function call
-	static Mol_ptr_vec 	int_mols;
+
 	static Atom_ptr_vec	int_atoms;		// interfacial water atoms (or as above)
+	static Mol_ptr_vec 	int_mols;
+
+	static Mol_ptr_vec	int_wats;		// interfacial waters, or just all the waters in the system depending on the function call
 
 	void OpenFile ();
 	void Debug (string msg) const;
+
 
 	static double AxisPosition (const Atom * a) {
 	  double pos = a->Position()[axis];
@@ -170,13 +170,13 @@ class WaterSystem {
 
 	// This slices the water molecules and leaves only those within a given location of the slab. However, it does not do any loading or unloading of the atoms from int_atoms or anything else...
 	template <typename U>
-	void SliceWaters (std::vector<U>& mols, Double_pair& extents) {
-	  mols.erase(
-		  remove_if(mols.begin(), mols.end(), std::not1(std::bind2nd(WaterInSlice<U>(), extents))), mols.end());
+	  void SliceWaters (std::vector<U>& mols, Double_pair& extents) {
+		mols.erase(
+			remove_if(mols.begin(), mols.end(), std::not1(std::bind2nd(WaterInSlice<U>(), extents))), mols.end());
 
-	  //this->UpdateAtoms(int_wats, int_atoms);
-	  return;
-	}
+		//this->UpdateAtoms(int_wats, int_atoms);
+		return;
+	  }
 
 
 	// predicate to determine if a molecule is a water
@@ -200,66 +200,11 @@ class WaterSystem {
 
 	  return;
 	}
-
-	// predicate to test if the name of an atom or molecule (determined by the template parameter) is found in a vector of names
-	template <class U>
-	  class NameInList : public std::binary_function<U, std::vector<string>,bool> {
-		public:
-		  bool operator() (const U u, const std::vector<string>& names) const
-		  {
-			return names.end() != std::find(names.begin(), names.end(), u->Name());
-		  }
-	  };
-
-	// predicate to determine if the given atom or molecule has the given name
-	template <class U>
-	  class IsName : public std::binary_function<U, std::string, bool> {
-		public:
-		  bool operator() (const U u, const std::string name) const
-		  {
-			return u->Name() == name;
-		  }
-	  };
-
-	template <class U>
-	  void KeepByName (U& u, std::string& name) {
-		u.erase(
-			remove_if(u.begin(), u.end(), not1(std::bind2nd(IsName<typename U::value_type>(), name))), u.end()
-			);
-		return;
-	  }
-
-	// keep elements of the vector with names matching one of those in the list
-	template <class U>
-	  void KeepByNames (U& u, std::vector<string>& names) {
-		u.erase(
-			remove_if(u.begin(), u.end(), not1(std::bind2nd(NameInList<typename U::value_type>(), names))), u.end());
-		return;
-	  }
-
-
-	// remove all elements that have the given name
-	template <class U>
-	  void RemoveByName (U& u, std::string& name) {
-		u.erase(
-			remove_if(u.begin(), u.end(), std::bind2nd(IsName<typename U::value_type>(), name)), u.end()
-			);
-		return;
-	  }
-
-	// remove all elements that have names matching any of those in the list of names supplied
-	template <class U>
-	  void RemoveByNames (U& u, std::vector<string>& names) {
-		u.erase(
-			remove_if(u.begin(), u.end(), std::bind2nd(NameInList<typename U::value_type>(), names)), u.end());
-		return;
-	  }
-
 	// Predicate to test if a water molecule has a given coordination (H-bonding pattern)
 	class WaterCoordination_p : public std::binary_function<Water *, BondGraph::coordination, bool> {
 	  public:
 		bool operator() (const Water * wat, const BondGraph::coordination c) const {
-		  return graph.WaterCoordination(wat) == c;
+		  return sys->graph.WaterCoordination(wat) == c;
 		}
 	};
 
@@ -278,11 +223,13 @@ class WaterSystem {
 	  return;
 	}
 
-	void UpdateGraph () { graph.UpdateGraph (int_atoms); }
+	void UpdateGraph () { sys->graph.UpdateGraph (int_atoms); }
 
   protected:
 
 	T * sys;
+
+    virtual void _InitializeSystem ();
 
 };
 
@@ -299,7 +246,6 @@ template<typename T> Mol_ptr_vec WaterSystem<T>::int_wats;
 template<typename T> Mol_ptr_vec WaterSystem<T>::int_mols;
 template<typename T> Atom_ptr_vec WaterSystem<T>::int_atoms;
 
-template<typename T> BondGraph WaterSystem<T>::graph;
 
   template <class T>
 WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
@@ -311,6 +257,19 @@ WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
   WaterSystem::pbcflip = params.pbcflip;
   WaterSystem::axis = params.axis;
 
+  try {
+	this->_InitializeSystem();
+  }
+  catch (const libconfig::SettingTypeException &stex) {
+	std::cerr << "WaterSystem<T>::_InitializeSystem() -- Something wrong with initializing the system. Try checking filenames in the system.cfg" << std::endl;
+	exit(EXIT_FAILURE);
+  }
+  catch (const libconfig::SettingNotFoundException &snfex)
+  {
+	std::cerr << "Couldn't find the system file names (prmtop, mdcrd, xyz, etc.) in the configuration file" << std::endl;
+	exit(EXIT_FAILURE);
+  }
+
   return;
 }
 
@@ -320,6 +279,43 @@ WaterSystem<T>::~WaterSystem () {
   return;
 }
 
+template <>
+void WaterSystem<AmberSystem>::_InitializeSystem () {
+  this->sys = new AmberSystem(
+	  wsp.config_file->lookup("system.files.prmtop"),
+	  wsp.config_file->lookup("system.files.mdcrd"),
+	  wsp.config_file->lookup("system.files.mdvel"));
+  return;
+}
+
+template <>
+void WaterSystem<XYZSystem>::_InitializeSystem () {
+
+  std::string filepath = wsp.config_file->lookup("system.files.xyzfile");
+
+  double a,b,c;
+  a = wsp.config_file->lookup("system.dimensions")[0];
+  b = wsp.config_file->lookup("system.dimensions")[1];
+  c = wsp.config_file->lookup("system.dimensions")[2];
+
+  std::string wanniers = wsp.config_file->lookup("system.files.wanniers");
+  VecR dims(a,b,c);
+
+  this->sys = new XYZSystem(filepath, dims, wanniers);
+
+  return;
+}
+
+#ifdef GROMACS_SYS
+template <>
+void WaterSystem<GMXSystem>::_InitializeSystem () {
+  std::string trr = wsp.config_file->lookup("system.files.gmx-trrfile");
+  std::string gro = wsp.config_file->lookup("system.files.gmx-grofile");
+  this->sys = new GMXSystem(trr.c_str(), gro.c_str());
+  return;
+}
+#endif
+
 template <class T>
 void WaterSystem<T>::LoadAll () {
 
@@ -328,14 +324,12 @@ void WaterSystem<T>::LoadAll () {
   int_mols.clear();
   int_atoms.clear();
 
-  Mol_ptr_vec mols = sys->Molecules();
   // copy the molecules and atoms into each container
-  std::copy(mols.begin(), mols.end(), std::back_inserter(sys_mols));
-  std::copy(mols.begin(), mols.end(), std::back_inserter(int_mols));
+  std::copy(sys->begin_mols(), sys->end_mols(), std::back_inserter(sys_mols));
+  std::copy(sys->begin_mols(), sys->end_mols(), std::back_inserter(int_mols));
 
-  // copy the atoms into the atom containers
-  this->UpdateAtoms (sys_mols, sys_atoms);
-  this->UpdateAtoms (int_mols, int_atoms);
+  std::copy(sys->begin(), sys->end(), std::back_inserter(sys_atoms));
+  std::copy(sys->begin(), sys->end(), std::back_inserter(int_atoms));
 
   return;
 }

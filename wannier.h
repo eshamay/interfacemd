@@ -32,6 +32,9 @@ public:
 
 	// output functions
 	const VecR_vec& Coords () const { return _coords; }
+	VecR_it begin () const { return _coords.begin(); }
+	VecR_it end () const { return _coords.end(); }
+
 	unsigned int size () 	const { return _size; }
 
 	bool eof () 	const { return _eof; }		// have we reached the end of the file?

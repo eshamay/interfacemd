@@ -20,7 +20,6 @@ class Molecule {
     VecR			_x, _y, _z;			// molecular frame axes
 
     bool			_set;				// just a little helper to see if the atoms of the molecule have been set or for any other special purpose
-    //bool			_copy;				// this gets set if the molecule is a copy of a previous molecule
 
     // this is broken last I checked - not updated with coordinate updates
     VecR			_centerofmass;		// calculate by 1/M * Sum(m[i]*r[i])	where M = total mass, m[i] and r[i] are atom mass and pos
@@ -33,6 +32,8 @@ class Molecule {
     double			_eulerangles[3];	// the three euler angles theta, phi, chi
     MatR			_DCM;				// the direction cosine matrix for rotating the molecule to the lab frame
     void 			_FindEulerAngles ();// Calculates the Euler angles between the molecular axes and the fixed axes
+
+
   public:
 
     Molecule ();								// an empty molecule
@@ -74,7 +75,10 @@ class Molecule {
       return _atoms.end();
     }
 
-    const std::vector<VecR>& Wanniers ()		const { return _wanniers; }
+    const VecR_vec& Wanniers ()		const { return _wanniers; }
+	VecR_it wanniers_begin () const { return _wanniers.begin(); }
+	VecR_it wanniers_end () const { return _wanniers.end(); }
+
     double Mass () const 			{ return _mass; }					// Returns the molecular mass
     int size () const				{ return _atoms.size(); }
     string Name () const			{ return _name; }
@@ -100,7 +104,7 @@ class Molecule {
 
     double MinDistance (Molecule& mol);	// calculates the minimum distance between this molecule and another (2 closest atoms)
 
-    VecR CalcDipole ();	// calculate the dipole
+    //VecR CalcDipole ();	// calculate the dipole
 	virtual void Dipole (VecR& dip) { _dipole = dip; }
     virtual VecR Dipole () const { return _dipole; }		// return the dipole of the molecule
 
@@ -122,7 +126,7 @@ class Molecule {
 	//int operator+= (Molecule& mol);					// Joins two molecules
 
 	// Some stuff to work with wannier centers
-	void AddWannier (VecR& wannier) { _wanniers.push_back(wannier); } // adds a wannier center into the molecule
+	void AddWannier (const VecR& wannier) { _wanniers.push_back(wannier); } // adds a wannier center into the molecule
 	void ClearWanniers () { _wanniers.clear(); }	// clear out the entire list
 
 	//void ClearHBonds ();

@@ -250,10 +250,14 @@ void Molecule::Shift (VecR& shift) {
 
 void Molecule::Print () const {
 
-  printf ("Residue = %s  (%d)\tmass = % .3f\n", _name.c_str(), _ID, _mass);
+  printf ("Residue = %s  (%d)\tmass = % .3f\t%d wannier centers\n", _name.c_str(), _ID, _mass, _wanniers.size());
 
   for (Atom_it it = this->begin(); it != this->end(); it++) {
 	(*it)->Print();
+  }
+  for (VecR_it it = this->_wanniers.begin(); it != this->_wanniers.end(); it++) {
+	printf ("Wannier) ");
+	it->Print();
   }
   //printf ("wan)\t%d\n", _wanniers.size());
 
@@ -268,27 +272,6 @@ void Molecule::clear () {
   //_dipole.Zero();
   _name = "";
   _ID = 0;
-}
-
-// This should calculate the dipole of a molecule given that we've already generated the wannier centers
-VecR Molecule::CalcDipole () {
-
-  this->UpdateCenterOfMass();
-
-  _dipole.Zero();
-
-  // the dipole is just a sum of the position vectors multiplied by the charges (classical treatment)
-  for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
-	VecR r = (*it)->Position() - _centerofmass;
-	_dipole += r * (*it)->Charge();
-  }
-
-  // wannier centers have a charge of -2
-  for (VecR_it it = _wanniers.begin(); it != _wanniers.end(); it++) {
-	_dipole -= ((*it) - _centerofmass) * 2.0;
-  }
-
-  return (_dipole);
 }
 
 double Molecule::MinDistance (Molecule& mol) {

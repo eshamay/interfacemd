@@ -4,7 +4,7 @@ int Hydroxide::numHydroxides = 0;
 
 Hydroxide::Hydroxide () : Molecule()
 {
-	_name = "oh";
+	this->Rename("oh");
 	++numHydroxides;
 }
 

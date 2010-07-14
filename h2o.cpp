@@ -8,6 +8,7 @@ WaterDipoleParms Water::_dipparms ("dipoleparm.dat");
 
 Water::Water ()
 {
+  this->Rename("h2o");
   ++numWaters;
 }
 

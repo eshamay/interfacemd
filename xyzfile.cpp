@@ -22,8 +22,8 @@ XYZFile::XYZFile (std::string path)
 
 XYZFile::~XYZFile () {
   fclose (_file);
-  RUN(_atoms)
-	delete _atoms[i];
+  for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++)
+	delete *it;
 }
 
 void XYZFile::LoadNext () {
@@ -47,6 +47,7 @@ void XYZFile::LoadNext () {
 	}
   }
 
+  int id = 0;
   for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
 	// now parse each line's information into the atoms
 	fscanf (_file, " %s %lf %lf %lf", name, &X, &Y, &Z);
@@ -54,7 +55,7 @@ void XYZFile::LoadNext () {
 	// if we haven't already done so, let's create all the atoms we'll need
 	if (!_initialized) {
 	  (*it)->Name (std::string(name));
-	  (*it)->ID (atom);
+	  (*it)->ID (id++);
 	  (*it)->SetMass();
 	  (*it)->SetCharge();
 	}

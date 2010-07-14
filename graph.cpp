@@ -7,6 +7,8 @@ const double BondGraph::HBONDLENGTH  = 2.3;				// used to be 2.46
 const double BondGraph::HBONDANGLECOS	= cos(30.0*M_PI/180.0);		// bonding angle has to be bigger than this cos (i.e. smaller than ~30 degrees
 const double BondGraph::NOBONDLENGTH = 2.0;
 const double BondGraph::NHBONDLENGTH = 1.3;		// uhmm... check this?
+const double BondGraph::SOBONDLENGTH = 1.8;
+
 
 
 // property map definitions
@@ -17,25 +19,32 @@ BondGraph::PropertyMap<Atom *,BondGraph::VertexProperties>::Type BondGraph::v_at
 BondGraph::PropertyMap<VecR,BondGraph::VertexProperties>::Type BondGraph::v_position = get(&VertexProperties::position, _graph);
 BondGraph::PropertyMap<std::string,BondGraph::VertexProperties>::Type BondGraph::v_name = get(&VertexProperties::name, _graph);
 
+
+
 BondGraph::BondGraph ()
+  :
+	_sys_type("xyz")
 { return; }
 
-BondGraph::BondGraph (const Atom_ptr_vec& atoms, std::string sys) :
-  _sys_type(sys)
+
+
+BondGraph::BondGraph (const Atom_ptr_vec& atoms, std::string sys)
+  :
+	_sys_type(sys)
 {
-
   this->UpdateGraph(atoms);
-
   return;
 }
+
+
 
 BondGraph::~BondGraph () {
-
   this->_ClearBonds();
   this->_ClearAtoms();
-
   return;
 }
+
+
 
 void BondGraph::_ParseAtoms (const Atom_ptr_vec& atoms) {
 
@@ -54,18 +63,15 @@ void BondGraph::_ParseAtoms (const Atom_ptr_vec& atoms) {
 }
 
 // some predicates
-bool BondGraph::_OHCombo_p (const std::string name1, const std::string name2) const {
+bool BondGraph::_NameCombo (const std::string name1, const std::string name2, const std::string test1, const std::string test2) const {
   return 
-	((name1.find("O") != std::string::npos) || (name2.find("O") != std::string::npos))
+	((name1.find(test1) != std::string::npos) || (name2.find(test1) != std::string::npos))
 	&& 
-	((name1.find("H") != std::string::npos || name2.find("H") != std::string::npos));
+	((name1.find(test2) != std::string::npos || name2.find(test2) != std::string::npos));
 }
 
-bool BondGraph::_SameAtomName_p (const std::string name1, const std::string name2) const {
-  return
-	((name1.find("O") != std::string::npos) && (name2.find("O") != std::string::npos))
-	|| 
-	((name1.find("H") != std::string::npos && name2.find("H") != std::string::npos));
+bool BondGraph::_SameAtomName (const std::string name1, const std::string name2) const {
+  return (name1.find(name2) != std::string::npos) || (name2.find(name1) != std::string::npos);
 }
 
 // Calculate the distance between each of the atoms and update the graph edge list with bonds between them
@@ -101,7 +107,7 @@ void BondGraph::_ParseBonds () {
 	  std::string aj_name = v_name[*vj];
 
 	  // Don't connect oxygens to oxygens, and hydrogen to hydrogen...etc.
-	  if (_SameAtomName_p(ai_name, aj_name)) continue;
+	  if (_SameAtomName(ai_name, aj_name)) continue;
 
 	  // calculate the distance between the two atoms
 	  double bondlength = MDSystem::Distance (v_position[*vi], v_position[*vj]).Magnitude();
@@ -111,12 +117,11 @@ void BondGraph::_ParseBonds () {
 	  bondtype btype = unbonded;
 
 	  // first look at bonds between O and H
-	  if (_OHCombo_p(ai_name,aj_name))
+	  if (_NameCombo(ai_name,aj_name,"O","H"))
 	  {
 		// one type of bond is the O-H covalent
 		if (bondlength <= OHBONDLENGTH) {
 		  btype = ohbond;
-		  continue;
 		}
 
 		// Or an H-bond is formed!
@@ -168,12 +173,18 @@ void BondGraph::_ParseBonds () {
 		btype = nobond;
 		}
 		}
-		*/
-		// add in the bond between two atoms
-		if (btype != unbonded)
-		  this->_SetBond (*vi, *vj, bondlength, btype);
+		 */
+	  }	// Check OH bond combos
 
+
+	  // now process SO2 molecules
+	  if (_NameCombo (ai_name,aj_name, "S", "O") && (bondlength < SOBONDLENGTH)) {
+		btype = covalent;
 	  }
+
+	  // add in the bond between two atoms
+	  if (btype != unbonded)
+		this->_SetBond (*vi, *vj, bondlength, btype);
 	}
   }
 
