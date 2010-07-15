@@ -3,7 +3,9 @@
 XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath) :
   MDSystem (),
   _coords(filepath),
-  _wanniers(wannierpath)
+  _wanniers(wannierpath),
+  _reparse_limit(1),	// initially set to parse everything everytime
+  _reparse_step(0)
 {
   MDSystem::Dimensions (size);
   this->LoadFirst();
@@ -115,6 +117,7 @@ return;
 void XYZSystem::LoadFirst () {
   _atoms.clear();
   std::copy(_coords.begin(), _coords.end(), std::back_inserter(_atoms));
+
   this->_ParseMolecules();
 
   if (_wanniers.Loaded()) {
@@ -126,18 +129,17 @@ void XYZSystem::LoadFirst () {
 // watch out - no functionality for wannier centers here (yet)
 void XYZSystem::Seek (int step) {
   _coords.Seek (step);
-  _atoms.clear();
-  _atoms = _coords.Atoms();
   this->_ParseMolecules();
 }	// Seek
 
 
 void XYZSystem::LoadNext () {
   _coords.LoadNext();
-  _atoms.clear();
-  std::copy(_coords.begin(), _coords.end(), std::back_inserter(_atoms));
 
-  this->_ParseMolecules();
+  if (_reparse_step++ == _reparse_limit) {
+	this->_ParseMolecules();
+	_reparse_step = 0;
+  }
 
   if (_wanniers.Loaded()) {
 	_wanniers.LoadNext();
@@ -184,6 +186,7 @@ void XYZSystem::_ParseWaters () {
 	// The bondgraph provides us with all the covalently bound H's
 	Atom_ptr_vec atoms = graph.BondedAtoms (O, covalent);
 	Atom_ptr_vec Hs = graph.BondedAtoms (O, covalent, "H");
+
 
 	// if we pick up an OH group that is part of a larger molecule (i.e. nitric acid) then it will be processed as a hydroxide...
 	// So if the only type of atom attached is a hydrogen, we have some form of water (OH, H2O, H3O)
@@ -253,7 +256,7 @@ void XYZSystem::_ParseNitrates () {
 	if ((*N)->Name().find("N") == string::npos) continue;
 
 	// analogous to water, let's grab all the (covalently) bound O's of the molecule
-	Atom_ptr_vec NAatoms (graph.BondedAtoms (*N, nobond, "O"));
+	Atom_ptr_vec NAatoms (graph.BondedAtoms (*N, covalent, "O"));
 
 	// at least 3 oxygens for a nitrate/nitric acid
 	if (NAatoms.size() != 3) continue;

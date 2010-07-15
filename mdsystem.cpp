@@ -41,26 +41,37 @@ return (VecR(bx - ax, by - ay, bz - az));
 }
 
 // A useful method for finding the distances between pairs of atoms in a periodic system
-VecR MDSystem::Distance (const Atom * atom1, const Atom * atom2) {
+VecR MDSystem::Distance (const AtomPtr atom1, const AtomPtr atom2) {
 	return MDSystem::Distance(atom1->Position(), atom2->Position());
 }
 
+double MDSystem::Distance (const MolPtr mol1, const MolPtr mol2) const {
+
+  std::vector <double> distances;
+  for (Atom_it ai = mol1->begin(); ai != mol1->end(); ai++) {
+	for (Atom_it aj = mol2->begin(); aj != mol2->end(); aj++) {
+	  distances.push_back (this->Distance(*ai,*aj).Magnitude());
+	}
+  }
+  std::sort(distances.begin(), distances.end());
+  return distances[0];
+}
+
 // This should calculate the dipole of a molecule given that we've already generated the wannier centers
-VecR MDSystem::CalcDipole (Molecule * mol) {
+VecR MDSystem::CalcDipole (Molecule * mol) const {
 
-  mol->UpdateCenterOfMass();
-
-  VecR dipole;
+  VecR com = mol->UpdateCenterOfMass();
+  VecR dipole (0.0, 0.0, 0.0);
 
   // the dipole is just a sum of the position vectors multiplied by the charges (classical treatment)
   for (Atom_it it = mol->begin(); it != mol->end(); it++) {
-	VecR r (MDSystem::Distance((*it)->Position(), mol->CenterOfMass()));
+	VecR r (MDSystem::Distance(com, (*it)->Position()));
 	dipole += r * (*it)->Charge();
   }
 
   // wannier centers have a charge of -2
-  for (VecR_it it = mol->wanniers_begin(); it != mol->wanniers_end(); it++) {
-	VecR r (MDSystem::Distance(*it, mol->CenterOfMass()));
+  for (VecR_it vt = mol->wanniers_begin(); vt != mol->wanniers_end(); vt++) {
+	VecR r (MDSystem::Distance(com, *vt));
 	dipole -= (r * 2.0);
   }
 

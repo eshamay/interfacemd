@@ -5,6 +5,8 @@ TEST		= ../mdmath.o ../vecr.o ../matrixr.o test.o
 MPIMORITAFILES		= $(MORITAFILES) ../mpi/mpisys.o
 MORITA2002		= $(AMBERSYSTEM) $(WATER) $(IONS) $(ORGANIC) morita2002.o
 
+XYZSFG		= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) xyzsfg.o
+
 morita : $(MORITAFILES)
 	$(CXX) $(CPPFLAGS) $(MORITAFILES) -llapack -o ../bin/morita
 
@@ -14,6 +16,9 @@ morita : $(MORITAFILES)
 morita2002 : $(MORITA2002)
 	icpc $(MORITA2002) $(LIBS) $(LAPACKLIBS) -lfftw3 -o ../bin/morita2002
 
+xyzsfg : $(XYZSFG)
+	icpc $(XYZSFG) $(LIBS) -lfftw3 -o ../bin/xyzsfg
+	
 mpimorita : $(MPIMORITAFILES)
 	$(MPICXX) $(CPPFLAGS) $(MPILIBS) $(MPIMORITAFILES) -o ../bin/mpi-morita
 

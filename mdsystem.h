@@ -48,10 +48,13 @@ class MDSystem {
     static VecR Distance (const VecR& v1, const VecR& v2);
 
     // Calculate the distance between two atoms given the periodic boundaries of the system
-    static VecR Distance (const Atom * atom1, const Atom * atom2);
+    static VecR Distance (const AtomPtr atom1, const AtomPtr atom2);
+
+	// Calculates the minimum distance between two molecules - i.e. the shortest inter-molecular atom-pair distance
+	double Distance (const MolPtr mol1, const MolPtr mol2) const;
 
 	// calculate a molecule's dipole moment
-	VecR CalcDipole (Molecule * mol);
+	VecR CalcDipole (Molecule * mol) const;
 };
 
 #include "h2o.h"

@@ -180,10 +180,11 @@ class WaterSystem {
 
 
 	// predicate to determine if a molecule is a water
-	class IsWater_p : public std::unary_function<Molecule *, bool> {
+	template <typename T>
+	class name_pred : public std::binary_function<T,std::string,bool> {
 	  public:
-		bool operator() (const Molecule * mol) const
-		{ return mol->Name() == "h2o"; }
+		bool operator() (const T t, const std::string name) const
+		{ return t->Name() == name; }
 	};
 
 	/* loads the int_wats and int_atoms with only waters and water atoms */
@@ -193,7 +194,7 @@ class WaterSystem {
 
 	  // copy over all the water molecules into the int_wats container
 	  std::remove_copy_if(		// have to use remove_copy_if because the STL doesn't have a copy_if!!!
-		  sys_mols.begin(), sys_mols.end(), std::back_inserter(int_wats), std::not1(IsWater_p()));
+		  sys_mols.begin(), sys_mols.end(), std::back_inserter(int_wats), std::not1(std::bind2nd(name_pred<MolPtr>(), "h2o")));
 
 	  // load in the water atoms to int_atoms
 	  this->UpdateAtoms (int_wats, int_atoms);

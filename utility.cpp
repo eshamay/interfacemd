@@ -2,6 +2,7 @@
 
 namespace md_utility {
 
+
   /*******************************************************************************************************************************************************/
   /***************************************** Dealing with Pairs ******************************************************************************************/
 
@@ -50,22 +51,24 @@ namespace md_utility {
 
 template <typename Iter> std::vector< std::pair<double,int> > 
 //std::vector< std::pair<typename std::iterator_traits<Iter>::value_type, int> > 
-Histogram (Iter first, Iter last, const int num_bins) {
+histogram::Histogram (Iter first, Iter last, const int num_bins) {
 
-  typedef typename std::iterator_traits<Iter>::value_type& val_t;
+  typedef typename std::iterator_traits<Iter>::value_type val_t;
 
   // sorts the data - note this is a destructive operation!
   std::sort (first, last);
 
   // instead of requiring a min/max value to be supplied, we just take the smallest and highest values in the data set
-  val_t bin_size = (*last - *first)/(val_t)num_bins;
+  val_t max = *std::max_element(first,last);
+  val_t min = *std::min_element(first,last);
+  val_t bin_size = (max - min)/((val_t)num_bins);
 
   std::vector< std::pair<val_t,int> > histogram;
 
   std::pair<val_t,val_t> test;
   std::pair<val_t,int> result;
 
-  for (val_t bin = *first; bin < *last; bin += bin_size) {
+  for (val_t bin = min; bin < max; bin += bin_size) {
 	test.first = bin;
 	test.second = bin + bin_size;
 
@@ -77,6 +80,9 @@ Histogram (Iter first, Iter last, const int num_bins) {
 
   return histogram;
 }	// Histogram converter
+
+
+
 
 
 

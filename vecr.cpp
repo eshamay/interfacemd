@@ -55,13 +55,12 @@ VecR VecR::operator- (const double input) const {
 }
 
 void VecR::operator+= (const double input) {
-  for (unsigned i = 0; i < 3; i++)
-	(*this)(i) += input;
+  for (vector_t::iterator it = this->begin(); it != this->end(); it++)
+	*it += input;
 }
 
 void VecR::operator+= (const VecR& input) {
-  for (unsigned i = 0; i < 3; i++)
-	(*this)(i) += input(i);
+  this->plus_assign(input);
 }
 
 void VecR::operator-= (const double input) {

@@ -157,7 +157,7 @@ VecR Molecule::UpdateCenterOfMass () {
 	VecR ri = (*atom)->Position();
 	double mi = (*atom)->Mass();
 	_mass += mi;
-	_centerofmass += (ri) * mi;
+	_centerofmass += (ri * mi);
   }
   _centerofmass /= _mass;
 

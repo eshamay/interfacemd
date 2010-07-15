@@ -28,7 +28,7 @@ This leaves the bottom-diagonal free to store more information. If two atoms are
 */
 
 // bond types
-typedef enum {unbonded, nobond, nhbond, hbond, ohbond, covalent} bondtype;
+typedef enum {unbonded, hbond, covalent} bondtype;
 
 using namespace boost;
 
@@ -58,6 +58,9 @@ private:
 	  bondtype	btype;
 	};
 
+
+
+
 	typedef boost::adjacency_list<listS, listS, undirectedS, VertexProperties, EdgeProperties> Graph;
 	typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
 	typedef boost::graph_traits<Graph>::vertex_iterator Vertex_it;
@@ -83,7 +86,7 @@ private:
 	void _ParseBonds ();
 	void _ClearBonds ();
 	void _ClearAtoms ();
-	void _FixSharedAtoms ();
+	void _ResolveSharedHydrogens ();
 
 	void _SetBond (const Vertex& vi, const Vertex& vj, const double bondlength, const bondtype btype);
 	Edge _GetBond (const Vertex& vi, const Vertex& vj) const;
@@ -127,7 +130,7 @@ public:
 		Atom const * const ap,
 		bondtype const btype = unbonded,
 		std::string const name = ""
-	) const;
+		) const;
 
 	int NumHBonds (Atom const * const ap) const;
 	int NumHBonds (Water const * const wat) const;
@@ -135,12 +138,23 @@ public:
 
 	double Distance (Atom const * const a1, Atom const * const a2) const;
 
-/*
+	// useful for tracking distances between atom pairs
+	typedef std::pair<double, AtomPtr>	distance_tag;
+
+	struct distance_sort_pred {
+	  bool operator()(const distance_tag& left, const distance_tag& right) const {
+		return left.first < right.first;
+	  }
+	};
+
+
+
+	/*
 	// returns the closest atoms of a given name to a given atom
 	// input is the target atom's id, atomname is the name of the other atoms in the system we want returned,
 	// and number is the number of nearest atoms
 	// i.e. ClosestAtoms (5, O, 3) - returns the three closest O's to the atom with ID 5
 	std::vector<Atom *> ClosestAtoms (const int input, const string atomname, const int number) const;
-*/
+	 */
 };
 #endif

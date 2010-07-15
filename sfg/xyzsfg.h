@@ -1,13 +1,14 @@
-#ifndef TEST_H_
-#define TEST_H_
+#ifndef XYZSFG_H_
+#define XYZSFG_H_
 
 #include "../analysis.h"
+#include "fftw3.h"
 
-class Tester : public Analyzer<XYZSystem>
+class XYZSFGAnalyzer : public Analyzer<XYZSystem>
 {
 
   public:
-	Tester (WaterSystemParams& params);
+	XYZSFGAnalyzer (WaterSystemParams& params);
 
   private:
 
@@ -16,8 +17,8 @@ class Tester : public Analyzer<XYZSystem>
 	void DataOutput (const unsigned int timestep);
 	void PostAnalysis () { return; }
 
-	std::vector< std::pair<int,double> > min_distances;
-	int timestep;
+	VecR_vec	_M;
+
 };
 
 #endif

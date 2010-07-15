@@ -12,7 +12,12 @@ class XYZSystem : public MDSystem {
 private:
 	XYZFile				_coords;		// Atomlist parsed from an xyz file
 	WannierFile 		_wanniers;		// The wannier centers
-	bool _parsed;
+
+	// This is set to control how often the system molecules will be reparsed.
+	// Note that the wanniers centers need to be loaded with every timestep,
+	// but the molecules don't necessarily need to
+	int _reparse_limit;					
+	int _reparse_step;
 
 
 	/* For debugging (and other useful things?) this will keep a list of all the atoms that have been processed into molecules. Any atoms left over at the end of the parsing routine are not included and ... can potentially cause problems */
@@ -43,6 +48,8 @@ public:
 	void Seek (int step);
 	int NumSteps () const { return _coords.NumSteps(); }		// number of timesteps in the xyzfile
 	int Current () const { return _coords.Current(); }
+
+	void SetReparseLimit (const int limit) { _reparse_limit = limit; }
 
 	const std::vector<VecR>& Wanniers () const { return _wanniers.Coords(); }
 

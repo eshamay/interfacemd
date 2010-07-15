@@ -121,7 +121,7 @@ void BondGraph::_ParseBonds () {
 	  {
 		// one type of bond is the O-H covalent
 		if (bondlength <= OHBONDLENGTH) {
-		  btype = ohbond;
+		  btype = covalent;
 		}
 
 		// Or an H-bond is formed!
@@ -183,16 +183,15 @@ void BondGraph::_ParseBonds () {
 	  }
 
 	  // add in the bond between two atoms
-	  if (btype != unbonded)
-		this->_SetBond (*vi, *vj, bondlength, btype);
+	  this->_SetBond (*vi, *vj, bondlength, btype);
 	}
   }
 
   // Now fix up any weird atom-sharing between molecules. At this point we have to consider if we want to divide the system into separate molecules, or if we're interested in other phenomena, such as contact-ion pairs, etc.
   if (_sys_type == "xyz")
-	this->_FixSharedAtoms ();
+	this->_ResolveSharedHydrogens ();
   return;
-}
+}	// Parse Bonds
 
 // Set all the bonds to unbonded
 void BondGraph::_ClearBonds () {
@@ -316,7 +315,8 @@ int BondGraph::NumHBonds (Water const * const wat) const {
 }
 
 // calculates the water bonding coordination of a given water molecule
-BondGraph::coordination BondGraph::WaterCoordination (Water const * const wat) const {
+BondGraph::coordination BondGraph::WaterCoordination (Water const * const wat) const 
+{
 
   int c = 0;
   //Atom * ap;
@@ -333,110 +333,129 @@ BondGraph::coordination BondGraph::WaterCoordination (Water const * const wat) c
 	  c += bonds;
 	}
   }
-  //	printf ("%d)  ", c);
 
   return (coordination) c;
-  }
+}
 
-  void BondGraph::_FixSharedAtoms () {
+void BondGraph::_ResolveSharedHydrogens () {
 
-	// if any of the Hs are being shared between two molecules (i.e. a contact-ion pair) then we have to resolve which molecule gets the atom.
-	// A simple solution is to decide that the molecule with the oxygen closer to the hydrogen is the one that wins out
-	// This routine ***assumes*** that all the Hs will be bound to an Oxygen, and not some other atom in the system.
+  // if any of the Hs are being shared between two molecules (i.e. a contact-ion pair) then we have to resolve which molecule gets the atom.
+  // A simple solution is to decide that the molecule with the oxygen closer to the hydrogen is the one that wins out
+  // This routine ***assumes*** that all the Hs will be bound to an Oxygen, and not some other atom in the system.
+  // the closer oxygen becomes the covalent one, and the further oxygen becomes the h-bonded one
 
-	// we'll go through each of the hydrogens and find if they are bound to one or two different molecules
-	Vertex_it vi, vi_end, next;
-	tie (vi, vi_end) = vertices(_graph);
-	for (next = vi; vi != vi_end; vi = next) { next++;
+  // we'll go through each of the hydrogens and find if they are bound to one or two different molecules
+  Vertex_it vi, vi_end, next;
+  tie (vi, vi_end) = vertices(_graph);
+  for (next = vi; vi != vi_end; vi = next) { next++;
 
-	  Atom * H = _graph[*vi].atom;
+	Atom * H = _graph[*vi].atom;
 
-	  if (H->Name().find("H") == string::npos) continue;
+	if (H->Name().find("H") == string::npos) continue;
 
-	  // here we check to see if it's bound to multiple atoms
-	  std::vector<Atom *> atoms = this->BondedAtoms (H, covalent);
+	// here we check to see if it's bound to multiple atoms
+	Atom_ptr_vec covalent_atoms = this->BondedAtoms (H, covalent);
+	Atom_ptr_vec hbond_atoms = this->BondedAtoms (H, hbond);
 
-	  // great ... if the H is only bound to one molecule
-	  if (atoms.size() == 1) continue;
+	// great ... if the H is only covalently bound to one molecule then don't worry about it
+	if (covalent_atoms.size() == 1) continue;
 
-	  // we shouldn't have any free-floating hydrogens!
-	  if (atoms.size() < 1) {
-		std::cout << "BondGraph::_FixSharedAtoms()" << std::endl;
-		std::cout << "Found an unbound H!" << std::endl;
-		H->Print();
-		exit(1);
-	  }
-
-	  // this is totally bizarre - since when do we see an H bound to 3 molecules
-	  if (atoms.size() > 2) {
-		std::cout << "BondGraph::_FixSharedAtoms()" << std::endl;
-		std::cout << "This H is bound to more than 2 molecules!!" << std::endl;
-		H->Print();
-		exit(1);
-	  }
-
-	  // now we do a comparison of distances between the two covalently bound atoms and the hydrogen - which is further away?
-	  int further;
-	  double distance[2] = { this->Distance(H, atoms[0]), this->Distance(H, atoms[1]) };
-
-	  further = (distance[0] < distance[1]) ? 1 : 0;
-
-	  Vertex_it vO = this->_FindVertex(atoms[further]);
-
-	  // the further bond is now changed from covalent to hbonded just to show that it's not the primary bond to the hydrogen
-	  this->_RemoveBond (*vi, *vO);
-	  this->_SetBond(*vi, *vO, distance[further], hbond);
-	}
-
-	return;
-  }
-
-  double BondGraph::Distance (Atom const * const a1, Atom const * const a2) const {
-
-	Vertex_it vi, vj;
-	vi = this->_FindVertex (a1);
-	vj = this->_FindVertex (a2);
-
-	Edge e = edge(*vi, *vj, _graph).first;
-
-	return (b_length[e]);
-  }
-
-  BondGraph::Edge BondGraph::_GetBond (const Vertex& vi, const Vertex& vj) const {
-
-	Edge e;
-	bool b;
-	tie (e,b) = edge(vi, vj, _graph);
-
-	if (!b) {
-	  printf ("BondGraph::_GetBond - Couldn't find the requested Bond");
+	// this is totally bizarre - since when do we see an H bound to 3 molecules
+	if (covalent_atoms.size() > 2) {
+	  std::cout << "BondGraph::_ResolveSharedHydrogens()" << std::endl;
+	  std::cout << "This H is covalently bound to more than 2 oxygens!!" << std::endl;
+	  H->Print();
 	  exit(1);
 	}
 
-	return (e);
+	// The hydrogen isn't close enough to any oxygen to be covalent - it's probably shared between 2 as hbonds
+	if (!covalent_atoms.size() && hbond_atoms.size() >= 2) {
+	  /*
+	  std::cout << "\nBondGraph::_ResolveSharedHydrogens()" << std::endl;
+	  std::cout << "Found an unbound H (no covalent bonds)!" << std::endl;
+	  H->Print();
+	  exit(1);
+	  */
+
+	  // find the length of each of the H-bonds
+	  std::vector< distance_tag > distances;
+
+
+	  for (Atom_it it = hbond_atoms.begin(); it != hbond_atoms.end(); it++) {
+		distances.push_back (std::make_pair(this->Distance(H, *it), *it));
+	  }
+	  // sort nearest atoms
+	  std::sort (distances.begin(), distances.end(), distance_sort_pred());
+
+	  Vertex_it vO = this->_FindVertex(distances[0].second);
+
+	  // the closer bond is now changed from hbonded to covalent. The others are unchanged as they remain hbound
+	  this->_RemoveBond (*vi, *vO);								// cut the hbond to the nearest oxygen
+	  this->_SetBond(*vi, *vO, distances[0].first, covalent);	// and replace it with a covalent bond
+	}
+
+
+	else if (!covalent_atoms.size() && hbond_atoms.size() <= 1) {
+	  std::cout << "\nBondGraph::_ResolveSharedHydrogens()" << std::endl;
+	  std::cout << "Found an unbound H (no covalent bonds) with " << hbond_atoms.size() << " h-bonded O's!" << std::endl;
+	  H->Print();
+	  exit(1);
+	}
+
   }
 
-  BondGraph::Edge BondGraph::_GetBond (Atom const * const a1, Atom const * const a2) const {
+  return;
+}	// Resolve shared hydrogens
 
-	Vertex_it v1 = this->_FindVertex(a1);
-	Vertex_it v2 = this->_FindVertex(a2);
-	Edge e = this->_GetBond(*v1, *v2);
 
-	return (e);
+
+double BondGraph::Distance (Atom const * const a1, Atom const * const a2) const {
+
+  Vertex_it vi, vj;
+  vi = this->_FindVertex (a1);
+  vj = this->_FindVertex (a2);
+
+  Edge e = edge(*vi, *vj, _graph).first;
+
+  return (b_length[e]);
+}
+
+BondGraph::Edge BondGraph::_GetBond (const Vertex& vi, const Vertex& vj) const {
+
+  Edge e;
+  bool b;
+  tie (e,b) = edge(vi, vj, _graph);
+
+  if (!b) {
+	printf ("BondGraph::_GetBond - Couldn't find the requested Bond");
+	exit(1);
   }
 
-  void BondGraph::_RemoveBond (const Vertex& vi, const Vertex& vj) {
+  return (e);
+}
 
-	Edge e = this->_GetBond(vi, vj);
-	remove_edge(e, _graph);
+BondGraph::Edge BondGraph::_GetBond (Atom const * const a1, Atom const * const a2) const {
 
-	return;
-  }
+  Vertex_it v1 = this->_FindVertex(a1);
+  Vertex_it v2 = this->_FindVertex(a2);
+  Edge e = this->_GetBond(*v1, *v2);
 
-  void BondGraph::_RemoveBond (Atom const * const a1, Atom const * const a2) {
+  return (e);
+}
 
-	Edge e = this->_GetBond (a1, a2);
-	remove_edge(e, _graph);
+void BondGraph::_RemoveBond (const Vertex& vi, const Vertex& vj) {
 
-	return;
-  }
+  Edge e = this->_GetBond(vi, vj);
+  remove_edge(e, _graph);
+
+  return;
+}
+
+void BondGraph::_RemoveBond (Atom const * const a1, Atom const * const a2) {
+
+  Edge e = this->_GetBond (a1, a2);
+  remove_edge(e, _graph);
+
+  return;
+}
+
