@@ -96,6 +96,13 @@ class Atom {
 		}
 	};
 
+	class AtomPtr_sort : public std::binary_function<AtomPtr,AtomPtr,bool> {
+	  public:
+		bool operator() (AtomPtr const &left, AtomPtr const &right) { 
+		  return left->ID() < right->ID();
+		}
+	};
+
 };
 
 typedef Atom::AtomPtr AtomPtr;

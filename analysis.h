@@ -2,6 +2,7 @@
 #define ANALYSIS_H_
 
 #include "watersystem.h"
+#include "utility.h"
 
 template <class T>
 class Analyzer : public WaterSystem<T> {
@@ -33,6 +34,7 @@ class Analyzer : public WaterSystem<T> {
     static int		posbins;
     static double 	angmin, angmax, angres;
     static int		angbins;
+	int 			timestep;
     static int 		timesteps;
     static unsigned int restart;
 
@@ -127,7 +129,8 @@ Analyzer<T>::Analyzer (const WaterSystemParams& params)
 
 : WaterSystem<T>(params),
   output_filename(params.output_filename), output(params.output),
-  output_freq(params.output_freq)
+  output_freq(params.output_freq),
+  timestep (0)
 { 
   Analyzer<T>::posres = params.posres;
   Analyzer<T>::posbins = int((params.posmax - params.posmin)/params.posres);
@@ -212,15 +215,24 @@ void Analyzer<T>::SystemAnalysis ()
   // do some initial setup
   this->Setup();
 
-  int timestep = 0;
   // start the analysis - run through each timestep
   for (timestep = 0; timestep < timesteps; timestep++) {
 
-	// Perform the main loop analysis that works on every timestep of the simulation
-	this->Analysis ();
+	try {
+	  // Perform the main loop analysis that works on every timestep of the simulation
+	  this->Analysis ();
+	} catch (std::exception& ex) {
+	  std::cout << "Caught an exception during the system analysis at timestep " << timestep << "." << std::endl;
+	  throw;
+	}
 
-	// load the next timestep
-	this->LoadNext();
+	try {
+	  // load the next timestep
+	  this->LoadNext();
+	} catch (std::exception& ex) {
+	  std::cout << "Caught an exception while loading the next timestep after step " << timestep << "." << std::endl;
+	  throw;
+	}
 
 	// output the status of the analysis (to the screen or somewhere useful)
 	this->_OutputStatus (timestep);
@@ -236,7 +248,7 @@ void Analyzer<T>::SystemAnalysis ()
   DataOutput(timestep);
 
   return;
-}
+}	// system analysis
 
 template <class T> 
 int Analyzer<T>::PositionBin (const double position) {

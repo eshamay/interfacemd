@@ -5,6 +5,7 @@
 
 #include "atom.h"
 #include "h2o.h"
+#include "utility.h"
 
 #include <map>
 #include <string>
@@ -14,18 +15,20 @@
 //#include <boost/property_map/property_map.hpp>
 #include <boost/property_map.hpp>
 
+#include <exception>
+
 //#define ANGLE_CRITERIA
 
 /* The idea of a connectivity matrix is the same as mapping the connections between different members of a system. In this case, we're dealing with atoms in a system, and the connections are defined by the distances between the atoms. We're going to employ a few tricks here in order to make data retrieval a bit more succinct, and also to store more information into one matrix.
 
-Firstly, the matrix is represented by a 2D array of numbers. Each number will represent the distance between 2 atoms. The matrix is symmetric such that each row and each column represent the ordered list of atoms in the system. The upper triangle (all elements above the diagonal) hold the distances between atoms. Only using one half of a symmetric matrix ensures that we don't double our efforts and redo calculations between atoms.
+   Firstly, the matrix is represented by a 2D array of numbers. Each number will represent the distance between 2 atoms. The matrix is symmetric such that each row and each column represent the ordered list of atoms in the system. The upper triangle (all elements above the diagonal) hold the distances between atoms. Only using one half of a symmetric matrix ensures that we don't double our efforts and redo calculations between atoms.
 
-Because we'll be working with water, a hydrogen bond is any bond less than 2.4 angstroms and greater than 1.3 (or so... this is to be defined below). If we want to find the number of hydrogen bonds an atom is involved in, then we look at that atom's column from the top to the diagonal, and from the diagonal to the end of the row, and count the number of bonds that fall within the distance of an H-bond.
+   Because we'll be working with water, a hydrogen bond is any bond less than 2.4 angstroms and greater than 1.3 (or so... this is to be defined below). If we want to find the number of hydrogen bonds an atom is involved in, then we look at that atom's column from the top to the diagonal, and from the diagonal to the end of the row, and count the number of bonds that fall within the distance of an H-bond.
 
-As for the diagonal elements - instead of writing a routine that will count the number of h-bonds by looking over the rows and columns, as distances are calculated the diagonal elements for each atom will be updated to reflect the number of H-bonds formed. Thus at any time we can look at the diagonal and know immediately the number of H-bonds an atom is involved in.
+   As for the diagonal elements - instead of writing a routine that will count the number of h-bonds by looking over the rows and columns, as distances are calculated the diagonal elements for each atom will be updated to reflect the number of H-bonds formed. Thus at any time we can look at the diagonal and know immediately the number of H-bonds an atom is involved in.
 
-This leaves the bottom-diagonal free to store more information. If two atoms are covalently bound, then the bottom diagonal element will mark this with a 1.0.
-*/
+   This leaves the bottom-diagonal free to store more information. If two atoms are covalently bound, then the bottom diagonal element will mark this with a 1.0.
+ */
 
 // bond types
 typedef enum {unbonded, hbond, covalent} bondtype;
@@ -35,7 +38,7 @@ using namespace boost;
 
 class BondGraph {
 
-private:
+  private:
 	static const double OHBONDLENGTH;
 	static const double HBONDLENGTH;
 	static const double HBONDANGLECOS;
@@ -102,7 +105,7 @@ private:
 	static Graph _graph;
 	std::string	_sys_type;
 
-public:
+  public:
 
 	// constructor builds the matrix based on number of atoms to analyze
 	BondGraph ();
@@ -140,12 +143,20 @@ public:
 
 	// useful for tracking distances between atom pairs
 	typedef std::pair<double, AtomPtr>	distance_tag;
+	typedef std::vector<distance_tag> distance_vec;
 
-	struct distance_sort_pred {
-	  bool operator()(const distance_tag& left, const distance_tag& right) const {
-		return left.first < right.first;
-	  }
+
+	typedef std::exception graphex;
+
+	struct unboundhex : public graphex {
+	  const char* what() const throw() { return "A hydrogen was found with no covalent bonds, and no hydrogen bonds"; }
 	};
+
+	struct multiplyboundhex : public graphex {
+	  const char* what() const throw() { return "A hydrogen was found with more than 1 covalent bonds"; }
+	};
+
+
 
 
 
@@ -156,5 +167,8 @@ public:
 	// i.e. ClosestAtoms (5, O, 3) - returns the three closest O's to the atom with ID 5
 	std::vector<Atom *> ClosestAtoms (const int input, const string atomname, const int number) const;
 	 */
-};
+};	// BondGraph
+
+
+
 #endif

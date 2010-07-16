@@ -3,14 +3,14 @@
 
 Tester::Tester (WaterSystemParams& wsp)
   :	
-	Analyzer<XYZSystem> (wsp), timestep(0)
+	Analyzer<XYZSystem> (wsp)
 {
   return;
 }
 
 void Tester::Setup () {
 
-  this->sys->SetReparseLimit(100);
+  this->sys->SetReparseLimit(20);
 
   return;
 }
@@ -19,19 +19,19 @@ void Tester::Analysis () {
 
   LoadAll();
 
-  std::vector<double> distances;
-  Mol_it so2 = std::find_if (sys_mols.begin(), sys_mols.end(), std::bind2nd(name_pred<MolPtr>(), "so2"));
-  //(*so2)->Print();
+  std::vector< mol_distance > distances;
+ 
+  std::string name ("so2");
+  Mol_it so2 = md_utility::FindByName(sys_mols.begin(), sys_mols.end(), name);
+  //Mol_it so2 = std::find_if (sys_mols.begin(), sys_mols.end(), std::bind2nd(name_pred<MolPtr>(), "so2"));
 
-  /*
   for (Mol_it mol = sys_mols.begin(); mol != sys_mols.end(); mol++) {
 	if (so2 == mol) continue;
-	distances.push_back(this->sys->Distance(*so2,*mol));
+	distances.push_back(std::make_pair(this->sys->Distance(*so2,*mol), *mol));
   }
 
-  std::sort(distances.begin(), distances.end());
-  min_distances.push_back(std::make_pair(timestep++,distances[0]));
-  */
+  md_utility::pair_sort_first (distances.begin(), distances.end());
+  min_distances.push_back(distances[0]);
 
   return;
 
@@ -42,7 +42,7 @@ void Tester::DataOutput (const unsigned int timestep) {
   rewind(output);
 
   for (int i = 0; i < min_distances.size(); i++) {
-	fprintf (output, "% 8d % 8.3f\n", min_distances[i].first, min_distances[i].second);
+	fprintf (output, "% 8.3f % 8d %s\n", min_distances[i].first, min_distances[i].second->MolID(), min_distances[i].second->Name().c_str());
   }
 
   return; 

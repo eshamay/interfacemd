@@ -144,8 +144,9 @@ void BondGraph::_ParseBonds () {
 		  o1 = h->ParentMolecule()->GetAtom("O");
 
 		  if (h == (Atom *)NULL || o1 == (Atom *)NULL || o2 == (Atom *)NULL) {
-			printf ("Something wrong in assigning the atoms O and H in forming an H-bond - graph.cpp\n");
-			exit(1);
+			//throw (MALFORMED_H2O);
+			//printf ("Something wrong in assigning the atoms O and H in forming an H-bond - graph.cpp\n");
+			//exit(1);
 		  }
 
 		  VecR o1h = MDSystem::Distance (o1, h);	// the covalent bond
@@ -189,11 +190,14 @@ void BondGraph::_ParseBonds () {
 
   // Now fix up any weird atom-sharing between molecules. At this point we have to consider if we want to divide the system into separate molecules, or if we're interested in other phenomena, such as contact-ion pairs, etc.
   if (_sys_type == "xyz")
-	this->_ResolveSharedHydrogens ();
-  return;
+	try {
+	  this->_ResolveSharedHydrogens ();
+	} catch (unboundhex& ex) {
+	  std::cout << "Exception caught while resolving hydrogens shared between multiple molecules" << std::endl;
+	  throw;
+	}
 }	// Parse Bonds
 
-// Set all the bonds to unbonded
 void BondGraph::_ClearBonds () {
   // Remove all the edges.
   Edge_it ei, e_end, next;
@@ -226,7 +230,11 @@ void BondGraph::UpdateGraph (const Atom_ptr_vec& atoms) {
   // parse the atom info into the vertices
   this->_ParseAtoms(atoms);
   // then find all the needed bond information
-  this->_ParseBonds ();
+  try {
+	this->_ParseBonds ();
+  } catch (graphex& ex) {
+	std::cout << "An exception was caught while determining the bonds between atoms in the system" << std::endl;
+  }
 
 
   return;
@@ -240,10 +248,12 @@ void BondGraph::_SetBond (const Vertex& vi, const Vertex& vj, const double bondl
   tie(e, b) = add_edge(vi, vj, EdgeProperties(bondlength, btype), _graph);
 
   if (!b) {
+	/*
 	cout << "BondGraph::SetBond() - Tried to add a bond to an already-bonded atom pair" << endl;
 	v_atom[vi]->Print();
 	v_atom[vj]->Print();
 	exit(1);
+	*/
   }
 
   return;
@@ -355,21 +365,25 @@ void BondGraph::_ResolveSharedHydrogens () {
 
 	// here we check to see if it's bound to multiple atoms
 	Atom_ptr_vec covalent_atoms = this->BondedAtoms (H, covalent);
-	Atom_ptr_vec hbond_atoms = this->BondedAtoms (H, hbond);
 
-	// great ... if the H is only covalently bound to one molecule then don't worry about it
+	// great ... if the H is only covalently bound to one atom then don't worry about it
 	if (covalent_atoms.size() == 1) continue;
 
-	// this is totally bizarre - since when do we see an H bound to 3 molecules
-	if (covalent_atoms.size() > 2) {
+	Atom_ptr_vec hbond_atoms = this->BondedAtoms (H, hbond);
+
+	// this is totally bizarre - since when do we see an H covalently bound to more than 1 molecule
+	//if (covalent_atoms.empty() > 2) {
+	  /*
 	  std::cout << "BondGraph::_ResolveSharedHydrogens()" << std::endl;
 	  std::cout << "This H is covalently bound to more than 2 oxygens!!" << std::endl;
 	  H->Print();
 	  exit(1);
-	}
+	  */
+	  //throw (TOO_MANY_COVALENT_BONDS);
+	//}
 
 	// The hydrogen isn't close enough to any oxygen to be covalent - it's probably shared between 2 as hbonds
-	if (!covalent_atoms.size() && hbond_atoms.size() >= 2) {
+	if (covalent_atoms.empty() && !hbond_atoms.empty()) {
 	  /*
 	  std::cout << "\nBondGraph::_ResolveSharedHydrogens()" << std::endl;
 	  std::cout << "Found an unbound H (no covalent bonds)!" << std::endl;
@@ -378,14 +392,13 @@ void BondGraph::_ResolveSharedHydrogens () {
 	  */
 
 	  // find the length of each of the H-bonds
-	  std::vector< distance_tag > distances;
-
+	  distance_vec distances;
 
 	  for (Atom_it it = hbond_atoms.begin(); it != hbond_atoms.end(); it++) {
 		distances.push_back (std::make_pair(this->Distance(H, *it), *it));
 	  }
 	  // sort nearest atoms
-	  std::sort (distances.begin(), distances.end(), distance_sort_pred());
+	  md_utility::pair_sort_first (distances.begin(), distances.end());
 
 	  Vertex_it vO = this->_FindVertex(distances[0].second);
 
@@ -394,12 +407,17 @@ void BondGraph::_ResolveSharedHydrogens () {
 	  this->_SetBond(*vi, *vO, distances[0].first, covalent);	// and replace it with a covalent bond
 	}
 
-
-	else if (!covalent_atoms.size() && hbond_atoms.size() <= 1) {
-	  std::cout << "\nBondGraph::_ResolveSharedHydrogens()" << std::endl;
-	  std::cout << "Found an unbound H (no covalent bonds) with " << hbond_atoms.size() << " h-bonded O's!" << std::endl;
+	// in the case that there are more than 1 covalent bond to the hydrogen (it's being shared, covalently, by more than two atoms!) then we have a physically very improbable scenario!
+	else if (covalent_atoms.size() >= 2) {
+	  std::cout << "Found a hydrogen atom that is covalently bound to multiple oxygens. This is physically very improbable." << std::endl;
 	  H->Print();
-	  exit(1);
+	  throw (multiplyboundhex());
+	}
+
+	else if (covalent_atoms.empty() && hbond_atoms.empty()) {
+	  std::cout << "Found a hydrogen with no covalent or hydrogen bonds to which it is attached (below)" << std::endl;
+	  H->Print();
+	  throw (unboundhex());
 	}
 
   }
@@ -427,8 +445,11 @@ BondGraph::Edge BondGraph::_GetBond (const Vertex& vi, const Vertex& vj) const {
   tie (e,b) = edge(vi, vj, _graph);
 
   if (!b) {
+	//throw(BOND_NOT_FOUND);
+	/*
 	printf ("BondGraph::_GetBond - Couldn't find the requested Bond");
 	exit(1);
+	*/
   }
 
   return (e);

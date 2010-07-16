@@ -1,11 +1,12 @@
 #ifndef XYZSYSTEM_H_
 #define XYZSYSTEM_H_
 
-#include <ext/algorithm>
 #include "mdsystem.h"
 #include "xyzfile.h"
 #include "wannier.h"
 #include "graph.h"
+#include <ext/algorithm>
+#include <exception>
 
 class XYZSystem : public MDSystem {
 
@@ -31,7 +32,7 @@ private:
 	void _ParseWanniers ();
 	// Check if an atom pair (O & H) pass the hbond angle criteria
 	//bool _HBondAngle (const Atom *H, const Atom *O);
-	void _UpdateUnparsedList (const Atom_ptr_vec& parsed);
+	void _UpdateUnparsedList (Atom_ptr_vec& parsed);
 	void _CheckForUnparsedAtoms () const;
 
 public:
@@ -58,6 +59,13 @@ public:
 
 	VecR SystemDipole ();	// calculate the total system dipole and return it
 
-};
+	typedef std::exception xyzsysex;
+
+	struct unaccountedex : public xyzsysex { 
+	  char const* what() const throw() { return "After parsing of the xyz system molecules an atom(s) was left unaccounted for"; }
+	};
+
+
+};	// xyz system class
 
 #endif

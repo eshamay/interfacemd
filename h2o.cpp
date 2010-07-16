@@ -16,7 +16,7 @@ Water::~Water () {
   numWaters--;
 }
 
-Water::Water (const Molecule& molecule) : Molecule(molecule) {
+Water::Water (const Molecule& mol) : Molecule(mol) {
   this->Rename("h2o");
   ++numWaters;
 }

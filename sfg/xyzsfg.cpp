@@ -10,6 +10,8 @@ XYZSFGAnalyzer::XYZSFGAnalyzer (WaterSystemParams& wsp)
 
 void XYZSFGAnalyzer::Setup () {
 
+  this->sys->SetReparseLimit(100);
+
   return;
 }
 
@@ -34,6 +36,7 @@ void XYZSFGAnalyzer::DataOutput (const unsigned int timestep) {
   for (VecR_it it = _M.begin(); it != _M.end(); it++)
 	corr.push_back (_M[0] * *it);
 
+  rewind(output);
   // print the time-domain data and also the fft version
   for (std::vector<double>::const_iterator it = corr.begin(); it != corr.end(); it++) {
 	fprintf (output, "% 20.6f\n", *it);

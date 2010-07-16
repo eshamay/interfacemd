@@ -27,7 +27,12 @@ void XYZSystem::_ParseMolecules () {
    * *********************************************************************************/
 
   // first things first - we need the interatomic distances!
-  graph.UpdateGraph (_atoms);
+  try {
+	graph.UpdateGraph (_atoms);
+  }
+  catch (BondGraph::graphex& ex) {
+	std::cout << "Caught an exception while updating the bond graph" << std::endl;
+  }
 
   // Now let's do some house-cleaning to set us up for working with new molecules
   for (Mol_it it = _mols.begin(); it != _mols.end(); it++) {
@@ -51,15 +56,42 @@ void XYZSystem::_ParseMolecules () {
   this->_ParseNitrates ();
   this->_ParseSulfides ();
 
-  this->_CheckForUnparsedAtoms ();
+  try {
+	this->_CheckForUnparsedAtoms ();
+  }
+  catch (xyzsysex& ex) {
+	std::cout << "Exception thrown while checking for unparsed atoms in the system - some atoms were not parsed into molecules" << std::endl;
+	throw;
+  }
 
   return;
 }
 
 void XYZSystem::_CheckForUnparsedAtoms () const {
-  bool leave = false;
+
+  if (!_unparsed.empty()) {
+	std::cout << "The following atoms were found unparsed into molecules after all molecules had been formed" << std::endl;
+
+	// print out every atom that hasn't been parsed
+	for (Atom_it it = _unparsed.begin(); it != _unparsed.end(); it++) {
+	  std::cout << std::endl;
+	  (*it)->Print();	// show all remaining atoms
+
+	  // and all the atoms to which it is bound
+	  std::vector<AtomPtr> bound (graph.BondedAtoms(*it));
+	  for (Atom_it jt = bound.begin(); jt != bound.end(); jt++) { 
+		// and the distance between them
+		cout << "^--~ (" << graph.Distance(*jt, *it) << ")  ";
+		(*jt)->Print();
+	  }
+	}
+	throw (unaccountedex());
+  }
+
+  /*
   for (Atom_it it = _unparsed.begin(); it != _unparsed.end(); it++) {
 	if (*it != (AtomPtr)NULL) {
+	  std::cout << std::endl;
 	  (*it)->Print();	// show all remaining atoms
 
 	  // and all the atoms to which it is bound (and the distance)
@@ -71,12 +103,9 @@ void XYZSystem::_CheckForUnparsedAtoms () const {
 	  leave = true;
 	}
   }
-  if (leave) {
-	cout << "Found the above atoms unaccounted for in the system! Fix up the parsing routine" << endl;
-	exit(1);
-  }
+  */
   return;
-}
+}	// check for unparsed atoms
 
 
 /******************************
@@ -118,7 +147,12 @@ void XYZSystem::LoadFirst () {
   _atoms.clear();
   std::copy(_coords.begin(), _coords.end(), std::back_inserter(_atoms));
 
-  this->_ParseMolecules();
+  try {
+	this->_ParseMolecules();
+  } catch (xyzsysex& ex) {
+	std::cout << "Exception caught while parsing the molecules of the XYZ system" << std::endl;
+	throw;
+  }
 
   if (_wanniers.Loaded()) {
 	this->_ParseWanniers();
@@ -136,9 +170,15 @@ void XYZSystem::Seek (int step) {
 void XYZSystem::LoadNext () {
   _coords.LoadNext();
 
-  if (_reparse_step++ == _reparse_limit) {
-	this->_ParseMolecules();
-	_reparse_step = 0;
+
+  try {
+	if (_reparse_step++ == _reparse_limit) {
+	  this->_ParseMolecules();
+	  _reparse_step = 0;
+	}
+  } catch (xyzsysex& ex) {
+	std::cout << "Exception caught while parsing the molecules of the XYZ system" << std::endl;
+	throw;
   }
 
   if (_wanniers.Loaded()) {
@@ -190,7 +230,7 @@ void XYZSystem::_ParseWaters () {
 
 	// if we pick up an OH group that is part of a larger molecule (i.e. nitric acid) then it will be processed as a hydroxide...
 	// So if the only type of atom attached is a hydrogen, we have some form of water (OH, H2O, H3O)
-	if (Hs.size() != atoms.size()) continue;
+	if (Hs.size() != atoms.size()) continue;	// then the oxygen is part of a larger molecule (i.e. it's bound to atoms other than just hydrogens)
 
 	int molIndex = (int)_mols.size();	// set the molecule index
 
@@ -211,7 +251,7 @@ void XYZSystem::_ParseWaters () {
 	}
 
 	else if (num_H == 0 || num_H > 3) {
-	  printf ("XYZSystem::_ParseMolecules() - found water with %d H's\n", (int)atoms.size());
+	  printf ("XYZSystem::_ParseMolecules() - found an oxygen with %d H's attached\n", (int)atoms.size());
 	  O->Print();
 	  for (Atom_it jt = atoms.begin(); jt != atoms.end(); jt++) {
 		(*jt)->Print();
@@ -321,7 +361,7 @@ void XYZSystem::_ParseSulfides () {
 
 	// for every S in the system, see if 2 oxygens are connected
 	Atom_ptr_vec Os (graph.BondedAtoms (*S, covalent, "O"));
-	if (Os.size() != 2) continue;
+	if (Os.size() != 2) continue;	// SO2 is not process if there aren't at-least 2 Os attached
 
 	int molIndex = (int)_mols.size();
 
@@ -340,15 +380,29 @@ void XYZSystem::_ParseSulfides () {
 }	// Parse SO2
 
 
-void XYZSystem::_UpdateUnparsedList (const Atom_ptr_vec& parsed) {
-  // fix up the tracking list
-  for (Atom_ptr_vec::iterator it = _unparsed.begin(); it != _unparsed.end(); it++) {
-	for (Atom_it jt = parsed.begin(); jt != parsed.end(); jt++) {
-	  if (*it == *jt) {
-		*it = (AtomPtr)NULL;
-		break;
-	  }
-	}
-  }
+void XYZSystem::_UpdateUnparsedList (Atom_ptr_vec& parsed) {
+  // fix up the list for tracking atoms that have already been added into molecules.
+  // _unparsed should contain only atoms that are not in the parsed list
+  // these atom vectors get sorted according the the atom's ID
+
+  std::sort(_unparsed.begin(), _unparsed.end(), Atom::AtomPtr_sort());
+  std::sort(parsed.begin(), parsed.end(), Atom::AtomPtr_sort());
+
+  Atom_ptr_vec difference;
+  std::set_difference (_unparsed.begin(), _unparsed.end(), parsed.begin(), parsed.end(), std::back_inserter(difference), Atom::AtomPtr_sort());
+
+  _unparsed.clear();
+  std::copy (difference.begin(), difference.end(), std::back_inserter(_unparsed));
+
+  /*
+	 for (Atom_ptr_vec::iterator it = _unparsed.begin(); it != _unparsed.end(); it++) {
+	 for (Atom_it jt = parsed.begin(); jt != parsed.end(); jt++) {
+	 if (*it == *jt) {
+   *it = (AtomPtr)NULL;
+   break;
+   }
+   }
+   }
+   */
   return;
 }

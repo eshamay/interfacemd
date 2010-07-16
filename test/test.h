@@ -2,6 +2,7 @@
 #define TEST_H_
 
 #include "../analysis.h"
+#include "../utility.h"
 
 class Tester : public Analyzer<XYZSystem>
 {
@@ -16,8 +17,8 @@ class Tester : public Analyzer<XYZSystem>
 	void DataOutput (const unsigned int timestep);
 	void PostAnalysis () { return; }
 
-	std::vector< std::pair<int,double> > min_distances;
-	int timestep;
+	typedef std::pair<double, MolPtr>	mol_distance;
+	std::vector< mol_distance > min_distances;
 };
 
 #endif

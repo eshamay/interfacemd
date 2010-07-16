@@ -24,8 +24,8 @@ TEST		= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) test.o
 
 # $(CXX) $(CPPFLAGS) $(TEST) -lmkl_solver_ilp64 -lmkl_core -lmkl_lapack -lmkl_gnu_thread -lguide -lpthread -o test
 
-test : $(TEST)
-	icpc $(SRCLIB)/utility.o $(TEST) $(LIBS) $(LAPACKLIBS) -o test
+test : $(TEST) 
+	icpc $(TEST) $(LIBS) $(LAPACKLIBS) -o test
 
 anglehisto: $(ANGLEHISTO)
 	$(CXX) $(CPPFLAGS) $(ANGLEHISTO) -llapack -o ../bin/anglehisto

@@ -2,9 +2,9 @@
 
 XYZFile::XYZFile (std::string path) 
   : 
-	_initialized(false), 
+	_file ((FILE *)NULL),
 	_path(path),
-	_file ((FILE *)NULL)
+	_initialized(false) 
 {
 
   _file = fopen (path.c_str(), "r");

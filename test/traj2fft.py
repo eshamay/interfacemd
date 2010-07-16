@@ -18,9 +18,11 @@ def PlotData():
 	parts_ax.plot(x, im, 'b-', linewidth=2)
 
 	for ax in fig.get_axes():
-	  ax.set_xlim(500.0, 5000.0)
+	  ax.set_xlim(700.0, 4000.0)
 	  ax.set_ylim(0.0, 400.0)
 
+	chi_ax.set_ylim(0.0,600.0)
+	parts_ax.set_ylim(-800.0,800.0)
 	plt.show()
 
 	#C = (1-math.exp(-beta*hbar*freq))/3.0/hbar/c
@@ -32,14 +34,16 @@ def PlotData():
 
 ## first open up the bond-length trajectory file
 myfile = open(sys.argv[1])
-#
-data = []
+
 # # read the data in and make sure it's converted into a nice (floating point) format for manipulation
+data = [float(line.strip().split()[0]) for line in myfile.readlines()]
+'''
 for line in myfile.readlines():
 	line = line.strip()
 	line = line.split()
 	if line != "":
-		data.append(float(line[1]))
+		data.append(float(line[0]))
+'''
 
 myfile.close()
 

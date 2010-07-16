@@ -86,7 +86,7 @@ void Molecule::AddAtom (AtomPtr const atom) {
 void Molecule::FixAtom (AtomPtr const atom) {
 
   // now adjust the center of mass to accomodate for the new atom. Also, adjust the total molecular mass.
-  this->UpdateCenterOfMass ();
+  //this->UpdateCenterOfMass ();
 
   // and some of the atom's properties should be adjusted
   atom->ParentMolecule (this);
@@ -118,7 +118,7 @@ void Molecule::RemoveAtom (AtomPtr const atom) {
 
   _atoms.erase(std::find(_atoms.begin(), _atoms.end(), atom));
 
-  this->UpdateCenterOfMass();
+  //this->UpdateCenterOfMass();
 
   // note on the atom that it is no longer part of a molecule
   atom->ParentMolecule ((MolPtr) NULL);
