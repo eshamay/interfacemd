@@ -30,145 +30,161 @@
    This leaves the bottom-diagonal free to store more information. If two atoms are covalently bound, then the bottom diagonal element will mark this with a 1.0.
  */
 
-// bond types
-typedef enum {unbonded, hbond, covalent} bondtype;
+namespace bondgraph {
 
-using namespace boost;
+  using namespace boost;
 
+  // bond types
+  typedef enum {unbonded, hbond, covalent} bondtype;
 
-class BondGraph {
+  // useful for tracking distances between atom pairs
+  typedef std::pair<double, AtomPtr>	distance_pair;
+  typedef std::vector<distance_pair> 	distance_vec;
 
-  private:
-	static const double OHBONDLENGTH;
-	static const double HBONDLENGTH;
-	static const double HBONDANGLECOS;
-	static const double NOBONDLENGTH;
-	static const double NHBONDLENGTH;
-	static const double SOBONDLENGTH;
+  /* Encoding of the different coordination types
+   * The numbering is based on each O having a value of 1, and each H haveing a value of 10 (i.e. add 1 for every O, and 10 for every H...). So a water in a state of OOHH bonding would have a coordination of 22, and a coordination of 13 would be OOOH, 12 = OOH, 11 = OH, 10 = H, etc.
+   */
+  typedef enum {
+	UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			// no H
+	H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			// 1 H
+	HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		// 2 Hs
+	HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	// 3 Hs
+	HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44
+  } coordination;
+  // And hopefully that covers all the bonding coordination types :)
 
-
-	// Vertices are atoms
-	struct VertexProperties {
-	  AtomPtr atom;
-	  VecR position;
-	  std::string name;
-	};
-
-	// edges are bonds between atoms
-	struct EdgeProperties {
-	  EdgeProperties (const double b_length, const bondtype b_type) : distance(b_length), btype(b_type) { }
-	  double 		distance;
-	  bondtype	btype;
-	};
+  typedef std::map<coordination, std::string> coord_map;
 
 
 
 
-	typedef boost::adjacency_list<listS, listS, undirectedS, VertexProperties, EdgeProperties> Graph;
-	typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
-	typedef boost::graph_traits<Graph>::vertex_iterator Vertex_it;
-	typedef boost::graph_traits<Graph>::edge_descriptor Edge;
-	typedef boost::graph_traits<Graph>::edge_iterator Edge_it;
-	typedef boost::graph_traits<Graph>::adjacency_iterator Adj_it;
-	typedef std::vector<Atom *> Atom_ptr_vec;
+  class BondGraph {
 
-	// generic property maps
-	template <class T, class Property_T> struct PropertyMap
-	{
-	  typedef typename boost::property_map<Graph, T Property_T::*>::type Type;
-	};
+	private:
+	  static const double OHBONDLENGTH;
+	  static const double HBONDLENGTH;
+	  static const double HBONDANGLECOS;
+	  static const double NOBONDLENGTH;
+	  static const double NHBONDLENGTH;
+	  static const double SOBONDLENGTH;
 
 
-	static PropertyMap<double,EdgeProperties>::Type 		b_length;
-	static PropertyMap<bondtype,EdgeProperties>::Type 		b_type;
-	static PropertyMap<Atom *,VertexProperties>::Type 		v_atom;
-	static PropertyMap<VecR,VertexProperties>::Type 		v_position;
-	static PropertyMap<std::string,VertexProperties>::Type	v_name;
+	  // Vertices are atoms
+	  struct VertexProperties {
+		AtomPtr atom;
+		VecR position;
+		std::string name;
+	  };
 
-	void _ParseAtoms (const Atom_ptr_vec& atoms);
-	void _ParseBonds ();
-	void _ClearBonds ();
-	void _ClearAtoms ();
-	void _ResolveSharedHydrogens ();
-
-	void _SetBond (const Vertex& vi, const Vertex& vj, const double bondlength, const bondtype btype);
-	Edge _GetBond (const Vertex& vi, const Vertex& vj) const;
-	Edge _GetBond (Atom const * const a1, Atom const * const a2) const;
-	void _RemoveBond (const Vertex& vi, const Vertex& vj);
-	void _RemoveBond (Atom const * const a1, Atom const * const a2);
-	Vertex_it _FindVertex (Atom const * const ap) const;
-
-	// predicate for testing if an atom pair is an OH
-	bool _NameCombo (const std::string name1, const std::string name2, const std::string test1, const std::string test2) const;
-	bool _SameAtomName (const std::string name1, const std::string name2) const;
-
-	static Graph _graph;
-	std::string	_sys_type;
-
-  public:
-
-	// constructor builds the matrix based on number of atoms to analyze
-	BondGraph ();
-	BondGraph (const Atom_ptr_vec& atoms, std::string sys = "xyz");
-	~BondGraph ();
-
-	/* Encoding of the different coordination types
-	 * The numbering is based on each O having a value of 1, and each H haveing a value of 10 (i.e. add 1 for every O, and 10 for every H...). So a water in a state of OOHH bonding would have a coordination of 22, and a coordination of 13 would be OOOH, 12 = OOH, 11 = OH, 10 = H, etc.
-	 */
-	typedef enum {
-	  UNBOUND=0, O=1, OO=2, OOO=3, OOOO=4, 			// no H
-	  H=10, OH=11, OOH=12, OOOH=13, OOOOH=14,			// 1 H
-	  HH=20, OHH=21, OOHH=22, OOOHH=23, OOOOHH=24,		// 2 Hs
-	  HHH=30, OHHH=31, OOHHH=32, OOOHHH=33, OOOOHHH=34,	// 3 Hs
-	  HHHH=40, OHHHH=41, OOHHHH=42, OOOHHHH=43, OOOOHHHH=44
-	} coordination;
-	// And hopefully that covers all the bonding coordination types :)
-
-	typedef std::map< coordination, std::string> coord_map;
-
-	void SysType (std::string sys_type) { _sys_type = sys_type; }
-	void UpdateGraph (const Atom_ptr_vec& atoms);
-
-	Atom_ptr_vec BondedAtoms (
-		Atom const * const ap,
-		bondtype const btype = unbonded,
-		std::string const name = ""
-		) const;
-
-	int NumHBonds (Atom const * const ap) const;
-	int NumHBonds (Water const * const wat) const;
-	coordination WaterCoordination (Water const * const wat) const;
-
-	double Distance (Atom const * const a1, Atom const * const a2) const;
-
-	// useful for tracking distances between atom pairs
-	typedef std::pair<double, AtomPtr>	distance_tag;
-	typedef std::vector<distance_tag> distance_vec;
-
-
-	typedef std::exception graphex;
-
-	struct unboundhex : public graphex {
-	  const char* what() const throw() { return "A hydrogen was found with no covalent bonds, and no hydrogen bonds"; }
-	};
-
-	struct multiplyboundhex : public graphex {
-	  const char* what() const throw() { return "A hydrogen was found with more than 1 covalent bonds"; }
-	};
+	  // edges are bonds between atoms
+	  struct EdgeProperties {
+		EdgeProperties (const double b_length, const bondtype b_type) : distance(b_length), btype(b_type) { }
+		double 		distance;
+		bondtype	btype;
+	  };
 
 
 
 
+	  typedef adjacency_list<listS, listS, undirectedS, VertexProperties, EdgeProperties> Graph;
+	  typedef graph_traits<Graph>::vertex_descriptor Vertex;
+	  typedef graph_traits<Graph>::vertex_iterator Vertex_it;
+	  typedef graph_traits<Graph>::edge_descriptor Edge;
+	  typedef graph_traits<Graph>::edge_iterator Edge_it;
+	  typedef graph_traits<Graph>::adjacency_iterator Adj_it;
+	  typedef std::vector<Atom *> Atom_ptr_vec;
 
-	/*
-	// returns the closest atoms of a given name to a given atom
-	// input is the target atom's id, atomname is the name of the other atoms in the system we want returned,
-	// and number is the number of nearest atoms
-	// i.e. ClosestAtoms (5, O, 3) - returns the three closest O's to the atom with ID 5
-	std::vector<Atom *> ClosestAtoms (const int input, const string atomname, const int number) const;
-	 */
-};	// BondGraph
+	  // generic property maps
+	  template <class T, class Property_T> struct PropertyMap
+	  {
+		typedef typename boost::property_map<Graph, T Property_T::*>::type Type;
+	  };
 
 
+	  static PropertyMap<double,EdgeProperties>::Type 			b_length;
+	  static PropertyMap<bondtype,EdgeProperties>::Type 		b_type;
+	  static PropertyMap<AtomPtr,VertexProperties>::Type 		v_atom;
+	  static PropertyMap<VecR,VertexProperties>::Type 			v_position;
+	  static PropertyMap<std::string,VertexProperties>::Type	v_name;
+
+	  void _ParseAtoms (const Atom_ptr_vec& atoms);
+	  void _ParseBonds ();
+	  void _ClearBonds ();
+	  void _ClearAtoms ();
+	  void _ResolveSharedHydrogens ();
+
+	  void _SetBond (const Vertex& vi, const Vertex& vj, const double bondlength, const bondtype btype);
+	  Edge _GetBond (const Vertex& vi, const Vertex& vj) const;
+	  Edge _GetBond (Atom const * const a1, Atom const * const a2) const;
+	  void _RemoveBond (const Vertex& vi, const Vertex& vj);
+	  void _RemoveBond (Atom const * const a1, Atom const * const a2);
+	  Vertex_it _FindVertex (Atom const * const ap) const;
+
+	  // predicate for testing if an atom pair is an OH
+	  bool _NameCombo (const std::string name1, const std::string name2, const std::string test1, const std::string test2) const;
+	  bool _SameAtomName (const std::string name1, const std::string name2) const;
+
+	  static Graph _graph;
+	  std::string	_sys_type;
+
+	public:
+
+	  // constructor builds the matrix based on number of atoms to analyze
+	  BondGraph ();
+	  BondGraph (const Atom_ptr_vec& atoms, const std::string& sys = "xyz");
+	  ~BondGraph ();
+
+
+	  void SysType (std::string sys_type) { _sys_type = sys_type; }
+	  void UpdateGraph (const Atom_ptr_vec& atoms);
+
+	  Atom_ptr_vec BondedAtoms (
+		  Atom const * const ap,
+		  bondtype const btype = unbonded,
+		  std::string const name = ""
+		  ) const;
+
+	  // Given a molecule, find the atom (of an optionally given name) that is closest to the molecule but not part of it.
+	  distance_pair ClosestAtom (const MolPtr& mol, const std::string& name = "") const;
+	  // Given an atom, find the atom closest to it (of an optionally given name) that is not part of the same molecule
+	  // returns a distance pair - [distance, AtomPtr]
+	  distance_pair ClosestAtom (const AtomPtr atom, const std::string& name = "") const;
+
+	  int NumHBonds (Atom const * const ap) const;
+	  int NumHBonds (Water const * const wat) const;
+	  coordination WaterCoordination (Water const * const wat) const;
+
+	  // returns the distance between two vertices in the graph
+	  double Distance (const Vertex& vi, const Vertex& vj) const;
+	  // returns the distance between two atoms
+	  double Distance (Atom const * const a1, Atom const * const a2) const;
+
+
+
+	  typedef std::exception graphex;
+
+	  struct unboundhex : public graphex {
+		const char* what() const throw() { return "A hydrogen was found with no covalent bonds, and no hydrogen bonds"; }
+	  };
+
+	  struct multiplyboundhex : public graphex {
+		const char* what() const throw() { return "A hydrogen was found with more than 1 covalent bonds"; }
+	  };
+
+
+
+
+
+	  /*
+	  // returns the closest atoms of a given name to a given atom
+	  // input is the target atom's id, atomname is the name of the other atoms in the system we want returned,
+	  // and number is the number of nearest atoms
+	  // i.e. ClosestAtoms (5, O, 3) - returns the three closest O's to the atom with ID 5
+	  std::vector<Atom *> ClosestAtoms (const int input, const string atomname, const int number) const;
+	   */
+  };	// BondGraph
+
+
+}
 
 #endif

@@ -1,6 +1,6 @@
 #include "xyzsystem.h"
 
-XYZSystem::XYZSystem (string filepath, VecR size, string wannierpath) :
+XYZSystem::XYZSystem (const std::string& filepath, const VecR& size, const std::string& wannierpath) :
   MDSystem (),
   _coords(filepath),
   _wanniers(wannierpath),
@@ -30,7 +30,7 @@ void XYZSystem::_ParseMolecules () {
   try {
 	graph.UpdateGraph (_atoms);
   }
-  catch (BondGraph::graphex& ex) {
+  catch (bondgraph::BondGraph::graphex& ex) {
 	std::cout << "Caught an exception while updating the bond graph" << std::endl;
   }
 
@@ -81,7 +81,7 @@ void XYZSystem::_CheckForUnparsedAtoms () const {
 	  std::vector<AtomPtr> bound (graph.BondedAtoms(*it));
 	  for (Atom_it jt = bound.begin(); jt != bound.end(); jt++) { 
 		// and the distance between them
-		cout << "^--~ (" << graph.Distance(*jt, *it) << ")  ";
+		std::cout << "^--~ (" << graph.Distance(*jt, *it) << ")  ";
 		(*jt)->Print();
 	  }
 	}
@@ -121,7 +121,7 @@ void XYZSystem::_ParseWanniers () {
 
   for (Atom_it O = _atoms.begin(); O != _atoms.end(); O++) {
 	// find every oxygen atom
-	if ((*O)->Name().find("O") == string::npos && (*O)->Name().find("S") == string::npos) continue;
+	if ((*O)->Name().find("O") == std::string::npos && (*O)->Name().find("S") == std::string::npos) continue;
 
 	MolPtr mol = (*O)->ParentMolecule();
 
@@ -221,11 +221,11 @@ void XYZSystem::_ParseWaters () {
 
 	// every water has an oxygen atom, right? So let's find those
 	AtomPtr O = *it;
-	if (O->Name().find("O") == string::npos) continue;
+	if (O->Name().find("O") == std::string::npos) continue;
 
 	// The bondgraph provides us with all the covalently bound H's
-	Atom_ptr_vec atoms = graph.BondedAtoms (O, covalent);
-	Atom_ptr_vec Hs = graph.BondedAtoms (O, covalent, "H");
+	Atom_ptr_vec atoms = graph.BondedAtoms (O, bondgraph::covalent);
+	Atom_ptr_vec Hs = graph.BondedAtoms (O, bondgraph::covalent, "H");
 
 
 	// if we pick up an OH group that is part of a larger molecule (i.e. nitric acid) then it will be processed as a hydroxide...
@@ -293,10 +293,10 @@ void XYZSystem::_ParseNitrates () {
 
   // The easiest thing to spot for nitric acid is, of course, the nitrogen! Only one of those, so let's grab it
   for (Atom_it N = _atoms.begin(); N != _atoms.end(); N++) {
-	if ((*N)->Name().find("N") == string::npos) continue;
+	if ((*N)->Name().find("N") == std::string::npos) continue;
 
 	// analogous to water, let's grab all the (covalently) bound O's of the molecule
-	Atom_ptr_vec NAatoms (graph.BondedAtoms (*N, covalent, "O"));
+	Atom_ptr_vec NAatoms (graph.BondedAtoms (*N, bondgraph::covalent, "O"));
 
 	// at least 3 oxygens for a nitrate/nitric acid
 	if (NAatoms.size() != 3) continue;
@@ -309,7 +309,7 @@ void XYZSystem::_ParseNitrates () {
 	for (Atom_it O = NAatoms.begin(); O != NAatoms.end(); O++) {
 
 	  // these are all the Hs bound to the O
-	  Atom_ptr_vec Hs (graph.BondedAtoms (*O, covalent, "H"));
+	  Atom_ptr_vec Hs (graph.BondedAtoms (*O, bondgraph::covalent, "H"));
 	  if (!Hs.size()) continue;
 	  // if an H is attached to one of the oxygens then we have a bonafide nitric acid
 	  fullNA = true;
@@ -357,10 +357,10 @@ void XYZSystem::_ParseNitrates () {
 
 void XYZSystem::_ParseSulfides () {
   for (Atom_it S = _atoms.begin(); S != _atoms.end(); S++) {
-	if ((*S)->Name().find("S") == string::npos) continue;
+	if ((*S)->Name().find("S") == std::string::npos) continue;
 
 	// for every S in the system, see if 2 oxygens are connected
-	Atom_ptr_vec Os (graph.BondedAtoms (*S, covalent, "O"));
+	Atom_ptr_vec Os (graph.BondedAtoms (*S, bondgraph::covalent, "O"));
 	if (Os.size() != 2) continue;	// SO2 is not process if there aren't at-least 2 Os attached
 
 	int molIndex = (int)_mols.size();

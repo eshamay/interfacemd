@@ -1,6 +1,6 @@
 #include "ambersystem.h"
 
-AmberSystem::AmberSystem (const std::string prmtop, const std::string mdcrd, const std::string mdvel = "")
+AmberSystem::AmberSystem (const std::string& prmtop, const std::string& mdcrd, const std::string& mdvel)
 // some initialization needs to happen here
 : 	_topfile(prmtop),
   _coords(mdcrd, _topfile.NumAtoms()),
@@ -72,7 +72,7 @@ void AmberSystem::_ParseMolecules () {
 
 	// At each new pointer we create a molecule and start adding in atoms
 	// if the molecule is of a specific type for which a class has been created, then let's use that!
-	string name = _topfile.MolNames()[mol];
+	std::string name = _topfile.MolNames()[mol];
 	if (name == "no3") {
 	  _mols.push_back (new Nitrate());
 	}

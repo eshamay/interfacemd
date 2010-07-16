@@ -1,6 +1,6 @@
 SRCLIB	 	= $(HOME)/md/src
 
-CXX			= icpc -wd981,444,383,177
+CXX			= icpc -wd981,444,383,177,1418
 
 DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated #-debug #-wd981,1599,1572,383
 OPTIMIZE 	= -fast -finline-functions -finline -funroll-loops -m64

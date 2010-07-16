@@ -9,8 +9,6 @@
 #include "atom.h"
 #include "wannier.h"
 
-using namespace std;
-
 class Molecule {
 
   protected:
@@ -26,7 +24,7 @@ class Molecule {
 
     double			_mass;				// Total molecular mass
     double			_charge;
-    string			_name;				// some text ID or name for the molecule
+	std::string			_name;				// some text ID or name for the molecule
     int				_ID;				// A numerical ID for the molecule
 
     double			_eulerangles[3];	// the three euler angles theta, phi, chi
@@ -45,7 +43,7 @@ class Molecule {
     static int numMolecules;
 
     // Input functions
-    void Name (string name) { _name = name; }	// set the molecule's name
+    void Name (std::string name) { _name = name; }	// set the molecule's name
     void MolID (int ID) { _ID = ID; }
 
     bool Set () { _set = true; return (_set); }
@@ -81,7 +79,7 @@ class Molecule {
 
     double Mass () const 			{ return _mass; }					// Returns the molecular mass
     int size () const				{ return _atoms.size(); }
-    string Name () const			{ return _name; }
+	std::string Name () const			{ return _name; }
     int MolID () const				{ return _ID; }
 
     // molecular axes
@@ -112,15 +110,15 @@ class Molecule {
 
     // Operators
     AtomPtr operator[] (int index) const { return _atoms[index]; }	// retrieve an atom by array index
-    AtomPtr operator[] (const string atomname) const;			// retrieve a particular atom using its unique name/ID
-    AtomPtr GetAtom (const string atomname) const;
+    AtomPtr operator[] (const std::string& atomname) const;			// retrieve a particular atom using its unique name/ID
+    AtomPtr GetAtom (const std::string& atomname) const;
     //int operator+= (Atom * newAtom);					// adds an atom into the molecule
 
     void AddAtom (AtomPtr const newAtom);					// same as the operator
     void AddHydrogen (AtomPtr const atom);					// same as adding an atom but renames accordingly
     void RemoveAtom (AtomPtr const atom);
     void FixAtom (AtomPtr const atom);
-	void Rename (const string name);
+	void Rename (const std::string& name);
 
 	MolPtr Merge (MolPtr mol);				// merges two molecules
 	//int operator+= (Molecule& mol);					// Joins two molecules

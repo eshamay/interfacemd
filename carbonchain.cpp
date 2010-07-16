@@ -3,7 +3,7 @@
 int CarbonChain::numCarbonChains = 0;
 
 CarbonChain::CarbonChain (int numCarbons) 
-  : Molecule (), _carbons(vector<Atom *>(numCarbons, (Atom *)NULL))
+  : Molecule (), _carbons(Atom_ptr_vec(numCarbons, (AtomPtr)NULL))
 {
   ++numCarbonChains;
 }

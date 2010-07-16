@@ -55,7 +55,7 @@ return (_atoms.size());
  */
 
 // get back the atom pointer to the atom with the given name
-AtomPtr Molecule::operator[] (const std::string atomname) const {
+AtomPtr Molecule::operator[] (const std::string& atomname) const {
 
   Atom_it it = std::find_if(_atoms.begin(), _atoms.end(), std::bind2nd(Atom::NameIs_p(), atomname));
 
@@ -70,7 +70,7 @@ AtomPtr Molecule::operator[] (const std::string atomname) const {
   return(*it);
 }
 
-AtomPtr Molecule::GetAtom (const string atomname) const {
+AtomPtr Molecule::GetAtom (const std::string& atomname) const {
   AtomPtr patom = (*this)[atomname];
   return(patom);
 }
@@ -100,7 +100,7 @@ void Molecule::AddHydrogen (AtomPtr const atom) {
 
   this->AddAtom (atom);
 
-  if (atom->Name().find("H") == string::npos) {
+  if (atom->Name().find("H") == std::string::npos) {
 	std::cout << "Molecule::AddHydrogen() - Tried adding a hydrogen with a non-hydrogen atom:" << std::endl;
 	atom->Print();
 	exit(1);
@@ -136,7 +136,7 @@ void Molecule::RemoveAtom (AtomPtr const atom) {
 }
 
 // rename the molecule, and its atoms.
-void Molecule::Rename (const std::string name) {
+void Molecule::Rename (const std::string& name) {
 
   this->_name = name;
   for (Atom_it atom = _atoms.begin(); atom != _atoms.end(); atom++) {

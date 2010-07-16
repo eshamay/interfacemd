@@ -38,9 +38,9 @@ void Water::SetAtoms () {
   this->_h1 = (Atom *)NULL; this->_h2 = (Atom *)NULL;
 
   for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
-	if ((*it)->Name().find("O") != string::npos)
+	if ((*it)->Name().find("O") != std::string::npos)
 	  this->_o = *it;
-	if ((*it)->Name().find("H") != string::npos) {
+	if ((*it)->Name().find("H") != std::string::npos) {
 	  if (_h1 == (Atom *)NULL)
 		this->_h1 = *it;
 	  else

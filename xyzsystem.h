@@ -37,10 +37,10 @@ private:
 
 public:
 	// constructors
-	XYZSystem (std::string filepath, VecR size, std::string wannierpath = "");
+	XYZSystem (const std::string& filepath, const VecR& size, const std::string& wannierpath = "");
 	~XYZSystem ();
 
-	BondGraph graph;
+	bondgraph::BondGraph graph;
 
 	// Controller & Calculation methods
 	// Update the system to the next timestep
@@ -54,7 +54,7 @@ public:
 
 	const std::vector<VecR>& Wanniers () const { return _wanniers.Coords(); }
 
-	Atom_ptr_vec CovalentBonds (Atom const * const atom) const { return graph.BondedAtoms(atom, covalent); }
+	Atom_ptr_vec CovalentBonds (Atom const * const atom) const { return graph.BondedAtoms(atom, bondgraph::covalent); }
 	Atom_ptr_vec BondedAtoms (Atom const * const atom) const { return graph.BondedAtoms (atom); }
 
 	VecR SystemDipole ();	// calculate the total system dipole and return it

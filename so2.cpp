@@ -26,7 +26,7 @@ void SulfurDioxide::SetAtoms () {
   _o1 = (AtomPtr)NULL; _o2 = (AtomPtr)NULL;
 
   for (Atom_it it = this->begin(); it != this->end(); it++) {
-	if ((*it)->Name().find("O") != string::npos) {
+	if ((*it)->Name().find("O") != std::string::npos) {
 	  if (_o1 == NULL)
 		_o1 = *it;
 	  else

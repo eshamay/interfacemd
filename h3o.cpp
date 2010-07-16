@@ -4,7 +4,7 @@ int Hydronium::numHydroniums = 0;
 
 Hydronium::Hydronium () : Molecule()
 {
-	_name = "h3o";
+	this->Rename("h3o");
 	++numHydroniums;
 }
 

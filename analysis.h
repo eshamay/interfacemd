@@ -182,9 +182,9 @@ void Analyzer<T>::_CheckOutputFile () {
 void Analyzer<T>::_OutputStatus (const int timestep)
 {
   if (!(timestep % (this->output_freq * 10)))
-	cout << endl << timestep << "/" << this->timesteps << " ) ";
+	std::cout << std::endl << timestep << "/" << this->timesteps << " ) ";
   if (!(timestep % this->output_freq)) {
-	cout << "*";
+	std::cout << "*";
   }
 
   fflush (stdout);
@@ -226,6 +226,13 @@ void Analyzer<T>::SystemAnalysis ()
 	  throw;
 	}
 
+	// output the status of the analysis (to the screen or somewhere useful)
+	this->_OutputStatus (timestep);
+	// Output the actual data being collected to a file or something for processing later
+	if (!(timestep % (output_freq * 10)) && timestep)
+	  this->DataOutput(timestep);
+
+
 	try {
 	  // load the next timestep
 	  this->LoadNext();
@@ -233,14 +240,7 @@ void Analyzer<T>::SystemAnalysis ()
 	  std::cout << "Caught an exception while loading the next timestep after step " << timestep << "." << std::endl;
 	  throw;
 	}
-
-	// output the status of the analysis (to the screen or somewhere useful)
-	this->_OutputStatus (timestep);
-	// Output the actual data being collected to a file or something for processing later
-	if (!(timestep % (output_freq * 10)) && timestep)
-	  this->DataOutput(timestep);
   }
-
   // do a little work after the main analysis loop (normalization of a histogram? etc.)
   PostAnalysis ();
 

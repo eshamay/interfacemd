@@ -41,6 +41,7 @@ namespace md_utility {
 
 
 
+  // sorts a container of pairs by the first element of the pairs
   template <typename Iter>
 	void pair_sort_first (Iter first, Iter last) {
 	  typedef typename std::iterator_traits<Iter>::value_type val_t;

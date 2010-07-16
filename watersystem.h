@@ -113,7 +113,6 @@ class WaterSystem {
 	static Mol_ptr_vec	int_wats;		// interfacial waters, or just all the waters in the system depending on the function call
 
 	void OpenFile ();
-	void Debug (string msg) const;
 
 
 	static double AxisPosition (const Atom * a) {
@@ -131,7 +130,7 @@ class WaterSystem {
 	}
 
 	void LoadAll ();							// Loads all the molecules and atoms in the system into the containers
-	void SliceWaterCoordination (const BondGraph::coordination c);
+	void SliceWaterCoordination (const bondgraph::coordination c);
 
 	// predicate determines if an atom sits within a particular slice of the system
 	class AtomPositionInSlice : public std::binary_function<Atom *, Double_pair&, bool> {
@@ -194,14 +193,14 @@ class WaterSystem {
 	  return;
 	}
 	// Predicate to test if a water molecule has a given coordination (H-bonding pattern)
-	class WaterCoordination_p : public std::binary_function<Water *, BondGraph::coordination, bool> {
+	class WaterCoordination_p : public std::binary_function<Water *, bondgraph::coordination, bool> {
 	  public:
-		bool operator() (const Water * wat, const BondGraph::coordination c) const {
+		bool operator() (const Water * wat, const bondgraph::coordination c) const {
 		  return sys->graph.WaterCoordination(wat) == c;
 		}
 	};
 
-	void KeepWaterByCoordination (Mol_ptr_vec& mols, const BondGraph::coordination c) {
+	void KeepWaterByCoordination (Mol_ptr_vec& mols, const bondgraph::coordination c) {
 	  mols.erase(
 		  remove_if(mols.begin(), mols.end(), std::not1(std::bind2nd(WaterCoordination_p(), c))), mols.end());
 	  return;
