@@ -107,7 +107,7 @@ void NitricAcid::SetAtoms () {
 	int i = 0;
 	for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
 
-	  if ((*it)->Name().find("O") == std::string::npos) continue;
+	  if ((*it)->Element() != Atom::O) continue;
 
 	  std::vector<double> temp;
 	  // find the distance from each oxygen to the hydrogen
@@ -181,7 +181,7 @@ void Nitrate::SetAtoms () {
   // now set the 3 oxygens
   std::vector<Atom *> oxygens;
   for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
-	if ((*it)->Name() != "O") continue;
+	if ((*it)->Element() != Atom::O) continue;
 	oxygens.push_back (*it);
   }
 

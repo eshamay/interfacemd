@@ -111,7 +111,9 @@ class Molecule {
     // Operators
     AtomPtr operator[] (int index) const { return _atoms[index]; }	// retrieve an atom by array index
     AtomPtr operator[] (const std::string& atomname) const;			// retrieve a particular atom using its unique name/ID
+	AtomPtr operator[] (const Atom::Element_t elmt) const;
     AtomPtr GetAtom (const std::string& atomname) const;
+	AtomPtr GetAtom (const Atom::Element_t elmt) const;
     //int operator+= (Atom * newAtom);					// adds an atom into the molecule
 
     void AddAtom (AtomPtr const newAtom);					// same as the operator

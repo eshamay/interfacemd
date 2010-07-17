@@ -18,7 +18,7 @@ namespace bondgraph {
 
   BondGraph::PropertyMap<Atom *,BondGraph::VertexProperties>::Type BondGraph::v_atom = get(&VertexProperties::atom, _graph);
   BondGraph::PropertyMap<VecR,BondGraph::VertexProperties>::Type BondGraph::v_position = get(&VertexProperties::position, _graph);
-  BondGraph::PropertyMap<std::string,BondGraph::VertexProperties>::Type BondGraph::v_name = get(&VertexProperties::name, _graph);
+  BondGraph::PropertyMap<Atom::Element_t,BondGraph::VertexProperties>::Type BondGraph::v_elmt = get(&VertexProperties::element, _graph);
 
 
 
@@ -56,24 +56,13 @@ namespace bondgraph {
 	  v = boost::vertex(i, _graph);
 	  v_atom[v] = *it;
 	  v_position[v] = (*it)->Position();
-	  v_name[v] = (*it)->Name();
+	  v_elmt[v] = (*it)->Element();
 	  i++;
 	}
 
 	return;
   }
 
-  // some predicates
-  bool BondGraph::_NameCombo (const std::string name1, const std::string name2, const std::string test1, const std::string test2) const {
-	return 
-	  ((name1.find(test1) != std::string::npos) || (name2.find(test1) != std::string::npos))
-	  && 
-	  ((name1.find(test2) != std::string::npos || name2.find(test2) != std::string::npos));
-  }
-
-  bool BondGraph::_SameAtomName (const std::string name1, const std::string name2) const {
-	return (name1.find(name2) != std::string::npos) || (name2.find(name1) != std::string::npos);
-  }
 
   // Calculate the distance between each of the atoms and update the graph edge list with bonds between them
   // Edges/bonds should only exist between atoms that are bound in some fashion (h-hond, covalent, etc.)
@@ -82,10 +71,8 @@ namespace bondgraph {
 	// first clear out all the bonds from before
 	this->_ClearBonds();
 
-#ifdef ANGLE_CRITERIA
 	// now run through all atom combos and get their bondlengths in order to set their bondtypes
-	Atom *ai, *aj;
-#endif
+	AtomPtr ai, aj;
 
 	// this little for-loop bit runs through all atom-pair combinations once and find the bond-types between them
 	Vertex_it vi, vi_end, next_i;
@@ -100,15 +87,11 @@ namespace bondgraph {
 	  for (next_j = vj; vj != vj_end; vj = next_j) {
 		++next_j;
 
-#ifdef ANGLE_CRITERIA
 		ai = v_atom[*vi];
 		aj = v_atom[*vj];
-#endif
-		std::string ai_name = v_name[*vi];
-		std::string aj_name = v_name[*vj];
 
 		// Don't connect oxygens to oxygens, and hydrogen to hydrogen...etc.
-		if (_SameAtomName(ai_name, aj_name)) continue;
+		//if (Atom::SameElement(ai,aj)) continue;
 
 		// calculate the distance between the two atoms (taking into account the periodic boundaries)
 		double bondlength = MDSystem::Distance (v_position[*vi], v_position[*vj]).Magnitude();
@@ -118,7 +101,7 @@ namespace bondgraph {
 		//double bondlength = v_position[*vi].MinDistance(v_position[*vj], Atom::_size);
 
 		// first process O-H bonds
-		if (_NameCombo(ai_name,aj_name,"O","H"))
+		if (Atom::ElementCombo(ai,aj,Atom::O,Atom::H))
 		{
 		  // one type of bond is the O-H covalent
 		  if (bondlength <= OHBONDLENGTH) {
@@ -131,20 +114,20 @@ namespace bondgraph {
 			// This is done by looking at the angle formed from
 #ifdef ANGLE_CRITERIA
 			// o1 is covalently bound to h, and o2 is h-bound to h
-			Atom *o1 = (Atom *)NULL, *h = (Atom *)NULL, *o2 = (Atom *)NULL;	
+			AtomPtr o1 = (AtomPtr)NULL, h = (AtomPtr)NULL, o2 = (AtomPtr)NULL;	
 
-			if (ai_name.find("O") != std::string::npos) {		// ai is the O, and aj is the H
+			if (ai->Element() == Atom::O) {		// ai is the O, and aj is the H
 			  o2 = ai;
 			  h = aj;
 			}
-			else if (aj_name.find("O") != std::string::npos) {
-			  h = ai;
+			else if (aj->Element() == Atom::O) {
 			  o2 = aj;
+			  h = ai;
 			}
 
 			o1 = h->ParentMolecule()->GetAtom("O");
 
-			if (h == (Atom *)NULL || o1 == (Atom *)NULL || o2 == (Atom *)NULL) {
+			if (h == (AtomPtr)NULL || o1 == (AtomPtr)NULL || o2 == (AtomPtr)NULL) {
 			  //throw (MALFORMED_H2O);
 			  //printf ("Something wrong in assigning the atoms O and H in forming an H-bond - graph.cpp\n");
 			  //exit(1);
@@ -168,12 +151,12 @@ namespace bondgraph {
 
 
 		// process N-O bonds
-		else if (_NameCombo (ai_name,aj_name, "N", "O") && (bondlength < NOBONDLENGTH)) {
+		else if (Atom::ElementCombo (ai,aj, Atom::N, Atom::O) && (bondlength < NOBONDLENGTH)) {
 		  btype = covalent;
 		}
 
 		// now process SO2 molecules
-		else if (_NameCombo (ai_name,aj_name, "S", "O") && (bondlength < SOBONDLENGTH)) {
+		else if (Atom::ElementCombo (ai,aj, Atom::S, Atom::O) && (bondlength < SOBONDLENGTH)) {
 		  btype = covalent;
 		} // process S-O bonds
 
@@ -240,15 +223,14 @@ namespace bondgraph {
 	Edge e;
 
 	tie(e, b) = add_edge(vi, vj, EdgeProperties(bondlength, btype), _graph);
-
-	/*
+/*
 	   if (!b) {
-	   cout << "BondGraph::SetBond() - Tried to add a bond to an already-bonded atom pair" << endl;
+		 std::cout << "BondGraph::SetBond() - Tried to add a bond to an already-bonded atom pair" << std::endl;
 	   v_atom[vi]->Print();
 	   v_atom[vj]->Print();
 	   exit(1);
 	   }
-	 */
+	   */
 
 	return;
   }
@@ -270,38 +252,28 @@ namespace bondgraph {
   Atom_ptr_vec BondGraph::BondedAtoms
 	(Atom const * const ap,
 	 bondtype const btype,
-	 std::string const name)
+	 Atom::Element_t const elmt)
 	const {
 
 	  Atom_ptr_vec atoms;
 	  Vertex_it va = this->_FindVertex(ap);
+	  Edge e;
 
 	  Adj_it vi, vi_end, next;
 	  tie(vi, vi_end) = adjacent_vertices(*va, _graph);
 	  for (next = vi; vi != vi_end; vi = next) {
 		next++;
-		// check the bondtype criteria
-		if (btype != unbonded) {
-		  Edge e = edge(*va, *vi, _graph).first;
-
-		  if (
-			  (btype == covalent && b_type[e] == hbond)
-			  ||
-			  (btype != covalent && b_type[e] != btype))
-			continue;
+		// check the bondtype criteria - return only bonds that are specified by the bondtype argument, or if no argument is specified, return all hbond and covalent bonds.
+		e = edge(*va, *vi, _graph).first;
+		if (btype == b_type[e] || (btype == null && (b_type[e] == hbond || b_type[e] == covalent))) {
+		  if (!elmt || v_elmt[*vi] == elmt) {
+			atoms.push_back(v_atom[*vi]);
+		  }
 		}
-
-		// check the name criteria
-		if (name != "") {
-		  if (v_name[*vi].find(name) == std::string::npos)
-			continue;
-		}
-
-		atoms.push_back(v_atom[*vi]);
 	  }
 
 	  return (atoms);
-	}
+	}	// Bonded atoms
 
   int BondGraph::NumHBonds (Atom const * const ap) const {
 
@@ -330,10 +302,10 @@ namespace bondgraph {
 	  //int bonds = NumHBonds (ap);
 	  int bonds = NumHBonds (*atom);
 
-	  if ((*atom)->Name().find("H") != std::string::npos) {
+	  if ((*atom)->Element() == Atom::H) {
 		c += 10 * bonds;
 	  }
-	  if ((*atom)->Name().find("O") != std::string::npos) {
+	  if ((*atom)->Element() == Atom::O) {
 		c += bonds;
 	  }
 	}
@@ -356,7 +328,7 @@ namespace bondgraph {
 
 		Atom * H = _graph[*vi].atom;
 
-		if (H->Name().find("H") == std::string::npos) continue;
+		if (H->Element() != Atom::H) continue;
 
 		// here we check to see if it's bound to multiple atoms
 		Atom_ptr_vec covalent_atoms = this->BondedAtoms (H, covalent);
@@ -434,12 +406,12 @@ namespace bondgraph {
 	  return Distance(*vi,*vj);
 	}
 
-	distance_pair BondGraph::ClosestAtom (const MolPtr& mol, const std::string& name) const {
+	distance_pair BondGraph::ClosestAtom (const MolPtr& mol, const Atom::Element_t elmt) const {
 
 	  distance_vec distances;
 
 	  for (Atom_it it = mol->begin(); it != mol->end(); it++) {
-		distances.push_back (ClosestAtom (*it, name));
+		distances.push_back (ClosestAtom (*it, elmt));
 	  }
 
 	  md_utility::pair_sort_first(distances.begin(), distances.end());
@@ -448,7 +420,7 @@ namespace bondgraph {
 
 	}
 
-	distance_pair BondGraph::ClosestAtom (const AtomPtr atom, const std::string& name) const {
+	distance_pair BondGraph::ClosestAtom (const AtomPtr atom, const Atom::Element_t elmt) const {
 
 	  distance_vec distances;
 
@@ -463,16 +435,17 @@ namespace bondgraph {
 		// don't consider atoms within the same molecule, or an atom compared to itself
 		if (v_atom[*vt]->ParentMolecule() == v_atom[*vi]->ParentMolecule() || vt == vi) continue;
 
-		// do a name check so that only atoms with the (optional) given name are considered
-		if (name == "" || name == v_name[*vi])
+		// do an element check so that only atoms with the (optional) given element type are considered
+		if (!elmt || elmt == v_elmt[*vi]) { 
 		  distances.push_back (std::make_pair (Distance(*vt, *vi), v_atom[*vi]));
+		}
 	  }
 
 	  // sort all the distances to find the one closest
 	  md_utility::pair_sort_first(distances.begin(), distances.end());
 
 	  return distances[0];
-	}
+	}	// Closest Atom
 
 	BondGraph::Edge BondGraph::_GetBond (const Vertex& vi, const Vertex& vj) const {
 
@@ -489,7 +462,7 @@ namespace bondgraph {
 	  }
 
 	  return (e);
-	}
+	}	// _Get Bond
 
 	BondGraph::Edge BondGraph::_GetBond (Atom const * const a1, Atom const * const a2) const {
 

@@ -56,8 +56,7 @@ void XYZFile::LoadNext () {
 	if (!_initialized) {
 	  (*it)->Name (std::string(name));
 	  (*it)->ID (id++);
-	  (*it)->SetMass();
-	  (*it)->SetCharge();
+	  (*it)->SetAtomProperties();
 	}
 
 	// finally we set the position of each atom for the timestep

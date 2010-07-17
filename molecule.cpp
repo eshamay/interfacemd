@@ -56,22 +56,35 @@ return (_atoms.size());
 
 // get back the atom pointer to the atom with the given name
 AtomPtr Molecule::operator[] (const std::string& atomname) const {
-
   Atom_it it = std::find_if(_atoms.begin(), _atoms.end(), std::bind2nd(Atom::NameIs_p(), atomname));
-
   // error checking
   if (it == _atoms.end()) {
 	printf ("\nFrom Molecule::operator[]\n\"The atom named '%s' was not found in the following molecule:\"\n", atomname.c_str());
 	this->Print();
 	exit(1);
   }
-  // note here that the atom may not even exist in the molecule! If you try to operate on that pointer something awefully bad could happen. Before using this method for retrieving atoms, make sure that the calling function checks that it knows what to do with a NULL pointer
+  return(*it);
+}
 
+// get back the first atom pointer to the atom with the given element
+AtomPtr Molecule::operator[] (const Atom::Element_t elmt) const {
+  Atom_it it = std::find_if(_atoms.begin(), _atoms.end(), std::bind2nd(Atom::ElementIs_p(), elmt));
+  // error checking
+  if (it == _atoms.end()) {
+	printf ("\nFrom Molecule::operator[]\n\"The atom with the given element type was not found in the following molecule:\"\n");
+	this->Print();
+	exit(1);
+  }
   return(*it);
 }
 
 AtomPtr Molecule::GetAtom (const std::string& atomname) const {
   AtomPtr patom = (*this)[atomname];
+  return(patom);
+}
+
+AtomPtr Molecule::GetAtom (const Atom::Element_t elmt) const {
+  AtomPtr patom = (*this)[elmt];
   return(patom);
 }
 
@@ -100,7 +113,7 @@ void Molecule::AddHydrogen (AtomPtr const atom) {
 
   this->AddAtom (atom);
 
-  if (atom->Name().find("H") == std::string::npos) {
+  if (atom->Element() != Atom::H) {
 	std::cout << "Molecule::AddHydrogen() - Tried adding a hydrogen with a non-hydrogen atom:" << std::endl;
 	atom->Print();
 	exit(1);
@@ -126,7 +139,7 @@ void Molecule::RemoveAtom (AtomPtr const atom) {
   atom->MolID (-1);
 
   // if we happen to be taking off a hydrogen from a molecule... rename it accordingly
-  if (atom->Name() == "H") {
+  if (atom->Element() == Atom::H) {
 	if (_name == "hno3") this->Rename ("no3");
 	else if (_name == "h3o") this->Rename ("h2o");
 	else if (_name == "h2o") this->Rename ("oh");

@@ -51,24 +51,27 @@ namespace md_utility {
 
 
 
+  template <class U>
+	struct SameName : public std::binary_function<U,U,bool> {
+	  bool operator() (const U& left, const U& right) const {
+		return left->Name() == right->Name();
+	  }
+	};
 
   // predicate to test if the name of an atom or molecule (determined by the template parameter) is found in a vector of names
   template <class U>
-	class NameInList : public std::binary_function<U, std::vector<std::string>,bool> {
-	  public:
-		bool operator() (const U u, const std::vector<std::string>& names) const
-		{
-		  return names.end() != std::find(names.begin(), names.end(), u->Name());
-		}
+	struct NameInList : public std::binary_function<U, std::vector<std::string>,bool> {
+	  bool operator() (const U u, const std::vector<std::string>& names) const {
+		return names.end() != std::find(names.begin(), names.end(), u->Name());
+	  }
 	};
 
   // predicate to determine if the given atom or molecule has the given name
   template <class U>
-	class IsName : public std::binary_function<U, std::string, bool> {
-	  public:
-		bool operator() (const U u, const std::string name) const {
-		  return u->Name() == name; 
-		}
+	struct IsName : public std::binary_function<U, std::string, bool> {
+	  bool operator() (const U u, const std::string name) const {
+		return u->Name() == name; 
+	  }
 	};
 
   // returns an iterator to the first occurence of a member with the given name

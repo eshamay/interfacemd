@@ -35,7 +35,7 @@ namespace bondgraph {
   using namespace boost;
 
   // bond types
-  typedef enum {unbonded, hbond, covalent} bondtype;
+  typedef enum {unbonded, hbond, covalent, null} bondtype;
 
   // useful for tracking distances between atom pairs
   typedef std::pair<double, AtomPtr>	distance_pair;
@@ -73,7 +73,7 @@ namespace bondgraph {
 	  struct VertexProperties {
 		AtomPtr atom;
 		VecR position;
-		std::string name;
+		Atom::Element_t element;
 	  };
 
 	  // edges are bonds between atoms
@@ -105,7 +105,7 @@ namespace bondgraph {
 	  static PropertyMap<bondtype,EdgeProperties>::Type 		b_type;
 	  static PropertyMap<AtomPtr,VertexProperties>::Type 		v_atom;
 	  static PropertyMap<VecR,VertexProperties>::Type 			v_position;
-	  static PropertyMap<std::string,VertexProperties>::Type	v_name;
+	  static PropertyMap<Atom::Element_t,VertexProperties>::Type	v_elmt;
 
 	  void _ParseAtoms (const Atom_ptr_vec& atoms);
 	  void _ParseBonds ();
@@ -120,9 +120,6 @@ namespace bondgraph {
 	  void _RemoveBond (Atom const * const a1, Atom const * const a2);
 	  Vertex_it _FindVertex (Atom const * const ap) const;
 
-	  // predicate for testing if an atom pair is an OH
-	  bool _NameCombo (const std::string name1, const std::string name2, const std::string test1, const std::string test2) const;
-	  bool _SameAtomName (const std::string name1, const std::string name2) const;
 
 	  static Graph _graph;
 	  std::string	_sys_type;
@@ -140,15 +137,15 @@ namespace bondgraph {
 
 	  Atom_ptr_vec BondedAtoms (
 		  Atom const * const ap,
-		  bondtype const btype = unbonded,
-		  std::string const name = ""
+		  bondtype const btype = null,
+		  Atom::Element_t const elmt = Atom::NO_ELEMENT
 		  ) const;
 
 	  // Given a molecule, find the atom (of an optionally given name) that is closest to the molecule but not part of it.
-	  distance_pair ClosestAtom (const MolPtr& mol, const std::string& name = "") const;
+	  distance_pair ClosestAtom (const MolPtr& mol, const Atom::Element_t elmt = Atom::NO_ELEMENT) const;
 	  // Given an atom, find the atom closest to it (of an optionally given name) that is not part of the same molecule
 	  // returns a distance pair - [distance, AtomPtr]
-	  distance_pair ClosestAtom (const AtomPtr atom, const std::string& name = "") const;
+	  distance_pair ClosestAtom (const AtomPtr atom, const Atom::Element_t elmt = Atom::NO_ELEMENT) const;
 
 	  int NumHBonds (Atom const * const ap) const;
 	  int NumHBonds (Water const * const wat) const;

@@ -41,8 +41,7 @@ void AmberSystem::_ParseAtomInformation () {
   int i = 0;
   for (Atom_ptr_vec::iterator it = _atoms.begin(); it != _atoms.end(); it++) {
 	(*it)->Name (_topfile.AtomNames()[i]);
-	(*it)->SetMass();
-	(*it)->SetCharge();
+	(*it)->SetAtomProperties();
 	(*it)->ID (i);		// set the atom's index number - because we may need to access ordered/list info elsewhere
 	i++;
   }
