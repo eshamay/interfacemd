@@ -1,11 +1,11 @@
 #ifndef PDBFILE_H_
 #define PDBFILE_H_
 
+#include "mdsystem.h"
 #include <string>
 #include <cstring>
 #include <vector>
 #include <iostream>
-#include "mdsystem.h"
 
 using namespace std;
 
@@ -43,7 +43,7 @@ public:
 	int Last () { return _laststep; }
 	int Current () { return _currentstep; }
 
-	static void WritePDB (std::vector<Molecule *>& system);		// given a vector of molecules, this will print out a PDB file
+	static void WritePDB (Mol_ptr_vec& system);		// given a vector of molecules, this will print out a PDB file
 
 };
 

@@ -1,12 +1,12 @@
 #ifndef MDSYSTEM_H_
 #define MDSYSTEM_H_
 
-#include <vector>
-#include <math.h>
-#include <string>
 #include "vecr.h"
 #include "atom.h"
 #include "molecule.h"
+#include <math.h>
+#include <string>
+#include <vector>
 
 class MDSystem {
 

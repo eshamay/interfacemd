@@ -1,20 +1,20 @@
 #ifndef CRDFILE_H_
 #define CRDFILE_H_
 
-#include <stdio.h>
-#include <vector>
-#include <string>
 #include "vecr.h"
+#include <stdio.h>
+#include <string>
 
 class CRDFile {
 
 	FILE 			*_file;
-	std::vector<VecR>	_coords;	// atomic coordinates
+	VecR_vec		_coords;	// atomic coordinates
 	int 			_size;		// number of atoms in the system
 	VecR			_dims;		// Dimensions of the system (box size)
 	int 			_frame;		// The current frame (number of timesteps processed)
 
 	bool			_eof;		// end of file marker for the coord file
+	bool			_set;
 
 public:
 
@@ -26,15 +26,16 @@ public:
 	void LoadFirst ();
 	void LoadNext ();
 
+	VecR_it begin () const { return _coords.begin(); }
+	VecR_it end () const { return _coords.end(); }
 	// output functions
-	const std::vector<VecR>& Coords () const { return _coords; }
+	const VecR_vec& Coords () const { return _coords; }
 	int size () 	const { return _size; }
 	const VecR& Dims () const { return _dims; }
 
 	bool eof () 	const { return _eof; }
 	int Current () 	const { return _frame; }
 
-	VecR& operator[] (int index) { return _coords[index]; }
 };
 
 #endif

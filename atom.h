@@ -1,9 +1,9 @@
 #ifndef ATOM_H_
 #define ATOM_H_
 
-#include <string>
-#include <vector>
 #include "vecr.h"
+#include <vector>
+#include <string>
 
 class Molecule;
 typedef Molecule* MolPtr;
@@ -25,9 +25,9 @@ class Atom {
 
 	// constructors
 	Atom ();
-	Atom (std::string name, VecR position);
-	Atom (std::string name, VecR position, VecR force);
-	Atom (VecR position);
+	Atom (const std::string& name, const VecR& position);
+	Atom (const std::string& name, const VecR& position, const VecR& force);
+	Atom (const VecR& position);
 	Atom (const Atom& oldAtom);				// copy constructor for deep copies
 	~Atom ();
 
@@ -37,7 +37,7 @@ class Atom {
 	double operator[] (const coord index) const;	// get the atom's position by coordinate
 
 	// Input
-	void Name (const std::string name) { _name = name; }
+	void Name (const std::string& name) { _name = name; }
 
 	void Position (const VecR& position) { _position = position; }
 	void Position (double X, double Y, double Z) { _position.Set(X, Y, Z); }
@@ -51,17 +51,17 @@ class Atom {
 	void ID (int id) { _ID = id; }
 	//void Charge (double charge) { _charge = charge; }
 	void SetAtomProperties ();
-	void Residue (std::string residue) { _residue = residue; }
+	void Residue (const std::string& residue) { _residue = residue; }
 
 	// for setting the atom's position
-	void X (double val) { _position.X(val); }			
-	void Y (double val) { _position.Y(val); }
-	void Z (double val) { _position.Z(val); }
+	void X (double val) { _position[0] = val; }			
+	void Y (double val) { _position[1] = val; }
+	void Z (double val) { _position[2] = val; }
 
 	void MolID (const int mol) { _molid = mol; }	// sets the ID of the molecule containing this atom
-	void ParentMolecule (Molecule * mol) { _pmolecule = mol; }	// sets a pointer to the molecule that contains the atom
+	void ParentMolecule (const MolPtr mol) { _pmolecule = mol; }	// sets a pointer to the molecule that contains the atom
 
-	void Shift (VecR shift)			// shift the atom's position
+	void Shift (const VecR& shift)			// shift the atom's position
 	{
 	  _position += shift;
 	}

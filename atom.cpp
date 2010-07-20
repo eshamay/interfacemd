@@ -11,7 +11,7 @@ Atom::Atom () :
 	{
 }
 
-Atom::Atom (std::string name, VecR position, VecR force) :
+Atom::Atom (const std::string& name, const VecR& position, const VecR& force) :
 	_name(name),
 	_residue(""),
 	_ID(-1),
@@ -26,7 +26,7 @@ Atom::Atom (std::string name, VecR position, VecR force) :
 
 }
 
-Atom::Atom (std::string name, VecR position) :
+Atom::Atom (const std::string& name, const VecR& position) :
 	_name(name),
 	_residue(""),
 	_ID(-1),
@@ -56,7 +56,7 @@ Atom::Atom (const Atom& oldAtom) :
 	  this->SetAtomProperties ();
 }
 
-Atom::Atom (VecR position) :
+Atom::Atom (const VecR& position) :
 	_name(""),
 	_residue(""),
 	_ID(-1),

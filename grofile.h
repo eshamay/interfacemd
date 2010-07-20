@@ -1,11 +1,11 @@
 #ifndef GROFILE_H_
 #define GROFILE_H_
 
+#include "atom.h"
+#include "molecule.h"
 #include <string>
 #include <vector>
 #include <iostream>
-#include "atom.h"
-#include "molecule.h"
 
 class GROFile {
   public:

@@ -35,7 +35,7 @@ void Water::SetBondLengths () {
 void Water::SetAtoms () {
 
   // first let's grab pointers to the three atoms and give them reasonable names
-  this->_h1 = (Atom *)NULL; this->_h2 = (Atom *)NULL;
+  this->_h1 = (AtomPtr)NULL; this->_h2 = (AtomPtr)NULL;
 
   for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
 	if ((*it)->Element() == Atom::O)
@@ -83,9 +83,9 @@ VecR Water::Bisector () {
 
   this->SetAtoms();
 
-  VecR bisector = _oh1.Unit() + _oh2.Unit();
+  VecR bisector = _oh1.normalized() + _oh2.normalized();
 
-  return bisector.Unit();
+  return bisector.normalized();
 }
 
 /* The molecular axes are defined as follows:
@@ -99,18 +99,18 @@ void Water::SetMoritaAxes (const int Zbond) {
 
   // try one of the oh bonds as the z-axis
   if (Zbond == 1) {
-	_z = _oh1.Unit();
+	_z = _oh1.normalized();
 	// let's find the y-axis, as it's just the normal to the molecular plane
-	_y = (_oh1 % _oh2).Unit();
+	_y = (_oh1 % _oh2).normalized();
   }
   else if (Zbond == 2) {
-	_z = _oh2.Unit();
-	_y = (_oh2 % _oh1).Unit();
+	_z = _oh2.normalized();
+	_y = (_oh2 % _oh1).normalized();
   }
 
 
   // the X-axis is just the cross product of the other two
-  _x = (_y % _z).Unit();
+  _x = (_y % _z).normalized();
 
   return;
 }
@@ -128,10 +128,10 @@ void Water::SetOrderAxes () {
   _z = this->Bisector() * (-1.0);
 
   // the y-axis points perpendicular to the plane of the molecule. This can be found from the cross product of the two OH vectors
-  _y = (_oh1 % _oh2).Unit();
+  _y = (_oh1 % _oh2).normalized();
 
   // and the x-axis is easy
-  _x = (_y % _z).Unit();
+  _x = (_y % _z).normalized();
 
   return;
 }
@@ -259,7 +259,8 @@ void Water::CalcEulerAngles (const coord axis) {
 	sb*sa, 				-sb*ca,				cb
   };
 
-  EulerMatrix.Set (euler_matrix);
+  MatR t (euler_matrix);
+  EulerMatrix = t.transpose();
 
   return;
 }

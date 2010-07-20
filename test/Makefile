@@ -21,8 +21,12 @@ ROTATE			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o molecule-rotate.cpp
 ANGLEHISTO = $(WATERSYSTEM) angle-histogram.o
 
 TEST		= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) test.o
+FOO			= foo.o
 
 # $(CXX) $(CPPFLAGS) $(TEST) -lmkl_solver_ilp64 -lmkl_core -lmkl_lapack -lmkl_gnu_thread -lguide -lpthread -o test
+
+foo : $(FOO)
+	$(CXX) $(FOO) -o foo
 
 test : $(TEST) 
 	icpc $(TEST) $(LIBS) $(LAPACKLIBS) -o test

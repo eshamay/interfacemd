@@ -3,10 +3,10 @@
 
 #define CPLUSPLUS 1
 
-#include <iostream>
+#include "vecr.h"
 #include "xdrfile/xdrfile.h"
 #include "xdrfile/xdrfile_trr.h"
-#include "vecr.h"
+#include <iostream>
 
 class TRRFile {
 

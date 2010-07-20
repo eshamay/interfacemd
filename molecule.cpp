@@ -224,8 +224,7 @@ void Molecule::Rotate (VecR& origin, VecR& axis, double angle) {
 
   double nx = 0.0, ny = 0.0, nz = 0.0;
 
-  axis = axis.Unit();
-
+  axis.normalize();
 
   for (Atom_it atom = _atoms.begin(); atom != _atoms.end(); atom++) {
 	// first move all the atoms to the origin of the rotation axis
@@ -458,7 +457,8 @@ MatR const & Molecule::DCMToLab (const coord axis) {
   double rotation_data[9] = {	_x<X, _y<X, _z<X,
 	_x<Y, _y<Y, _z<Y,
 	_x<Z, _y<Z, _z<Z   };
-  this->_DCM.Set(rotation_data);
+  MatR t (rotation_data);
+  this->_DCM = t.transpose();
 
   return _DCM;
 }

@@ -2,10 +2,10 @@
 #define _DENSITY_H_
 
 #include "utility.h"
-#include "ambersystem.h"
-#include <vector>
 #include "vecr.h"
 #include "atom.h"
+#include "ambersystem.h"
+#include <vector>
 
 /******** Number density calculator *********/
 /* 	Given a set of atoms and start/end points on the 3 axes of a system, and the binsize, this will return a vector with the x, y and z axis number densities */

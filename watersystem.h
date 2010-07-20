@@ -9,13 +9,14 @@
 #include "gmxsystem.h"
 #endif
 
+#include "utility.h"
+
 #include <libconfig.h++>
 #include <cstdlib>
 #include <iomanip>
 #include <algorithm>
 #include <functional>
 
-#include "utility.h"
 
 
 // easy way to carry around lots of config-file parameters

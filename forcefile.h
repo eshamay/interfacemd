@@ -1,22 +1,22 @@
 #ifndef FORCEFILE_H_
 #define FORCEFILE_H_
 
+#include "vecr.h"
 #include <iostream>
 #include <stdio.h>
-#include <vector>
 #include <string>
-#include "vecr.h"
 
 
 class ForceFile {
 
 	FILE 			*_file;
-	std::vector<VecR>	_forces;	// atomic coordinates
+	VecR_vec	 	_forces;	// atomic coordinates
 	int 			_size;		// number of atoms in the system
 	int 			_frame;		// The current frame (number of timesteps processed)
 
 	bool			_eof;		// end of file marker for the force file
 	bool			_loaded;
+	bool 			_set;
 
 public:
 
@@ -28,15 +28,17 @@ public:
 	void LoadFirst ();
 	void LoadNext ();
 
+	VecR_it begin () const { return _forces.begin(); }
+	VecR_it end () const { return _forces.end(); }
+
 	// output functions
-	const std::vector<VecR>& Forces () const { return _forces; }
+	const VecR_vec& Forces () const { return _forces; }
 	int size () 	{ return _size; }
 
 	bool eof () 	{ return _eof; }
 	int Current () 	{ return _frame; }
 	bool Loaded ()	{ return _loaded; }
 
-	VecR& operator[] (int index) { return _forces[index]; }
 };
 
 #endif

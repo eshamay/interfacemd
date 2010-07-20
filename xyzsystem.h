@@ -52,7 +52,7 @@ public:
 
 	void SetReparseLimit (const int limit) { _reparse_limit = limit; }
 
-	const std::vector<VecR>& Wanniers () const { return _wanniers.Coords(); }
+	const VecR_vec& Wanniers () const { return _wanniers.Coords(); }
 
 	Atom_ptr_vec CovalentBonds (Atom const * const atom) const { return graph.BondedAtoms(atom, bondgraph::covalent); }
 	Atom_ptr_vec BondedAtoms (Atom const * const atom) const { return graph.BondedAtoms (atom); }

@@ -43,7 +43,7 @@ void XYZSystem::_ParseMolecules () {
   // we also have to go through and clear out some info on all the atoms
   // like the parentmolecules and names
   for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
-	(*it)->ParentMolecule ( (Molecule *)NULL );
+	(*it)->ParentMolecule ( (MolPtr)NULL );
 	(*it)->Residue ("");
 	(*it)->MolID (-1);
   }
@@ -172,7 +172,7 @@ void XYZSystem::LoadNext () {
 
 
   try {
-	if (_reparse_step++ == _reparse_limit) {
+	if (++_reparse_step == _reparse_limit) {
 	  this->_ParseMolecules();
 	  _reparse_step = 0;
 	}
@@ -194,16 +194,13 @@ void XYZSystem::LoadNext () {
 VecR XYZSystem::SystemDipole () {
 
   VecR dipole;
-  //VecR center = Atom::Size() * 0.5;	// center of the system
 
   for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
-	//VecR ri = center.MinVector(_atoms[i]->Position(), Atom::Size());
 	VecR ri = (*it)->Position();
 	dipole += ri * (*it)->Charge();
   }
 
   for (VecR_it it = _wanniers.begin(); it != _wanniers.end(); it++) {
-	//VecR ri = center.MinVector(_wanniers[i], Atom::Size());
 	dipole -= (*it) * 2.0;
   }
 

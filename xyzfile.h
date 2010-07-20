@@ -1,16 +1,16 @@
 #ifndef XYZFILE_H_
 #define XYZFILE_H_
 
+#include "vecr.h"
+#include "atom.h"
 #include <vector>
 #include <string>
 #include <stdlib.h>
-#include "atom.h"
-#include "vecr.h"
 
 
 class XYZFile {
 
-	std::vector<AtomPtr> _atoms;		// The listing of the atoms in the file
+	Atom_ptr_vec  _atoms;		// The listing of the atoms in the file
 
 	FILE *_file;				// the XYZ file listing all the atom coordinates
 	std::string _path;

@@ -1,9 +1,10 @@
 #ifndef H2O_H_
 #define H2O_H_
 
-#include "molecule.h"
-
 #include "matrixr.h"
+#include "molecule.h"
+#include <vector>
+
 
 // A water class to add a few functions for dealing with water molecules specifically.
 class Water: public Molecule {

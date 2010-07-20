@@ -1,19 +1,19 @@
 #ifndef MOLECULE_H_
 #define MOLECULE_H_
 
-#include <string>
-#include <vector>
-#include <math.h>
 #include "vecr.h"
 #include "matrixr.h"
 #include "atom.h"
 #include "wannier.h"
+#include <string>
+#include <math.h>
+#include <vector>
 
 class Molecule {
 
   protected:
-    Atom_ptr_vec 		_atoms;				// the list of the atoms in the molecule
-    std::vector<VecR>	_wanniers;			// the wannier centers in the molecule
+    Atom_ptr_vec	_atoms;				// the list of the atoms in the molecule
+    VecR_vec		_wanniers;			// the wannier centers in the molecule
     VecR			_dipole;			// the molecular dipole
     VecR			_x, _y, _z;			// molecular frame axes
 
@@ -54,17 +54,13 @@ class Molecule {
     void clear ();							// Erases the molecule data
     VecR UpdateCenterOfMass ();				// recalculates the center of mass when coordinates are updated
 
-    //void Invert (VecR origin);							// Inversion of the molecule through a point in space
-    //void Rotate (VecR origin, VecR axis, double angle);	// rotate the molecule about an axis
-    //void Reflect (VecR base, VecR normal);				// reflect each atom through a plane
-
     // Output Functions
     VecR CenterOfMass () const		{ return _centerofmass; }
     VecR Position () const			{ return _centerofmass; }
 
     /* Dealing with atoms in the molecule */
     Atom_ptr_vec Atoms () const			{ return _atoms; }
-    AtomPtr Atoms (int index) const		{ return _atoms[index]; }
+    //AtomPtr Atoms (int index) const		{ return _atoms[index]; }
 
     Atom_it begin() const {
       return _atoms.begin();
@@ -109,7 +105,7 @@ class Molecule {
     virtual VecR MolecularAxis () { return _z; }
 
     // Operators
-    AtomPtr operator[] (int index) const { return _atoms[index]; }	// retrieve an atom by array index
+    AtomPtr operator[] (const int index) const { return _atoms[index]; }	// retrieve an atom by array index
     AtomPtr operator[] (const std::string& atomname) const;			// retrieve a particular atom using its unique name/ID
 	AtomPtr operator[] (const Atom::Element_t elmt) const;
     AtomPtr GetAtom (const std::string& atomname) const;

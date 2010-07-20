@@ -1,9 +1,9 @@
 /* These routines were originally written for analysis of nitric acid, with the .xyz file format specifically used. */
+#include "watersystem.h"
 #include <iostream>
 #include <string>
 #include <math.h>
 #include <stdio.h>
-#include "watersystem.h"
 
 
 #define NO_BOND	2.0

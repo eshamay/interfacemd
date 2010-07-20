@@ -1,10 +1,10 @@
 #ifndef HNO3_H_
 #define HNO3_H_
 
-#include <iostream>
 #include "vecr.h"
 #include "molecule.h"
 #include "mdsystem.h"
+#include <iostream>
 
 
 // A nitric acid class to add a few functions for dealing with nitric acid molecules specifically.
@@ -15,7 +15,7 @@ protected:
 	VecR _molPlane;
 	VecR _no2dipole;
 
-	std::vector<VecR> _no2wanniers;
+	VecR_vec _no2wanniers;
 
 	bool _set;								// to let us know if the atom have been set in the molecule
 	Atom *_oh, *_n, *_h, *_o1, *_o2;		// Pointers to the various atoms in the nitric acid. These are static for no
@@ -30,8 +30,8 @@ public:
 	bool CalcNO2Dipole ();	// calculate the nitric acid dipole
 
 	void SetAtoms ();
-	Atom * GetOH () const { return _oh; }
-	Atom * GetH () const { return _h; }
+	AtomPtr GetOH () const { return _oh; }
+	AtomPtr GetH () const { return _h; }
 
 	// Functions for analysis
 	VecR MolecularPlaneVector ();
@@ -40,7 +40,7 @@ public:
 	VecR NO2Bisector ();
 	void PrintNO2 () const;
 	VecR& OH () { return _voh; }
-	const std::vector<VecR>& NO2Wanniers () const { return _no2wanniers; }
+	const VecR_vec& NO2Wanniers () const { return _no2wanniers; }
 
 };
 
@@ -50,7 +50,7 @@ protected:
 	VecR _molPlane;
 
 	bool _set;								// to let us know if the atom have been set in the molecule
-	Atom *_n, *_o1, *_o2, *_o3;		// Pointers to the various atoms in the nitric acid. These are static for no
+	AtomPtr _n, _o1, _o2, _o3;		// Pointers to the various atoms in the nitric acid. These are static for no
 											// meaning that they're set at the the first formation of the molecule
 
 	VecR	_no1, _no2, _no3;		// vectors of the N-O bonds

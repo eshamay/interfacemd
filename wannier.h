@@ -1,9 +1,9 @@
 #ifndef WANNIER_H_
 #define WANNIER_H_
-#include <stdio.h>
-#include <vector>
-#include <string>
+
 #include "vecr.h"
+#include <stdio.h>
+#include <string>
 
 #define WANNIER_BOND	0.7
 
@@ -41,7 +41,6 @@ public:
 	bool Loaded ()	const { return _loaded; }	// find out if the file is loaded/exists
 	int Current () 	const { return _frame; }
 
-	VecR& operator[] (int index) { return _coords[index]; }
 };
 
 #endif

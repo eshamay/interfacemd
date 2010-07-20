@@ -37,9 +37,6 @@ public:
 
 	void PrintCRDFile () const;						// to output a frame of the system in .crd format
 
-	VecR& Forces (int index)	{ return _forces[index]; }
-	VecR& Coords (int index)	{ return _coords[index]; }
-
 };
 
 #endif

@@ -53,11 +53,22 @@ void AmberSystem::_ParseAtomInformation () {
 void AmberSystem::_ParseAtomVectors () {
 
   int i = 0;
+  Atom_it atom_i = _atoms.begin();
+  VecR_it coord_i = _coords.begin();
+  VecR_it force_i = _forces.begin();
+  while (atom_i != _atoms.end()) {
+	(*atom_i)->Position (*coord_i);
+	(*atom_i)->Force (*force_i);
+	++atom_i; ++coord_i; ++force_i;
+  }
+
+  /*
   for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
 	(*it)->Position ( _coords[i] );
 	if (_forces.Loaded()) (*it)->Force ( _forces[i] );
 	i++;
   }
+  */
 
   return;
 }

@@ -29,9 +29,8 @@ VecR NitricAcid::MolecularPlaneVector () {
   VecR oo2 = _o2->Position() - _oh->Position();
 
   // lastly we find the normal vector to the molecular plane
-  _molPlane = oo1 % oo2;
+  return (oo1 % oo2).normalized();
 
-  return(_molPlane.Unit());
 }
 
 // specialized routine for calculating the dipole of a nitric acid's NO2 group
@@ -144,7 +143,7 @@ VecR NitricAcid::NO2Bisector () {
   VecR no1 = _o1->Position() - _n->Position();
   VecR no2 = _o2->Position() - _n->Position();
 
-  VecR bisector = no1.Unit() + no2.Unit();
+  VecR bisector = no1.normalized() + no2.normalized();
 
   return (bisector);
 }

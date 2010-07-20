@@ -1,11 +1,11 @@
 #ifndef BOXFILLER_H_
 #define BOXFILLER_H_
 
+#include "pdbfile.h"
+#include "vecr.h"
 #include <vector>
 #include <iostream>
 #include <math.h>
-#include "pdbfile.h"
-#include "vecr.h"
 
 #define		PARAMS		string(argv[1])
 #define		PDBFILE		string(argv[2])

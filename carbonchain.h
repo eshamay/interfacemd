@@ -6,7 +6,7 @@
 class CarbonChain : public Molecule {
 
   protected:
-	std::vector<Atom *> _carbons;			/* An ordered listing of all the carbons in
+	Atom_ptr_vec _carbons;			/* An ordered listing of all the carbons in
 						   the molecule */
   public:
     CarbonChain (int numCarbons);			// a default constructor
@@ -20,7 +20,7 @@ class CarbonChain : public Molecule {
     void SetCarbons ();
 
     Atom_ptr_vec& Carbons () { return (_carbons); }
-    Atom * Carbon (int index) { return (_carbons[index]); }
+    AtomPtr Carbon (int index) { return (_carbons[index]); }
 
     VecR Vector_CoM_To_End ();
 };

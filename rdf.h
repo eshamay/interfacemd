@@ -1,10 +1,10 @@
 #ifndef __RDF_H_
 #define __RDF_H_
 
-#include <map>
-#include <utility>
 #include "utility.h"
 #include "atom.h"
+#include <map>
+#include <utility>
 
 typedef std::vector<double> Histogram_t;
 typedef std::pair<std::string, std::string> NamePair;
