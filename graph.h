@@ -58,6 +58,7 @@ namespace bondgraph {
 
 
 
+
   class BondGraph {
 
 	private:
@@ -122,7 +123,7 @@ namespace bondgraph {
 
 
 	  static Graph _graph;
-	  std::string	_sys_type;
+	  std::string _sys_type;
 
 	public:
 
@@ -169,6 +170,12 @@ namespace bondgraph {
 	  };
 
 
+	  class VertexIsAtom_pred : std::binary_function<Vertex_it,AtomPtr,bool> {
+		public:
+		  bool operator() (const Vertex_it it, const AtomPtr atom) const {
+			return *it == atom;
+		  }
+	  };
 
 
 
@@ -182,6 +189,6 @@ namespace bondgraph {
   };	// BondGraph
 
 
-}
+}	// namespace bondgraph
 
 #endif

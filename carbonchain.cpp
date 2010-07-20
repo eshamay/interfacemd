@@ -2,7 +2,7 @@
 
 int CarbonChain::numCarbonChains = 0;
 
-CarbonChain::CarbonChain (int numCarbons) 
+CarbonChain::CarbonChain (const int numCarbons) 
   : Molecule (), _carbons(Atom_ptr_vec(numCarbons, (AtomPtr)NULL))
 {
   ++numCarbonChains;
@@ -31,17 +31,18 @@ VecR CarbonChain::Vector_CoM_To_End () {
 	return (axis);
 }
 
-/*
-// sets the _carbons by name for easier access
-void CarbonChain::SetCarbons () {
+
+// Runs through the list of atoms in the system and returns all the carbons
+Atom_ptr_vec Carbons() {
+
+  Atom_ptr_vec carbons;
 
   for (Atom_it ai = this->begin(); ai != this->end(); ai++)
   {
-    std::string name = (*ai)->Name();
-    if (name[0] == "C" && std::isdigit(name[1]))
-      _carbons[FindDigits(name)] = *ai;
+    // check if the atom has a name starting with 'C', and then followed by numbers
+    if ((*ai)->Element() == Atom::C)
+      carbons.push_back (*ai);
   }
 
-  return;
+  return carbons;
 }
-*/

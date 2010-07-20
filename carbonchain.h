@@ -9,7 +9,7 @@ class CarbonChain : public Molecule {
 	Atom_ptr_vec _carbons;			/* An ordered listing of all the carbons in
 						   the molecule */
   public:
-    CarbonChain (int numCarbons);			// a default constructor
+    CarbonChain (const int numCarbons);			// a default constructor
     virtual ~CarbonChain ();
     CarbonChain (const Molecule& molecule);		// copy constructor for casting from a molecule
 
@@ -19,8 +19,10 @@ class CarbonChain : public Molecule {
     virtual void SetAtoms () = 0;
     void SetCarbons ();
 
-    Atom_ptr_vec& Carbons () { return (_carbons); }
-    AtomPtr Carbon (int index) { return (_carbons[index]); }
+	Atom_it carbons_begin () const { return _carbons.begin(); }
+	Atom_it carbons_end () const { return _carbons.end(); }
+    Atom_ptr_vec& Carbons () const { return (_carbons); }
+    AtomPtr Carbon (const int index) const { return (_carbons[index]); }
 
     VecR Vector_CoM_To_End ();
 };

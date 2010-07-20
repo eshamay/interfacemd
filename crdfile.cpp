@@ -1,12 +1,7 @@
 #include "crdfile.h"
 
 CRDFile::CRDFile (std::string const crdpath, int const c_size) :
-  _file((FILE *)NULL),
-  _size(c_size),
-  _dims(),
-  _frame(0),
-  _eof(true),
-  _set(false)
+  _file((FILE *)NULL), _size(c_size), _dims(), _frame(0), _eof(true), _set(false)
 {
 
   // first load up the file given the path
@@ -16,7 +11,7 @@ CRDFile::CRDFile (std::string const crdpath, int const c_size) :
 	exit(1);
   }
 
-  _eof = true;
+  _eof = false;
 
   char str[1000];
   fgets(str, 1000, _file);		// first frame's header
@@ -51,14 +46,14 @@ void CRDFile::LoadNext () {
   fscanf (_file, " %lf %lf %lf", &x, &y, &z);
   _dims.Set(x,y,z);
 
-  _frame++;
+  ++_frame;
 
   return;
 }
+
 
 void CRDFile::LoadFirst() {
   rewind (_file);
   _set = false;
   this->LoadNext();
-  _frame = 1;
 }

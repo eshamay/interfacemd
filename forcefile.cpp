@@ -1,11 +1,7 @@
 #include "forcefile.h"
 
 ForceFile::ForceFile (std::string const forcepath, int const c_size) :
-  _file((FILE *)NULL),
-  _size(c_size),
-  _eof(true),
-  _loaded(false),
-  _set(false)
+  _file((FILE *)NULL), _size(c_size), _eof(true), _loaded(false), _set(false)
 {
 
   // first load up the file given the path
@@ -46,7 +42,7 @@ void ForceFile::LoadNext () {
 	}
   }
 
-  _frame++;
+  ++_frame;
 
   return;
 }
@@ -55,5 +51,4 @@ void ForceFile::LoadFirst() {
   rewind (_file);
   _set = false;
   this->LoadNext();
-  _frame = 1;
 }

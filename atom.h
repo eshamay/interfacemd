@@ -40,15 +40,15 @@ class Atom {
 	void Name (const std::string& name) { _name = name; }
 
 	void Position (const VecR& position) { _position = position; }
-	void Position (double X, double Y, double Z) { _position.Set(X, Y, Z); }
+	void Position (const double X, const double Y, const double Z) { _position.Set(X, Y, Z); }
 
 	void Position (coord const axis, double const value) { _position.Set (axis, value); }
 
 	void Force (const VecR& force) { _force = force; }
-	void Force (double X, double Y, double Z) { _force.Set(X, Y, Z); }
+	void Force (const double X, const double Y, const double Z) { _force.Set(X, Y, Z); }
 	void Force (coord const axis, double const value) { _force.Set (axis, value); }
 
-	void ID (int id) { _ID = id; }
+	void ID (const int id) { _ID = id; }
 	//void Charge (double charge) { _charge = charge; }
 	void SetAtomProperties ();
 	void Residue (const std::string& residue) { _residue = residue; }
@@ -62,25 +62,23 @@ class Atom {
 	void ParentMolecule (const MolPtr mol) { _pmolecule = mol; }	// sets a pointer to the molecule that contains the atom
 
 	void Shift (const VecR& shift)			// shift the atom's position
-	{
-	  _position += shift;
-	}
+	{ _position += shift; }
 
 	// Output
-	std::string Name () const 	{ return _name; }
+	const std::string& Name () const 	{ return _name; }
 	Element_t Element () const { return _element; }
 	double Mass () const 	{ return _mass; }
 	double Charge () const 	{ return _charge; }
 	int ID () const 		{ return _ID; }
-	std::string Residue () const { return _residue; }
+	const std::string& Residue () const { return _residue; }
 
 	const VecR& Position () const	{ return _position; }
 
 	const VecR& Force () const		{ return _force; }
 
-	double X () const 		{ return _position[x]; }
-	double Y () const		{ return _position[y]; }
-	double Z () const 		{ return _position[z]; }
+	double X () const 		{ return _position.x(); }
+	double Y () const		{ return _position.y(); }
+	double Z () const 		{ return _position.z(); }
 	int MolID () const		{ return _molid; }
 	MolPtr ParentMolecule () const { return _pmolecule; }
 	void Print () const;
@@ -99,7 +97,7 @@ class Atom {
 		}
 	};
 
-	class AtomPtr_sort : public std::binary_function<AtomPtr,AtomPtr,bool> {
+	class AtomPtrID_sort : public std::binary_function<AtomPtr,AtomPtr,bool> {
 	  public:
 		bool operator() (AtomPtr const &left, AtomPtr const &right) { 
 		  return left->ID() < right->ID();
@@ -126,7 +124,6 @@ class Atom {
 	std::string _name, 	// human-readable identifier
 	  _residue; 		// name of the parent-molecule 
 
-	Element_t _element;			// the actual element based on the atom name - always upper-case and max length of two letters
 
 	int    _ID;	// some numerical identifier in case the atom is in an ordered list
 	int	   _molid;			   // the molecule that contains this atom
@@ -135,6 +132,7 @@ class Atom {
 
 	double _mass,
 		   _charge;
+	Element_t _element;			// the actual element based on the atom name - always upper-case and max length of two letters
 
 	VecR _position;				// Particle position
 	VecR _force; // the external force on the atom at any given point in time

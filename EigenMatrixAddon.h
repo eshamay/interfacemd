@@ -26,7 +26,7 @@ inline double operator< (const OtherDerived& input) const		// Find the cos(angle
 
 // Input & vector manipulation
 inline void Set (const int axis, const data_t val) { this->operator[](axis) = val; }
-inline void	Set (int const row, int const col, double const val) { this->operator()(row,col) = val; }
+//inline void	Set (int const row, int const col, double const val) { this->operator()(row,col) = val; }
 inline void Set (const double X, const double Y, const double Z) { *this << X,Y,Z; }
 
 // Output
@@ -41,7 +41,7 @@ inline void Print () const
 }
 
 template<typename OtherDerived>
-OtherDerived Transpose() const { return this->transpose(); }
+OtherDerived& Transpose() const { return this->transpose(); }
 
 #endif
 

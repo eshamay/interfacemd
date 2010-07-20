@@ -33,11 +33,11 @@ public:
 
 	// output functions
 	const VecR_vec& Forces () const { return _forces; }
-	int size () 	{ return _size; }
+	int size () 	const { return _size; }
 
-	bool eof () 	{ return _eof; }
-	int Current () 	{ return _frame; }
-	bool Loaded ()	{ return _loaded; }
+	bool eof () 	const { return _eof; }
+	int Current () 	const { return _frame; }
+	bool Loaded ()	const { return _loaded; }
 
 };
 

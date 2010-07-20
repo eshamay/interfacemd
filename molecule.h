@@ -48,6 +48,7 @@ class Molecule {
 
     bool Set () { _set = true; return (_set); }
     bool Unset () { _set = false; return (_set); }
+	virtual void SetAtoms ();
 
     // Controls
     void Shift (VecR& shift);				// Shift the origin of the entire molecule

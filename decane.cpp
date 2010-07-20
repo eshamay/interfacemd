@@ -3,9 +3,9 @@
 int Decane::numDecanes = 0;
 
 Decane::Decane () 
-  : CarbonChain (10)
+  : Alkane (10)
 {
-  _name = "dec";
+  this->Rename("dec");
   ++numDecanes;
 }
 
