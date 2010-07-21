@@ -14,12 +14,17 @@ Decane::~Decane () {
 }
 
 Decane::Decane (const Molecule& molecule) 
-  : CarbonChain(molecule)
+  : Alkane(molecule)
 {
   ++numDecanes;
 }
 
 void Decane::SetAtoms () {
+
+  // Runs through the list of atoms in the system and returns all the carbons
+  md_utility::copy_if (this->begin(), this->end(), std::back_inserter(_carbons), std::bind2nd(Atom::ElementIs_p(), Atom::C));
+
+  /*
   // Go through and assign each carbon to the slot in the ordered list
   _carbons[0] = this->GetAtom("C1");
   _carbons[1] = this->GetAtom("C2");
@@ -31,6 +36,7 @@ void Decane::SetAtoms () {
   _carbons[7] = this->GetAtom("C8");
   _carbons[8] = this->GetAtom("C9");
   _carbons[9] = this->GetAtom("C10");
+  */
 	
   return;
 }

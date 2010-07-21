@@ -3,14 +3,6 @@
 namespace bondgraph {
   BondGraph::Graph BondGraph::_graph (0);
 
-  const double BondGraph::OHBONDLENGTH = 1.1;				// used to be 1.1
-  const double BondGraph::HBONDLENGTH  = 2.46;				// used to be 2.46
-  const double BondGraph::HBONDANGLECOS	= cos(30.0*M_PI/180.0);		// bonding angle has to be bigger than this cos (i.e. smaller than ~30 degrees
-  const double BondGraph::NOBONDLENGTH = 2.0;
-  const double BondGraph::NHBONDLENGTH = 1.3;		// uhmm... check this?
-  const double BondGraph::SOBONDLENGTH = 1.8;
-
-
 
   // property map definitions
   BondGraph::PropertyMap<double,BondGraph::EdgeProperties>::Type BondGraph::b_length = get(&EdgeProperties::distance, _graph);
@@ -232,9 +224,8 @@ namespace bondgraph {
 	return;
   }
 
-  BondGraph::Vertex_it BondGraph::_FindVertex (Atom const * const atom) const {
+  BondGraph::Vertex_it BondGraph::_FindVertex (const AtomPtr atom) const {
 
-	/*
 	   Vertex_it vi, vi_end, next;
 	   tie(vi, vi_end) = vertices(_graph);
 	   for (next = vi; vi != vi_end; vi = next) {
@@ -243,16 +234,17 @@ namespace bondgraph {
 	   break;
 	   }
 
-	 */
-	Vertex_it vi, vi_end, v_atom;
-	tie(vi, vi_end) = vertices(_graph);
-	v_atom = std::find_if (vi, vi_end, std::bind2nd(VertexIsAtom_pred(), atom));
+	//Vertex_pair vp = vertices(_graph);
+	//Vertex_it vi, vi_end, atom_vt;
+	// find the vertex
+	//Vertex_it atom_vt = std::find_if (vp.first, vp.second, std::bind2nd(VertexIsAtom_pred(), atom));
+	//tie(vi, vi_end) = vertices(_graph);
 
-	return (v_atom);
+	return (vi);
   }
 
   // returns a list of the atoms bonded to the given atom
-  Atom_ptr_vec BondGraph::BondedAtoms (Atom const * const ap, bondtype const btype, Atom::Element_t const elmt) const 
+  Atom_ptr_vec BondGraph::BondedAtoms (const AtomPtr ap, bondtype const btype, Atom::Element_t const elmt) const 
   {
 
 	Atom_ptr_vec atoms;
@@ -275,7 +267,7 @@ namespace bondgraph {
 	return (atoms);
   }	// Bonded atoms
 
-  int BondGraph::NumHBonds (Atom const * const ap) const {
+  int BondGraph::NumHBonds (const AtomPtr ap) const {
 
 	return (this->BondedAtoms(ap, hbond).size());
   }
@@ -391,7 +383,7 @@ namespace bondgraph {
 	return (b_length[e]);
   }
 
-  double BondGraph::Distance (Atom const * const a1, Atom const * const a2) const {
+  double BondGraph::Distance (const AtomPtr a1, const AtomPtr a2) const {
 
 	Vertex_it vi, vj;
 	vi = this->_FindVertex (a1);
@@ -459,7 +451,7 @@ namespace bondgraph {
 	return (e);
   }	// _Get Bond
 
-  BondGraph::Edge BondGraph::_GetBond (Atom const * const a1, Atom const * const a2) const {
+  BondGraph::Edge BondGraph::_GetBond (const AtomPtr a1, const AtomPtr a2) const {
 
 	Vertex_it v1 = this->_FindVertex(a1);
 	Vertex_it v2 = this->_FindVertex(a2);
@@ -476,7 +468,7 @@ namespace bondgraph {
 	return;
   }
 
-  void BondGraph::_RemoveBond (Atom const * const a1, Atom const * const a2) {
+  void BondGraph::_RemoveBond (const AtomPtr a1, const AtomPtr a2) {
 
 	Edge e = this->_GetBond (a1, a2);
 	remove_edge(e, _graph);

@@ -34,6 +34,15 @@ namespace bondgraph {
 
   using namespace boost;
 
+  // various bondlengths to be used
+  const double OHBONDLENGTH = 1.2;				// used to be 1.1
+  const double HBONDLENGTH  = 2.46;				// used to be 2.46
+  const double HBONDANGLECOS	= cos(30.0*M_PI/180.0);		// bonding angle has to be bigger than this cos (i.e. smaller than ~30 degrees
+  const double NOBONDLENGTH = 2.0;
+  const double NHBONDLENGTH = 1.3;		// uhmm... check this?
+  const double SOBONDLENGTH = 1.8;
+
+
   // bond types
   typedef enum {unbonded, hbond, covalent, null} bondtype;
 
@@ -62,13 +71,6 @@ namespace bondgraph {
   class BondGraph {
 
 	private:
-	  static const double OHBONDLENGTH;
-	  static const double HBONDLENGTH;
-	  static const double HBONDANGLECOS;
-	  static const double NOBONDLENGTH;
-	  static const double NHBONDLENGTH;
-	  static const double SOBONDLENGTH;
-
 
 	  // Vertices are atoms
 	  struct VertexProperties {
@@ -90,6 +92,7 @@ namespace bondgraph {
 	  typedef adjacency_list<listS, listS, undirectedS, VertexProperties, EdgeProperties> Graph;
 	  typedef graph_traits<Graph>::vertex_descriptor Vertex;
 	  typedef graph_traits<Graph>::vertex_iterator Vertex_it;
+	  typedef std::pair<Vertex_it, Vertex_it> Vertex_pair;
 	  typedef graph_traits<Graph>::edge_descriptor Edge;
 	  typedef graph_traits<Graph>::edge_iterator Edge_it;
 	  typedef graph_traits<Graph>::adjacency_iterator Adj_it;
@@ -116,10 +119,10 @@ namespace bondgraph {
 
 	  void _SetBond (const Vertex& vi, const Vertex& vj, const double bondlength, const bondtype btype);
 	  Edge _GetBond (const Vertex& vi, const Vertex& vj) const;
-	  Edge _GetBond (Atom const * const a1, Atom const * const a2) const;
+	  Edge _GetBond (const AtomPtr a1, const AtomPtr a2) const;
 	  void _RemoveBond (const Vertex& vi, const Vertex& vj);
-	  void _RemoveBond (Atom const * const a1, Atom const * const a2);
-	  Vertex_it _FindVertex (Atom const * const ap) const;
+	  void _RemoveBond (const AtomPtr a1, const AtomPtr a2);
+	  Vertex_it _FindVertex (const AtomPtr atom) const;
 
 
 	  static Graph _graph;
@@ -137,7 +140,7 @@ namespace bondgraph {
 	  void UpdateGraph (const Atom_ptr_vec& atoms);
 
 	  Atom_ptr_vec BondedAtoms (
-		  Atom const * const ap,
+		  const AtomPtr ap,
 		  bondtype const btype = null,
 		  Atom::Element_t const elmt = Atom::NO_ELEMENT
 		  ) const;
@@ -148,14 +151,14 @@ namespace bondgraph {
 	  // returns a distance pair - [distance, AtomPtr]
 	  distance_pair ClosestAtom (const AtomPtr atom, const Atom::Element_t elmt = Atom::NO_ELEMENT) const;
 
-	  int NumHBonds (Atom const * const ap) const;
+	  int NumHBonds (const AtomPtr ap) const;
 	  int NumHBonds (Water const * const wat) const;
 	  coordination WaterCoordination (Water const * const wat) const;
 
 	  // returns the distance between two vertices in the graph
 	  double Distance (const Vertex& vi, const Vertex& vj) const;
 	  // returns the distance between two atoms
-	  double Distance (Atom const * const a1, Atom const * const a2) const;
+	  double Distance (const AtomPtr a1, const AtomPtr a2) const;
 
 
 
@@ -170,10 +173,10 @@ namespace bondgraph {
 	  };
 
 
-	  class VertexIsAtom_pred : std::binary_function<Vertex_it,AtomPtr,bool> {
+	  class VertexIsAtom_pred : public std::binary_function<Vertex_it,AtomPtr,bool> {
 		public:
-		  bool operator() (const Vertex_it it, const AtomPtr atom) const {
-			return *it == atom;
+		  bool operator() (const Vertex_it& it, const AtomPtr& atom) const {
+			return v_atom[*it] == atom;
 		  }
 	  };
 

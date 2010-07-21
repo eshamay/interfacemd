@@ -9,7 +9,22 @@
 #include <cctype>
 #include <cstdio>
 
+
 namespace md_utility {
+
+  // copy_if was dropped from the standard library by accident.
+  template<typename In, typename Out, typename Pred>
+	Out copy_if(In first, In last, Out res, Pred Pr)
+	{
+	  while (first != last) {
+		if (Pr(*first))
+		  *res++ = *first;
+		++first;
+	  }
+
+	  return res;
+	} 
+
 
   /* A functor that takes a std::pair as a constructor argument, and all applications of the tester will test pairs against the initial one given. */
   template <class T>

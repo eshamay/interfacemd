@@ -24,42 +24,19 @@ void Tester::Analysis () {
   //(*so2)->Print();
 
   bondgraph::distance_pair dt = this->sys->graph.ClosestAtom(*so2);
-  /*
-  printf ("the closest atom to the molecule is a distance of % 8.3f and is -- :\n", dt.first);
-  dt.second->Print();
+  min_distances.push_back(dt);
 
-  for (Atom_it it = (*so2)->begin(); it != (*so2)->end(); it++) {
-	(*it)->Print();
-	dt = this->sys->graph.ClosestAtom(*it);
-	printf ("closest atom (% 8.3f) -- \n", dt.first);
-	dt.second->Print();
-  }
-
-  for (Mol_it mol = sys_mols.begin(); mol != sys_mols.end(); mol++) {
-	if (so2 == mol) continue;
-	distances.push_back (std::make_pair (this->sys->Distance(*so2,*mol), *mol));
-  }
-
-  md_utility::pair_sort_first (distances.begin(), distances.end());
-  //min_distances.push_back(distances[0]);
-  */
-
-  fprintf (output, "% 8.3f % 8d %8s\n", dt.first, dt.second->MolID(), dt.second->Name().c_str());
-  printf ("time = %d\n", timestep);
 
   return;
 
 }
 
-void Tester::DataOutput (const unsigned int timestep) { 
-  /*
+void Tester::DataOutput () {
   rewind(output);
 
-  for (std::vector<mol_distance>::const_iterator it = min_distances.begin(); it != min_distances.end(); it++) {
-	//std::cout << it->second->MolID() << std::endl;
-	fprintf (output, "% 8.3f % 8d %s\n", it->first, it->second->MolID(), it->second->Name().c_str());
+  for (bondgraph::distance_vec::const_iterator it = min_distances.begin(); it != min_distances.end(); it++) {
+	fprintf (output, "% 8.3f % 8d %8s/%s\n", it->first, it->second->MolID(), it->second->Name().c_str(), it->second->Residue().c_str());
   }
-  */
 
   return; 
 }

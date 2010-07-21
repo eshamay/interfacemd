@@ -19,11 +19,10 @@ class Tester : public Analyzer<XYZSystem>
 
 	void Setup ();
 	void Analysis ();
-	void DataOutput (const unsigned int timestep);
+	void DataOutput ();
 	void PostAnalysis () { return; }
 
-	typedef std::pair<double, MolPtr>	mol_distance;
-	std::vector< mol_distance > min_distances;
+	bondgraph::distance_vec min_distances;
 };
 
 #endif

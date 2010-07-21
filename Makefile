@@ -22,15 +22,13 @@ XDRINC		= $(XDRDIR)/include
 #CPATH		= :$(SRCLIB):$(HOME)/share/include:$(ATLAS)/include:$(BOOST)#:$(XDRINC)
 
 
-MATH	= $(SRCLIB)/matrixr.o 
-
 MDSYSTEM = $(SRCLIB)/atom.o $(SRCLIB)/molecule.o $(SRCLIB)/mdsystem.o
 
 WATER	= $(SRCLIB)/h2o.o 
 
 IONS	= $(SRCLIB)/hno3.o $(SRCLIB)/h3o.o $(SRCLIB)/oh.o $(SRCLIB)/so2.o
 
-ORGANIC = $(SRCLIB)/carbonchain.o $(SRCLIB)/decane.o 
+ORGANIC = $(SRCLIB)/alkane.o $(SRCLIB)/decane.o 
 
 XYZSYSTEM = $(SRCLIB)/xyzsystem.o $(SRCLIB)/xyzfile.o $(SRCLIB)/wannier.o 
 
@@ -38,7 +36,7 @@ AMBERSYSTEM	= $(SRCLIB)/ambersystem.o $(SRCLIB)/crdfile.o $(SRCLIB)/forcefile.o 
 
 GMXSYS	= $(SRCLIB)/trrfile.o $(SRCLIB)/grofile.o $(SRCLIB)/gmxsystem.o
 
-WATERSYSTEM = $(MDSYSTEM) $(AMBERSYSTEM) $(XYZSYSTEM) $(SRCLIB)/graph.o 
+WATERSYSTEM = $(MDSYSTEM) $(AMBERSYSTEM) $(XYZSYSTEM) $(SRCLIB)/graph.o
 
 ANALYSIS = $(WATERSYSTEM)
 

@@ -54,8 +54,8 @@ public:
 
 	const VecR_vec& Wanniers () const { return _wanniers.Coords(); }
 
-	Atom_ptr_vec CovalentBonds (Atom const * const atom) const { return graph.BondedAtoms(atom, bondgraph::covalent); }
-	Atom_ptr_vec BondedAtoms (Atom const * const atom) const { return graph.BondedAtoms (atom); }
+	Atom_ptr_vec CovalentBonds (const AtomPtr atom) const { return graph.BondedAtoms(atom, bondgraph::covalent); }
+	Atom_ptr_vec BondedAtoms (const AtomPtr atom) const { return graph.BondedAtoms (atom); }
 
 	VecR SystemDipole ();	// calculate the total system dipole and return it
 

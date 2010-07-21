@@ -94,7 +94,7 @@ class Analyzer : public WaterSystem<T> {
 	virtual void Setup () = 0;
 	virtual void Analysis () = 0;
 	virtual void PostAnalysis () = 0;
-	virtual void DataOutput (const unsigned int timestep) = 0;
+	virtual void DataOutput () = 0;
 
 
 	/*
@@ -230,7 +230,7 @@ void Analyzer<T>::SystemAnalysis ()
 	this->_OutputStatus (timestep);
 	// Output the actual data being collected to a file or something for processing later
 	if (!(timestep % (output_freq * 10)) && timestep)
-	  this->DataOutput(timestep);
+	  this->DataOutput();
 
 
 	try {
@@ -245,7 +245,7 @@ void Analyzer<T>::SystemAnalysis ()
   PostAnalysis ();
 
   // do one final data output to push out the finalized data set
-  DataOutput(timestep);
+  DataOutput();
 
   return;
 }	// system analysis

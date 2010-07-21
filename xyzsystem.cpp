@@ -299,28 +299,40 @@ void XYZSystem::_ParseNitrates () {
 	if (NAatoms.size() != 3) continue;
 	bool fullNA = false;	// let's us know if the molecule is an hno3 or an no3
 	AtomPtr no3H = (AtomPtr)NULL;				// this is the H bonded to an NO3 (we use it down below)
-	AtomPtr no3O = (AtomPtr)NULL;				// this is the oxgen of the no3 that is closest to the H
 	double no3OHdistance = 1000.0;				// the distance of the H to the nearest O
 
 	// let's do a quick check to look at the oxygens of the molecule and see if it's a proper HNO3 or an NO3.
+	bondgraph::distance_vec dv;
+	// first, for every oxygen, find the hydrogen that is closest to it.
 	for (Atom_it O = NAatoms.begin(); O != NAatoms.end(); O++) {
-
-	  // these are all the Hs bound to the O
-	  Atom_ptr_vec Hs (graph.BondedAtoms (*O, bondgraph::covalent, Atom::H));
-	  if (!Hs.size()) continue;
-	  // if an H is attached to one of the oxygens then we have a bonafide nitric acid
-	  fullNA = true;
-
-	  // here we'll run through all the Hs that are covalently bound and find which is the closest to an no3 oxygen.
-	  for (Atom_it H = Hs.begin(); H != Hs.end(); H++) {
-		double distance = graph.Distance (*O, *H);
-		no3OHdistance = (distance < no3OHdistance) ? distance : no3OHdistance;
-		if (distance == no3OHdistance) {
-		  no3H = *H;
-		  no3O = *O;
-		}
-	  }
+	  bondgraph::distance_pair dp = graph.ClosestAtom(*O, Atom::H);
+	  dv.push_back(dp);
 	}
+	// then sort all those hydrogens, and find the one that is closest to the nitrate overall
+	md_utility::pair_sort_first (dv.begin(), dv.end());
+	// if the closest hydrogen forms a covalent bond to an oxygen, then create a full nitric acid molecule and add in the H
+	if (dv[0].first <= bondgraph::OHBONDLENGTH) {
+	  fullNA = true;
+	  no3H = dv[0].second;
+	}
+
+	/*
+	// these are all the Hs bound to the O
+	Atom_ptr_vec Hs (graph.BondedAtoms (*O, bondgraph::covalent, Atom::H));
+	if (!Hs.size()) continue;
+	// if an H is attached to one of the oxygens then we have a bonafide nitric acid
+	fullNA = true;
+
+	// here we'll run through all the Hs that are covalently bound and find which is the closest to an no3 oxygen.
+	for (Atom_it H = Hs.begin(); H != Hs.end(); H++) {
+	double distance = graph.Distance (*O, *H);
+	no3OHdistance = (distance < no3OHdistance) ? distance : no3OHdistance;
+	if (distance == no3OHdistance) {
+	no3H = *H;
+	no3O = *O;
+	}
+	}
+	 */
 
 	int molIndex = (int)_mols.size();
 
@@ -347,7 +359,7 @@ void XYZSystem::_ParseNitrates () {
 
 	_UpdateUnparsedList(NAatoms);
 
-  }
+  }	// foreach (N)
 
   return;
 }	// Parse Nitrates
@@ -382,24 +394,14 @@ void XYZSystem::_UpdateUnparsedList (Atom_ptr_vec& parsed) {
   // _unparsed should contain only atoms that are not in the parsed list
   // these atom vectors get sorted according the the atom's ID
 
-  std::sort(_unparsed.begin(), _unparsed.end(), Atom::AtomPtr_sort());
-  std::sort(parsed.begin(), parsed.end(), Atom::AtomPtr_sort());
+  std::sort(_unparsed.begin(), _unparsed.end(), Atom::AtomPtrID_sort());
+  std::sort(parsed.begin(), parsed.end(), Atom::AtomPtrID_sort());
 
   Atom_ptr_vec difference;
-  std::set_difference (_unparsed.begin(), _unparsed.end(), parsed.begin(), parsed.end(), std::back_inserter(difference), Atom::AtomPtr_sort());
+  std::set_difference (_unparsed.begin(), _unparsed.end(), parsed.begin(), parsed.end(), std::back_inserter(difference), Atom::AtomPtrID_sort());
 
   _unparsed.clear();
   std::copy (difference.begin(), difference.end(), std::back_inserter(_unparsed));
 
-  /*
-	 for (Atom_ptr_vec::iterator it = _unparsed.begin(); it != _unparsed.end(); it++) {
-	 for (Atom_it jt = parsed.begin(); jt != parsed.end(); jt++) {
-	 if (*it == *jt) {
-   *it = (AtomPtr)NULL;
-   break;
-   }
-   }
-   }
-   */
   return;
 }
