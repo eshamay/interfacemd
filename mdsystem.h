@@ -63,5 +63,6 @@ class MDSystem {
 #include "decane.h"
 #include "oh.h"
 #include "so2.h"
+#include "h.h"
 
 #endif

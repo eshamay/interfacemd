@@ -2,7 +2,7 @@ SRCLIB	 	= $(HOME)/md/src
 
 CXX			= icpc  -I$(HOME)/src/eigen -wd981,444,383,177,1418
 
-DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated #-debug #-wd981,1599,1572,383
+DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated -DNDEBUG #-debug #-wd981,1599,1572,383
 OPTIMIZE 	= -fast -finline-functions -finline -funroll-loops -m64 -O3 -DNDEBUG
 #CPPFLAGS    = -Wall -Drestrict= -ftemplate-depth-100 $(DEBUG) -L$(HOME)/share/lib
 CPPFLAGS    = -Wall -ftemplate-depth-100 $(OPTIMIZE)
@@ -26,7 +26,7 @@ MDSYSTEM = $(SRCLIB)/atom.o $(SRCLIB)/molecule.o $(SRCLIB)/mdsystem.o
 
 WATER	= $(SRCLIB)/h2o.o 
 
-IONS	= $(SRCLIB)/hno3.o $(SRCLIB)/h3o.o $(SRCLIB)/oh.o $(SRCLIB)/so2.o
+IONS	= $(SRCLIB)/hno3.o $(SRCLIB)/h3o.o $(SRCLIB)/oh.o $(SRCLIB)/so2.o $(SRCLIB)/h.o
 
 ORGANIC = $(SRCLIB)/alkane.o $(SRCLIB)/decane.o 
 

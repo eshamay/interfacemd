@@ -5,6 +5,7 @@ NitricAcid::NitricAcid () : Molecule () {
   _centerofmass.Zero();
   _mass = 0.0;
   _name = "hno3";
+  _moltype = Molecule::HNO3;
 
   _n = (Atom *)NULL;
   _h = (Atom *)NULL;
@@ -132,6 +133,7 @@ void NitricAcid::SetAtoms () {
   // lastly, let's set the OH vector (pointing from O to H)
   _voh = _h->Position() - _oh->Position();
   //_voh = _oh->Position().MinVector(_h->Position(), Atom::Size());
+  this->FixAtoms();
 
   return;
 }
@@ -154,7 +156,8 @@ int Nitrate::numNitrates = 0;
 Nitrate::Nitrate () : Molecule () {
   _centerofmass.Zero();
   _mass = 0.0;
-  _name = "no3";
+  this->Rename("no3");
+  _moltype = Molecule::NO3;
 
   _n = (Atom *)NULL;
   _o1 = (Atom *)NULL;
@@ -178,7 +181,7 @@ void Nitrate::SetAtoms () {
   _n = (*this)["N"];
 
   // now set the 3 oxygens
-  std::vector<Atom *> oxygens;
+  Atom_ptr_vec oxygens;
   for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
 	if ((*it)->Element() != Atom::O) continue;
 	oxygens.push_back (*it);
@@ -193,6 +196,8 @@ void Nitrate::SetAtoms () {
   _no2 = _o2->Position() - _n->Position();
   _no3 = _o3->Position() - _n->Position();
   //_no1 = _n->Position().MinVector(_o1->Position(), Atom::Size());
+
+  this->FixAtoms();
 
   _set = true;
 

@@ -90,12 +90,28 @@ class Atom {
 		}
 	};
 
-	class ElementIs_p : public std::binary_function<AtomPtr,Element_t,bool> {
+	class IDIs_p : public std::binary_function<AtomPtr,int,bool> {
+	  public:
+		bool operator() (const AtomPtr atom, const int id) const {
+		  return atom->ID() == id;
+		}
+	};
+
+	class atom_element_pred : public std::binary_function<AtomPtr,Element_t,bool> {
 	  public:
 		bool operator() (const AtomPtr atom, const Element_t elmt) const {
 		  return atom->Element() == elmt;
 		}
 	};
+
+
+	// returns an iterator to the first occurence of a member with the given name
+	template <typename Iter>
+	  static Iter FindByElement (Iter first, Iter last, const Element_t& elmt) {
+		typedef typename std::iterator_traits<Iter>::value_type val_t;
+		return std::find_if (first, last, std::bind2nd(atom_element_pred(), elmt));
+	  }
+
 
 	class AtomPtrID_sort : public std::binary_function<AtomPtr,AtomPtr,bool> {
 	  public:

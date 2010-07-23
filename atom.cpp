@@ -56,7 +56,7 @@ double Atom::operator[] (const coord index) const {
 }
 
 void Atom::Print () const {
-  printf ("%s (%d)\t%s\t% f\t% f\t% f\n", _name.c_str(), _ID, _residue.c_str(), _position.x(), _position.y(), _position.z());
+  printf ("%s (ID:%d)\t%s (molID:%d)\t% f\t% f\t% f\n", _name.c_str(), _ID, _residue.c_str(), _molid, _position.x(), _position.y(), _position.z());
 }
 
 void Atom::SetAtomProperties () {

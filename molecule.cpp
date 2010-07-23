@@ -6,7 +6,8 @@ int Molecule::numMolecules = 0;
 Molecule::Molecule () :
   _set(false),
   _mass(0.0),
-  _name("")
+  _name(""),
+  _moltype(Molecule::NO_MOLECULE)
 {
   ++numMolecules;
 }
@@ -20,6 +21,7 @@ Molecule::Molecule (const Molecule& oldMol) :
   _mass(oldMol._mass),
   _name(oldMol._name),
   _ID (oldMol._ID),
+  _moltype(oldMol._moltype),
   _DCM (oldMol._DCM)
 {
   this->Rename(oldMol.Name());
@@ -96,7 +98,7 @@ void Molecule::AddAtom (AtomPtr const atom) {
 }
 
 // Instead of adding an atom to a molecule - fix an atom's info in case it was somehow messed up
-void Molecule::FixAtom (AtomPtr const atom) {
+void Molecule::FixAtom (AtomPtr atom) {
 
   // now adjust the center of mass to accomodate for the new atom. Also, adjust the total molecular mass.
   //this->UpdateCenterOfMass ();
@@ -109,6 +111,12 @@ void Molecule::FixAtom (AtomPtr const atom) {
   return;
 }
 
+void Molecule::FixAtoms () {
+  for (Atom_it atom = _atoms.begin(); atom != _atoms.end(); atom++) {
+	this->FixAtom(*atom);
+  }
+}
+
 void Molecule::AddHydrogen (AtomPtr const atom) {
 
   this->AddAtom (atom);
@@ -116,13 +124,17 @@ void Molecule::AddHydrogen (AtomPtr const atom) {
   if (atom->Element() != Atom::H) {
 	std::cout << "Molecule::AddHydrogen() - Tried adding a hydrogen with a non-hydrogen atom:" << std::endl;
 	atom->Print();
+	std::cout << "To the following molecule" << std::endl;
+	this->Print();
 	exit(1);
   }
 
   // now rename the molecule accordingly
-  if (_name == "no3") this->Rename ("hno3");
-  else if (_name == "h2o") this->Rename ("h3o");
-  else if (_name == "oh") this->Rename ("h2o");
+  if (_moltype == Molecule::NO3) { _name = "hno3"; _moltype = Molecule::HNO3; }
+  else if (_moltype == Molecule::H2O) { _name = "h3o"; _moltype = Molecule::H3O; }
+  else if (_moltype == Molecule::OH) { _name = "h2o"; _moltype = Molecule::H2O; }
+
+  this->FixAtoms();
 
   return;
 }
@@ -140,9 +152,11 @@ void Molecule::RemoveAtom (AtomPtr const atom) {
 
   // if we happen to be taking off a hydrogen from a molecule... rename it accordingly
   if (atom->Element() == Atom::H) {
-	if (_name == "hno3") this->Rename ("no3");
-	else if (_name == "h3o") this->Rename ("h2o");
-	else if (_name == "h2o") this->Rename ("oh");
+	if (_moltype == Molecule::HNO3) { _name = "no3"; _moltype = Molecule::NO3; }
+	else if (_moltype == Molecule::H3O) { _name = "h2o"; _moltype = Molecule::H2O; }
+	else if (_moltype == Molecule::H2O) { _name = "oh"; _moltype = Molecule::OH; }
+
+	this->FixAtoms();
   }
 
   return;
@@ -284,6 +298,7 @@ void Molecule::clear () {
   //_dipole.Zero();
   _name = "";
   _ID = 0;
+  _moltype = Molecule::NO_MOLECULE;
 }
 
 double Molecule::MinDistance (Molecule& mol) {
@@ -529,6 +544,7 @@ MolPtr Molecule::Merge (MolPtr mol) {
   mol->Print();
   // the new molecule's name is yet unknown
   _name = "undefined";
+  _moltype = Molecule::NO_MOLECULE; 
 
   for (Atom_it it = mol->begin(); it != mol->end(); it++) {
 	this->AddAtom (*it);

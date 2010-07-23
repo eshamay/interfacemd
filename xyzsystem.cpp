@@ -52,9 +52,15 @@ void XYZSystem::_ParseMolecules () {
   _unparsed.clear();
   std::copy (_atoms.begin(), _atoms.end(), std::back_inserter(_unparsed));
 
-  this->_ParseWaters ();
-  this->_ParseNitrates ();
-  this->_ParseSulfides ();
+  this->_ParseSimpleMolecule<Hydroxide> (Atom::O, Atom::H, 1);
+  this->_ParseSimpleMolecule<Water> (Atom::O, Atom::H, 2);
+  this->_ParseSimpleMolecule<Hydronium> (Atom::O, Atom::H, 3);
+  // parse NO3- ions
+  this->_ParseSimpleMolecule<Nitrate> (Atom::N, Atom::O, 3);
+  // turn any NO3- ions that have a covalently bound H into HNO3 - nitric acid
+  this->_ParseNitricAcids ();
+  this->_ParseSimpleMolecule<SulfurDioxide> (Atom::S, Atom::O, 2);
+  this->_ParseProtons ();
 
   try {
 	this->_CheckForUnparsedAtoms ();
@@ -67,9 +73,46 @@ void XYZSystem::_ParseMolecules () {
   return;
 }
 
+void XYZSystem::_ParseNitricAcids () {
+
+  for (Mol_it mol = _mols.begin(); mol != _mols.end(); mol++) {
+	if ((*mol)->MolType() != Molecule::NO3) continue;
+
+	AtomPtr N = (*mol)->GetAtom(Atom::N);
+	// find any Hs bound to oxygens of the NO3
+	Atom_ptr_vec Os = graph.BondedAtoms(N, bondgraph::covalent, Atom::O);
+	Atom_ptr_vec Hs; 
+	for (Atom_it O = Os.begin(); O != Os.end(); O++) {
+	  Atom_ptr_vec H_check = graph.BondedAtoms(*O, bondgraph::covalent, Atom::H);
+	  if (H_check.size() == 1)
+		Hs.push_back(H_check[0]);
+	  if (H_check.size() > 1) {
+		printf ("A nitrate Oxygen has %d covalently bound hydrogens! what's going on here?\n", H_check.size());
+		(*O)->Print();
+		exit(1);
+	  }
+	}
+
+	if (Hs.size() == 1)
+	  (*mol)->AddHydrogen (Hs[0]);
+	else if (Hs.size() > 1) {
+	  printf ("This nitric acid has %d covalently bound hydrogens!\n", Hs.size());
+	  (*mol)->Print();
+	  for (Atom_it ai = Hs.begin(); ai != Hs.end(); ai++) {
+		(*ai)->Print();
+	  }
+	}
+  }
+  return;
+}	// Parse Nitric acids
+
+
+
+
 void XYZSystem::_CheckForUnparsedAtoms () const {
 
   if (!_unparsed.empty()) {
+
 	std::cout << "The following atoms were found unparsed into molecules after all molecules had been formed" << std::endl;
 
 	// print out every atom that hasn't been parsed
@@ -78,7 +121,7 @@ void XYZSystem::_CheckForUnparsedAtoms () const {
 	  (*it)->Print();	// show all remaining atoms
 
 	  // and all the atoms to which it is bound
-	  std::vector<AtomPtr> bound (graph.BondedAtoms(*it));
+	  Atom_ptr_vec bound (graph.BondedAtoms(*it));
 	  for (Atom_it jt = bound.begin(); jt != bound.end(); jt++) { 
 		// and the distance between them
 		std::cout << "^--~ (" << graph.Distance(*jt, *it) << ")  ";
@@ -88,23 +131,7 @@ void XYZSystem::_CheckForUnparsedAtoms () const {
 	throw (unaccountedex());
   }
 
-  /*
-  for (Atom_it it = _unparsed.begin(); it != _unparsed.end(); it++) {
-	if (*it != (AtomPtr)NULL) {
-	  std::cout << std::endl;
-	  (*it)->Print();	// show all remaining atoms
-
-	  // and all the atoms to which it is bound (and the distance)
-	  std::vector<AtomPtr> bound (graph.BondedAtoms(*it));
-	  for (Atom_it jt = bound.begin(); jt != bound.end(); jt++) { 
-		cout << "^--~ (" << graph.Distance(*jt, *it) << ")  ";
-		(*jt)->Print();
-	  }
-	  leave = true;
-	}
-  }
-  */
-  return;
+return;
 }	// check for unparsed atoms
 
 
@@ -138,7 +165,7 @@ void XYZSystem::_ParseWanniers () {
 	}
   }
 
-return;
+  return;
 }	// Parse Wanniers
 
 
@@ -209,9 +236,9 @@ VecR XYZSystem::SystemDipole () {
 
 void XYZSystem::_ParseWaters () {
 
-  /*******************
-   * Processing Waters
-   *******************/
+   /////////////////////
+   // Processing Waters
+   /////////////////////
 
   // let's go through the system and find all the waters and form molecules out of them
   for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
@@ -221,17 +248,30 @@ void XYZSystem::_ParseWaters () {
 	if (O->Element() != Atom::O) continue;
 
 	// The bondgraph provides us with all the covalently bound H's
-	Atom_ptr_vec atoms = graph.BondedAtoms (O, bondgraph::covalent);
-	Atom_ptr_vec Hs = graph.BondedAtoms (O, bondgraph::covalent, Atom::H);
+	Atom_ptr_vec covalent_bonds = graph.BondedAtoms (O, bondgraph::covalent);
+	Atom_ptr_vec covalent_Hs = graph.BondedAtoms (O, bondgraph::covalent, Atom::H);
 
 
 	// if we pick up an OH group that is part of a larger molecule (i.e. nitric acid) then it will be processed as a hydroxide...
 	// So if the only type of atom attached is a hydrogen, we have some form of water (OH, H2O, H3O)
-	if (Hs.size() != atoms.size()) continue;	// then the oxygen is part of a larger molecule (i.e. it's bound to atoms other than just hydrogens)
+	if (covalent_Hs.size() != covalent_bonds.size())
+	  continue;	// then the oxygen is part of a larger molecule (i.e. it's covalently bound to atoms other than just hydrogens)
+	  /*
+	  printf ("the oxygen is:\n");
+	  O->Print();
+	  printf ("covalent Hs are:\n");
+	  for (Atom_it H = covalent_Hs.begin(); H != covalent_Hs.end(); H++)
+		(*H)->Print();
+	  printf ("all covalent are:\n");
+	  for (Atom_it H = covalent_bonds.begin(); H != covalent_bonds.end(); H++)
+		(*H)->Print();
+	  
+	}
+		*/
 
 	int molIndex = (int)_mols.size();	// set the molecule index
 
-	int num_H = (int)atoms.size();
+	int num_H = (int)covalent_bonds.size();
 	// we may be dealing with a hydroxide ion
 	if (num_H == 1) {
 	  _mols.push_back (new Hydroxide ());
@@ -248,11 +288,26 @@ void XYZSystem::_ParseWaters () {
 	}
 
 	else if (num_H == 0 || num_H > 3) {
-	  printf ("XYZSystem::_ParseMolecules() - found an oxygen with %d H's attached\n", (int)atoms.size());
+	  printf ("XYZSystem::_ParseMolecules() - tried to parse an oxygen into a water, but found %d H's covalently bound to it\n", (int)covalent_bonds.size());
 	  O->Print();
-	  for (Atom_it jt = atoms.begin(); jt != atoms.end(); jt++) {
-		(*jt)->Print();
+	  bondgraph::distance_vec dv = graph.ClosestAtoms (O, 6, Atom::NO_ELEMENT, true);
+	  printf ("nearest 6 atoms to the oxygen are:\n");
+	  for (bondgraph::distance_vec::const_iterator jt = dv.begin(); jt != dv.end(); jt++) {
+		printf ("% 8.3f -- ", jt->first);
+		jt->second->Print();
 	  }
+
+	  printf("atoms forming covalent bonds with the oxygen are:\n");
+	  for (Atom_it cov = covalent_bonds.begin(); cov != covalent_bonds.end(); cov++) {
+		(*cov)->Print();
+	  }
+
+	  printf ("atoms forming h-bonds withe the oxygen are:\n");
+	  Atom_ptr_vec allbonds = graph.BondedAtoms(O, bondgraph::hbond);
+	  for (Atom_it cov = allbonds.begin(); cov != allbonds.end(); cov++) {
+		(*cov)->Print();
+	  }
+
 	  exit(1);
 	}
 
@@ -261,25 +316,16 @@ void XYZSystem::_ParseWaters () {
 
 	// let's set all the atom properties that we can, and add them into the molecule
 	// and we also add in the hydrogens that are covalently bound - note, this can be more than 2 in the case of H3O+
-	atoms.push_back(O);		// Don't forget to tack in the oxygen!
-	for (Atom_it jt = atoms.begin(); jt != atoms.end(); jt++) {
+	covalent_bonds.push_back(O);		// Don't forget to tack in the oxygen!
+	for (Atom_it jt = covalent_bonds.begin(); jt != covalent_bonds.end(); jt++) {
 	  newmol->AddAtom (*jt);
 	}
 
-	_UpdateUnparsedList(atoms);
+	_UpdateUnparsedList(covalent_bonds);
 
-	/*
-	// now, from before, if one of the hydrogens is shared between two molecules making a contact-ion pair, then we will merge the two molecule to make one, and also update our ever-growing list of molecules to reflect it.
-	if (s_mol != (Molecule *)NULL) {
-	s_mol->Merge (newmol);		// this will swallow the new molecule into the contact ion pair
-	delete newmol;				// get rid of the newmol
-	vector<Molecule *>::iterator imol = _mols.end() - 1;	// fixes the _mols to get rid of the newmol we just made so it's not double-counted
-	_mols.erase(imol);
-	}
-	 */
-  }
+}
 
-  return;
+return;
 }	// Parse Waters
 
 void XYZSystem::_ParseNitrates () {
@@ -299,7 +345,6 @@ void XYZSystem::_ParseNitrates () {
 	if (NAatoms.size() != 3) continue;
 	bool fullNA = false;	// let's us know if the molecule is an hno3 or an no3
 	AtomPtr no3H = (AtomPtr)NULL;				// this is the H bonded to an NO3 (we use it down below)
-	double no3OHdistance = 1000.0;				// the distance of the H to the nearest O
 
 	// let's do a quick check to look at the oxygens of the molecule and see if it's a proper HNO3 or an NO3.
 	bondgraph::distance_vec dv;
@@ -315,24 +360,6 @@ void XYZSystem::_ParseNitrates () {
 	  fullNA = true;
 	  no3H = dv[0].second;
 	}
-
-	/*
-	// these are all the Hs bound to the O
-	Atom_ptr_vec Hs (graph.BondedAtoms (*O, bondgraph::covalent, Atom::H));
-	if (!Hs.size()) continue;
-	// if an H is attached to one of the oxygens then we have a bonafide nitric acid
-	fullNA = true;
-
-	// here we'll run through all the Hs that are covalently bound and find which is the closest to an no3 oxygen.
-	for (Atom_it H = Hs.begin(); H != Hs.end(); H++) {
-	double distance = graph.Distance (*O, *H);
-	no3OHdistance = (distance < no3OHdistance) ? distance : no3OHdistance;
-	if (distance == no3OHdistance) {
-	no3H = *H;
-	no3O = *O;
-	}
-	}
-	 */
 
 	int molIndex = (int)_mols.size();
 
@@ -364,29 +391,48 @@ void XYZSystem::_ParseNitrates () {
   return;
 }	// Parse Nitrates
 
-void XYZSystem::_ParseSulfides () {
-  for (Atom_it S = _atoms.begin(); S != _atoms.end(); S++) {
-	if ((*S)->Element() != Atom::S) continue;
 
-	// for every S in the system, see if 2 oxygens are connected
-	Atom_ptr_vec Os (graph.BondedAtoms (*S, bondgraph::covalent, Atom::O));
-	if (Os.size() != 2) continue;	// SO2 is not process if there aren't at-least 2 Os attached
+void XYZSystem::_ParseProtons () {
 
-	int molIndex = (int)_mols.size();
+  Atom_ptr_vec parsed;
 
-	Os.push_back(*S);
+  for (Atom_it H = _atoms.begin(); H != _atoms.end(); H++) {
+	// form all the remaining un-bound hydrogens into their own "proton" molecules
+	if ((*H)->Element() != Atom::H) continue;
 
-	_mols.push_back (new SulfurDioxide());
-	_mols[molIndex]->MolID (molIndex);
+	Atom_ptr_vec cov = graph.BondedAtoms(*H, bondgraph::covalent);
+	if (cov.empty()) {
 
-	for (Atom_it it = Os.begin(); it != Os.end(); it++) {
-	  _mols[molIndex]->AddAtom (*it);
+	  int molIndex = (int)_mols.size();	// set the molecule index
+	  _mols.push_back (new Proton ());
+
+	  MolPtr newmol = _mols[molIndex];
+	  newmol->MolID (molIndex);
+	  newmol->AddAtom (*H);
+
+	  parsed.push_back (*H);
 	}
+	// otherwise, if there are covalent bonds, AND the hydrogen is not parsed into a molecule... something is wrong
+	else if (!(*H)->ParentMolecule()) {
+	  printf ("Found a hydrogen that is not parsed into a molecule, but has covalent bonds!\n");
+	  (*H)->Print();
+	  printf ("It is covalently bound to:\n");
+	  for (Atom_it it = cov.begin(); it != cov.end(); it++) {
+		(*it)->Print();
+	  }
+	  printf ("And it is h-bonded to:\n");
+	  Atom_ptr_vec hbonds = graph.BondedAtoms(*H, bondgraph::hbond);
+	  for (Atom_it it = hbonds.begin(); it != hbonds.end(); it++) {
+		(*it)->Print();
+	  }
 
-	_UpdateUnparsedList(Os);
+	  exit(1);
+	}
   }
 
-}	// Parse SO2
+  _UpdateUnparsedList (parsed);
+  return;
+}
 
 
 void XYZSystem::_UpdateUnparsedList (Atom_ptr_vec& parsed) {
@@ -394,14 +440,8 @@ void XYZSystem::_UpdateUnparsedList (Atom_ptr_vec& parsed) {
   // _unparsed should contain only atoms that are not in the parsed list
   // these atom vectors get sorted according the the atom's ID
 
-  std::sort(_unparsed.begin(), _unparsed.end(), Atom::AtomPtrID_sort());
-  std::sort(parsed.begin(), parsed.end(), Atom::AtomPtrID_sort());
-
-  Atom_ptr_vec difference;
-  std::set_difference (_unparsed.begin(), _unparsed.end(), parsed.begin(), parsed.end(), std::back_inserter(difference), Atom::AtomPtrID_sort());
-
-  _unparsed.clear();
-  std::copy (difference.begin(), difference.end(), std::back_inserter(_unparsed));
+  _unparsed.erase(
+	  std::remove_if (_unparsed.begin(), _unparsed.end(), std::bind2nd(AtomPtr_In_List<Atom_ptr_vec>(), parsed)), _unparsed.end());
 
   return;
 }

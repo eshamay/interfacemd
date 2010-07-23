@@ -28,10 +28,18 @@ private:
 	void _ParseMolecules ();		// take the atoms we have and stick them into molecules
 	void _ParseWaters ();
 	void _ParseNitrates ();
+	void _ParseNitricAcids ();
 	void _ParseSulfides ();
+	void _ParseProtons ();
 	void _ParseWanniers ();
+
+	// Parses a simple molecule that is composed of a central atom, and all other atoms are connected to it - i.e. h2o, no3, ccl4, etc
+	template <typename T>
+	  void _ParseSimpleMolecule (const Atom::Element_t central_elmt, const Atom::Element_t outer_elmt, const int numOuter);
+
 	// Check if an atom pair (O & H) pass the hbond angle criteria
 	//bool _HBondAngle (const Atom *H, const Atom *O);
+
 	void _UpdateUnparsedList (Atom_ptr_vec& parsed);
 	void _CheckForUnparsedAtoms () const;
 
@@ -65,7 +73,48 @@ public:
 	  char const* what() const throw() { return "After parsing of the xyz system molecules an atom(s) was left unaccounted for"; }
 	};
 
+	template <typename U>
+	class AtomPtr_In_List : public std::binary_function<AtomPtr,U,bool> {
+	  public:
+		bool operator () (const AtomPtr ap, const U u) const {
+		  return find(u.begin(), u.end(), ap) != u.end();
+		}
+	};
+
+
 
 };	// xyz system class
+
+
+
+template <typename T>
+void XYZSystem::_ParseSimpleMolecule (const Atom::Element_t central_elmt, const Atom::Element_t outer_elmt, const int numOuter) {
+
+  for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
+
+	if ((*it)->Element() != central_elmt) continue;
+
+	// for every S in the system, see if 2 oxygens are connected
+	Atom_ptr_vec outers = graph.BondedAtoms (*it, bondgraph::covalent, outer_elmt);
+	if (outers.size() != numOuter) continue;
+
+	int molIndex = _mols.size();
+
+	outers.push_back(*it);
+	T * newmol = new T();
+
+	_mols.push_back (newmol);
+	newmol->MolID (molIndex);
+
+	for (Atom_it jt = outers.begin(); jt != outers.end(); jt++) {
+	  newmol->AddAtom (*jt);
+	}
+
+	_UpdateUnparsedList(outers);
+  }
+
+  return;
+}	// parse simple molecule	
+
 
 #endif

@@ -9,6 +9,7 @@ WaterDipoleParms Water::_dipparms ("dipoleparm.dat");
 Water::Water ()
 {
   this->Rename("h2o");
+  _moltype = Molecule::H2O;
   ++numWaters;
 }
 
@@ -18,11 +19,13 @@ Water::~Water () {
 
 Water::Water (const Molecule& mol) : Molecule(mol) {
   this->Rename("h2o");
+  _moltype = Molecule::H2O;
   ++numWaters;
 }
 
 Water::Water (const MolPtr& mol) : Molecule(*mol) {
   this->Rename("h2o");
+  _moltype = Molecule::H2O;
   ++numWaters;
 }
 

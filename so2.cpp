@@ -2,6 +2,7 @@
 
 SulfurDioxide::SulfurDioxide () {
   this->Rename("so2");
+  _moltype = Molecule::SO2;
 }
 
 
@@ -10,6 +11,7 @@ SulfurDioxide::SulfurDioxide (const Molecule& mol)
 	Molecule (mol)
 {
   this->Rename("so2");
+  _moltype = Molecule::SO2;
 }
 
 
@@ -18,6 +20,7 @@ SulfurDioxide::SulfurDioxide (const MolPtr& mol)
 	Molecule (*mol)
 {
   this->Rename("so2");
+  _moltype = Molecule::SO2;
 }
 
 void SulfurDioxide::SetAtoms () {
@@ -33,5 +36,6 @@ void SulfurDioxide::SetAtoms () {
 		_o2 = *it;
 	}
   }
+  this->FixAtoms();
   return;
 }

@@ -35,6 +35,13 @@ namespace md_utility {
 	};
 
 
+  // tests if the second member of both pairs are equal
+  template <class T>
+	class pair_equal_second_pred : public std::binary_function<T,T,bool> {
+	  public:
+		bool operator() (const T& lhs, const T& rhs) const
+		{ return lhs.second == rhs.second; }
+	};
 
   /* Searches for the supplied pair p in the sequence of pairs from first to last */
   template <class Iter> 
@@ -65,6 +72,7 @@ namespace md_utility {
 
 
 
+  /********* routines for names ************/
   template <class U>
 	struct SameName : public std::binary_function<U,U,bool> {
 	  bool operator() (const U& left, const U& right) const {

@@ -241,12 +241,12 @@ void Analyzer<T>::SystemAnalysis ()
 	  throw;
 	}
   }
-  // do a little work after the main analysis loop (normalization of a histogram? etc.)
-  PostAnalysis ();
 
   // do one final data output to push out the finalized data set
   DataOutput();
 
+  // do a little work after the main analysis loop (normalization of a histogram? etc.)
+  PostAnalysis ();
   return;
 }	// system analysis
 

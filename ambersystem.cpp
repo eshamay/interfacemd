@@ -43,7 +43,7 @@ void AmberSystem::_ParseAtomInformation () {
 	(*it)->Name (_topfile.AtomNames()[i]);
 	(*it)->SetAtomProperties();
 	(*it)->ID (i);		// set the atom's index number - because we may need to access ordered/list info elsewhere
-	i++;
+	++i;
   }
 
   return;
@@ -83,6 +83,7 @@ void AmberSystem::_ParseMolecules () {
 	// At each new pointer we create a molecule and start adding in atoms
 	// if the molecule is of a specific type for which a class has been created, then let's use that!
 	std::string name = _topfile.MolNames()[mol];
+	// a topology file doesn't give us the type, so that will be determined when creating the new molecules
 	if (name == "no3") {
 	  _mols.push_back (new Nitrate());
 	}

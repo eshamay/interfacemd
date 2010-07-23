@@ -20,7 +20,7 @@ class Tester : public Analyzer<XYZSystem>
 	void Setup ();
 	void Analysis ();
 	void DataOutput ();
-	void PostAnalysis () { return; }
+	void PostAnalysis ();
 
 	bondgraph::distance_vec min_distances;
 };

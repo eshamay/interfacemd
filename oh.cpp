@@ -5,6 +5,7 @@ int Hydroxide::numHydroxides = 0;
 Hydroxide::Hydroxide () : Molecule()
 {
 	this->Rename("oh");
+	this->_moltype = Molecule::OH;
 	++numHydroxides;
 }
 
@@ -13,12 +14,13 @@ Hydroxide::~Hydroxide () {
 }
 
 void Hydroxide::SetAtoms () {
-	_o = this->GetAtom("O");
-	_h = this->GetAtom("H");
+  this->FixAtoms();
+  _o = this->GetAtom("O");
+  _h = this->GetAtom("H");
 
-	_oh = _h->Position() - _o->Position();
-	_set = true;
+  _oh = _h->Position() - _o->Position();
+  _set = true;
 
-return;
+  return;
 }
 

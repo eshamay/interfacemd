@@ -40,11 +40,11 @@ namespace bondgraph {
   const double HBONDANGLECOS	= cos(30.0*M_PI/180.0);		// bonding angle has to be bigger than this cos (i.e. smaller than ~30 degrees
   const double NOBONDLENGTH = 2.0;
   const double NHBONDLENGTH = 1.3;		// uhmm... check this?
-  const double SOBONDLENGTH = 1.8;
+  const double SOBONDLENGTH = 1.9;
 
 
   // bond types
-  typedef enum {unbonded, hbond, covalent, null} bondtype;
+  typedef enum {null = 0, unbonded, hbond, covalent} bondtype;
 
   // useful for tracking distances between atom pairs
   typedef std::pair<double, AtomPtr>	distance_pair;
@@ -141,19 +141,27 @@ namespace bondgraph {
 
 	  Atom_ptr_vec BondedAtoms (
 		  const AtomPtr ap,
-		  bondtype const btype = null,
-		  Atom::Element_t const elmt = Atom::NO_ELEMENT
+		  const bondtype btype = null,
+		  const Atom::Element_t elmt = Atom::NO_ELEMENT
 		  ) const;
 
 	  // Given a molecule, find the atom (of an optionally given name) that is closest to the molecule but not part of it.
-	  distance_pair ClosestAtom (const MolPtr& mol, const Atom::Element_t elmt = Atom::NO_ELEMENT) const;
+	  distance_pair ClosestAtom (const MolPtr& mol, const Atom::Element_t elmt = Atom::NO_ELEMENT, bool SameMoleculeCheck = false) const;
 	  // Given an atom, find the atom closest to it (of an optionally given name) that is not part of the same molecule
 	  // returns a distance pair - [distance, AtomPtr]
-	  distance_pair ClosestAtom (const AtomPtr atom, const Atom::Element_t elmt = Atom::NO_ELEMENT) const;
+	  distance_pair ClosestAtom (const AtomPtr atom, const Atom::Element_t elmt = Atom::NO_ELEMENT, bool SameMoleculeCheck = false) const;
+
+	  // find the atoms that are closest to an atom
+	  distance_vec ClosestAtoms (const AtomPtr atom, const int num = 1, const Atom::Element_t elmt = Atom::NO_ELEMENT,
+		  bool SameMoleculeCheck = false) const;
+
+	  // find the atoms closest to a given molecule
+	  distance_vec ClosestAtoms (const MolPtr mol, const int num = 1, const Atom::Element_t elmt = Atom::NO_ELEMENT,
+		  bool SameMoleculeCheck = false) const;
 
 	  int NumHBonds (const AtomPtr ap) const;
-	  int NumHBonds (Water const * const wat) const;
-	  coordination WaterCoordination (Water const * const wat) const;
+	  int NumHBonds (const WaterPtr wat) const;
+	  coordination WaterCoordination (const WaterPtr wat) const;
 
 	  // returns the distance between two vertices in the graph
 	  double Distance (const Vertex& vi, const Vertex& vj) const;
