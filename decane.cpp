@@ -22,7 +22,7 @@ Decane::Decane (const Molecule& molecule)
 void Decane::SetAtoms () {
 
   // Runs through the list of atoms in the system and returns all the carbons
-  md_utility::copy_if (this->begin(), this->end(), std::back_inserter(_carbons), std::bind2nd(Atom::ElementIs_p(), Atom::C));
+  md_utility::copy_if (this->begin(), this->end(), std::back_inserter(_carbons), std::bind2nd(Atom::atom_element_pred(), Atom::C));
 
   /*
   // Go through and assign each carbon to the slot in the ordered list

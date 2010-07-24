@@ -58,17 +58,11 @@ void AmberSystem::_ParseAtomVectors () {
   VecR_it force_i = _forces.begin();
   while (atom_i != _atoms.end()) {
 	(*atom_i)->Position (*coord_i);
-	(*atom_i)->Force (*force_i);
+	if (_forces.Loaded())
+	  (*atom_i)->Force (*force_i);
+
 	++atom_i; ++coord_i; ++force_i;
   }
-
-  /*
-  for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
-	(*it)->Position ( _coords[i] );
-	if (_forces.Loaded()) (*it)->Force ( _forces[i] );
-	i++;
-  }
-  */
 
   return;
 }
@@ -94,6 +88,9 @@ void AmberSystem::_ParseMolecules () {
 	else if (name == "h2o") {
 	  _mols.push_back (new Water());
 	}
+	else if (name == "so2") {
+	  _mols.push_back (new SulfurDioxide());
+	}
 	else if (name == "dec" || name == "pds") {
 	  _mols.push_back (new Decane());
 	}
@@ -111,11 +108,8 @@ void AmberSystem::_ParseMolecules () {
 	  int curAtom = molpointer + atomCount - 1;
 
 	  // Now we're going to bless this new atom with loads of information about itself and its molecule
-	  _mols[mol]->AddAtom( _atoms[curAtom] );			// First add the atom into the molecule
 	  _mols[mol]->MolID (mol);
-	  _atoms[curAtom]->Residue (_mols[mol]->Name());	// While we're here, let's set the residue names
-	  _atoms[curAtom]->MolID (mol);					// set the molecule's ID #
-	  _atoms[curAtom]->ParentMolecule (_mols[mol]);	// Hell, why not also let the atom know what molecule it's in!
+	  _mols[mol]->AddAtom( _atoms[curAtom] );			// First add the atom into the molecule
 	}
   }
 

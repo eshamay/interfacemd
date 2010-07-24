@@ -2,25 +2,20 @@
 #define MORITA2002_H_
 
 #include "../analysis.h"
-#include "../mdmath.h"
 #include "sfgunits.h"
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/symmetric.hpp>
+#include "../tensor.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/timer.hpp>
 #include <iostream>
 #include <fftw3.h>
+#include <mkl_blas.h>
+#include <mkl_lapack.h>
 
-
-
-
-//#include "../moritasfg2002.h"
 
 namespace morita {
 
-  using namespace boost::numeric::ublas;
+  USING_PART_OF_NAMESPACE_EIGEN
+
   /*	From the morita 2002 water model
 		const double BONDLENGTH_EQ	= 0.9575;		// in angstroms
 		const double ANGLE_EQ 		= 104.51*M_PI/180.0;		// in radians
@@ -55,46 +50,6 @@ namespace morita {
 		D7 = 3.4710;
 
 
-  namespace utilities {
-
-
-	/*
-	   template <typename T>
-	   class DeletePointer : public std::unary_function<T,void> {
-	   public:
-	   void operator() (T t) { delete t; }
-	   };  // delete pointer
-
-
-	   template <typename T, typename U>
-	   class ConvertPointerType : public std::unary_function<T,U> {
-	   public:
-	   U operator() (T t) const { return static_cast<U>(t); }
-	   };  // convert pointer type
-
-
-	   template <typename Iter1, typename Iter2>
-	   void ConvertContainerElementTypes (Iter1 pBegin, Iter1 pEnd, Iter2 pBegin2)
-	   {
-	   typedef typename std::iterator_traits<Iter1>::value_type value_t1;
-	   typedef typename std::iterator_traits<Iter2>::value_type value_t2;
-
-	   std::transform(pBegin, pEnd, pBegin2, ConvertPointerType<value_t1, value_t2>());
-	   } // convert container element types
-
-
-	   template <typename T, typename U>
-	   class MakeDerivedFromPointer : public std::unary_function<T *,U *> {
-	   public:
-	   U * operator() (T * t) const {
-	   return new U(t);
-	   }
-	   };  // make derived from pointer
-	 */
-
-
-  } // namespace utilities
-
 
   // a new water that has all the needed pieces for our calculations
   class MoritaH2O : public Water {
@@ -125,9 +80,11 @@ namespace morita {
   typedef Morita_ptr_vec::const_iterator Morita_it;
 
 
+
+
   // dipole field tensor 'T' as used in the morita&hynes paper
   // it's a square 3Nx3N matrix, where N = number of particles
-  class DipoleFieldTensor : public tensor::tensor_t {
+  class DipoleFieldTensor : public MatR {
 	public:
 	  DipoleFieldTensor (const MoritaH2O_ptr wat1, const MoritaH2O_ptr wat2);
   }; // Dipole field tensor
@@ -151,23 +108,23 @@ namespace morita {
 
 	  void Setup ();
 	  void Analysis ();
-	  void DataOutput (const unsigned int timestep);
+	  void DataOutput ();
 	  void PostAnalysis ();
 
 	private:
 	  Morita_ptr_vec		all_wats;
 	  Morita_ptr_vec		cutoff_wats;
-	  vector_t				_p;
-	  tensor::tensor_t		_alpha;
-	  tensor::SymmetricMatrix _T;	// system dipole field tensors
-	  tensor::id_matrix_t 	_IDENT;	// a few temporaries for calculating eq 23
-	  tensor::tensor_t		_g;	
-	  tensor::tensor_t		_f;	
+	  VectorXd				_p;
+	  MatrixXd		_alpha;
+	  MatrixXd		 _T;	// system dipole field tensors
+	  MatrixXd	 	_IDENT;	// a few temporaries for calculating eq 23
+	  MatrixXd		_g;	
+	  MatrixXd		_f;	
 
-	  tensor::tensor_t		_A;		// total system polarizability
-	  VecR					_M;		// total system dipole moment (at time zero)
+	  MatR			_A;		// total system polarizability
+	  VecR			_M;		// total system dipole moment (at time zero)
 
-	  tensor::tensor_vec	_vA;	// the tensor A for each timestep
+	  MatR_list		_vA;	// the tensor A for each timestep
 
 	  bool	time_zero;
 

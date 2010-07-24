@@ -28,7 +28,7 @@ public:
 	void LoadNext ();	 					// Update the system to the next timestep
 	void LoadFirst ();
 
-	bool eof () { return _coords.eof(); }
+	bool eof () const { return _coords.eof(); }
 
 	// Output
 	VecR	Dims () 		const 	{ return _coords.Dims(); }		// returns the system size.

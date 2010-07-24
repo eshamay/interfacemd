@@ -24,23 +24,20 @@ private:
 	/* For debugging (and other useful things?) this will keep a list of all the atoms that have been processed into molecules. Any atoms left over at the end of the parsing routine are not included and ... can potentially cause problems */
 	Atom_ptr_vec _unparsed;
 
-	/* some internal methods */
-	void _ParseMolecules ();		// take the atoms we have and stick them into molecules
-	void _ParseWaters ();
-	void _ParseNitrates ();
-	void _ParseNitricAcids ();
-	void _ParseSulfides ();
-	void _ParseProtons ();
-	void _ParseWanniers ();
+	void _ParseMolecules ();		// take the atoms we have and stick them into molecules - general umbrella routine
 
 	// Parses a simple molecule that is composed of a central atom, and all other atoms are connected to it - i.e. h2o, no3, ccl4, etc
 	template <typename T>
 	  void _ParseSimpleMolecule (const Atom::Element_t central_elmt, const Atom::Element_t outer_elmt, const int numOuter);
 
-	// Check if an atom pair (O & H) pass the hbond angle criteria
-	//bool _HBondAngle (const Atom *H, const Atom *O);
+	/* mor specialized parsing routines */
 
-	void _UpdateUnparsedList (Atom_ptr_vec& parsed);
+	void _ParseNitricAcids ();
+	void _ParseProtons ();
+	void _ParseWanniers ();
+
+
+	void _UpdateUnparsedList (Atom_ptr_vec& parsed);	// fixes the list of unparsed atoms
 	void _CheckForUnparsedAtoms () const;
 
 public:
@@ -74,12 +71,12 @@ public:
 	};
 
 	template <typename U>
-	class AtomPtr_In_List : public std::binary_function<AtomPtr,U,bool> {
-	  public:
-		bool operator () (const AtomPtr ap, const U u) const {
-		  return find(u.begin(), u.end(), ap) != u.end();
-		}
-	};
+	  class AtomPtr_In_List : public std::binary_function<AtomPtr,U,bool> {
+		public:
+		  bool operator () (const AtomPtr ap, const U u) const {
+			return find(u.begin(), u.end(), ap) != u.end();
+		  }
+	  };
 
 
 

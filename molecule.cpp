@@ -70,7 +70,7 @@ AtomPtr Molecule::operator[] (const std::string& atomname) const {
 
 // get back the first atom pointer to the atom with the given element
 AtomPtr Molecule::operator[] (const Atom::Element_t elmt) const {
-  Atom_it it = std::find_if(_atoms.begin(), _atoms.end(), std::bind2nd(Atom::ElementIs_p(), elmt));
+  Atom_it it = std::find_if(_atoms.begin(), _atoms.end(), std::bind2nd(Atom::atom_element_pred(), elmt));
   // error checking
   if (it == _atoms.end()) {
 	printf ("\nFrom Molecule::operator[]\n\"The atom with the given element type was not found in the following molecule:\"\n");
