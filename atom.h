@@ -2,11 +2,13 @@
 #define ATOM_H_
 
 #include "vecr.h"
+#include "utility.h"
 #include <vector>
 #include <string>
 
 class Molecule;
 typedef Molecule* MolPtr;
+
 
 class Atom {
 
@@ -31,10 +33,14 @@ class Atom {
 	Atom (const Atom& oldAtom);				// copy constructor for deep copies
 	~Atom ();
 
-	typedef Atom * AtomPtr;
+	typedef Atom* AtomPtr;
+	typedef std::vector<AtomPtr> Atom_ptr_vec;
+	typedef Atom_ptr_vec::const_iterator Atom_it;
 
 	double operator- (const Atom& input) const;		// operator usage to determine the distance between two atoms
 	double operator[] (const coord index) const;	// get the atom's position by coordinate
+	bool operator< (const AtomPtr& rhs) const;
+	bool operator< (const Atom& rhs) const;
 
 	// Input
 	void Name (const std::string& name) { _name = name; }
@@ -66,10 +72,10 @@ class Atom {
 
 	// Output
 	const std::string& Name () const 	{ return _name; }
-	Element_t Element () const { return _element; }
-	double Mass () const 	{ return _mass; }
-	double Charge () const 	{ return _charge; }
-	int ID () const 		{ return _ID; }
+	const Element_t& Element () const { return _element; }
+	const double& Mass () const 	{ return _mass; }
+	const double& Charge () const 	{ return _charge; }
+	const int& ID () const 		{ return _ID; }
 	const std::string& Residue () const { return _residue; }
 
 	const VecR& Position () const	{ return _position; }
@@ -83,44 +89,10 @@ class Atom {
 	MolPtr ParentMolecule () const { return _pmolecule; }
 	void Print () const;
 
-	class NameIs_p : public std::binary_function<AtomPtr,std::string,bool> {
-	  public:
-		bool operator() (const AtomPtr atom, const std::string name) const {
-		  return atom->Name() == name;
-		}
-	};
 
-	class IDIs_p : public std::binary_function<AtomPtr,int,bool> {
-	  public:
-		bool operator() (const AtomPtr atom, const int id) const {
-		  return atom->ID() == id;
-		}
-	};
+	static AtomPtr FindByElement (const Atom_ptr_vec& apv, Element_t e);
 
-	class atom_element_pred : public std::binary_function<AtomPtr,Element_t,bool> {
-	  public:
-		bool operator() (const AtomPtr atom, const Element_t elmt) const {
-		  return atom->Element() == elmt;
-		}
-	};
-
-
-	// returns an iterator to the first occurence of a member with the given name
-	template <typename Iter>
-	  static Iter FindByElement (Iter first, Iter last, const Element_t& elmt) {
-		typedef typename std::iterator_traits<Iter>::value_type val_t;
-		return std::find_if (first, last, std::bind2nd(atom_element_pred(), elmt));
-	  }
-
-
-	class AtomPtrID_sort : public std::binary_function<AtomPtr,AtomPtr,bool> {
-	  public:
-		bool operator() (AtomPtr const &left, AtomPtr const &right) { 
-		  return left->ID() < right->ID();
-		}
-	};
-
-	static bool SameElement (const AtomPtr& first, const AtomPtr& second) {
+	static bool element_eq (const AtomPtr& first, const AtomPtr& second) {
 	  return first->Element() == second->Element();
 	}
 
@@ -154,8 +126,15 @@ class Atom {
 	VecR _force; // the external force on the atom at any given point in time
 };
 
+
 typedef Atom::AtomPtr AtomPtr;
-typedef std::vector<AtomPtr> Atom_ptr_vec;
-typedef Atom_ptr_vec::const_iterator Atom_it;
+typedef Atom::Atom_ptr_vec Atom_ptr_vec;
+typedef Atom::Atom_it Atom_it;
+
+AtomPtr Atom::FindByElement (const Atom_ptr_vec& apv, Element_t elmt) {
+  Atom_it a = std::find_if (apv.begin(), apv.end(), md_utility::mem_fun_eq(&Atom::Element,elmt));
+  return *a;
+}
+
 
 #endif

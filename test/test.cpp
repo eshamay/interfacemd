@@ -10,7 +10,15 @@ Tester::Tester (WaterSystemParams& wsp)
 
 void Tester::Setup () {
 
+  if (!timestep)
+	rewind(output);
+
   this->sys->SetReparseLimit(1);
+
+  s = Atom::FindByElement (sys_atoms, Atom::S);
+  bondgraph::distance_vec Os = this->sys->graph.ClosestAtoms (s, 2, Atom::O, true);
+  o1 = Os[0]->second;
+  o2 = Os[1]->second;
 
   return;
 }
@@ -19,50 +27,42 @@ void Tester::Analysis () {
 
   LoadAll();
 
-  //Mol_it so2 = Molecule::FindByType(sys_mols.begin(), sys_mols.end(), Molecule::SO2);
-  Atom_it S = Atom::FindByElement (sys_atoms.begin(), sys_atoms.end(), Atom::S);
-  bondgraph::distance_vec Os = this->sys->graph.ClosestAtoms (*S, 2, Atom::O, true);
-  min_distances.push_back (Os[0]);
-  min_distances.push_back (Os[1]);
 
-  /*
-  bondgraph::distance_vec dv = this->sys->graph.ClosestAtoms(*so2,3);
-  for (bondgraph::distance_vec::const_iterator it = dv.begin(); it != dv.end(); it++) {
-	printf ("% 8.3f % 8d %8s/%s\n", it->first, it->second->MolID(), it->second->Name().c_str(), it->second->Residue().c_str());
+  bondgraph::distance_vec closest_1 = this->sys->graph.ClosestAtoms (o1, 3);
+  bondgraph::distance_vec closest_2 = this->sys->graph.ClosestAtoms (o2, 3);
+
+  // data output 
+  fprintf (output, "% 8d ", timestep);
+  // atoms closest to o1
+  fprintf (output, "o1 -- ");
+  for (bondgraph::distance_vec::const_iterator it = closest_1.begin(); it != closest_1.end(); it++) {
+	printf ("% 8.4f (%s/%d) ", it->first, it->second->Name().c_str(), it->second->ID());
   }
-  */
 
-  //min_distances.push_back(dt);
-
+  // atoms closest to o2
+  fprintf (output, "o2 -- ");
+  for (bondgraph::distance_vec::const_iterator it = closest_2.begin(); it != closest_2.end(); it++) {
+	printf ("% 8.4f (%s/%d) ", it->first, it->second->Name().c_str(), it->second->ID());
+  }
+  printf ("\n");
 
   return;
-
 }
 
 void Tester::DataOutput () {
-  rewind(output);
+  /*
+	 rewind(output);
 
-  for (bondgraph::distance_vec::const_iterator it = min_distances.begin(); it != min_distances.end(); it++) {
-	fprintf (output, "% 8.3f % 8d %8s/%s\n", it->first, it->second->MolID(), it->second->Name().c_str(), it->second->Residue().c_str());
-  }
+	 int i = 0;
+	 for (bondgraph::distance_vec::const_iterator iti = so1.begin(), itj = so2.begin(); iti != so1.end(); iti++, itj++) {
+	 fprintf (output, "%8d % 8.3f % 8.3f\n", ++i, iti->first, itj->first);
+	 }
 
-  return; 
+	 return; 
+   */
 }
 
 void Tester::PostAnalysis () {
-
-  std::vector<double> dist;
-  for (bondgraph::distance_vec::const_iterator it = min_distances.begin(); it != min_distances.end(); it++) {
-	dist.push_back(it->first);
-  }
-  typedef std::vector< std::pair<double, int> > dist_t;
-  dist_t histo = histogram::Histogram(dist.begin(), dist.end(), 200);
-
-  rewind (output);
-
-  for (dist_t::const_iterator it = histo.begin(); it != histo.end(); it++) {
-	fprintf (output, "% 8.4f\t% 12d\n", it->first, it->second);
-  }
 
   return;
 }

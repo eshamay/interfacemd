@@ -1,4 +1,4 @@
-#include "xyzsfg.h"
+#include "xyz_ir.h"
 
 
 XYZSFGAnalyzer::XYZSFGAnalyzer (WaterSystemParams& wsp)
@@ -10,7 +10,7 @@ XYZSFGAnalyzer::XYZSFGAnalyzer (WaterSystemParams& wsp)
 
 void XYZSFGAnalyzer::Setup () {
 
-  this->sys->SetReparseLimit(100);
+  this->sys->SetReparseLimit(1);
 
   return;
 }
@@ -29,12 +29,13 @@ void XYZSFGAnalyzer::Analysis () {
   return;
 }
 
-void XYZSFGAnalyzer::DataOutput (const unsigned int timestep) { 
+void XYZSFGAnalyzer::DataOutput () {
 
   // process time-domain data
   std::vector<double> corr;
+  VecR M_0 = *_M.begin();
   for (VecR_it it = _M.begin(); it != _M.end(); it++)
-	corr.push_back (_M[0] * *it);
+	corr.push_back (M_0.dot(*it));
 
   rewind(output);
   // print the time-domain data and also the fft version

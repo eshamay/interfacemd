@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cctype>
 #include <cstdio>
+#include <vector>
 
 
 namespace md_utility {
@@ -24,6 +25,41 @@ namespace md_utility {
 
 	  return res;
 	} 
+
+
+  // generic adaptor predicate to perform a comparison (equality test) between 2 objects using the same getter function
+  template<typename U, typename R>
+	class mem_fun_cmp_t : public std::binary_function<U const*, U const*, bool> {
+	  private:
+		R (U::*fn_)() const;
+	  public:
+		mem_fun_cmp_t(R (U::*fn )() const) : fn_(fn), val_(val){}
+		bool operator()(U * lhs, U * rhs) { 
+		  return (lhs->*fn_)() == (rhs->*fn_)(); 
+		}
+	};
+
+  template<typename U, typename R>
+	mem_fun_cmp_t<U,R> mem_fun_cmp(R (U::*fn)() const)
+	{ return mem_fun_cmp_t<U,R>(fn); }
+
+
+  // generic predicate for comparing an attribute method of a list of object pointers to a specified test value
+  template<typename U, typename R, typename S>
+	class mem_fun_eq_t : public std::unary_function<U const*, bool>
+  {
+	private:
+	  R (U::*fn_)() const;
+	  S val_;
+	public:
+	  mem_fun_eq_t(R (U::*fn )() const, S val) : fn_(fn), val_(val){}
+	  bool operator()(U * u) { return (u->*fn_)() == val_; }
+  };
+
+  template<typename U, typename R, typename S>
+	mem_fun_eq_t<U, R, S> mem_fun_eq(R (U::*fn)() const, S val)
+	{ return mem_fun_eq_t<U, R, S>(fn, val); }
+
 
 
   /* A functor that takes a std::pair as a constructor argument, and all applications of the tester will test pairs against the initial one given. */
@@ -73,40 +109,29 @@ namespace md_utility {
 
 
   /********* routines for names ************/
+  /*  replaced by mem_fun_cmp
   template <class U>
 	struct SameName : public std::binary_function<U,U,bool> {
 	  bool operator() (const U& left, const U& right) const {
 		return left->Name() == right->Name();
 	  }
 	};
+	*/
 
   // predicate to test if the name of an atom or molecule (determined by the template parameter) is found in a vector of names
   template <class U>
-	struct NameInList : public std::binary_function<U, std::vector<std::string>,bool> {
-	  bool operator() (const U u, const std::vector<std::string>& names) const {
-		return names.end() != std::find(names.begin(), names.end(), u->Name());
-	  }
+	class NameInList : public std::binary_function<U, std::vector<std::string>, bool> {
+	  public:
+		bool operator() (const U u, const std::vector<std::string>& names) const {
+		  return names.end() != std::find(names.begin(), names.end(), u->Name());
+		}
 	};
 
-  // predicate to determine if the given atom or molecule has the given name
-  template <class U>
-	struct IsName : public std::binary_function<U, std::string, bool> {
-	  bool operator() (const U u, const std::string name) const {
-		return u->Name() == name; 
-	  }
-	};
-
-  // returns an iterator to the first occurence of a member with the given name
-  template <typename Iter>
-	Iter FindByName (Iter first, Iter last, const std::string& name) {
-	  typedef typename std::iterator_traits<Iter>::value_type val_t;
-	  return std::find_if (first, last, std::bind2nd(IsName<val_t>(), name));
-	}
 
   template <class U> 
 	void KeepByName (U& u, std::string& name) {
 	  u.erase(
-		  remove_if(u.begin(), u.end(), not1(std::bind2nd(IsName<typename U::value_type>(), name))), u.end()
+		  remove_if(u.begin(), u.end(), std::not1(mem_fun_eq(&U::Name, name))), u.end()
 		  );
 	  return;
 	}
@@ -123,7 +148,7 @@ namespace md_utility {
   template <class U> 
 	void RemoveByName (U& u, std::string& name) {
 	  u.erase(
-		  remove_if(u.begin(), u.end(), std::bind2nd(IsName<typename U::value_type>(), name)), u.end()
+		  remove_if(u.begin(), u.end(), mem_fun_eq(&U::Name, name)), u.end()
 		  );
 	  return;
 	}

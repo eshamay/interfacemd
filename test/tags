@@ -20,6 +20,7 @@ AngleHistogram	angle-histogram.h	/^class AngleHistogram : public Analyzer {$/;"	
 AngleHistogramOutput	carbonchainsystem.cpp	/^void CarbonChainSystem::AngleHistogramOutput (const int timestep) {$/;"	f	class:CarbonChainSystem
 Axis_Vector_Fn	carbonchainsystem.h	/^typedef VecR (CarbonChain::*Axis_Vector_Fn) ();	\/\/ a pointer to an axis vector function to find carbon-chain axes$/;"	t
 BinPosition	coordination.cpp	/^void CoordinationTest::BinPosition (Water const * const wat, coordination const coord) {$/;"	f	class:CoordinationTest
+C	traj2fft.py	/^C = [(1-math.exp(-beta*hbar*f))\/3.0\/hbar\/c for f in freq]$/;"	v
 CARBONCHAIN	Makefile	/^CARBONCHAIN	= ..\/carbonchain.o ..\/decane.o$/;"	m
 CARBONCHAINSYSTEM_H_	carbonchainsystem.h	2;"	d
 COORDINATION	Makefile	/^COORDINATION	= $(WATERSYSTEM) coordination.o$/;"	m
@@ -80,7 +81,7 @@ PRMTOP	toptest.h	11;"	d
 PlotData	traj2fft.py	/^def PlotData():$/;"	f
 PostAnalysis	angle-histogram.h	/^	void PostAnalysis () { return; }$/;"	f	class:AngleHistogram
 PostAnalysis	gmxtest.cpp	/^void GMXAnalyzer::PostAnalysis () { return; }$/;"	f	class:GMXAnalyzer
-PostAnalysis	test.h	/^	void PostAnalysis () { return; }$/;"	f	class:Tester
+PostAnalysis	test.cpp	/^void Tester::PostAnalysis () {$/;"	f	class:Tester
 QPT	Makefile	/^QPT = $(XYZSYSTEM) ..\/hno3analysis.o Qpt.o$/;"	m
 QPT_H_	Qpt.h	2;"	d
 ROTATE	Makefile	/^ROTATE			= $(MDSYSTEM) $(XYZSYSTEM) ..\/pdbfile.o molecule-rotate.cpp$/;"	m
@@ -102,13 +103,15 @@ axisFn	carbonchainsystem.h	/^	Axis_Vector_Fn	axisFn;$/;"	m	struct:__anon1
 beta	traj2fft.py	/^beta = 1.0\/temp\/k$/;"	v
 binner	angle-histogram.h	/^	AngleBinner binner;$/;"	m	class:AngleHistogram
 c	traj2fft.py	/^c = 29979245800.0 # speed of light in cm\/s$/;"	v
-chi	traj2fft.py	/^chi = [sqrt(i*i.conjugate()).real for i in fourier]$/;"	v
+chi	traj2fft.py	/^chi = [c\/max_chi for c in chi]$/;"	v
+chi	traj2fft.py	/^chi = map(lambda c, f, val: c*f*abs(val)**2, C, freq, fourier)$/;"	v
 data	traj2fft.py	/^data = [float(line.strip().split()[0]) for line in myfile.readlines()]$/;"	v
 data	traj2fft.py	/^data = map (lambda x,y: x * y, data, hamming(N))$/;"	v
 density_histo_2	carbonchainsystem.h	/^	vector< vector<int> >		density_histo_2;$/;"	m	struct:__anon1
 dt	traj2fft.py	/^dt = 0.75e-15 # sample size in seconds$/;"	v
 filename	Qpt.h	15;"	d
 fourier	traj2fft.py	/^fourier = fft.rfft(data)[1:-1]$/;"	v
+freq	traj2fft.py	/^freq = [float(i)\/N\/dt\/c for i in range(1,N\/2)]$/;"	v
 hbar	traj2fft.py	/^hbar = 1.05457148e-34$/;"	v
 histo	angle-histogram.cpp	/^AngleBinner::histo_t AngleBinner::histo = AngleBinner::histo_t (-1.0, 1.0, 0.01);$/;"	m	class:AngleBinner	file:
 histo	angle-histogram.h	/^  static histo_t histo;$/;"	m	class:AngleBinner
@@ -144,19 +147,22 @@ main	test.cpp	/^int main () {$/;"	f
 main	toptest.cpp	/^int main (int argc, char *argv) {$/;"	f
 main	unique-atoms.cpp	/^int main () {$/;"	f
 matplotlib	traj2fft.py	/^import matplotlib.pyplot as plt$/;"	i
-min_distances	test.h	/^	bondgraph::distance_vec min_distances;$/;"	m	class:Tester
+max_chi	traj2fft.py	/^max_chi = max(chi)$/;"	v
 mol_name	carbonchainsystem.h	/^	string 			mol_name;$/;"	m	struct:__anon1
 mol_t	carbonchainsystem.h	/^typedef Decane mol_t;$/;"	t
 myfile	traj2fft.py	/^myfile = open(sys.argv[1])$/;"	v
 name_map	coordination.h	/^	coord_map name_map;$/;"	m	class:CoordinationTest
 nthreads	boost-threads-sandbox.cpp	6;"	d	file:
 numSteps	Qpt.h	18;"	d
+o1	test.h	/^	AtomPtr s, o1, o2;$/;"	m	class:Tester
+o2	test.h	/^	AtomPtr s, o1, o2;$/;"	m	class:Tester
 oi_t	binary-io-test.cpp	/^typedef std::ostream_iterator<double> oi_t;$/;"	t	file:
 operator ()	angle-histogram.h	/^  void operator() (Water * wat)$/;"	f	class:AngleBinner
 operator ()	binary-io-test.cpp	/^  double operator() ()$/;"	f	struct:RandomGenerator
 pdb	closest.cpp	6;"	d	file:
 plt	traj2fft.py	/^import matplotlib.pyplot as plt$/;"	i
 re	traj2fft.py	/^re = [i.real for i in fourier]$/;"	v
+s	test.h	/^	AtomPtr s, o1, o2;$/;"	m	class:Tester
 scaling_factor	traj2fft.py	/^scaling_factor = 0.9981	# a vibrational scaling factor for frequencies taken from http:\/\/srdata.nist.gov\/cccbdb\/vsf.asp$/;"	v
 set_unitcell	set_unitcell.tcl	/^proc set_unitcell {a b c {molid top} {alpha 90.0} {beta 90.0} {gamma 90.0}} {$/;"	p
 sys	traj2fft.py	/^import sys$/;"	i
@@ -165,7 +171,6 @@ task2	boost-threads-sandbox.cpp	/^void task2() {$/;"	f
 temp	traj2fft.py	/^temp = 273.0$/;"	v
 vcoords	coordination.h	/^	std::vector<coordination> vcoords;$/;"	m	class:CoordinationTest
 wannierfile	Qpt.h	22;"	d
-x	traj2fft.py	/^x = [float(i)\/N\/dt\/c for i in range(1,N\/2)]$/;"	v
 xSize	Qpt.h	11;"	d
 ySize	Qpt.h	12;"	d
 zSize	Qpt.h	13;"	d

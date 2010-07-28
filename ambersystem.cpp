@@ -95,7 +95,10 @@ void AmberSystem::_ParseMolecules () {
 	  _mols.push_back (new Decane());
 	}
 	// otherwise add on a generic molecule
-	else _mols.push_back (new Molecule());
+	else {
+	  printf ("AmberSystem::_ParseMolecules() -- Couldn't parse the molecule with name '%s'. Don't know what to do with it\n", name.c_str());
+	  exit(1);
+	}
 
 	_mols[mol]->Name (name);	// set the molecule's residue name
 

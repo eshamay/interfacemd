@@ -22,7 +22,7 @@ class Tester : public Analyzer<XYZSystem>
 	void DataOutput ();
 	void PostAnalysis ();
 
-	bondgraph::distance_vec min_distances;
+	AtomPtr s, o1, o2;
 };
 
 #endif

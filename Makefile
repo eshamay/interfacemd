@@ -3,7 +3,7 @@ SRCLIB	 	= $(HOME)/md/src
 CXX			= icpc  -I$(HOME)/src/eigen -wd981,444,383,177,1418
 
 DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated -DNDEBUG #-debug #-wd981,1599,1572,383
-OPTIMIZE 	= -fast -finline-functions -finline -funroll-loops -m64 -O3 -DNDEBUG
+OPTIMIZE 	= -finline-functions -finline -funroll-loops -m64 -O3 -DNDEBUG -fast 
 #CPPFLAGS    = -Wall -Drestrict= -ftemplate-depth-100 $(DEBUG) -L$(HOME)/share/lib
 CPPFLAGS    = -Wall -ftemplate-depth-100 $(OPTIMIZE)
 
@@ -41,7 +41,7 @@ WATERSYSTEM = $(MDSYSTEM) $(AMBERSYSTEM) $(XYZSYSTEM) $(SRCLIB)/graph.o
 ANALYSIS = $(WATERSYSTEM)
 
 clean:
-	rm -f *.o bin/*
+	rm -f *.o
 
 cleanall:
 	( make clean )

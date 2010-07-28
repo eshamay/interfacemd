@@ -58,7 +58,8 @@ return (_atoms.size());
 
 // get back the atom pointer to the atom with the given name
 AtomPtr Molecule::operator[] (const std::string& atomname) const {
-  Atom_it it = std::find_if(_atoms.begin(), _atoms.end(), std::bind2nd(Atom::NameIs_p(), atomname));
+  Atom_it it = std::find_if( _atoms.begin(), _atoms.end(), md_utility::mem_fun_eq(&Atom::Name, atomname));
+
   // error checking
   if (it == _atoms.end()) {
 	printf ("\nFrom Molecule::operator[]\n\"The atom named '%s' was not found in the following molecule:\"\n", atomname.c_str());
@@ -70,7 +71,9 @@ AtomPtr Molecule::operator[] (const std::string& atomname) const {
 
 // get back the first atom pointer to the atom with the given element
 AtomPtr Molecule::operator[] (const Atom::Element_t elmt) const {
-  Atom_it it = std::find_if(_atoms.begin(), _atoms.end(), std::bind2nd(Atom::atom_element_pred(), elmt));
+  
+  Atom_it it = std::find_if(_atoms.begin(), _atoms.end(), md_utility::mem_fun_eq(&Atom::Element, elmt));
+
   // error checking
   if (it == _atoms.end()) {
 	printf ("\nFrom Molecule::operator[]\n\"The atom with the given element type was not found in the following molecule:\"\n");
@@ -115,6 +118,7 @@ void Molecule::FixAtoms () {
   for (Atom_it atom = _atoms.begin(); atom != _atoms.end(); atom++) {
 	this->FixAtom(*atom);
   }
+  this->SetAtoms();
 }
 
 void Molecule::AddHydrogen (AtomPtr const atom) {
@@ -276,15 +280,11 @@ void Molecule::Shift (VecR& shift) {
 
 void Molecule::Print () const {
 
-  printf ("Residue = %s  (%d)\tmass = % .3f\t%d wannier centers\n", _name.c_str(), _ID, _mass, _wanniers.size());
+  printf ("Residue = %s  (%d)\tmass = % .3f\t%zu wannier centers\n", _name.c_str(), _ID, _mass, _wanniers.size());
+  std::for_each (this->begin(), this->end(), std::mem_fun(&Atom::Print));
 
-  for (Atom_it it = this->begin(); it != this->end(); it++) {
-	(*it)->Print();
-  }
-  for (VecR_it it = this->_wanniers.begin(); it != this->_wanniers.end(); it++) {
-	printf ("Wannier) ");
-	it->Print();
-  }
+  printf ("Wannier) ");
+  std::for_each (this->_wanniers.begin(), this->_wanniers.end(), std::mem_fun_ref(&VecR::Print));
   //printf ("wan)\t%d\n", _wanniers.size());
 
   return;

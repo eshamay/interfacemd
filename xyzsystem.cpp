@@ -89,7 +89,7 @@ void XYZSystem::_ParseNitricAcids () {
 	  if (H_check.size() == 1)
 		Hs.push_back(H_check[0]);
 	  if (H_check.size() > 1) {
-		printf ("A nitrate Oxygen has %d covalently bound hydrogens! what's going on here?\n", H_check.size());
+		printf ("A nitrate Oxygen has %zu covalently bound hydrogens! what's going on here?\n", H_check.size());
 		(*O)->Print();
 		exit(1);
 	  }
@@ -98,7 +98,7 @@ void XYZSystem::_ParseNitricAcids () {
 	if (Hs.size() == 1)
 	  (*mol)->AddHydrogen (Hs[0]);
 	else if (Hs.size() > 1) {
-	  printf ("This nitric acid has %d covalently bound hydrogens!\n", Hs.size());
+	  printf ("This nitric acid has %zu covalently bound hydrogens!\n", Hs.size());
 	  (*mol)->Print();
 	  for (Atom_it ai = Hs.begin(); ai != Hs.end(); ai++) {
 		(*ai)->Print();

@@ -81,7 +81,7 @@ namespace bondgraph {
 		ai = v_atom[*vi];
 		aj = v_atom[*vj];
 		// Don't connect oxygens to oxygens, and hydrogen to hydrogen...etc.
-		//if (Atom::SameElement(ai,aj)) continue;
+		//if (Atom::element_eq(ai,aj)) continue;
 
 		// calculate the distance between the two atoms (taking into account the periodic boundaries)
 		double bondlength = MDSystem::Distance (v_position[*vi], v_position[*vj]).Magnitude();

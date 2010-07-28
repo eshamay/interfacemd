@@ -5,6 +5,7 @@
 #include "matrixr.h"
 #include "atom.h"
 #include "wannier.h"
+#include "utility.h"
 #include <string>
 #include <math.h>
 #include <vector>
@@ -18,6 +19,8 @@ class Molecule {
     virtual ~Molecule ();
 
 	typedef Molecule* MolPtr;
+	typedef std::vector<MolPtr> Mol_ptr_vec;
+	typedef Mol_ptr_vec::const_iterator Mol_it;
 
 	typedef enum {
 	  NO_MOLECULE = 0,
@@ -106,6 +109,9 @@ class Molecule {
 	void AddAtom (AtomPtr const newAtom);					// same as the operator
 	void AddHydrogen (AtomPtr const atom);					// same as adding an atom but renames accordingly
 	void RemoveAtom (AtomPtr const atom);
+
+
+	virtual void SetAtoms () = 0;
 	void FixAtom (AtomPtr atom);
 	void FixAtoms ();
 	void Rename (const std::string& name);
@@ -146,15 +152,6 @@ class Molecule {
 	MatR const & DCMToLab (const coord axis = z);
 
 
-
-
-	class MoleculeType_pred : public std::binary_function<MolPtr,Molecule_t,bool> {
-	  public:
-		bool operator() (const MolPtr mol, const Molecule_t type) const {
-		  return mol->MolType() == type;
-		}
-	};	// molecule type predicate
-
 	template <class U>
 	  struct SameType : public std::binary_function<U,U,bool> {
 		bool operator() (const U& left, const U& right) const {
@@ -171,16 +168,15 @@ class Molecule {
 	  };
 
 	// returns an iterator to the first occurence of a member with the given name
-	template <typename Iter>
-	  static Iter FindByType (Iter first, Iter last, const Molecule_t& type) {
-		typedef typename std::iterator_traits<Iter>::value_type val_t;
-		return std::find_if (first, last, std::bind2nd(MoleculeType_pred(), type));
-	  }
+	static MolPtr FindByType (const Mol_ptr_vec& mols, const Molecule_t& type) {
+	  Mol_it it = std::find_if (mols.begin(), mols.end(), md_utility::mem_fun_eq(&Molecule::MolType,type));
+	  return *it;
+	}
 
 	template <class U> 
 	  static void KeepByType (U& u, const Molecule_t& type) {
 		u.erase(
-			remove_if(u.begin(), u.end(), not1(std::bind2nd(MoleculeType_pred(), type))), u.end()
+			remove_if(u.begin(), u.end(), std::not1(md_utility::mem_fun_eq(&Molecule::MolType, type))), u.end()
 			);
 		return;
 	  }
@@ -189,15 +185,16 @@ class Molecule {
 	template <class U> 
 	  static void KeepByTypes (U& u, std::vector<Molecule_t>& types) {
 		u.erase(
-			remove_if(u.begin(), u.end(), not1(std::bind2nd(NameInList<typename U::value_type>(), types))), u.end());
+			remove_if(u.begin(), u.end(), not1(std::bind2nd(md_utility::NameInList<typename U::value_type>(), types))), u.end());
 		return;
 	  }
 
 	// remove all elements that have the given name
 	template <class U> 
 	  static void RemoveByTypes (U& u, Molecule_t& type) {
+		typedef const Molecule::Molecule_t& (Molecule::*fn)() const;
 		u.erase(
-			remove_if(u.begin(), u.end(), std::bind2nd(IsName<typename U::value_type>(), type)), u.end()
+			remove_if(u.begin(), u.end(), md_utility::mem_fun_eq(&Molecule::MolType,type)), u.end()
 			);
 		return;
 	  }
@@ -206,38 +203,38 @@ class Molecule {
 	template <class U> 
 	  static void RemoveByTypes (U& u, std::vector<Molecule_t>& types) {
 		u.erase(
-			remove_if(u.begin(), u.end(), std::bind2nd(NameInList<typename U::value_type>(), types)), u.end());
+			remove_if(u.begin(), u.end(), std::bind2nd(md_utility::NameInList<typename U::value_type>(), types)), u.end());
 		return;
 	  }
 
 
 
   protected:
-    Atom_ptr_vec	_atoms;				// the list of the atoms in the molecule
-    VecR_vec		_wanniers;			// the wannier centers in the molecule
-    VecR			_dipole;			// the molecular dipole
-    VecR			_x, _y, _z;			// molecular frame axes
+	Atom_ptr_vec	_atoms;				// the list of the atoms in the molecule
+	VecR_vec		_wanniers;			// the wannier centers in the molecule
+	VecR			_dipole;			// the molecular dipole
+	VecR			_x, _y, _z;			// molecular frame axes
 
-    bool			_set;				// just a little helper to see if the atoms of the molecule have been set or for any other special purpose
+	bool			_set;				// just a little helper to see if the atoms of the molecule have been set or for any other special purpose
 
-    // this is broken last I checked - not updated with coordinate updates
-    VecR			_centerofmass;		// calculate by 1/M * Sum(m[i]*r[i])	where M = total mass, m[i] and r[i] are atom mass and pos
+	// this is broken last I checked - not updated with coordinate updates
+	VecR			_centerofmass;		// calculate by 1/M * Sum(m[i]*r[i])	where M = total mass, m[i] and r[i] are atom mass and pos
 
-    double			_mass;				// Total molecular mass
-    double			_charge;
+	double			_mass;				// Total molecular mass
+	double			_charge;
 	std::string		_name;				// some text ID or name for the molecule
-    int				_ID;				// A numerical ID for the molecule
+	int				_ID;				// A numerical ID for the molecule
 	Molecule_t		_moltype;		// an enumerated way to compare different types of molecule
 
-    double			_eulerangles[3];	// the three euler angles theta, phi, chi
-    MatR			_DCM;				// the direction cosine matrix for rotating the molecule to the lab frame
-    void 			_FindEulerAngles ();// Calculates the Euler angles between the molecular axes and the fixed axes
+	double			_eulerangles[3];	// the three euler angles theta, phi, chi
+	MatR			_DCM;				// the direction cosine matrix for rotating the molecule to the lab frame
+	void 			_FindEulerAngles ();// Calculates the Euler angles between the molecular axes and the fixed axes
 
 
 };
 
-typedef Molecule::MolPtr MolPtr;
-typedef std::vector<MolPtr> Mol_ptr_vec;
-typedef Mol_ptr_vec::const_iterator Mol_it;
+	typedef Molecule::MolPtr MolPtr;
+	typedef Molecule::Mol_ptr_vec Mol_ptr_vec;
+	typedef Molecule::Mol_it Mol_it;
 
 #endif

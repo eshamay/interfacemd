@@ -55,6 +55,13 @@ double Atom::operator[] (const coord index) const {
   return pos;
 }
 
+bool Atom::operator< (const AtomPtr& rhs) const {
+  return this->_ID < rhs->ID();
+}
+bool Atom::operator< (const Atom& rhs) const {
+  return this->_ID < rhs.ID();
+}
+
 void Atom::Print () const {
   printf ("%s (ID:%d)\t%s (molID:%d)\t% f\t% f\t% f\n", _name.c_str(), _ID, _residue.c_str(), _molid, _position.x(), _position.y(), _position.z());
 }
@@ -120,3 +127,4 @@ void Atom::SetAtomProperties () {
 
   return;
 }
+

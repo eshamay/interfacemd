@@ -186,7 +186,7 @@ class WaterSystem {
 
 	  // copy over all the water molecules into the int_wats container
 	  std::remove_copy_if(		// have to use remove_copy_if because the STL doesn't have a copy_if!!!
-		  sys_mols.begin(), sys_mols.end(), std::back_inserter(int_wats), std::not1(std::bind2nd(md_utility::IsName<MolPtr>(), "h2o")));
+		  sys_mols.begin(), sys_mols.end(), std::back_inserter(int_wats), std::not1(md_utility::mem_fun_eq(&Atom::Name, "h2o")));
 
 	  // load in the water atoms to int_atoms
 	  this->UpdateAtoms (int_wats, int_atoms);
