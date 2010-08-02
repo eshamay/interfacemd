@@ -4,13 +4,13 @@ int Hydroxide::numHydroxides = 0;
 
 Hydroxide::Hydroxide () : Molecule()
 {
-	this->Rename("oh");
-	this->_moltype = Molecule::OH;
-	++numHydroxides;
+  this->Rename("oh");
+  this->_moltype = Molecule::OH;
+  ++numHydroxides;
 }
 
 Hydroxide::~Hydroxide () {
-	--numHydroxides;
+  --numHydroxides;
 }
 
 void Hydroxide::SetAtoms () {

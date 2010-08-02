@@ -16,6 +16,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <functional>
+#include <numeric>
 
 
 
@@ -116,7 +117,7 @@ class WaterSystem {
 	void OpenFile ();
 
 
-	static double AxisPosition (const Atom * a) {
+	static double AxisPosition (const AtomPtr a) {
 	  double pos = a->Position()[axis];
 	  pos = (pos > pbcflip) ? pos : pos + MDSystem::Dimensions()[axis];
 	  return pos;
@@ -134,9 +135,9 @@ class WaterSystem {
 	void SliceWaterCoordination (const bondgraph::coordination c);
 
 	// predicate determines if an atom sits within a particular slice of the system
-	class AtomPositionInSlice : public std::binary_function<Atom *, Double_pair&, bool> {
+	class AtomPositionInSlice : public std::binary_function<AtomPtr, Double_pair&, bool> {
 	  public:
-		bool operator() (const Atom * atom, const Double_pair& extents) const
+		bool operator() (const AtomPtr atom, const Double_pair& extents) const
 		{
 		  double pos = AxisPosition (atom);
 		  return pos > extents.first && pos < extents.second;
@@ -185,8 +186,10 @@ class WaterSystem {
 	  int_wats.clear();
 
 	  // copy over all the water molecules into the int_wats container
-	  std::remove_copy_if(		// have to use remove_copy_if because the STL doesn't have a copy_if!!!
-		  sys_mols.begin(), sys_mols.end(), std::back_inserter(int_wats), std::not1(md_utility::mem_fun_eq(&Atom::Name, "h2o")));
+	  md_utility::copy_if (sys_mols.begin(), sys_mols.end(), std::back_inserter(int_wats), md_utility::mem_fun_eq(&Molecule::MolType, Molecule::H2O));
+
+	  //std::remove_copy_if(		// have to use remove_copy_if because the STL doesn't have a copy_if!!!
+		  //sys_mols.begin(), sys_mols.end(), std::back_inserter(int_wats), std::not1(md_utility::mem_fun_eq(&Molecule::MolType, Molecule::H2O)));
 
 	  // load in the water atoms to int_atoms
 	  this->UpdateAtoms (int_wats, int_atoms);

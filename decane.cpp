@@ -6,6 +6,7 @@ Decane::Decane ()
   : Alkane (10)
 {
   this->Rename("dec");
+  _moltype = Molecule::DECANE;
   ++numDecanes;
 }
 

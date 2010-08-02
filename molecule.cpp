@@ -7,8 +7,7 @@ Molecule::Molecule () :
   _set(false),
   _mass(0.0),
   _name(""),
-  _moltype(Molecule::NO_MOLECULE)
-{
+  _moltype(Molecule::NO_MOLECULE) {
   ++numMolecules;
 }
 
@@ -22,8 +21,7 @@ Molecule::Molecule (const Molecule& oldMol) :
   _name(oldMol._name),
   _ID (oldMol._ID),
   _moltype(oldMol._moltype),
-  _DCM (oldMol._DCM)
-{
+  _DCM (oldMol._DCM) {
   this->Rename(oldMol.Name());
   ++numMolecules;
 }
@@ -302,7 +300,6 @@ void Molecule::clear () {
 }
 
 double Molecule::MinDistance (Molecule& mol) {
-
   // go through the atoms on each molecule and calculate the distance between them, then return the minimum
   bool first = true;
   double min = 0.0;
@@ -326,154 +323,18 @@ double Molecule::MinDistance (Molecule& mol) {
   return (min);
 }
 
-// This builds a rotation matrix to rotate from the Lab-frame to the body-fixed frame coordinates
-void Molecule::RotateToMol (double vector[3]) const {
-
-  // here's the lab-frame coordinates
-  VecR X (1.0, 0.0, 0.0);
-  VecR Y (0.0, 1.0, 0.0);
-  VecR Z (0.0, 0.0, 1.0);
-
-  // now we build our direction cosine matrix (each element is the cosine of the angle between two axes
-  // The molecular-frame axes are already known as _x, _y, and _z
-  double rotation[3][3] = {
-	{ _x < X, _x < Y, _x < Z},
-	{ _y < X, _y < Y, _y < Z},
-	{ _z < X, _z < Y, _z < Z}
-  };
-
-  this->RotateVector(rotation, vector);
-
-  return;
-}
-
-void Molecule::RotateToMol (double matrix[][3]) const {
-
-  // here's the lab-frame coordinates
-  VecR X (1.0, 0.0, 0.0);
-  VecR Y (0.0, 1.0, 0.0);
-  VecR Z (0.0, 0.0, 1.0);
-
-  // now we build our direction cosine matrix (each element is the cosine of the angle between two axes
-  // The molecular-frame axes are already known as _x, _y, and _z
-  double rotation[3][3] = {
-	{ _x < X, _x < Y, _x < Z},
-	{ _y < X, _y < Y, _y < Z},
-	{ _z < X, _z < Y, _z < Z}
-  };
-
-  this->RotateMatrix(rotation, matrix);
-
-  return;
-}
-
-// This builds a rotation matrix to rotate from the Lab-frame to the body-fixed frame coordinates
-void Molecule::RotateToLab (double vector[3]) const {
-
-  // here's the lab-frame coordinates
-  VecR X (1.0, 0.0, 0.0);
-  VecR Y (0.0, 1.0, 0.0);
-  VecR Z (0.0, 0.0, 1.0);
-
-  // now we build our direction cosine matrix [transpose of the reverse operation - RotateToMol]
-  // (each element is the cosine of the angle between two axes)
-  // The molecular-frame axes are already known as _x, _y, and _z
-  double rotation[3][3] = {
-	{ _x < X, _y < X, _z < X},
-	{ _x < Y, _y < Y, _z < Y},
-	{ _x < Z, _y < Z, _z < Z}
-  };
-
-  this->RotateVector(rotation, vector);
-
-  return;
-}
-
-void Molecule::RotateToLab (double matrix[][3]) const {
-
-  // here's the lab-frame coordinates
-  VecR X (1.0, 0.0, 0.0);
-  VecR Y (0.0, 1.0, 0.0);
-  VecR Z (0.0, 0.0, 1.0);
-
-  // now we build our direction cosine matrix [transpose of the reverse operation - RotateToMol]
-  // (each element is the cosine of the angle between two axes)
-  // The molecular-frame axes are already known as _x, _y, and _z
-  double rotation[3][3] = {
-	{ _x < X, _y < X, _z < X},
-	{ _x < Y, _y < Y, _z < Y},
-	{ _x < Z, _y < Z, _z < Z}
-  };
-
-  this->RotateMatrix(rotation, matrix);
-
-  return;
-}
-
-void Molecule::RotateVector (double rotation[][3], double vector[3]) const {
-
-  double temp[3];		// a temp holder for the rotated vector
-
-  for (int i = 0; i < 3; i++) {
-	temp[i] = rotation[i][0]*vector[0] + rotation[i][1]*vector[1] + rotation[i][2]*vector[2];
-  }
-
-  // and lastly apply the changes to the input vector
-  for (int i = 0; i < 3; i++) {
-	vector[i] = temp[i];
-  }
-
-  return;
-}
-
-void Molecule::RotateMatrix (double rotation[][3], double matrix[][3]) const {
-
-  // apply the matrix rotation to the given matrix (probably something like the polarizability derivative matrix)
-
-  double temp[3][3];	// this is a temp output matrix to work with
-
-  for (int i = 0; i < 3; i++) {
-	for (int j = 0; j < 3; j++) {
-	  temp[i][j] = rotation[i][0]*matrix[0][j] + rotation[i][1]*matrix[1][j] + rotation[i][2]*matrix[2][j];
-	}
-  }
-
-  // and lastly apply the changes to the input matrix
-  for (int i = 0; i < 3; i++) {
-	for (int j = 0; j < 3; j++) {
-	  matrix[i][j] = temp[i][j];
-	}
-  }
-
-  return;
-}
-
-
 // returns the direction cosine matrix to the lab frame from the molecular one
-MatR const & Molecule::DCMToLab (const coord axis) {
+MatR const & Molecule::DCMToLab () {
   // These are the three lab-frame axes
-  VecR X, Y, Z;
-
-  if (axis == z) {
-	X.Set (1.,0.,0.);
-	Y.Set (0.,1.,0.);
-	Z.Set (0.,0.,1.);
-  }
-
-  // but if the system is funky and we want to use different lab-frame coords, perhaps treating the Y-axis as the primary axis, then this will work
-  // This is just changing the 'primary' axis used to define the 'tilt' angle when calculating Euler angles
-  if (axis == y) {
-	X.Set (0.,1.,0.);
-	Y.Set (0.,0.,1.);
-	Z.Set (1.,0.,0.);
-  }
+  VecR X = Vector3d::UnitX();
+  VecR Y = Vector3d::UnitY();
+  VecR Z = Vector3d::UnitZ();
 
   // Here we'll create the lab-frame rotation matrix to rotate molecular properties into the lab-frame
-  double rotation_data[9] = {	_x<X, _y<X, _z<X,
-	_x<Y, _y<Y, _z<Y,
-	_x<Z, _y<Z, _z<Z   };
-  MatR t (rotation_data);
-  this->_DCM = t.transpose();
+  _DCM.setZero(3,3);
+  _DCM << (_x < X) , (_y < X) , (_z < X),
+	   (_x < Y) , (_y < Y) , (_z < Y),
+	   (_x < Z) , (_y < Z) , (_z < Z);
 
   return _DCM;
 }
@@ -482,26 +343,10 @@ MatR const & Molecule::DCMToLab (const coord axis) {
  * _eulerangles is set up as [theta, phi, chi]
  */
 void Molecule::_FindEulerAngles () {
-
   // Theta - The angle between the reference and derived z-axes
   _eulerangles[0] = acos(_z[z]);
-
   // Phi, is then found similarly with x and y components from other axes
   _eulerangles[1] = atan2(_y[z], _x[z]);
-
-  /*
-  // Chi is not so obvious. We have to actually rotate the axes to find that last angle
-  double rotate[3][3];	// the rotation matrix
-  double angles[3] = {_eulerangles[0], _eulerangles[1], 0.0};
-  VecR rotatedZ = _oh2; // the rotated molecular Z-axis
-
-  this->RotateToLabLabFrame (rotate, angles);
-  this->RotateVector (rotate, rotatedZ.Coords());
-
-  // Chi is derived from a combination of the x and y components of the rotated z-axis in the reference frame
-  _eulerangles[2] = atan2(rotatedZ[y], rotatedZ[x]);	// Chi/Psi (depending on your choice of greek)
-   */
-
   // Chi is derived from a combination of the x and y components of the rotated z-axis in the reference frame
   _eulerangles[2] = atan2(-_z[y], _z[x]);
 
@@ -535,9 +380,9 @@ return (atoms);
 }
  */
 
+
 // if given a 2nd molecule, this will merge the current and the new molecules into one larger molecule.
 MolPtr Molecule::Merge (MolPtr mol) {
-
   printf ("merging two molecules:\n");
   this->Print();
   printf ("mol 2---\n");

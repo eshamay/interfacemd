@@ -9,42 +9,60 @@ Tester::Tester (WaterSystemParams& wsp)
 }
 
 void Tester::Setup () {
-
   if (!timestep)
 	rewind(output);
 
+  LoadAll();
   this->sys->SetReparseLimit(1);
 
   s = Atom::FindByElement (sys_atoms, Atom::S);
   bondgraph::distance_vec Os = this->sys->graph.ClosestAtoms (s, 2, Atom::O, true);
-  o1 = Os[0]->second;
-  o2 = Os[1]->second;
+  o1 = Os[0].second;
+  o2 = Os[1].second;
 
   return;
 }
 
 void Tester::Analysis () {
-
   LoadAll();
 
+  /*
+  // find out the hbond-distance factor for each O atom. 
+  // The Distance Factor is a dimensionless number that represents the position of a hydrogen between two oxygens.
+  // An H exactly in the middle of 2 oxygens will have Q=0.0
+  // an H sitting right on top of the water (target) oxygen will have a value of 1.0, and sitting right on top of the source (SO2) oxygen will have a value of -1.0
+  // Q = (dOH1 - dOH2)/D
+  // dOH1 = distance of H to SO2 Oxygen
+  // dOH2 = distance of H to H2O oxygen
+  // D = total distance
+  bondgraph::distance_pair h1_pair = this->sys->graph.ClosestAtom (o1, Atom::H);
+  bondgraph::distance_pair h2_pair = this->sys->graph.ClosestAtom (o2, Atom::H);
 
-  bondgraph::distance_vec closest_1 = this->sys->graph.ClosestAtoms (o1, 3);
-  bondgraph::distance_vec closest_2 = this->sys->graph.ClosestAtoms (o2, 3);
+  AtomPtr target_o1 = h1_pair.second->ParentMolecule()->GetAtom(Atom::O);
+  AtomPtr target_o2 = h2_pair.second->ParentMolecule()->GetAtom(Atom::O);
+
+  double target_distance1 = this->sys->graph.Distance(target_o1, h1_pair.second);
+  double target_distance2 = this->sys->graph.Distance(target_o2, h2_pair.second);
+
+  double Q1 = (h1_pair.first - target_distance1)/(h1_pair.first + target_distance1);
+  double Q2 = (h2_pair.first - target_distance2)/(h2_pair.first + target_distance2);
 
   // data output 
-  fprintf (output, "% 8d ", timestep);
+  fprintf (output, "% 8d % 8.4f % 8.4f\n", timestep, Q1, Q2);
+  */
+
   // atoms closest to o1
   fprintf (output, "o1 -- ");
   for (bondgraph::distance_vec::const_iterator it = closest_1.begin(); it != closest_1.end(); it++) {
-	printf ("% 8.4f (%s/%d) ", it->first, it->second->Name().c_str(), it->second->ID());
+	fprintf (output, "% 8.4f (%s/%d) ", it->first, it->second->Name().c_str(), it->second->ID());
   }
 
   // atoms closest to o2
   fprintf (output, "o2 -- ");
   for (bondgraph::distance_vec::const_iterator it = closest_2.begin(); it != closest_2.end(); it++) {
-	printf ("% 8.4f (%s/%d) ", it->first, it->second->Name().c_str(), it->second->ID());
+	fprintf (output, "% 8.4f (%s/%d) ", it->first, it->second->Name().c_str(), it->second->ID());
   }
-  printf ("\n");
+  fprintf (output, "\n");
 
   return;
 }
@@ -63,13 +81,11 @@ void Tester::DataOutput () {
 }
 
 void Tester::PostAnalysis () {
-
   return;
 }
 
 
 int main () {
-
   libconfig::Config cfg;
   cfg.readFile("system.cfg");
 

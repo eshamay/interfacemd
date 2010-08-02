@@ -2,16 +2,14 @@
 int NitricAcid::numNitricAcids = 0;
 
 NitricAcid::NitricAcid () : Molecule () {
-  _centerofmass.Zero();
-  _mass = 0.0;
-  _name = "hno3";
+  this->Rename("hno3");
   _moltype = Molecule::HNO3;
 
-  _n = (Atom *)NULL;
-  _h = (Atom *)NULL;
-  _oh = (Atom *)NULL;
-  _o1 = (Atom *)NULL;
-  _o2 = (Atom *)NULL;
+  _n = (AtomPtr)NULL;
+  _h = (AtomPtr)NULL;
+  _oh = (AtomPtr)NULL;
+  _o1 = (AtomPtr)NULL;
+  _o2 = (AtomPtr)NULL;
 
   _set = false;
 
@@ -98,8 +96,8 @@ void NitricAcid::SetAtoms () {
   if (!_set) {
 
 	// here's the hydrogen and nitrogen atoms
-	_h = (*this)["H"];
-	_n = (*this)["N"];
+	_h = this->GetAtom(Atom::H);
+	_n = this->GetAtom(Atom::N);
 
 	std::vector< std::vector<double> > oxygens;
 
@@ -111,8 +109,7 @@ void NitricAcid::SetAtoms () {
 
 	  std::vector<double> temp;
 	  // find the distance from each oxygen to the hydrogen
-	  double distance = (_h->Position() - (*it)->Position()).Magnitude();
-	  //double distance = _atoms[i]->Position().MinDistance (_h->Position(), Atom::Size());
+	  double distance = MDSystem::Distance(_h, *it).norm();
 	  temp.push_back (distance);
 	  temp.push_back ((double)i++);
 
@@ -154,15 +151,13 @@ VecR NitricAcid::NO2Bisector () {
 int Nitrate::numNitrates = 0;
 
 Nitrate::Nitrate () : Molecule () {
-  _centerofmass.Zero();
-  _mass = 0.0;
   this->Rename("no3");
   _moltype = Molecule::NO3;
 
-  _n = (Atom *)NULL;
-  _o1 = (Atom *)NULL;
-  _o2 = (Atom *)NULL;
-  _o3 = (Atom *)NULL;
+  _n = (AtomPtr)NULL;
+  _o1 = (AtomPtr)NULL;
+  _o2 = (AtomPtr)NULL;
+  _o3 = (AtomPtr)NULL;
 
   _set = false;
 
@@ -178,7 +173,7 @@ Nitrate::~Nitrate () {
 void Nitrate::SetAtoms () {
 
   // here's the hydrogen and nitrogen atoms
-  _n = (*this)["N"];
+  _n = this->GetAtom(Atom::N);
 
   // now set the 3 oxygens
   Atom_ptr_vec oxygens;

@@ -6,7 +6,7 @@ AmberSystem::AmberSystem (const std::string& prmtop, const std::string& mdcrd, c
   _coords(mdcrd, _topfile.NumAtoms()),
   _forces(mdvel, _topfile.NumAtoms())
 {
-  _atoms = Atom_ptr_vec(_topfile.NumAtoms(), (Atom *)NULL);
+  _atoms = Atom_ptr_vec(_topfile.NumAtoms(), (AtomPtr)NULL);
 
   // because some really useful functionality comes out of the Atom class if the Atom::Size() is set, we'll do that here
   MDSystem::Dimensions (_coords.Dims());

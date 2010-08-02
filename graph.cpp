@@ -8,23 +8,19 @@ namespace bondgraph {
   BondGraph::PropertyMap<double,BondGraph::EdgeProperties>::Type BondGraph::b_length = get(&EdgeProperties::distance, _graph);
   BondGraph::PropertyMap<bondtype,BondGraph::EdgeProperties>::Type BondGraph::b_type = get(&EdgeProperties::btype, _graph);
 
-  BondGraph::PropertyMap<Atom *,BondGraph::VertexProperties>::Type BondGraph::v_atom = get(&VertexProperties::atom, _graph);
+  BondGraph::PropertyMap<AtomPtr,BondGraph::VertexProperties>::Type BondGraph::v_atom = get(&VertexProperties::atom, _graph);
   BondGraph::PropertyMap<VecR,BondGraph::VertexProperties>::Type BondGraph::v_position = get(&VertexProperties::position, _graph);
   BondGraph::PropertyMap<Atom::Element_t,BondGraph::VertexProperties>::Type BondGraph::v_elmt = get(&VertexProperties::element, _graph);
 
 
-
-  BondGraph::BondGraph ()
-	:
-	  _sys_type("xyz")
-  { return; }
-
+  BondGraph::BondGraph () :
+	  _sys_type("xyz") { 
+		return; }
 
 
   BondGraph::BondGraph (const Atom_ptr_vec& atoms, const std::string& sys)
 	:
-	  _sys_type(sys)
-  {
+	  _sys_type(sys) {
 	this->UpdateGraph(atoms);
 	return;
   }
@@ -39,7 +35,6 @@ namespace bondgraph {
 
 
   void BondGraph::_ParseAtoms (const Atom_ptr_vec& atoms) {
-
 	// set all the vertices to contain the proper info
 	Vertex v;
 	int i = 0;
@@ -58,7 +53,6 @@ namespace bondgraph {
   // Calculate the distance between each of the atoms and update the graph edge list with bonds between them
   // Edges/bonds should only exist between atoms that are bound in some fashion (h-hond, covalent, etc.)
   void BondGraph::_ParseBonds () {
-
 	// first clear out all the bonds from before
 	this->_ClearBonds();
 
@@ -186,7 +180,6 @@ namespace bondgraph {
   }
 
   void BondGraph::UpdateGraph (const Atom_ptr_vec& atoms) {
-
 	// clear out the old graph info
 	_graph.clear();
 	// resize the graph with new vertices
@@ -206,7 +199,6 @@ namespace bondgraph {
   }
 
   void BondGraph::_SetBond (const Vertex& vi, const Vertex& vj, const double bondlength, const bondtype btype) {
-
 	bool b;
 	Edge e;
 
@@ -224,7 +216,6 @@ namespace bondgraph {
   }
 
   BondGraph::Vertex_it BondGraph::_FindVertex (const AtomPtr atom) const {
-
 	Vertex_it vi, vi_end, next;
 	tie(vi, vi_end) = vertices(_graph);
 	for (next = vi; vi != vi_end; vi = next) {
@@ -243,9 +234,7 @@ namespace bondgraph {
   }
 
   // returns a list of the atoms bonded to the given atom
-  Atom_ptr_vec BondGraph::BondedAtoms (const AtomPtr ap, bondtype const btype, Atom::Element_t const elmt) const 
-  {
-
+  Atom_ptr_vec BondGraph::BondedAtoms (const AtomPtr ap, bondtype const btype, Atom::Element_t const elmt) const {
 	Atom_ptr_vec atoms;
 	Vertex_it va = this->_FindVertex(ap);
 	Edge e;
@@ -271,12 +260,10 @@ namespace bondgraph {
   }	// Bonded atoms
 
   int BondGraph::NumHBonds (const AtomPtr ap) const {
-
 	return (this->BondedAtoms(ap, hbond).size());
   }
 
   int BondGraph::NumHBonds (const WaterPtr wat) const {
-
 	int num = 0;
 	for (Atom_it it = wat->begin(); it != wat->end(); it++) {
 	  num += this->NumHBonds(*it);
@@ -287,7 +274,6 @@ namespace bondgraph {
 
   // calculates the water bonding coordination of a given water molecule
   coordination BondGraph::WaterCoordination (const WaterPtr wat) const {
-
 	int c = 0;
 	for (Atom_it atom = wat->begin(); atom != wat->end(); atom++) {
 	  int bonds = NumHBonds (*atom);
@@ -304,7 +290,6 @@ namespace bondgraph {
 
 
   void BondGraph::_ResolveSharedHydrogens () {
-
 	/*
 	// if any of the Hs are being shared between two molecules (i.e. a contact-ion pair) then we have to resolve which molecule gets the atom.
 	// A simple solution is to decide that the molecule with the oxygen closer to the hydrogen is the one that wins out
@@ -374,7 +359,6 @@ namespace bondgraph {
   }
 
   double BondGraph::Distance (const AtomPtr a1, const AtomPtr a2) const {
-
 	Vertex_it vi, vj;
 	vi = this->_FindVertex (a1);
 	vj = this->_FindVertex (a2);
@@ -382,9 +366,7 @@ namespace bondgraph {
 	return Distance(*vi,*vj);
   }
 
-  distance_pair BondGraph::ClosestAtom (const MolPtr& mol, const Atom::Element_t elmt, bool SameMoleculeCheck) const
-  {
-
+  distance_pair BondGraph::ClosestAtom (const MolPtr& mol, const Atom::Element_t elmt, bool SameMoleculeCheck) const {
 	distance_vec distances;
 
 	for (Atom_it it = mol->begin(); it != mol->end(); it++) {
@@ -398,12 +380,10 @@ namespace bondgraph {
 
 
   distance_pair BondGraph::ClosestAtom (const AtomPtr atom, const Atom::Element_t elmt, bool SameMoleculeCheck) const {
-
 	return ClosestAtoms (atom, 1, elmt, SameMoleculeCheck)[0];
   }	// Closest Atom
 
   distance_vec BondGraph::ClosestAtoms (const AtomPtr atom, const int num, const Atom::Element_t elmt, bool SameMoleculeCheck) const {
-
 	distance_vec distances;
 
 	// find the distance between the target atom and all the other atoms in the system
@@ -434,7 +414,6 @@ namespace bondgraph {
   }
 
   distance_vec BondGraph::ClosestAtoms (const MolPtr mol, const int num, const Atom::Element_t elmt, bool SameMoleculeCheck) const {
-
 	distance_vec distances;
 	for (Atom_it atom = mol->begin(); atom != mol->end(); atom++) {
 	  distance_vec closest = ClosestAtoms (*atom, 10, elmt, false);
@@ -453,7 +432,6 @@ namespace bondgraph {
 
 
   BondGraph::Edge BondGraph::_GetBond (const Vertex& vi, const Vertex& vj) const {
-
 	Edge e;
 	bool b;
 	tie (e,b) = edge(vi, vj, _graph);
@@ -470,7 +448,6 @@ namespace bondgraph {
   }	// _Get Bond
 
   BondGraph::Edge BondGraph::_GetBond (const AtomPtr a1, const AtomPtr a2) const {
-
 	Vertex_it v1 = this->_FindVertex(a1);
 	Vertex_it v2 = this->_FindVertex(a2);
 	Edge e = this->_GetBond(*v1, *v2);
@@ -479,7 +456,6 @@ namespace bondgraph {
   }
 
   void BondGraph::_RemoveBond (const Vertex& vi, const Vertex& vj) {
-
 	Edge e = this->_GetBond(vi, vj);
 	remove_edge(e, _graph);
 
@@ -487,11 +463,9 @@ namespace bondgraph {
   }
 
   void BondGraph::_RemoveBond (const AtomPtr a1, const AtomPtr a2) {
-
 	Edge e = this->_GetBond (a1, a2);
 	remove_edge(e, _graph);
 
 	return;
   }
-
 }	// namespace bondgraph

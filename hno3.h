@@ -18,7 +18,7 @@ protected:
 	VecR_vec _no2wanniers;
 
 	bool _set;								// to let us know if the atom have been set in the molecule
-	Atom *_oh, *_n, *_h, *_o1, *_o2;		// Pointers to the various atoms in the nitric acid. These are static for no
+	AtomPtr _oh, _n, _h, _o1, _o2;		// Pointers to the various atoms in the nitric acid. These are static for no
 	VecR _voh;
 											// meaning that they're set at the the first formation of the molecule
 

@@ -11,12 +11,10 @@ USING_PART_OF_NAMESPACE_EIGEN
 
 class Tester : public Analyzer<XYZSystem>
 {
-
   public:
 	Tester (WaterSystemParams& params);
 
   private:
-
 	void Setup ();
 	void Analysis ();
 	void DataOutput ();

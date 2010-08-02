@@ -96,7 +96,7 @@ namespace bondgraph {
 	  typedef graph_traits<Graph>::edge_descriptor Edge;
 	  typedef graph_traits<Graph>::edge_iterator Edge_it;
 	  typedef graph_traits<Graph>::adjacency_iterator Adj_it;
-	  typedef std::vector<Atom *> Atom_ptr_vec;
+	  typedef std::vector<AtomPtr> Atom_ptr_vec;
 
 	  // generic property maps
 	  template <class T, class Property_T> struct PropertyMap

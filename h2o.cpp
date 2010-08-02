@@ -44,13 +44,13 @@ void Water::SetAtoms () {
 	if ((*it)->Element() == Atom::O)
 	  this->_o = *it;
 	if ((*it)->Element() == Atom::H) {
-	  if (_h1 == (Atom *)NULL)
+	  if (_h1 == (AtomPtr)NULL)
 		this->_h1 = *it;
 	  else
 		this->_h2 = *it;
 	}
 
-	if (*it == (Atom *)NULL) {
+	if (*it == (AtomPtr)NULL) {
 	  std::cout << "problem setting the water atoms! Water::SetAtoms()" << std::endl;
 	}
   }
@@ -189,12 +189,19 @@ return;
 #endif
  */
 
+
+
 // The molecular axes are defined as per Morita&Hynes (2000) where they set one of the OH bonds (oh1) as the molecular z-axis, and the other bond points in the positive x-axis direction. The result is setting DCM as the direction cosine matrix, that, when operating on a vector in the molecular frame will rotate it into lab-frame coordinates
-MatR const & Water::DCMToLabMorita (const coord axis, const int bond) {
+MatR const & Water::DCMToLabMorita (const int bond) {
   this->SetMoritaAxes (bond);
 
-  this->DCMToLab (axis);
+  Molecule::DCMToLab ();
 
+  return _DCM;
+}
+
+MatR const & Water::DCMToLab () {
+  this->DCMToLabMorita();
   return _DCM;
 }
 
@@ -208,11 +215,11 @@ MatR const & Water::DCMToLabOrder () {
 }
 
 // this should calculate the Euler Angles to get from the molecular frame to the lab frame
-void Water::CalcEulerAngles (const coord axis) {
+void Water::CalcEulerAngles () {
 
   // First let's set up the direction cosine matrix. The values of the euler angles come from that.
   // Don't forget to set the molecular axes before using this!
-  this->DCMToLab (axis);
+  this->DCMToLab ();
 
   // here is the direct calculation of the euler angles from the direction cosine matrix. This method comes from wikipedia of all places :)
   double x3 = _DCM(0,2);

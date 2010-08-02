@@ -9,7 +9,7 @@ void GROFile::_ParseSystem () {
   fscanf (_file, " %d", &_natoms);	// grab the number of atoms
   fgets (title, 500, _file);		// clear out the rest of the line
 
-  _atoms.resize(_natoms, (Atom *)NULL);
+  _atoms.resize(_natoms, (AtomPtr)NULL);
 
   int oldresnum = 1;
   int newresnum = 1;

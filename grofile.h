@@ -36,7 +36,7 @@ class GROFile {
     Atom_ptr_vec& Atoms() { return _atoms; }
     Mol_ptr_vec& Molecules() { return _mols; }
 
-    Atom * operator[] (const int index) { return _atoms[index]; }
+    AtomPtr operator[] (const int index) { return _atoms[index]; }
 
   private:
     FILE * _file;

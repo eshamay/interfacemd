@@ -10,7 +10,7 @@ class Hydronium: public Molecule {
 
 protected:
 	VecR _oh1, _oh2, _oh3;				// Both of the OH vectors
-	Atom *_o, *_h1, *_h2, *_h3;			// pointers to the atoms for easy access
+	AtomPtr _o, _h1, _h2, _h3;			// pointers to the atoms for easy access
 
 public:
 	Hydronium ();

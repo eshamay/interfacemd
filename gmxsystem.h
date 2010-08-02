@@ -8,9 +8,6 @@
 #include "grofile.h"
 
 
-typedef std::vector<Atom *> Atom_ptr_vec;
-typedef std::vector<Molecule *> Mol_ptr_vec;
-
 class GMXSystem : public MDSystem {
 
   public:

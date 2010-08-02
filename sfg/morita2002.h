@@ -4,10 +4,11 @@
 #include "../analysis.h"
 #include "sfgunits.h"
 #include "../tensor.h"
-#include <boost/shared_ptr.hpp>
+#include <Eigen/LU>
+//#include <boost/shared_ptr.hpp>
 #include <boost/timer.hpp>
 #include <iostream>
-#include <fftw3.h>
+//#include <fftw3.h>
 #include <mkl_blas.h>
 #include <mkl_lapack.h>
 
@@ -75,7 +76,7 @@ namespace morita {
 	  double qO, qH1, qH2;		// charges calculated from the MoritaHynes 2002 method
   };	// morita-h2o
 
-  typedef boost::shared_ptr<MoritaH2O>	MoritaH2O_ptr;
+  typedef MoritaH2O * MoritaH2O_ptr;
   typedef std::vector<MoritaH2O_ptr> Morita_ptr_vec;
   typedef Morita_ptr_vec::const_iterator Morita_it;
 
@@ -88,16 +89,6 @@ namespace morita {
 	public:
 	  DipoleFieldTensor (const MoritaH2O_ptr wat1, const MoritaH2O_ptr wat2);
   }; // Dipole field tensor
-
-  class SetDipoleMoment : public std::unary_function<MoritaH2O_ptr,void> {
-	public:
-	  void operator() (MoritaH2O_ptr& wat) { wat->SetDipoleMoment(); }
-  };
-
-  class SetPolarizability : public std::unary_function<MoritaH2O_ptr,void> {
-	public:
-	  void operator() (MoritaH2O_ptr& wat) { wat->SetPolarizability(); }
-  };
 
 
 
@@ -120,6 +111,7 @@ namespace morita {
 	  MatrixXd	 	_IDENT;	// a few temporaries for calculating eq 23
 	  MatrixXd		_g;	
 	  MatrixXd		_f;	
+	  MatrixXd		_h;
 
 	  MatR			_A;		// total system polarizability
 	  VecR			_M;		// total system dipole moment (at time zero)

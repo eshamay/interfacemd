@@ -10,7 +10,7 @@ class Hydroxide: public Molecule {
 
 protected:
 	VecR _oh;				// The OH bond vector
-	Atom *_o, *_h;			// pointers to the atoms for easy access
+	AtomPtr _o, _h;			// pointers to the atoms for easy access
 
 public:
 	Hydroxide ();

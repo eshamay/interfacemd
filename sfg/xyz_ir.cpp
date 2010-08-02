@@ -13,21 +13,23 @@ void XYZSFGAnalyzer::Setup () {
   this->sys->SetReparseLimit(1);
 
   return;
-}
+}	// Setup
 
 void XYZSFGAnalyzer::Analysis () {
 
   LoadAll();
 
   VecR M (0.0,0.0,0.0);
+  MolPtr so2 = Molecule::FindByType(sys_mols, Molecule::SO2);
 
-  for (Mol_it mol = sys_mols.begin(); mol != sys_mols.end(); mol++) {
-	M += this->sys->CalcDipole(*mol);
-  }
+  M = this->sys->CalcDipole(so2);
+  //for (Mol_it mol = sys_mols.begin(); mol != sys_mols.end(); mol++) {
+	//M += this->sys->CalcDipole(*mol);
+  //}
   _M.push_back(M);
 
   return;
-}
+}	// Analysis
 
 void XYZSFGAnalyzer::DataOutput () {
 
@@ -78,7 +80,7 @@ void XYZSFGAnalyzer::DataOutput () {
    */
 
   return; 
-}
+}	// data output
 
 
 
