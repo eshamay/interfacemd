@@ -1,3 +1,4 @@
+#pragma once
 #ifndef CRDFILE_H_
 #define CRDFILE_H_
 

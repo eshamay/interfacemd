@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ANALYSIS_H_
 #define ANALYSIS_H_
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GMXSYSTEM_H_
 #define GMXSYSTEM_H_
 

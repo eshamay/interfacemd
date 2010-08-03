@@ -1,3 +1,4 @@
+#pragma once
 #ifndef HNO3_H_
 #define HNO3_H_
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MDSYSTEM_H_
 #define MDSYSTEM_H_
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef FORCEFILE_H_
 #define FORCEFILE_H_
 

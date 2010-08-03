@@ -52,7 +52,6 @@ void AmberSystem::_ParseAtomInformation () {
 // This function copies the coordinates and force vectors into each of the atoms from the input files
 void AmberSystem::_ParseAtomVectors () {
 
-  int i = 0;
   Atom_it atom_i = _atoms.begin();
   VecR_it coord_i = _coords.begin();
   VecR_it force_i = _forces.begin();

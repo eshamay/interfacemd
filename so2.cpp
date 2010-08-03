@@ -25,7 +25,7 @@ SulfurDioxide::SulfurDioxide (const MolPtr& mol)
 
 void SulfurDioxide::SetAtoms () {
 
-  _s = this->GetAtom("S");
+  _s = this->GetAtom(Atom::S);
   _o1 = (AtomPtr)NULL; _o2 = (AtomPtr)NULL;
 
   for (Atom_it it = this->begin(); it != this->end(); it++) {
@@ -36,6 +36,8 @@ void SulfurDioxide::SetAtoms () {
 		_o2 = *it;
 	}
   }
-  this->FixAtoms();
+
+  this->_so1 = this->_o1->Position() - this->_s->Position();
+  this->_so2 = this->_o2->Position() - this->_s->Position();
   return;
 }

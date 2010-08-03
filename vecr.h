@@ -1,3 +1,4 @@
+#pragma once
 #ifndef VECR_H_
 #define VECR_H_
 

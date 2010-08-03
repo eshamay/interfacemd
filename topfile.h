@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TOPFILE_H_
 #define TOPFILE_H_
 

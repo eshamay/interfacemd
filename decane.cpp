@@ -24,7 +24,7 @@ void Decane::SetAtoms () {
 
   // Runs through the list of atoms in the system and returns all the carbons
   typedef const Atom::Element_t& (Atom::*fn)() const;
-  md_utility::copy_if (this->begin(), this->end(), std::back_inserter(_carbons), md_utility::mem_fun_eq(&Atom::Element, Atom::C));
+  algorithm_extra::copy_if (this->begin(), this->end(), std::back_inserter(_carbons), member_functional::mem_fun_eq(&Atom::Element, Atom::C));
 
   /*
   // Go through and assign each carbon to the slot in the ordered list

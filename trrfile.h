@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TRRFILE_H_
 #define TRRFILE_H_
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef H_H_
 #define H_H_
 

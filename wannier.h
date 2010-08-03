@@ -1,3 +1,4 @@
+#pragma once
 #ifndef WANNIER_H_
 #define WANNIER_H_
 

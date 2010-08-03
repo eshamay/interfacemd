@@ -1,3 +1,4 @@
+#pragma once
 #ifndef H2O_H_
 #define H2O_H_
 

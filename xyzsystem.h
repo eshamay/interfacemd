@@ -1,3 +1,4 @@
+#pragma once
 #ifndef XYZSYSTEM_H_
 #define XYZSYSTEM_H_
 
@@ -28,7 +29,7 @@ private:
 
 	// Parses a simple molecule that is composed of a central atom, and all other atoms are connected to it - i.e. h2o, no3, ccl4, etc
 	template <typename T>
-	  void _ParseSimpleMolecule (const Atom::Element_t central_elmt, const Atom::Element_t outer_elmt, const int numOuter);
+	  void _ParseSimpleMolecule (const Atom::Element_t central_elmt, const Atom::Element_t outer_elmt, const unsigned numOuter);
 
 	/* mor specialized parsing routines */
 
@@ -85,7 +86,7 @@ public:
 
 
 template <typename T>
-void XYZSystem::_ParseSimpleMolecule (const Atom::Element_t central_elmt, const Atom::Element_t outer_elmt, const int numOuter) {
+void XYZSystem::_ParseSimpleMolecule (const Atom::Element_t central_elmt, const Atom::Element_t outer_elmt, const unsigned numOuter) {
 
   for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++) {
 

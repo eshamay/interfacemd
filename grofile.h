@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GROFILE_H_
 #define GROFILE_H_
 

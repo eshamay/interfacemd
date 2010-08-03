@@ -373,7 +373,7 @@ namespace bondgraph {
 	  distances.push_back ((ClosestAtoms (*it, 1, elmt, SameMoleculeCheck))[0]);
 	}
 
-	md_utility::pair_sort_first(distances.begin(), distances.end());
+	pair_utility::pair_sort_first(distances.begin(), distances.end());
 
 	return distances[0];
   }
@@ -407,7 +407,7 @@ namespace bondgraph {
 	}
 
 	// sort all the distances to find the one closest
-	md_utility::pair_sort_first(distances.begin(), distances.end());
+	pair_utility::pair_sort_first(distances.begin(), distances.end());
 	distances.erase (distances.begin()+num, distances.end());
 
 	return distances;
@@ -420,10 +420,10 @@ namespace bondgraph {
 	  std::copy (closest.begin(), closest.end(), std::back_inserter(distances));
 	}
 
-	md_utility::pair_sort_first (distances.begin(), distances.end());
-	distance_vec::const_iterator it = std::unique(distances.begin(), distances.end(), md_utility::pair_equal_second_pred<distance_pair>());
+	pair_utility::pair_sort_first (distances.begin(), distances.end());
+	distance_vec::const_iterator it = std::unique(distances.begin(), distances.end(), pair_utility::pair_equal_second_pred<distance_pair>());
 	distances.resize(it - distances.begin());
-	md_utility::pair_sort_first (distances.begin(), distances.end());
+	pair_utility::pair_sort_first (distances.begin(), distances.end());
 	distances.resize(num);
 
 	return distances;

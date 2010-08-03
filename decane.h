@@ -1,3 +1,4 @@
+#pragma once
 #ifndef DECANE_H_
 #define DECANE_H_
 

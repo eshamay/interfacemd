@@ -1,3 +1,4 @@
+#pragma once
 #ifndef AMBERSYSTEM_H_
 #define AMBERSYSTEM_H_
 

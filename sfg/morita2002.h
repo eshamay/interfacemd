@@ -129,6 +129,7 @@ namespace morita {
 
 
 
+  /*
   // Using the LAPACK solver for some simple systems
   extern "C" {
 
@@ -137,6 +138,7 @@ namespace morita {
 	void pdgesv_ (int *n, int *nrhs, double *A, int *ia, int *ja, int *desca, int* ipiv, double *B, int *ib, int *jb, int *descb, int *info); 
 
   } // extern
+  */
 
 
 

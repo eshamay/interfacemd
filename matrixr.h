@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MATRIXR_H_
 #define MATRIXR_H_
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef CARBONCHAIN_H_
 #define CARBONCHAIN_H_
 

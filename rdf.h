@@ -1,3 +1,4 @@
+#pragma once
 #ifndef __RDF_H_
 #define __RDF_H_
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef __UTIL_H
 #define __UTIL_H
 
@@ -11,56 +12,39 @@
 #include <vector>
 
 
-namespace md_utility {
+namespace pair_utility {
 
-  // copy_if was dropped from the standard library by accident.
-  template<typename In, typename Out, typename Pred>
-	Out copy_if(In first, In last, Out res, Pred Pr)
-	{
-	  while (first != last) {
-		if (Pr(*first))
-		  *res++ = *first;
-		++first;
-	  }
-
-	  return res;
-	} 
-
-
-  // generic adaptor predicate to perform a comparison (equality test) between 2 objects using the same getter function
-  template<typename U, typename R>
-	class mem_fun_cmp_t : public std::binary_function<U const*, U const*, bool> {
-	  private:
-		R (U::*fn_)() const;
+  // takes a reference to a pair and returns the first element
+  template <class T, class U>
+	class pair_ref_first : public std::unary_function<T,U> {
 	  public:
-		mem_fun_cmp_t(R (U::*fn )() const) : fn_(fn), val_(val){}
-		bool operator()(U * lhs, U * rhs) { 
-		  return (lhs->*fn_)() == (rhs->*fn_)(); 
-		}
+		U operator() (const T& t) const
+		{ return t.first; }
 	};
 
-  template<typename U, typename R>
-	mem_fun_cmp_t<U,R> mem_fun_cmp(R (U::*fn)() const)
-	{ return mem_fun_cmp_t<U,R>(fn); }
+  // takes a pointer to a pair and returns the first element
+  template <class T, class U>
+	class pair_first : public std::unary_function<T,U> {
+	  public:
+		U operator() (const T& t) const
+		{ return t->first; }
+	};
 
+  // takes a reference to a pair and returns the second element
+  template <class T, class U>
+	class pair_ref_second : public std::unary_function<T,U> {
+	  public:
+		U operator() (const T& t) const
+		{ return t.second; }
+	};
 
-  // generic predicate for comparing an attribute method of a list of object pointers to a specified test value
-  template<typename U, typename R, typename S>
-	class mem_fun_eq_t : public std::unary_function<U const*, bool>
-  {
-	private:
-	  R (U::*fn_)() const;
-	  S val_;
-	public:
-	  mem_fun_eq_t(R (U::*fn )() const, S val) : fn_(fn), val_(val){}
-	  bool operator()(U * u) { return (u->*fn_)() == val_; }
-  };
-
-  template<typename U, typename R, typename S>
-	mem_fun_eq_t<U, R, S> mem_fun_eq(R (U::*fn)() const, S val)
-	{ return mem_fun_eq_t<U, R, S>(fn, val); }
-
-
+  // takes a pointer to a pair and returns the second element
+  template <class T, class U>
+	class pair_second : public std::unary_function<T,U> {
+	  public:
+		U operator() (const T& t) const
+		{ return t->second; }
+	};
 
   /* A functor that takes a std::pair as a constructor argument, and all applications of the tester will test pairs against the initial one given. */
   template <class T>
@@ -96,6 +80,15 @@ namespace md_utility {
 		}
 	};
 
+  // function object comparator for pairs using the 2nd element
+  template <typename T>
+	class pair_second_less_than : public std::binary_function<T,T,bool> {
+	  public:
+		bool operator()(const T& left, const T& right) const {
+		  return left.second < right.second;
+		}
+	};
+
 
 
   // sorts a container of pairs by the first element of the pairs
@@ -105,18 +98,77 @@ namespace md_utility {
 	  std::sort (first, last, pair_sort_first_pred<val_t>());
 	}	// Pair sort first
 
+}	// pair utilities
 
 
+
+namespace algorithm_extra {
+
+  // copy_if was dropped from the standard library by accident.
+  template<typename In, typename Out, typename Pred>
+	Out copy_if(In first, In last, Out res, Pred Pr)
+	{
+	  while (first != last) {
+		if (Pr(*first))
+		  *res++ = *first;
+		++first;
+	  }
+
+	  return res;
+	} 
+
+}	// algorithm extra
+
+namespace member_functional {
+
+  // generic adaptor predicate to perform a comparison (equality test) between 2 objects using the same getter function
+  template<typename U, typename R>
+	class mem_fun_cmp_t : public std::binary_function<U const*, U const*, bool> {
+	  private:
+		R (U::*fn_)() const;
+	  public:
+		mem_fun_cmp_t(R (U::*fn )() const) : fn_(fn) { }
+		bool operator()(U * lhs, U * rhs) { 
+		  return (lhs->*fn_)() == (rhs->*fn_)(); 
+		}
+	};
+
+  template<typename U, typename R>
+	mem_fun_cmp_t<U,R> mem_fun_cmp(R (U::*fn)() const)
+	{ return mem_fun_cmp_t<U,R>(fn); }
+
+
+  // generic predicate for comparing an attribute method of a list of object pointers to a specified test value
+  template<typename U, typename R, typename S>
+	class mem_fun_eq_t : public std::unary_function<U const*, bool>
+  {
+	private:
+	  R (U::*fn_)() const;
+	  S val_;
+	public:
+	  mem_fun_eq_t(R (U::*fn )() const, S val) : fn_(fn), val_(val){}
+	  bool operator()(U * u) { return (u->*fn_)() == val_; }
+  };
+
+  template<typename U, typename R, typename S>
+	mem_fun_eq_t<U, R, S> mem_fun_eq(R (U::*fn)() const, S val)
+	{ return mem_fun_eq_t<U, R, S>(fn, val); }
+
+} // class member functional
+
+
+
+namespace md_name_utilities {
 
   /********* routines for names ************/
   /*  replaced by mem_fun_cmp
-  template <class U>
-	struct SameName : public std::binary_function<U,U,bool> {
+	  template <class U>
+	  struct SameName : public std::binary_function<U,U,bool> {
 	  bool operator() (const U& left, const U& right) const {
-		return left->Name() == right->Name();
+	  return left->Name() == right->Name();
 	  }
-	};
-	*/
+	  };
+   */
 
   // predicate to test if the name of an atom or molecule (determined by the template parameter) is found in a vector of names
   template <class U>
@@ -131,7 +183,7 @@ namespace md_utility {
   template <class U> 
 	void KeepByName (U& u, std::string& name) {
 	  u.erase(
-		  remove_if(u.begin(), u.end(), std::not1(mem_fun_eq(&U::Name, name))), u.end()
+		  remove_if(u.begin(), u.end(), std::not1(member_functional::mem_fun_eq(&U::Name, name))), u.end()
 		  );
 	  return;
 	}
@@ -148,7 +200,7 @@ namespace md_utility {
   template <class U> 
 	void RemoveByName (U& u, std::string& name) {
 	  u.erase(
-		  remove_if(u.begin(), u.end(), mem_fun_eq(&U::Name, name)), u.end()
+		  remove_if(u.begin(), u.end(), member_functional::mem_fun_eq(&U::Name, name)), u.end()
 		  );
 	  return;
 	}
@@ -161,10 +213,13 @@ namespace md_utility {
 	  return;
 	}
 
-}	// namespace md_utility
+}	// namespace md name utilities
 
 
 namespace histogram {
+
+  typedef std::pair<double, int> histo_pair;
+  typedef std::vector<histo_pair> histogram_t;
 
   template <typename T>
 	class ValueBetween : public std::binary_function<T,std::pair<T,T>,bool> {
@@ -174,9 +229,20 @@ namespace histogram {
 		}
 	}; // value between - predicate
 
+
+  // takes a vector<pair> type of histogram, where each element is a <val,int> pair with int being the population of the val. Return is the maximum population size
   template <typename Iter> 
-	//std::vector< std::pair<typename std::iterator_traits<Iter>::value_type, int> > 
-	std::vector< std::pair<double, int> > 
+	int MaxPopulation (Iter first, Iter last) {
+
+	  typedef typename std::iterator_traits<Iter>::value_type pair_t;
+	  std::vector<int> vi;
+	  std::transform (first, last, std::back_inserter(vi), pair_utility::pair_ref_second<pair_t,int>());
+	  return *std::max_element(vi.begin(), vi.end());
+	}	// Max population
+
+
+  template <typename Iter> 
+	std::vector< std::pair<typename std::iterator_traits<Iter>::value_type, int> > 
 	Histogram (Iter first, Iter last, const int num_bins) {
 
 	  typedef typename std::iterator_traits<Iter>::value_type val_t;

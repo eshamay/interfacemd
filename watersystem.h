@@ -1,3 +1,4 @@
+#pragma once
 #ifndef	WATERSYSTEM_H_
 #define	WATERSYSTEM_H_
 
@@ -186,10 +187,7 @@ class WaterSystem {
 	  int_wats.clear();
 
 	  // copy over all the water molecules into the int_wats container
-	  md_utility::copy_if (sys_mols.begin(), sys_mols.end(), std::back_inserter(int_wats), md_utility::mem_fun_eq(&Molecule::MolType, Molecule::H2O));
-
-	  //std::remove_copy_if(		// have to use remove_copy_if because the STL doesn't have a copy_if!!!
-		  //sys_mols.begin(), sys_mols.end(), std::back_inserter(int_wats), std::not1(md_utility::mem_fun_eq(&Molecule::MolType, Molecule::H2O)));
+	  algorithm_extra::copy_if (sys_mols.begin(), sys_mols.end(), std::back_inserter(int_wats), member_functional::mem_fun_eq(&Molecule::MolType, Molecule::H2O));
 
 	  // load in the water atoms to int_atoms
 	  this->UpdateAtoms (int_wats, int_atoms);

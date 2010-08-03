@@ -1,3 +1,4 @@
+#pragma once
 #ifndef ATOM_H_
 #define ATOM_H_
 
@@ -90,7 +91,10 @@ class Atom {
 	void Print () const;
 
 
-	static AtomPtr FindByElement (const Atom_ptr_vec& apv, Element_t e);
+	static AtomPtr FindByElement (const Atom_ptr_vec& apv, Element_t elmt) {
+	  Atom_it a = std::find_if (apv.begin(), apv.end(), member_functional::mem_fun_eq(&Atom::Element,elmt));
+	  return *a;
+	}
 
 	static bool element_eq (const AtomPtr& first, const AtomPtr& second) {
 	  return first->Element() == second->Element();
@@ -124,17 +128,12 @@ class Atom {
 
 	VecR _position;				// Particle position
 	VecR _force; // the external force on the atom at any given point in time
-};
+
+};	// class Atom
 
 
 typedef Atom::AtomPtr AtomPtr;
 typedef Atom::Atom_ptr_vec Atom_ptr_vec;
 typedef Atom::Atom_it Atom_it;
-
-AtomPtr Atom::FindByElement (const Atom_ptr_vec& apv, Element_t elmt) {
-  Atom_it a = std::find_if (apv.begin(), apv.end(), md_utility::mem_fun_eq(&Atom::Element,elmt));
-  return *a;
-}
-
 
 #endif

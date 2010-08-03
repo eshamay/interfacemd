@@ -1,3 +1,4 @@
+#pragma once
 #ifndef __TENSOR_H
 #define __TENSOR_H
 

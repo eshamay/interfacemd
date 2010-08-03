@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MOLECULE_H_
 #define MOLECULE_H_
 
@@ -148,14 +149,14 @@ class Molecule {
 
 	// returns an iterator to the first occurence of a member with the given name
 	static MolPtr FindByType (const Mol_ptr_vec& mols, const Molecule_t& type) {
-	  Mol_it it = std::find_if (mols.begin(), mols.end(), md_utility::mem_fun_eq(&Molecule::MolType,type));
+	  Mol_it it = std::find_if (mols.begin(), mols.end(), member_functional::mem_fun_eq(&Molecule::MolType,type));
 	  return *it;
 	}
 
 	template <class U> 
 	  static void KeepByType (U& u, const Molecule_t& type) {
 		u.erase(
-			remove_if(u.begin(), u.end(), std::not1(md_utility::mem_fun_eq(&Molecule::MolType, type))), u.end()
+			remove_if(u.begin(), u.end(), std::not1(member_functional::mem_fun_eq(&Molecule::MolType, type))), u.end()
 			);
 		return;
 	  }
@@ -164,7 +165,7 @@ class Molecule {
 	template <class U> 
 	  static void KeepByTypes (U& u, std::vector<Molecule_t>& types) {
 		u.erase(
-			remove_if(u.begin(), u.end(), not1(std::bind2nd(md_utility::NameInList<typename U::value_type>(), types))), u.end());
+			remove_if(u.begin(), u.end(), not1(std::bind2nd(md_name_utilities::NameInList<typename U::value_type>(), types))), u.end());
 		return;
 	  }
 
@@ -173,7 +174,7 @@ class Molecule {
 	  static void RemoveByTypes (U& u, Molecule_t& type) {
 		typedef const Molecule::Molecule_t& (Molecule::*fn)() const;
 		u.erase(
-			remove_if(u.begin(), u.end(), md_utility::mem_fun_eq(&Molecule::MolType,type)), u.end()
+			remove_if(u.begin(), u.end(), member_functional::mem_fun_eq(&Molecule::MolType,type)), u.end()
 			);
 		return;
 	  }
@@ -182,7 +183,7 @@ class Molecule {
 	template <class U> 
 	  static void RemoveByTypes (U& u, std::vector<Molecule_t>& types) {
 		u.erase(
-			remove_if(u.begin(), u.end(), std::bind2nd(md_utility::NameInList<typename U::value_type>(), types)), u.end());
+			remove_if(u.begin(), u.end(), std::bind2nd(md_name_utilities::NameInList<typename U::value_type>(), types)), u.end());
 		return;
 	  }
 

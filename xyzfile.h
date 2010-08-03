@@ -1,3 +1,4 @@
+#pragma once
 #ifndef XYZFILE_H_
 #define XYZFILE_H_
 

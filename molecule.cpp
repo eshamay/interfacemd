@@ -56,7 +56,7 @@ return (_atoms.size());
 
 // get back the atom pointer to the atom with the given name
 AtomPtr Molecule::operator[] (const std::string& atomname) const {
-  Atom_it it = std::find_if( _atoms.begin(), _atoms.end(), md_utility::mem_fun_eq(&Atom::Name, atomname));
+  Atom_it it = std::find_if( _atoms.begin(), _atoms.end(), member_functional::mem_fun_eq(&Atom::Name, atomname));
 
   // error checking
   if (it == _atoms.end()) {
@@ -70,7 +70,7 @@ AtomPtr Molecule::operator[] (const std::string& atomname) const {
 // get back the first atom pointer to the atom with the given element
 AtomPtr Molecule::operator[] (const Atom::Element_t elmt) const {
   
-  Atom_it it = std::find_if(_atoms.begin(), _atoms.end(), md_utility::mem_fun_eq(&Atom::Element, elmt));
+  Atom_it it = std::find_if(_atoms.begin(), _atoms.end(), member_functional::mem_fun_eq(&Atom::Element, elmt));
 
   // error checking
   if (it == _atoms.end()) {
