@@ -26,7 +26,7 @@ FOO			= foo.o
 # $(CXX) $(CPPFLAGS) $(TEST) -lmkl_solver_ilp64 -lmkl_core -lmkl_lapack -lmkl_gnu_thread -lguide -lpthread -o test
 
 foo : $(FOO)
-	$(CXX) $(FOO) -o foo
+	icpc $(FOO) -o foo
 
 test : $(TEST) 
 	icpc $(TEST) $(LIBS) $(LAPACKLIBS) -o test

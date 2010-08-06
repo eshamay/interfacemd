@@ -8,10 +8,10 @@ AmberSystem::AmberSystem (const std::string& prmtop, const std::string& mdcrd, c
 {
   _atoms = Atom_ptr_vec(_topfile.NumAtoms(), (AtomPtr)NULL);
 
-  // because some really useful functionality comes out of the Atom class if the Atom::Size() is set, we'll do that here
+  // A lot of functionality depends on knowing the system size - so we set it here
   MDSystem::Dimensions (_coords.Dims());
 
-  // and then actually create these bad mamma jammas
+  // Create all the atoms that will be used during analysis
   for (Atom_ptr_vec::iterator it = _atoms.begin(); it != _atoms.end(); it++) {
 	*it = new Atom ();
   }

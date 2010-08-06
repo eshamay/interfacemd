@@ -58,7 +58,7 @@ double MDSystem::Distance (const MolPtr mol1, const MolPtr mol2) const {
 }
 
 // This should calculate the dipole of a molecule given that we've already generated the wannier centers
-VecR MDSystem::CalcDipole (MolPtr mol) const {
+VecR MDSystem::CalcDipole (MolPtr mol) {
 
   VecR com = mol->UpdateCenterOfMass();
   VecR dipole (0.0, 0.0, 0.0);

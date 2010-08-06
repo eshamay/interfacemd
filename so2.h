@@ -20,6 +20,8 @@ class SulfurDioxide : public Molecule {
 	VecR SO1 () const { return _so1; }
 	VecR SO2 () const { return _so2; }
 
+	double Angle () const { return (_so1 < _so2); } // cos of the O-S-O angle
+
 
   private:
 	AtomPtr	_s, _o1, _o2;

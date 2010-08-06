@@ -23,7 +23,7 @@ class Tester : public Analyzer<XYZSystem>
 	SulfurDioxide * so2;
 	typedef std::vector<double> double_vec;
 	typedef double_vec::const_iterator double_it;
-	double_vec so1_data, so2_data, theta_data;
+	double_vec so, theta;
 };
 
 #endif

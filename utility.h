@@ -14,38 +14,6 @@
 
 namespace pair_utility {
 
-  // takes a reference to a pair and returns the first element
-  template <class T, class U>
-	class pair_ref_first : public std::unary_function<T,U> {
-	  public:
-		U operator() (const T& t) const
-		{ return t.first; }
-	};
-
-  // takes a pointer to a pair and returns the first element
-  template <class T, class U>
-	class pair_first : public std::unary_function<T,U> {
-	  public:
-		U operator() (const T& t) const
-		{ return t->first; }
-	};
-
-  // takes a reference to a pair and returns the second element
-  template <class T, class U>
-	class pair_ref_second : public std::unary_function<T,U> {
-	  public:
-		U operator() (const T& t) const
-		{ return t.second; }
-	};
-
-  // takes a pointer to a pair and returns the second element
-  template <class T, class U>
-	class pair_second : public std::unary_function<T,U> {
-	  public:
-		U operator() (const T& t) const
-		{ return t->second; }
-	};
-
   /* A functor that takes a std::pair as a constructor argument, and all applications of the tester will test pairs against the initial one given. */
   template <class T>
 	class EqualPairs : public std::binary_function<T,T,bool> {
@@ -70,6 +38,23 @@ namespace pair_utility {
 	  return find_if (first, last, std::bind1st(EqualPairs<typename std::iterator_traits<Iter>::value_type>(), p));
 	}
 
+    template <class P>
+  	class pair_ref_1st : public std::unary_function<P,typename P::first_type> {
+  	  public:
+		typedef typename P::first_type P_1_t;
+  		P_1_t operator() (const P& p) {
+  		  return p.first;
+  		}
+  	};
+
+    template <class P>
+  	class pair_ref_2nd : public std::unary_function<P,typename P::second_type> {
+  	  public:
+		typedef typename P::second_type P_2_t;
+  		P_2_t operator() (const P& p) {
+  		  return p.second;
+  		}
+  	};
 
   // used for sorting/comparing pairs based on the first element
   template <typename T>
@@ -236,7 +221,8 @@ namespace histogram {
 
 	  typedef typename std::iterator_traits<Iter>::value_type pair_t;
 	  std::vector<int> vi;
-	  std::transform (first, last, std::back_inserter(vi), pair_utility::pair_ref_second<pair_t,int>());
+	  // grab all the populations in the histogram and determine the maximum of the list
+	  std::transform (first, last, std::back_inserter(vi), pair_utility::pair_ref_2nd<pair_t>());
 	  return *std::max_element(vi.begin(), vi.end());
 	}	// Max population
 

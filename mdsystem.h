@@ -55,7 +55,7 @@ class MDSystem {
 	double Distance (const MolPtr mol1, const MolPtr mol2) const;
 
 	// calculate a molecule's dipole moment
-	VecR CalcDipole (MolPtr mol) const;
+	static VecR CalcDipole (MolPtr mol);
 };
 
 #include "h2o.h"

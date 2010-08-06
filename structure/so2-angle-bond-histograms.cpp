@@ -23,21 +23,27 @@ void Tester::Analysis () {
   so2 = new SulfurDioxide(mol);
   so2->SetAtoms();
 
-  so1_data.push_back(so2->SO1().norm());
-  so2_data.push_back(so2->SO2().norm());
-  double theta = so2->SO1() < so2->SO2();
-  theta_data.push_back(acos(theta)*180.0/M_PI);
+  so.push_back(so2->SO1().norm());
+  so.push_back(so2->SO2().norm());
+  double angle = so2->Angle();
+  theta.push_back(acos(angle)*180.0/M_PI);
   delete so2;
 
- return;
+  return;
 }
 
 void Tester::DataOutput () {
   rewind(output);
 
-  fprintf (output, "timestep so1length so2length angle\n");
-  for (int i = 0; i < so1_data.size(); i++) {
-	fprintf (output, "% 8d % 8.4f % 8.4f % 8.4f\n", i+1, so1_data[i], so2_data[i], theta_data[i]);
+  histogram::histogram_t so_histo = histogram::Histogram (so.begin(), so.end(), 100);
+  int so_histo_max = histogram::MaxPopulation (so_histo.begin(), so_histo.end());
+  histogram::histogram_t theta_histo = histogram::Histogram (theta.begin(), theta.end(), 100);
+  int theta_histo_max = histogram::MaxPopulation (theta_histo.begin(), theta_histo.end());
+
+  for (unsigned i = 0; i < so_histo.size(); i++) {
+	fprintf (output, "% 8.4f % 8.4f % 8.4f % 8.4f\n", 
+		so_histo[i].first, (double)so_histo[i].second/so_histo_max, 
+		theta_histo[i].first, (double)theta_histo[i].second/theta_histo_max);
   }
 
 }
