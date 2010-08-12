@@ -14,6 +14,8 @@
 
 namespace morita {
 
+  typedef std::pair<double,double> sfgdata_pair_t;
+
   USING_PART_OF_NAMESPACE_EIGEN
 
 	template <class U>
@@ -54,6 +56,7 @@ namespace morita {
 		void CalculateTotalPolarizability ();
 		void CalculateLocalFieldCorrection ();
 
+		sfgdata_pair_t SSP_SPS_Result (const int s1, const int s2, const int p, const MatR& a) const;
 	};	// sfg-analyzer
 
 
@@ -106,10 +109,10 @@ namespace morita {
 	  this->CalculateTensors();
 
 	  // sums all the water dipole moments to get the total system dipole
-	  if (time_zero) {
+	  //if (time_zero) {
 		this->CalculateTotalDipole();
 		time_zero = false;
-	  }
+	 // }
 
 	  //t.restart();
 	  // determine the local field correction to each of the molecular polarizabilities
@@ -122,29 +125,60 @@ namespace morita {
 	} // Analysis
 
 
+  // calculates the ssp and sps value of the autocorrelation function for a given set of pqr space-frame coordinates
+  template <class U>
+	sfgdata_pair_t SFGAnalyzer<U>::SSP_SPS_Result (const int s1, const int s2, const int p, const MatR& a) const {
+	  // for now, only output the SSP and SPS components of the correlation function
+	  double a_sps, m_sps;
+	  double a_ssp, m_ssp;
+
+		a_sps = a(s1,p);
+		m_sps = _M(s1);
+
+		a_ssp = a(s1,s1);
+		m_ssp = _M(p);
+	  //a_sps = (a(s1,p) + a(s2,p))/2.0;
+	  //a_ssp = (a(s1,s1) + a(s2,s2))/2.0;
+
+	  //m_sps = (_M(s1) + _M(s2))/2.0;
+	  //m_ssp = _M(p);
+
+	  return std::make_pair (a_ssp*m_ssp, a_sps*m_sps);
+	}
+
+
   template <class U>
 	void SFGAnalyzer<U>::DataOutput () {
 
 	  rewind (this->output);
 
-	  // for now, only output the SSP and SPS components of the correlation function
-	  double a_sps, m_sps;
-	  double a_ssp, m_ssp;
-
-	  //std::vector<double> sps, ssp;
-
-	  // *********** time-domain work *********** //
+	  // try this - for each timestep, output the vector dipole, and the matrix polarizability of the system
 	  for (MatR_it it = _vA.begin(); it != _vA.end(); it++) {
-		a_sps = ((*it)(0,1) + (*it)(2,1))/2.0;
-		a_ssp = ((*it)(0,0) + (*it)(2,2))/2.0;
 
-		m_sps = (_M(0) + _M(2))/2.0;
-		m_ssp = _M(1);
-
-		fprintf (this->output, "% 12.6f % 12.6f\n", a_ssp*m_ssp, a_sps*m_sps);
-		//sps.push_back(a_sps*m_sps);
-		//ssp.push_back(a_ssp*m_ssp);
+	  // *********** time-domain output work *********** //
+	  // Output will be 6 columns. 2 each for the X,Y, and Z axes as the "P" axis, and each pair of columns will have ssp, sps data
+/*
+	  sfgdata_pair_t datapair;
+	  for (MatR_it it = _vA.begin(); it != _vA.end(); it++) {
+		//datapair = SSP_SPS_Result(1,2,0,*it);	// for the X-axis
+		//fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+		//datapair = SSP_SPS_Result(0,2,1,*it);	// for the Y-axis
+		//fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+		datapair = SSP_SPS_Result(1,2,0,*it);	// for the Z-axis
+		fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+		datapair = SSP_SPS_Result(2,1,0,*it);	// for the Z-axis
+		fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+		datapair = SSP_SPS_Result(0,2,1,*it);	// for the Z-axis
+		fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+		datapair = SSP_SPS_Result(2,0,1,*it);	// for the Z-axis
+		fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+		datapair = SSP_SPS_Result(0,1,2,*it);	// for the Z-axis
+		fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+		datapair = SSP_SPS_Result(1,0,2,*it);	// for the Z-axis
+		fprintf (this->output, "% 12.6f % 12.6f\n", datapair.first, datapair.second);
 	  }
+*/
+
 	  fflush(this->output);
 
 

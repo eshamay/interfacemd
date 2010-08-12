@@ -12,42 +12,58 @@ def is_number(s):
 
 class ColumnDataFile:
 	# need to supply which columns contain float data
-  	def __init__(self,file, float_data_cols=None, header=None):
+  	def __init__(self,file,header=None):
 	  	self.filename = file
 		fp = open(file)
 
-		# Parse the header (1st line of the file) if there is one.
-		# Otherwise just use column indices as identifiers, and form a dict out of the data set
-		line1 = fp.readline().strip().split()
-		self.data = [line.strip().split() for line in fp.readlines()]
-		if header:
-			self.header = line1
-		else:
-			self.data.insert(0,line1)
-			
-		self.data_array = zip(*self.data)
+		self.ParseHeader(fp,header)
+		self.ParseData(fp,header)
 
-		if not header:
-			self.header = range(len(self.data_array))
-
-		if (float_data_cols):
-			for col in float_data_cols:
-				self.data_array[col] = [float(i) for i in self.data_array[col]]
-		else:
-			try:
-				self.data_array = [[float(i) for i in col] for col in self.data_array]
-			except ValueError:
-				print "The data file has data that is not a number. The column numbers must be supplied to specify data columns"
-				return
-
-		self.data = dict(zip(self.header, self.data_array))
 		fp.close()
 
 
-	def __getitem__(self,item):
-		return self.data[item]
-	def iteritems(self):
-		return self.data.iteritems()
+	def ParseHeader(self,file,header):
+		# Parse the header (1st line of the file) if there is one.
+		line1 = file.readline().strip().split()
+		if header:
+			self.header = line1
+		# Otherwise just use column indices as identifiers, and form a dict out of the data set
+		else:
+			self.header = range(len(line1))
+			self.line1 = line1
+			
+  
+
+  	def ParseData(self,file,header):
+		self.data = [line.strip().split() for line in file.readlines()]
+		if not header:
+			self.data.insert(0,self.line1)
+		self.data = zip(*self.data)
+
+		for col in range(len(self.data)):
+		  	try:
+				self.data[col] = [float(i) for i in self.data[col]]
+			except ValueError:
+				continue
+
+#print "The data file has data that is not a number. The column numbers must be supplied to specify data columns"
+#				return
+
+#
+#		if (float_data_cols):
+#			for col in float_data_cols:
+#				self.data_array[col] = [float(i) for i in self.data_array[col]]
+#		else:
+		self.data = dict(zip(self.header, self.data))
+
+
+	def __iter__(self):
+		for data in self.data:
+			yield data
+
+	def __getitem__(self,index):
+		return self.data[index]
+
 	def keys(self):
 		return self.data.keys()
 

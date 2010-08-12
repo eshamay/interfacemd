@@ -41,6 +41,7 @@ inline void Print () const
 	printf ("[% 8.3f% 8.3f% 8.3f ]\n", this->x(), this->y(), this->z());
 }
 
+
 template<typename OtherDerived>
 OtherDerived& Transpose() const { return this->transpose(); }
 

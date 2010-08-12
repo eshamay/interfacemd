@@ -10,10 +10,18 @@ namespace morita {
    */
 
   /* from the equilibrium values of the spcfw model */
+/*
   const double BONDLENGTH_EQ	= 1.012 * sfg_units::ANG2BOHR;		// in atomic units
   const double ANGLE_EQ 		= 113.24;		// in degress
   const double CHARGE_H_EQ		= 0.41;		// charge units (atomic units?)
   const double CHARGE_O_EQ		= -0.82;
+*/
+
+// using values from the actual simulations
+  const double BONDLENGTH_EQ	= 0.99 * sfg_units::ANG2BOHR;		// in atomic units
+  const double ANGLE_EQ 		= 105.0;		// in degress
+  const double CHARGE_H_EQ		= 0.3285;		// charge units (atomic units?)
+  const double CHARGE_O_EQ		= -0.6570;
 
 
   // these are the constants from the 2002 Morita work for calculating the dipole moment
