@@ -266,6 +266,12 @@ namespace histogram {
   /*******************************************************************************************************************************************************/
   /***************************************** Histograms **************************************************************************************************/
 
+  // calculate a bin for a histogram
+  /*
+  int Bin (const double value, const double min, const double res) {
+	return (int)((value-min)/res);
+  }
+  */
 
   /* 1-d histogram functor */
   template <class T>
@@ -354,7 +360,7 @@ namespace histogram {
 		/* 
 		   printf ("size = <%d,%d>\nmax = <%f,%f\n,min = <%f,%f>\nres = <%f,%f>\n",
 		   size.first, size.second, max.first, max.second, min.first, min.second, resolution.first, resolution.second);
-		 */
+		   */
 
 		_histogram.clear();
 		_histogram.resize (size.first, Histogram_t (size.second, 0));

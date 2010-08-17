@@ -32,7 +32,7 @@ namespace morita {
 	  protected:
 		Morita_ptr_vec		all_wats;
 		Morita_ptr_vec		analysis_wats;
-		VectorXd				_p;
+		//VectorXd				_p;
 		MatrixXd		_alpha;
 		MatrixXd		 _T;	// system dipole field tensors
 		MatrixXd	 	_IDENT;	// a few temporaries for calculating eq 23
@@ -43,6 +43,8 @@ namespace morita {
 		MatR			_A;		// total system polarizability
 		VecR			_M;		// total system dipole moment (at time zero)
 
+
+		VecR_list		_vM;	// total system dipole for each timestep
 		MatR_list		_vA;	// the tensor A for each timestep
 
 		bool	time_zero;
@@ -64,13 +66,14 @@ namespace morita {
 	SFGAnalyzer<U>::SFGAnalyzer (WaterSystemParams& wsp)
 	: 
 	  Analyzer<U> (wsp),
-	  _p(0), _alpha(0,0), _IDENT(0,0), _g(0,0), _f(0,0), time_zero(true)
-
+	  //_p(0), 
+	  _alpha(0,0), _IDENT(0,0), _g(0,0), _f(0,0), time_zero(true) 
   { return; }
 
-  template <class U>
-	SFGAnalyzer<U>::~SFGAnalyzer () {
-	}
+
+
+  template <class U> SFGAnalyzer<U>::~SFGAnalyzer () { } 
+
 
   template <class U>
 	void SFGAnalyzer<U>::Setup () {
@@ -84,6 +87,8 @@ namespace morita {
 		  MoritaH2O_ptr ptr (new MoritaH2O (*it));
 		  all_wats.push_back(ptr);
 		}
+
+		rewind (this->output);
 	  }
 
 	  // analysis_wats will hold only those waters that will by analyzed
@@ -95,7 +100,7 @@ namespace morita {
 
 	  int N = 3*analysis_wats.size();
 	  _T.setZero(N,N);
-	  _p.setZero(N);
+	  //_p.setZero(N);
 	  _alpha.setZero(N,N);
 
 	} // Setup
@@ -108,12 +113,6 @@ namespace morita {
 	  // Sets up the p, alpha, and T tensors by calculating through each water's dipole moment, polarizability, and dipole field contributions
 	  this->CalculateTensors();
 
-	  // sums all the water dipole moments to get the total system dipole
-	  //if (time_zero) {
-		this->CalculateTotalDipole();
-		time_zero = false;
-	 // }
-
 	  //t.restart();
 	  // determine the local field correction to each of the molecular polarizabilities
 	  this->CalculateLocalFieldCorrection ();
@@ -121,6 +120,20 @@ namespace morita {
 
 	  // sum all the molecular polarizabilities to get the total system value
 	  this->CalculateTotalPolarizability ();
+
+
+
+
+	  for (unsigned int i = 0; i < 3; i++) {
+		fprintf (this->output, "%8.3f ", _M(i));
+	  } 
+	  // output in row-major order
+	  for (unsigned int i = 0; i < 3; i++) {
+		for (unsigned int j = 0; j < 3; j++) {
+		  fprintf (this->output, "% 8.3f", _A(i,j));
+		}
+	  }
+	  fprintf (this->output,"\n");
 
 	} // Analysis
 
@@ -132,11 +145,11 @@ namespace morita {
 	  double a_sps, m_sps;
 	  double a_ssp, m_ssp;
 
-		a_sps = a(s1,p);
-		m_sps = _M(s1);
+	  a_sps = a(s1,p);
+	  m_sps = _M(s1);
 
-		a_ssp = a(s1,s1);
-		m_ssp = _M(p);
+	  a_ssp = a(s1,s1);
+	  m_ssp = _M(p);
 	  //a_sps = (a(s1,p) + a(s2,p))/2.0;
 	  //a_ssp = (a(s1,s1) + a(s2,s2))/2.0;
 
@@ -150,34 +163,33 @@ namespace morita {
   template <class U>
 	void SFGAnalyzer<U>::DataOutput () {
 
-	  rewind (this->output);
+	  //	  rewind (this->output);
 
 	  // try this - for each timestep, output the vector dipole, and the matrix polarizability of the system
-	  for (MatR_it it = _vA.begin(); it != _vA.end(); it++) {
 
 	  // *********** time-domain output work *********** //
 	  // Output will be 6 columns. 2 each for the X,Y, and Z axes as the "P" axis, and each pair of columns will have ssp, sps data
-/*
-	  sfgdata_pair_t datapair;
-	  for (MatR_it it = _vA.begin(); it != _vA.end(); it++) {
-		//datapair = SSP_SPS_Result(1,2,0,*it);	// for the X-axis
-		//fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
-		//datapair = SSP_SPS_Result(0,2,1,*it);	// for the Y-axis
-		//fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
-		datapair = SSP_SPS_Result(1,2,0,*it);	// for the Z-axis
-		fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
-		datapair = SSP_SPS_Result(2,1,0,*it);	// for the Z-axis
-		fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
-		datapair = SSP_SPS_Result(0,2,1,*it);	// for the Z-axis
-		fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
-		datapair = SSP_SPS_Result(2,0,1,*it);	// for the Z-axis
-		fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
-		datapair = SSP_SPS_Result(0,1,2,*it);	// for the Z-axis
-		fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
-		datapair = SSP_SPS_Result(1,0,2,*it);	// for the Z-axis
-		fprintf (this->output, "% 12.6f % 12.6f\n", datapair.first, datapair.second);
+	  /*
+		 sfgdata_pair_t datapair;
+		 for (MatR_it it = _vA.begin(); it != _vA.end(); it++) {
+	  //datapair = SSP_SPS_Result(1,2,0,*it);	// for the X-axis
+	  //fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+	  //datapair = SSP_SPS_Result(0,2,1,*it);	// for the Y-axis
+	  //fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+	  datapair = SSP_SPS_Result(1,2,0,*it);	// for the Z-axis
+	  fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+	  datapair = SSP_SPS_Result(2,1,0,*it);	// for the Z-axis
+	  fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+	  datapair = SSP_SPS_Result(0,2,1,*it);	// for the Z-axis
+	  fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+	  datapair = SSP_SPS_Result(2,0,1,*it);	// for the Z-axis
+	  fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+	  datapair = SSP_SPS_Result(0,1,2,*it);	// for the Z-axis
+	  fprintf (this->output, "% 12.6f % 12.6f", datapair.first, datapair.second);
+	  datapair = SSP_SPS_Result(1,0,2,*it);	// for the Z-axis
+	  fprintf (this->output, "% 12.6f % 12.6f\n", datapair.first, datapair.second);
 	  }
-*/
+	  */
 
 	  fflush(this->output);
 
@@ -220,15 +232,19 @@ namespace morita {
 
 	  if (!(timestep == timesteps))
 	  this->Setup();
-	   */
+	  */
 
 	} // Data Output
 
   template <class U>
 	void SFGAnalyzer<U>::CalculateTensors() {
+
 	  // Calculate the dipole moment of each water, and then constructs the 3Nx3 tensor 'p'.
-	  if (time_zero)
+	  //if (time_zero)
 		this->SetAnalysisWaterDipoleMoments ();
+	  // sums all the water dipole moments to get the total system dipole
+
+		this->CalculateTotalDipole();
 
 	  // Set up the polarizability (alpha) matrix similar to the method for the dipole moment
 	  std::for_each (analysis_wats.begin(), analysis_wats.end(), std::mem_fun(&MoritaH2O::SetPolarizability));
@@ -236,9 +252,10 @@ namespace morita {
 	  _T.setZero();
 	  for (unsigned int i = 0; i < analysis_wats.size(); i++) {
 
-		if (time_zero) {
-		  _p.block(3*i,0,3,1) = analysis_wats[i]->Dipole();
-		}
+
+		//if (time_zero) {
+		  //_p.block(3*i,0,3,1) = analysis_wats[i]->Dipole();
+		//}
 
 		_alpha.block(3*i,3*i,3,3) = analysis_wats[i]->Polarizability();
 
@@ -256,14 +273,14 @@ namespace morita {
 
 
   // take care of the polarization calculations for the first timestep
-
   template <class U>
 	void SFGAnalyzer<U>::CalculateTotalDipole () {
-
 	  VecR_vec dipoles;
 	  std::transform (analysis_wats.begin(), analysis_wats.end(), std::back_inserter(dipoles), std::mem_fun<VecR,Molecule>(&Molecule::Dipole));
 
 	  _M = std::accumulate (dipoles.begin(), dipoles.end(), VecR());
+
+	  _vM.push_back(_M);
 
 	}	// calculate total dipole
 
@@ -349,7 +366,7 @@ namespace morita {
   void pdgesv_ (int *n, int *nrhs, double *A, int *ia, int *ja, int *desca, int* ipiv, double *B, int *ib, int *jb, int *descb, int *info); 
 
   } // extern
-   */
+  */
 
 
 }	// namespace morita

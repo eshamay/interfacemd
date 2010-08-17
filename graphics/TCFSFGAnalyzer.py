@@ -34,9 +34,9 @@ class TCFSFGAnalyzer:
 		beta = 1.0/temp/k
 		self.CalcFFT(dt)
 
-		#self.C = [(1-numpy.exp(-beta*hbar*f))/3.0/hbar/c for f in self.freq]
-		#chi = map(lambda const, f, val: const*f*abs(val)**2, self.C, self.freq, self.fft)
-		chi = map(lambda x: x*1j, self.fft)
+		self.C = [(1-numpy.exp(-beta*hbar*f))/3.0/hbar/c for f in self.freq]
+		chi = map(lambda const, f, val: const*f*abs(val)**2, self.C, self.freq, self.fft)
+		#chi = map(lambda x: x*1j, self.fft)
 
   		# normalization to unity
 		max_chi = max(chi)

@@ -2,10 +2,7 @@
 
 namespace morita {
 
-  CP2KSFGAnalyzer::CP2KSFGAnalyzer (WaterSystemParams& wsp)
-	:
-	  SFGAnalyzer<XYZSystem> (wsp)
-  { return; }
+  CP2KSFGAnalyzer::CP2KSFGAnalyzer (WaterSystemParams& wsp) : SFGAnalyzer<XYZSystem> (wsp) { return; }
 
 
 // for the small cp2k systems, just use all the waters

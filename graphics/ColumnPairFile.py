@@ -3,10 +3,10 @@ A class for dealing with column-data-files where every pair of 2 columns represe
 The first column of the pair is the data point, and the 2nd column is the population
 '''
 from ColumnDataFile import ColumnDataFile as CDF
+from Utility import *
 
 class ColumnPairFile (CDF):
 
-group = lambda t, n: zip(*[t[i::n] for i in range(n)])
 
 class ColumnPairFile:
   	def __init__(self,file):

@@ -48,7 +48,6 @@ public:
 
 	bondgraph::BondGraph graph;
 
-	// Controller & Calculation methods
 	// Update the system to the next timestep
 	void LoadNext ();
 	void LoadFirst ();

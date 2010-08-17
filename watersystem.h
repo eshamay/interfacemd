@@ -33,8 +33,6 @@ struct WaterSystemParams {
 	  posmax = (cfg.lookup("analysis.position-range")[1]);
 
 	  avg = cfg.lookup("analysis.averaging");
-	  output_filename = (const char *)cfg.lookup("analysis.filename");
-	  output = fopen(output_filename.c_str(), "w");
 	  axis = (coord)((int)cfg.lookup("analysis.reference-axis"));
 	  ref_axis = VecR(
 		  cfg.lookup("analysis.reference-vector")[0], 
@@ -65,9 +63,6 @@ struct WaterSystemParams {
 
   bool avg;			/* Will averaging of two interfaces be performed? Can also be used for other functionality */
 
-  std::string output_filename;
-  FILE * output;		/* The file name and stream of the data output */
-
   coord axis;			/* The reference axis (generally normal to the interface */
   VecR ref_axis;
 
@@ -81,7 +76,8 @@ struct WaterSystemParams {
   int angbins;
 
   void PrintParameters () {
-	printf ("output_file = %s\naxis = %d, ref_axis = ", output_filename.c_str(), axis);
+	//printf ("output_file = %s\naxis = %d, ref_axis = ", output_filename.c_str(), axis);
+	printf ("axis = %d, ref_axis = ", axis);
 	ref_axis.Print();
 	printf ("output_freq = %d, timesteps = %d, restart = %d\n", output_freq, timesteps, restart);
 	printf ("posmin = % 8.3f, posmax = % 8.3f, posres = % 8.3f, posbins = %d\n", posmin, posmax, posres, posbins);
@@ -91,16 +87,19 @@ struct WaterSystemParams {
 };
 
 
+class AmberAnalysisSet;
+class XYZAnalysisSet;
+
 template<class T>
 class WaterSystem {
 
   public:
 
 	WaterSystem (const WaterSystemParams& params);
-	//WaterSystem (const int argc, const char **argv, const WaterSystemParams& params);
 	virtual ~WaterSystem ();
 
 	static WaterSystemParams wsp;
+	T * System () { return sys; }
 
 	static double	posmin, posmax;
 	static double	pbcflip;			// location to flip about periodic boundaries
@@ -194,6 +193,8 @@ class WaterSystem {
 
 	  return;
 	}
+
+
 	// Predicate to test if a water molecule has a given coordination (H-bonding pattern)
 	class WaterCoordination_p : public std::binary_function<Water *, bondgraph::coordination, bool> {
 	  public:
@@ -202,11 +203,13 @@ class WaterSystem {
 		}
 	};
 
+
 	void KeepWaterByCoordination (Mol_ptr_vec& mols, const bondgraph::coordination c) {
 	  mols.erase(
 		  remove_if(mols.begin(), mols.end(), std::not1(std::bind2nd(WaterCoordination_p(), c))), mols.end());
 	  return;
 	}
+
 
 	// Sets the atom container to hold only the atoms of the set of molecules given
 	void UpdateAtoms (const Mol_ptr_vec& mols, Atom_ptr_vec& atoms) {
@@ -269,7 +272,6 @@ WaterSystem<T>::WaterSystem (const WaterSystemParams& params)
 
 template <class T>
 WaterSystem<T>::~WaterSystem () {
-  fclose (WaterSystem<T>::wsp.output);
   return;
 }
 
@@ -294,6 +296,8 @@ void WaterSystem<XYZSystem>::_InitializeSystem () {
 
   std::string wanniers = wsp.config_file->lookup("system.files.wanniers");
   VecR dims(a,b,c);
+  printf ("system dimensions are: ");
+  dims.Print();
 
   this->sys = new XYZSystem(filepath, dims, wanniers);
 
@@ -309,6 +313,7 @@ void WaterSystem<GMXSystem>::_InitializeSystem () {
   return;
 }
 #endif
+
 
 template <class T>
 void WaterSystem<T>::LoadAll () {
@@ -327,5 +332,8 @@ void WaterSystem<T>::LoadAll () {
 
   return;
 }
+
+
+
 
 #endif

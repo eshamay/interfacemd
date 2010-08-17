@@ -11,6 +11,12 @@ int main () {
   std::ofstream fout ("foo.dat");
   std::copy(&A(0,0), &A(A.rows(),A.cols()-1), std::ostream_iterator<double>(fout, "\n"));
   
+  for (unsigned int i = 0; i < 3; i++) {
+	for (unsigned int j = 0; j < 3; j++) {
+	  printf ("% 8.3f", A(i,j));
+	}
+  }
+  printf ("\n");
   fout.close();
 
 

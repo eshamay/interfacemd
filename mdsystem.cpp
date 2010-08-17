@@ -61,7 +61,7 @@ double MDSystem::Distance (const MolPtr mol1, const MolPtr mol2) const {
 VecR MDSystem::CalcDipole (MolPtr mol) {
 
   VecR com = mol->UpdateCenterOfMass();
-  VecR dipole (0.0, 0.0, 0.0);
+  VecR dipole;
 
   // the dipole is just a sum of the position vectors multiplied by the charges (classical treatment)
   for (Atom_it it = mol->begin(); it != mol->end(); it++) {

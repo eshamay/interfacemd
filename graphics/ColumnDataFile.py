@@ -46,14 +46,6 @@ class ColumnDataFile:
 			except ValueError:
 				continue
 
-#print "The data file has data that is not a number. The column numbers must be supplied to specify data columns"
-#				return
-
-#
-#		if (float_data_cols):
-#			for col in float_data_cols:
-#				self.data_array[col] = [float(i) for i in self.data_array[col]]
-#		else:
 		self.data = dict(zip(self.header, self.data))
 
 

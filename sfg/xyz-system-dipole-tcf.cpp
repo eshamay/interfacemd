@@ -1,37 +1,35 @@
-#include "xyz_ir.h"
+#include "xyz-analyzer.h"
 
-
-XYZSFGAnalyzer::XYZSFGAnalyzer (WaterSystemParams& wsp)
-  :	
-	Analyzer<XYZSystem> (wsp)
-{
-  return;
-}
-
-void XYZSFGAnalyzer::Setup () {
-
-  this->sys->SetReparseLimit(1);
-
-  return;
-}	// Setup
-
-void XYZSFGAnalyzer::Analysis () {
+void XYZAnalyzer::Analysis () {
 
   LoadAll();
 
-  VecR M (0.0,0.0,0.0);
-  MolPtr so2 = Molecule::FindByType(sys_mols, Molecule::SO2);
+  // calculate the dipole for each molecule
+  std::for_each (sys_mols.begin(), sys_mols.end(), MDSystem::CalcDipole);
 
-  M = this->sys->CalcDipole(so2);
+  // grab all the dipoles into a single container
+  VecR_vec dipoles;
+  std::transform (sys_mols.begin(), sys_mols.end(), std::back_inserter(dipoles), std::mem_fun<VecR,Molecule>(&Molecule::Dipole));
+
+  // Sum all the dipoles for the total system dipole
+  VecR M = std::accumulate (dipoles.begin(), dipoles.end(), VecR());
+
+  if (!timezero) {
+	M_0 = M;
+	timezero = true;
+  }
+
+  fprintf (this->output, "%f %f %f\n", M(0), M(1), M(2));
+  //fprintf (this->output, "% 20.6f\n", M_0.dot(M));
   //for (Mol_it mol = sys_mols.begin(); mol != sys_mols.end(); mol++) {
 	//M += this->sys->CalcDipole(*mol);
   //}
-  _M.push_back(M);
 
   return;
 }	// Analysis
 
-void XYZSFGAnalyzer::DataOutput () {
+  /*
+void XYZAnalyzer::DataOutput () {
 
   // process time-domain data
   std::vector<double> corr;
@@ -44,6 +42,7 @@ void XYZSFGAnalyzer::DataOutput () {
   for (std::vector<double>::const_iterator it = corr.begin(); it != corr.end(); it++) {
 	fprintf (output, "% 20.6f\n", *it);
   }
+  */
 
   // ********  fftw work ******** //
   /*
@@ -77,10 +76,10 @@ void XYZSFGAnalyzer::DataOutput () {
   fftw_destroy_plan(p);
   fftw_free(in);
   fftw_free(corr_fft);
-   */
 
   return; 
 }	// data output
+   */
 
 
 
@@ -89,13 +88,13 @@ int main () {
   libconfig::Config cfg;
   cfg.readFile("system.cfg");
 
-  std::string filename = cfg.lookup("analysis.xyzsfg.filename");
+  std::string filename ("xyz-system-dipole-vector.dat");
   libconfig::Setting &analysis = cfg.lookup("analysis");
   analysis.add("filename", libconfig::Setting::TypeString) = filename;
 
   WaterSystemParams wsp (cfg);
 
-  XYZSFGAnalyzer test (wsp);
+  XYZAnalyzer test (wsp);
 
   test.SystemAnalysis ();
 
