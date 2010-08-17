@@ -366,11 +366,11 @@ namespace bondgraph {
 	return Distance(*vi,*vj);
   }
 
-  distance_pair BondGraph::ClosestAtom (const MolPtr& mol, const Atom::Element_t elmt, bool SameMoleculeCheck) const {
+  distance_pair BondGraph::ClosestAtom (const MolPtr& mol, const Atom::Element_t elmt) const {
 	distance_vec distances;
 
 	for (Atom_it it = mol->begin(); it != mol->end(); it++) {
-	  distances.push_back ((ClosestAtoms (*it, 1, elmt, SameMoleculeCheck))[0]);
+	  distances.push_back ((ClosestAtoms (*it, 1, elmt, false))[0]);
 	}
 
 	pair_utility::pair_sort_first(distances.begin(), distances.end());
@@ -413,7 +413,7 @@ namespace bondgraph {
 	return distances;
   }
 
-  distance_vec BondGraph::ClosestAtoms (const MolPtr mol, const int num, const Atom::Element_t elmt, bool SameMoleculeCheck) const {
+  distance_vec BondGraph::ClosestAtoms (const MolPtr mol, const int num, const Atom::Element_t elmt) const {
 	distance_vec distances;
 	for (Atom_it atom = mol->begin(); atom != mol->end(); atom++) {
 	  distance_vec closest = ClosestAtoms (*atom, 10, elmt, false);
@@ -441,7 +441,7 @@ namespace bondgraph {
 	  /*
 		 printf ("BondGraph::_GetBond - Couldn't find the requested Bond");
 		 exit(1);
-	   */
+		 */
 	}
 
 	return (e);

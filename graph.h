@@ -147,27 +147,25 @@ namespace bondgraph {
 		  ) const;
 
 	  // Given a molecule, find the atom (of an optionally given name) that is closest to the molecule but not part of it.
-	  distance_pair ClosestAtom (const MolPtr& mol, const Atom::Element_t elmt = Atom::NO_ELEMENT, bool SameMoleculeCheck = false) const;
+	  distance_pair ClosestAtom (const MolPtr&, const Atom::Element_t = Atom::NO_ELEMENT) const;
 	  // Given an atom, find the atom closest to it (of an optionally given name) that is not part of the same molecule
 	  // returns a distance pair - [distance, AtomPtr]
-	  distance_pair ClosestAtom (const AtomPtr atom, const Atom::Element_t elmt = Atom::NO_ELEMENT, bool SameMoleculeCheck = false) const;
+	  distance_pair ClosestAtom (const AtomPtr, const Atom::Element_t = Atom::NO_ELEMENT, bool = false) const;
 
 	  // find the atoms that are closest to an atom
-	  distance_vec ClosestAtoms (const AtomPtr atom, const int num = 1, const Atom::Element_t elmt = Atom::NO_ELEMENT,
-		  bool SameMoleculeCheck = false) const;
+	  distance_vec ClosestAtoms (const AtomPtr, const int = 1, const Atom::Element_t = Atom::NO_ELEMENT, bool = false) const;
 
 	  // find the atoms closest to a given molecule
-	  distance_vec ClosestAtoms (const MolPtr mol, const int num = 1, const Atom::Element_t elmt = Atom::NO_ELEMENT,
-		  bool SameMoleculeCheck = false) const;
+	  distance_vec ClosestAtoms (const MolPtr, const int = 1, const Atom::Element_t = Atom::NO_ELEMENT) const;
 
-	  int NumHBonds (const AtomPtr ap) const;
-	  int NumHBonds (const WaterPtr wat) const;
-	  coordination WaterCoordination (const WaterPtr wat) const;
+	  int NumHBonds (const AtomPtr) const;
+	  int NumHBonds (const WaterPtr) const;
+	  coordination WaterCoordination (const WaterPtr) const;
 
 	  // returns the distance between two vertices in the graph
-	  double Distance (const Vertex& vi, const Vertex& vj) const;
+	  double Distance (const Vertex&, const Vertex&) const;
 	  // returns the distance between two atoms
-	  double Distance (const AtomPtr a1, const AtomPtr a2) const;
+	  double Distance (const AtomPtr, const AtomPtr) const;
 
 
 

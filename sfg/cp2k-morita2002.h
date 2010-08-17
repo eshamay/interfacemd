@@ -5,10 +5,13 @@
 #include "morita2002.h"
 
 namespace morita {
-  class CP2KSFGAnalyzer : public SFGAnalyzer<XYZSystem> {
+  class CP2KMorita2002Analysis : public Morita2002Analysis<XYZSystem> {
 	public:
 
-	  CP2KSFGAnalyzer (WaterSystemParams& wsp);
+	  CP2KMorita2002Analysis (std::string fn) : 
+		Morita2002Analysis<XYZSystem>(
+			std::string("Analysis of the waters in an MD system using the technique of Morita/Hynes (2002) with a system produced by the CP2K package"),
+			fn) { }
 
 	protected:
 	  void SelectAnalysisWaters ();

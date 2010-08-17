@@ -13,11 +13,12 @@ template <typename T>
 class AnalysisSet {
 
   public:
+	typedef T system_t;
+
 	virtual ~AnalysisSet () { }
 	AnalysisSet (std::string desc, std::string fn) : description (desc), filename(fn) { }
 
-	typedef T system_t;
-	typedef void (AnalysisSet::*analysis_fn)(T& t);
+	typedef void (AnalysisSet::*analysis_fn)(T&);
 
 	// default setup
 	virtual void Setup (T& t) {
@@ -28,10 +29,10 @@ class AnalysisSet {
 	}
 
 	// each analyzer has to have an analysis function to do some number crunching
-	virtual void Analysis (T& t) = 0;
+	virtual void Analysis (T&) = 0;
 	// normally this can be done in the analysis section, but just for style we can have something different defined here
-	virtual void DataOutput (T& t) { return; }
-	virtual void PostAnalysis (T& t) { return; }
+	virtual void DataOutput (T&) { }
+	virtual void PostAnalysis (T&) { }
 
 	std::string& Description () { return description; }
 	std::string& Filename () { return filename; }
@@ -55,14 +56,15 @@ class Analyzer : public WaterSystem<T> {
     int	output_freq;
 
     void _OutputHeader () const;
-    void _OutputStatus (const int timestep);
+    void _OutputStatus (const int);
 
 
   public:
-    Analyzer (const WaterSystemParams& params);
+    Analyzer (const std::string = std::string("system.cfg"));
     virtual ~Analyzer ();
 
-	void SystemAnalysis (AnalysisSet<Analyzer<T> >& an);
+	typedef AnalysisSet<Analyzer<T> > analysis_t;
+	void SystemAnalysis (analysis_t&);
 
     static VecR ref_axis;
 
@@ -75,22 +77,22 @@ class Analyzer : public WaterSystem<T> {
     static int 		timesteps;
     static unsigned int restart;
 
-    static double Position (const AtomPtr patom);
-    static double Position (const VecR& v);
-    static double Position (const double d);
+    static double Position (const AtomPtr);
+    static double Position (const VecR&);
+    static double Position (const double);
 
     void LoadNext ();
 
 	FILE * Output () { return output; }
-	void OpenDataOutputFile (const std::string& name);
+	void OpenDataOutputFile (analysis_t&);
 
     Atom_ptr_vec& Atoms () { return WaterSystem<T>::int_atoms; } 
     Mol_ptr_vec& Molecules () { return WaterSystem<T>::int_mols; }
     Water_ptr_vec& Waters () { return WaterSystem<T>::int_wats; }
 
 	// calculate the system's center of mass
-	VecR CenterOfMass (const Mol_ptr_vec& mols) const;
-	template <typename U> VecR CenterOfMass (const std::vector<U>& mols) const;
+	VecR CenterOfMass (const Mol_ptr_vec&) const;
+	template <typename U> VecR CenterOfMass (const std::vector<U>&) const;
 
 };	// Analyzer
 
@@ -109,25 +111,24 @@ template <class T> unsigned int Analyzer<T>::restart;
 template <class T> VecR		Analyzer<T>::ref_axis;
 
   template <class T> 
-Analyzer<T>::Analyzer (const WaterSystemParams& params)
-
-: WaterSystem<T>(params),
-  output_filename(""), output((FILE *)NULL),
-  output_freq(params.output_freq),
-  timestep (0)
+  Analyzer<T>::Analyzer (const std::string ConfigurationFilename) : 
+	WaterSystem<T>(ConfigurationFilename),
+	output_filename(""), output((FILE *)NULL),
+	output_freq(WaterSystem<T>::SystemParameters()->output_freq),
+	timestep (0)
 { 
-  Analyzer<T>::posres = params.posres;
-  Analyzer<T>::posbins = int((params.posmax - params.posmin)/params.posres);
+  Analyzer<T>::posres = WaterSystem<T>::SystemParameters()->posres;
+  Analyzer<T>::posbins = int((WaterSystem<T>::SystemParameters()->posmax - WaterSystem<T>::SystemParameters()->posmin)/WaterSystem<T>::SystemParameters()->posres);
 
-  Analyzer<T>::angmin = params.angmin;
-  Analyzer<T>::angmax = params.angmax;
-  Analyzer<T>::angres = params.angres;
-  Analyzer<T>::angbins = int((params.angmax - params.angmin)/params.angres);
+  Analyzer<T>::angmin = WaterSystem<T>::SystemParameters()->angmin;
+  Analyzer<T>::angmax = WaterSystem<T>::SystemParameters()->angmax;
+  Analyzer<T>::angres = WaterSystem<T>::SystemParameters()->angres;
+  Analyzer<T>::angbins = int((WaterSystem<T>::SystemParameters()->angmax - WaterSystem<T>::SystemParameters()->angmin)/WaterSystem<T>::SystemParameters()->angres);
 
-  Analyzer<T>::timesteps = params.timesteps;
-  Analyzer<T>::restart = params.restart;
+  Analyzer<T>::timesteps = WaterSystem<T>::SystemParameters()->timesteps;
+  Analyzer<T>::restart = WaterSystem<T>::SystemParameters()->restart;
 
-  Analyzer<T>::ref_axis = params.ref_axis;
+  Analyzer<T>::ref_axis = WaterSystem<T>::SystemParameters()->ref_axis;
 
   this->_OutputHeader();
 } // Analyzer ctor
@@ -149,20 +150,23 @@ void Analyzer<T>::_OutputHeader () const {
 template <class T> 
 Analyzer<T>::~Analyzer () {
   delete this->sys;
-  if (output)
+  if (output != (FILE *)NULL)
 	fclose(output);
   return;
 }
 
 template <class T> 
-void Analyzer<T>::OpenDataOutputFile (const std::string& name) {
+void Analyzer<T>::OpenDataOutputFile (analysis_t& an) {
 
-  output = fopen(name.c_str(), "w");
+  output = (FILE *)NULL;
+  output = fopen(an.Filename().c_str(), "w");
 
   if (output == (FILE *)NULL) {
-	printf ("Analyzer<T>::_CheckOutputFile() - couldn't open the data output file!\n");
+	printf ("Analyzer<T>::_CheckOutputFile() - couldn't open the data output file, \"%s\", given in the analysis set!\n", an.Filename().c_str());
 	exit(1);
   }
+
+  printf ("\nOutputting data to \"%s\"\n", an.Filename().c_str());
 
   return;
 }
@@ -196,7 +200,9 @@ void Analyzer<AmberSystem>::LoadNext () {
 
 
 template <class T>
-void Analyzer<T>::SystemAnalysis (AnalysisSet<Analyzer<T> >& an) {
+void Analyzer<T>::SystemAnalysis (analysis_t& an) {
+  // Open a file for data output
+  this->OpenDataOutputFile (an);
   // do some initial setup
   an.Setup(*this);
 

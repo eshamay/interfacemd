@@ -20,8 +20,6 @@ void Tester::PromptForAnalysisFunction () {
   std::cin >> choice;
   printf ("\n\nperforming analysis (%d) using output filename \"%s\"\n", choice, analyses[choice-1]->Filename().c_str());
 
-  this->OpenDataOutputFile (analyses[choice-1]->Filename());
-
   this->SystemAnalysis(*analyses[choice-1]);
 
   return;
