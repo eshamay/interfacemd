@@ -29,8 +29,8 @@ namespace morita {
 	  virtual void Analysis (system_t&);
 
 	protected:
-	  Morita_ptr_vec		all_wats;
-	  Morita_ptr_vec		analysis_wats;
+	  Morita_ptr_vec		all_wats;		//! The collection of all water molecules in the system
+	  Morita_ptr_vec		analysis_wats;	//! Filtered list of waters that will be analyzed by the analyzer
 	  //VectorXd				_p;
 	  MatrixXd		_alpha;
 	  MatrixXd		 _T;	// system dipole field tensors
@@ -48,6 +48,9 @@ namespace morita {
 
 	  bool	time_zero;
 
+	  /*!
+	   * Determines which of the molecules (waters) in the system are to be used for the ensuing analysis. Only waters that have been copied into the analysis_wats container will be used.
+	   */
 	  virtual void SelectAnalysisWaters () = 0;	// routine that determines which waters will be used in the analysis
 
 	  void CalculateTensors();
