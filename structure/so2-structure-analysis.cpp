@@ -1,6 +1,6 @@
 #include "so2-structure-analysis.h"
 
-void Tester::PromptForAnalysisFunction () {
+void StructureAnalyzer::PromptForAnalysisFunction () {
 
   analyses.push_back (new h2o_angle_bond_histogram_analyzer);
   analyses.push_back (new so2_angle_bond_histogram_analyzer);
@@ -18,7 +18,7 @@ void Tester::PromptForAnalysisFunction () {
   }
   printf ("analysis choice:  ");
   std::cin >> choice;
-  printf ("\n\nperforming analysis (%d) using output filename \"%s\"\n", choice, analyses[choice-1]->Filename().c_str());
+  //printf ("\n\nperforming analysis (%d) using output filename \"%s\"\n", choice, analyses[choice-1]->Filename().c_str());
 
   this->SystemAnalysis(*analyses[choice-1]);
 
@@ -187,17 +187,7 @@ void so2_hbond_factor_analyzer::Analysis (system_t& t) {
 
 
 int main () {
-  libconfig::Config cfg;
-  cfg.readFile("system.cfg");
-
-  std::string filename ("test.dat");
-  libconfig::Setting &analysis = cfg.lookup("analysis");
-  analysis.add("filename", libconfig::Setting::TypeString) = filename;
-
-  WaterSystemParams wsp (cfg);
-
-  Tester test (wsp);
-
+  StructureAnalyzer sa;
 
   return 0;
 }

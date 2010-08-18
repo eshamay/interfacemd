@@ -18,6 +18,9 @@ namespace morita {
 
   USING_PART_OF_NAMESPACE_EIGEN
 
+	/*!
+	 * A pure virtual base class for performing an SFG analysis based on the method of Morita/Hynes (J. Phys. Chem. B 2002, 106, 673-685). Depending on the specific MD system used (Amber, CP2K, etc) the pure virtual methods define the actions to be taken to alter how various components are defined, and customize the analysis.
+	 */
   template <class U>
   class Morita2002Analysis : public AnalysisSet< Analyzer<U> > {
 	public:
@@ -25,26 +28,38 @@ namespace morita {
 	  ~Morita2002Analysis ();
 
 	  typedef Analyzer<U> system_t;
+
 	  virtual void Setup (system_t&);
 	  virtual void Analysis (system_t&);
+	  virtual void DataOutput (system_t&);
 
 	protected:
-	  Morita_ptr_vec		all_wats;		//! The collection of all water molecules in the system
-	  Morita_ptr_vec		analysis_wats;	//! Filtered list of waters that will be analyzed by the analyzer
+	  //! all the waters in the MD system
+	  Morita_ptr_vec		all_wats;		
+	  //! Water molecules that will be analyzed by the morita 2002 routines
+	  Morita_ptr_vec		analysis_wats;	
 	  //VectorXd				_p;
+	  //! The sum-total of all molecular polarizabilities of the water molecules in the system
 	  MatrixXd		_alpha;
-	  MatrixXd		 _T;	// system dipole field tensors
-	  MatrixXd	 	_IDENT;	// a few temporaries for calculating eq 23
+	  //! System dipole field tensor
+	  MatrixXd		 _T;	
+	  //! Identity matrix used in calculation of eq.23 of the Morita/Hynes 2002 method
+	  MatrixXd	 	_IDENT;	
 	  MatrixXd		_g;	
+	  //! Local field correction tensor
 	  MatrixXd		_f;	
+	  //! Block-identity matrix
 	  MatrixXd		_h;
+	  
+	  //! total system polarizability
+	  MatR			_A;		
+	  //! total system dipole moment (at time zero)
+	  VecR			_M;		
 
-	  MatR			_A;		// total system polarizability
-	  VecR			_M;		// total system dipole moment (at time zero)
-
-
-	  VecR_list		_vM;	// total system dipole for each timestep
-	  MatR_list		_vA;	// the tensor A for each timestep
+	  //! Collection of all total system dipole moments for each timestep
+	  VecR_list		_vM;	
+	  //! the total system polarizability matrix for each timestep
+	  MatR_list		_vA;	
 
 	  bool	time_zero;
 
@@ -53,14 +68,19 @@ namespace morita {
 	   */
 	  virtual void SelectAnalysisWaters () = 0;	// routine that determines which waters will be used in the analysis
 
+	  /*!
+	   * Method of calculating the various tensors (molecular dipole moments, polarizabilities, dipole field tensor, etc) used in the ensuing analysis
+	   */
 	  void CalculateTensors();
+
+	  //! Sets the dipole moment of each water used in the analysis.
 	  virtual void SetAnalysisWaterDipoleMoments () = 0;
 
 	  void CalculateTotalDipole ();
 	  void CalculateTotalPolarizability ();
 	  void CalculateLocalFieldCorrection ();
 
-	  sfgdata_pair_t SSP_SPS_Result (const int s1, const int s2, const int p, const MatR& a) const;
+	  // sfgdata_pair_t SSP_SPS_Result (const int s1, const int s2, const int p, const MatR& a) const;
   };	// sfg-analyzer
 
 
@@ -117,14 +137,11 @@ namespace morita {
 	  // Sets up the p, alpha, and T tensors by calculating through each water's dipole moment, polarizability, and dipole field contributions
 	  this->CalculateTensors();
 
-	  //t.restart();
 	  // determine the local field correction to each of the molecular polarizabilities
 	  this->CalculateLocalFieldCorrection ();
-	  //std::cout << "local field correction:: " << t.elapsed() << std::endl;
 
 	  // sum all the molecular polarizabilities to get the total system value
 	  this->CalculateTotalPolarizability ();
-
 
 
 
@@ -143,6 +160,7 @@ namespace morita {
 
 
   // calculates the ssp and sps value of the autocorrelation function for a given set of pqr space-frame coordinates
+  /*
   template <class U>
 	sfgdata_pair_t Morita2002Analysis<U>::SSP_SPS_Result (const int s1, const int s2, const int p, const MatR& a) const {
 	  // for now, only output the SSP and SPS components of the correlation function
@@ -162,12 +180,12 @@ namespace morita {
 
 	  return std::make_pair (a_ssp*m_ssp, a_sps*m_sps);
 	}
+	*/
 
 
-  //template <class U>
-  //void Morita2002Analysis<U>::DataOutput (system_t& t) {
+  template <class U>
+  void Morita2002Analysis<U>::DataOutput (system_t& t) {
 
-  //	  rewind (this->output);
 
   // try this - for each timestep, output the vector dipole, and the matrix polarizability of the system
 
@@ -195,7 +213,8 @@ namespace morita {
   }
   */
 
-  //fflush(t.Output());
+	fflush(t.Output());
+  }
 
 
   // ********  fftw work ******** //
@@ -282,8 +301,10 @@ namespace morita {
 	  VecR_vec dipoles;
 	  std::transform (analysis_wats.begin(), analysis_wats.end(), std::back_inserter(dipoles), std::mem_fun<VecR,Molecule>(&Molecule::Dipole));
 
+	  // sum all the molecular dipoles together to get the total system dipole
 	  _M = std::accumulate (dipoles.begin(), dipoles.end(), VecR());
 
+	  // in case it's needed - keep the dipole for every timestep in a running list
 	  _vM.push_back(_M);
 
 	}	// calculate total dipole
@@ -292,7 +313,11 @@ namespace morita {
   template <class U>
 	void Morita2002Analysis<U>::CalculateLocalFieldCorrection () {
 	  // following equation 23 - (1 + T*alpha) f = h.
-	  // first here set up 1 + T*alpha, then solve the equation for f with a lapack routine
+	  // first, set up _g = (1 + T*alpha)
+	  // then solve the equation for f with a lapack routine
+	  //
+	  // note: g = inv(1+T*alpha)
+	  // so f = g*h --- solved with dsgesv from lapack
 
 	  // do lots of initialization before the polarizability calculations
 	  int N = 3*analysis_wats.size();
@@ -303,20 +328,22 @@ namespace morita {
 	  double scale = 1.0;
 	  //boost::timer t;
 	  //t.restart();
+	  // set g = T*alpha
 	  dgemm (&trans, &trans, &N, &N, &N, &scale, &_T(0,0), &N, &_alpha(0,0), &N, &scale, &_g(0,0), &N);
 	  //std::cout << "blas matrix mult. " << t.elapsed() << std::endl;
 
 	  _IDENT.setIdentity(N,N);
 
 	  //t.restart();
-	  _g += _IDENT;	// this is now 1 + T*alpha, a.k.a inverse of g
+	  // now g = 1+T*alpha
+	  _g += _IDENT;
 	  //std::cout << "eigen matrix sum " << t.elapsed() << std::endl;
 
 	  // for now, f is 'h', the 3Nx3 block identity tensor
 	  _h.setZero(N,3);
 	  tensor::BlockIdentity(_h,3);
 
-	  // now solve for f in the equation g*f = h 
+	  // now solve for f in the equation g*f = h using the lapack dsgesv
 	  int nrhs = 3;
 	  int ipiv[N];
 	  for (int i = 0; i < N; i++) ipiv[i] = 0;
@@ -329,6 +356,10 @@ namespace morita {
 
 	  //t.restart();
 	  dsgesv (&N, &nrhs, &_g(0,0), &N, ipiv, &_h(0,0), &N, &_f(0,0), &N, work, swork, &iter, &info);
+	  if (info != 0){
+		std::cout << "DSGESV.info parameter had a value of " << info << " meaning that something went wrong!" << std::endl;
+		exit(1);
+	  }
 	  //std::cout << "DSGESV (iterative) system solve:  " << t.elapsed() << std::endl;
 
 	  //t.restart();
