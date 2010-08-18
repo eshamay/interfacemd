@@ -12,14 +12,20 @@ USING_PART_OF_NAMESPACE_EIGEN
 typedef std::vector<double> double_vec;
 typedef double_vec::const_iterator double_it;
 
-class Tester : public Analyzer<XYZSystem>
+class StructureAnalyzer : public Analyzer<XYZSystem>
 {
   public:
-	Tester (WaterSystemParams& params) : Analyzer<XYZSystem> (params) { PromptForAnalysisFunction(); }
+	StructureAnalyzer () 
+	  : Analyzer<XYZSystem> () 
+	{
+	  PromptForAnalysisFunction(); 
+	}
 
   protected:
 
+	// output a bit of text to stdout and ask the user for a choice as to which type of analysis to perform - then do it.
 	void PromptForAnalysisFunction ();
+	// The set of possible analyses to perform on a given system
 	std::vector<XYZAnalysisSet *> analyses;
 };
 
