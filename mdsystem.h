@@ -21,20 +21,28 @@ class MDSystem {
 
     virtual ~MDSystem();
 
-    virtual void LoadNext () = 0;
+	//! Rewinds the necessary input and data files and then loads the first frame of an MD simulation
     virtual void LoadFirst () = 0;
+	//! Loads the next frame of an MD simulation data set
+    virtual void LoadNext () = 0;
 
+	//! Parses out molecules from the set of atoms in an MD data set. This is typically done via topology files, or some other defined routine that determines connectivity between atoms to form molecules.
     virtual void _ParseMolecules () = 0;
 
+	//! The set of all molecules in a system
     Mol_ptr_vec& Molecules () { return _mols; }
+	//! An iterator to the beginning of the set of molecules
 	Mol_it begin_mols () const { return _mols.begin(); }
+	//! An iterator to the end of the set of molecules
 	Mol_it end_mols () const { return _mols.end(); }
+	//! An indexing method for retrieving specific molecules in a system
     MolPtr Molecules (int index) { return _mols[index]; }
+	//! Returns the total number of molecules in a system
     int NumMols () const { return _mols.size(); }
 
+    Atom_ptr_vec& Atoms () { return _atoms; }
     Atom_it begin () { return _atoms.begin(); }
     Atom_it end () { return _atoms.end(); }
-    Atom_ptr_vec& Atoms () { return _atoms; }
     AtomPtr Atoms (const int index) { return _atoms[index]; }
     AtomPtr operator[] (int index) { return _atoms[index]; }
     int NumAtoms ()	const { return (int)_atoms.size(); }
@@ -54,8 +62,11 @@ class MDSystem {
 	// Calculates the minimum distance between two molecules - i.e. the shortest inter-molecular atom-pair distance
 	double Distance (const MolPtr mol1, const MolPtr mol2) const;
 
-	// calculate a molecule's dipole moment
-	static VecR CalcDipole (MolPtr mol);
+	//! Calculates a molecular dipole moment using the "classical E&M" method - consider each atom in the molecule as a point-charge, and that the molecule has no net charge (calculation is independent of origin location). This returns a vector that is the sum of the position*charge (r*q) of each atom.
+	static VecR CalcClassicDipole (MolPtr mol);
+
+	//! Calculates the dipole of a molecule using the classic E&M method, but also account for the wannier localization centers (WLC). This assumes that the wannier localization centers have also been calculated and parsed into the molecule.
+	static VecR CalcWannierDipole (MolPtr mol);
 };
 
 #include "h2o.h"
