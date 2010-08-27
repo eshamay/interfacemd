@@ -19,10 +19,10 @@ inline OtherDerived	operator% (const OtherDerived& input) const		// Vector cross
 template<typename OtherDerived>
 inline double operator< (const OtherDerived& input) const		// Find the cos(angle) between two vectors
 {
-  // determine the cos(angle) between two vectors by applying the dot product, and dividing by the magnitudes
-  // cos(angle) = dotproduct/magnitudes
-  // Return cos(angle)
-  return this->dot(input) / this->norm() / input.norm();
+	// determine the cos(angle) between two vectors by applying the dot product, and dividing by the magnitudes
+	// cos(angle) = dotproduct/magnitudes
+	// Return cos(angle)
+	return this->dot(input) / this->norm() / input.norm();
 }
 
 // Input & vector manipulation
@@ -35,10 +35,10 @@ inline data_t Magnitude () const { return this->norm(); }
 
 inline void Print () const
 {
-  if (cols() > 1)
-	std::cout << *this << std::endl;
-  else
-	printf ("[% 8.3f% 8.3f% 8.3f ]\n", this->x(), this->y(), this->z());
+	if (cols() > 1)
+		std::cout << *this << std::endl;
+	else
+		printf ("[% 8.3f% 8.3f% 8.3f ]\n", this->x(), this->y(), this->z());
 }
 
 

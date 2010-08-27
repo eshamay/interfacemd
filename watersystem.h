@@ -26,7 +26,7 @@ class WaterSystemParams {
 	WaterSystemParams () { }
 
 	~WaterSystemParams () { 
-	  std::cout << "WaterSystemParams dtor" << std::endl;
+	  //std::cout << "WaterSystemParams dtor" << std::endl;
 	  delete config_file; 
 	}
 
@@ -233,6 +233,8 @@ class WaterSystem {
 	}
 
 	void UpdateGraph () { sys->graph.UpdateGraph (int_atoms); }
+	bondgraph::BondGraph& Graph () const { return sys->graph; }
+
 
   protected:
 

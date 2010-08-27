@@ -44,87 +44,105 @@ Atom::Atom (const VecR& position) :
 Atom::~Atom () {
 }
 
-double Atom::operator[] (const coord index) const {
-  double pos = -1.0;
+void Atom::Position (const VecR& position) { 
+	_position = position; 
+	UnsetMolecule();
+}
 
-  switch (index) {
-	case x: pos = _position.x();
-	case y: pos = _position.y();
-	case z: pos = _position.z();
-  }
-  return pos;
+void Atom::Position (const double X, const double Y, const double Z) { 
+	_position.Set(X, Y, Z); 
+	UnsetMolecule();
+}
+
+void Atom::Position (coord const axis, double const value) { 
+	_position.Set (axis, value); 
+	UnsetMolecule();
+}
+
+double Atom::operator[] (const coord index) const {
+	double pos = -1.0;
+
+	switch (index) {
+		case x: pos = _position.x();
+		case y: pos = _position.y();
+		case z: pos = _position.z();
+	}
+	UnsetMolecule();
+	return pos;
 }
 
 bool Atom::operator< (const AtomPtr& rhs) const {
-  return this->_ID < rhs->ID();
+	return this->_ID < rhs->ID();
 }
 bool Atom::operator< (const Atom& rhs) const {
-  return this->_ID < rhs.ID();
+	return this->_ID < rhs.ID();
 }
 
 void Atom::Print () const {
-  printf ("%s (ID:%d)\t%s (molID:%d)\t% f\t% f\t% f\n", _name.c_str(), _ID, _residue.c_str(), _molid, _position.x(), _position.y(), _position.z());
+	printf ("%s (ID:%d)\t%s (molID:%d)\t% f\t% f\t% f\n", _name.c_str(), _ID, _residue.c_str(), _molid, _position.x(), _position.y(), _position.z());
 }
 
 void Atom::SetAtomProperties () {
 
-  //const double AMU2KG	= 1.6762158e-27;		// conversion for amu -> kg
-  if (_name.find("DW") != std::string::npos) {
-	_mass = 0.0;
-	_charge = 0.0;
-	_element = DW;
-  }
-  else if (_name.find("SW") != std::string::npos) {
-	_mass = 0.0;
-	_charge = 0.0;
-	_element = SW;
-  }
-  else if (_name.find("Cl") != std::string::npos) {
-	_mass = 35.453;
-	_charge = 7.0;
-	_element = Cl;
-  }
-  else if (_name.find("H") != std::string::npos) {
-	_mass = 1.0078250321;
-	_charge = 1.0;
-	_element = H;
-  }
-  else if (_name.find("O") != std::string::npos) {
-	_mass = 15.9949146221;
-	_charge = 6.0;
-	_element = O;
-  }
-  else if (_name.find("N") != std::string::npos) {
-	_mass = 14.0030740052;
-	_charge = 5.0;
-	_element = N;
-  }
-  else if (_name.find("D") != std::string::npos) {
-	_mass = 2.0156500641;
-	_charge = 1.0;
-	_element = D;
-  }
-  else if (_name.find("C") != std::string::npos) {
-	_mass = 12.0000000;
-	_charge = 4.0;
-	_element = C;
-  }
-  else if (_name.find("Si") != std::string::npos) {
-	_mass = 28.0855;
-	_charge = 4.0;
-	_element = Si;
-  }
-  else if (_name.find("S") != std::string::npos) {
-	_mass = 32.065;
-	_charge = 6.0;
-	_element = S;
-  }
-  else if (_name.find("F") != std::string::npos) {
-	_mass = 18.9984;
-	_charge = 7.0;
-	_element = F;
-  }
+	//const double AMU2KG	= 1.6762158e-27;		// conversion for amu -> kg
+	if (_name.find("DW") != std::string::npos) {
+		_mass = 0.0;
+		_charge = 0.0;
+		_element = DW;
+	}
+	else if (_name.find("SW") != std::string::npos) {
+		_mass = 0.0;
+		_charge = 0.0;
+		_element = SW;
+	}
+	else if (_name.find("Cl") != std::string::npos) {
+		_mass = 35.453;
+		_charge = 7.0;
+		_element = Cl;
+	}
+	else if (_name.find("H") != std::string::npos) {
+		_mass = 1.0078250321;
+		_charge = 1.0;
+		_element = H;
+	}
+	else if (_name.find("O") != std::string::npos) {
+		_mass = 15.9949146221;
+		_charge = 6.0;
+		_element = O;
+	}
+	else if (_name.find("N") != std::string::npos) {
+		_mass = 14.0030740052;
+		_charge = 5.0;
+		_element = N;
+	}
+	else if (_name.find("D") != std::string::npos) {
+		_mass = 2.0156500641;
+		_charge = 1.0;
+		_element = D;
+	}
+	else if (_name.find("C") != std::string::npos) {
+		_mass = 12.0000000;
+		_charge = 4.0;
+		_element = C;
+	}
+	else if (_name.find("Si") != std::string::npos) {
+		_mass = 28.0855;
+		_charge = 4.0;
+		_element = Si;
+	}
+	else if (_name.find("S") != std::string::npos) {
+		_mass = 32.065;
+		_charge = 6.0;
+		_element = S;
+	}
+	else if (_name.find("F") != std::string::npos) {
+		_mass = 18.9984;
+		_charge = 7.0;
+		_element = F;
+	}
 
-  return;
+	UnsetMolecule();
+
+	return;
 }
 

@@ -44,32 +44,34 @@ class Atom {
 	bool operator< (const Atom& rhs) const;
 
 	// Input
-	void Name (const std::string& name) { _name = name; }
+	virtual void UnsetMolecule() const;
 
-	void Position (const VecR& position) { _position = position; }
-	void Position (const double X, const double Y, const double Z) { _position.Set(X, Y, Z); }
+	void Name (const std::string& name) { _name = name; UnsetMolecule(); }
 
-	void Position (coord const axis, double const value) { _position.Set (axis, value); }
+	void Position (const VecR& position);
+	void Position (const double X, const double Y, const double Z);
 
-	void Force (const VecR& force) { _force = force; }
-	void Force (const double X, const double Y, const double Z) { _force.Set(X, Y, Z); }
-	void Force (coord const axis, double const value) { _force.Set (axis, value); }
+	void Position (coord const axis, double const value);
 
-	void ID (const int id) { _ID = id; }
+	void Force (const VecR& force) { _force = force; UnsetMolecule(); }
+	void Force (const double X, const double Y, const double Z) { _force.Set(X, Y, Z); UnsetMolecule(); }
+	void Force (coord const axis, double const value) { _force.Set (axis, value); UnsetMolecule(); }
+
+	void ID (const int id) { _ID = id; UnsetMolecule(); }
 	//void Charge (double charge) { _charge = charge; }
 	void SetAtomProperties ();
-	void Residue (const std::string& residue) { _residue = residue; }
+	void Residue (const std::string& residue) { _residue = residue; UnsetMolecule(); }
 
 	// for setting the atom's position
-	void X (double val) { _position[0] = val; }			
-	void Y (double val) { _position[1] = val; }
-	void Z (double val) { _position[2] = val; }
+	void X (double val) { _position[0] = val; UnsetMolecule(); }			
+	void Y (double val) { _position[1] = val; UnsetMolecule(); }
+	void Z (double val) { _position[2] = val; UnsetMolecule(); }
 
-	void MolID (const int mol) { _molid = mol; }	// sets the ID of the molecule containing this atom
-	void ParentMolecule (const MolPtr mol) { _pmolecule = mol; }	// sets a pointer to the molecule that contains the atom
+	void MolID (const int mol) { _molid = mol; UnsetMolecule(); }	// sets the ID of the molecule containing this atom
+	void ParentMolecule (const MolPtr mol) { _pmolecule = mol; UnsetMolecule(); }	// sets a pointer to the molecule that contains the atom
 
 	void Shift (const VecR& shift)			// shift the atom's position
-	{ _position += shift; }
+	{ _position += shift; UnsetMolecule(); }
 
 	// Output
 	const std::string& Name () const 	{ return _name; }
@@ -92,29 +94,29 @@ class Atom {
 
 
 	static AtomPtr FindByElement (const Atom_ptr_vec& apv, Element_t elmt) {
-	  Atom_it a = std::find_if (apv.begin(), apv.end(), member_functional::mem_fun_eq(&Atom::Element,elmt));
-	  return *a;
+		Atom_it a = std::find_if (apv.begin(), apv.end(), member_functional::mem_fun_eq(&Atom::Element,elmt));
+		return *a;
 	}
 
 	static bool element_eq (const AtomPtr& first, const AtomPtr& second) {
-	  return first->Element() == second->Element();
+		return first->Element() == second->Element();
 	}
 
 	// tests if the combination of atoms supplied matches the element pair supplied
 
 	// some predicates
 	static bool ElementCombo (const AtomPtr& ai, const AtomPtr& aj, const Element_t element_a, const Element_t element_b) {
-	  return 
-		((ai->Element() == element_a && aj->Element() == element_b)
-		 ||
-		 (ai->Element() == element_b && aj->Element() == element_a));
+		return 
+			((ai->Element() == element_a && aj->Element() == element_b)
+			 ||
+			 (ai->Element() == element_b && aj->Element() == element_a));
 	}
 
 
 
-  protected:
+	protected:
 	std::string _name, 	// human-readable identifier
-	  _residue; 		// name of the parent-molecule 
+		_residue; 		// name of the parent-molecule 
 
 
 	int    _ID;	// some numerical identifier in case the atom is in an ordered list
@@ -122,8 +124,8 @@ class Atom {
 
 	MolPtr _pmolecule;
 
-	double _mass,
-		   _charge;
+	double _mass, _charge;
+
 	Element_t _element;			// the actual element based on the atom name - always upper-case and max length of two letters
 
 	VecR _position;				// Particle position

@@ -16,6 +16,7 @@ namespace morita {
 	  MoritaH2O (const Molecule * molecule) 
 		: Water(*molecule) { return; }
 
+		void SetBondAngleVars ();
 	  void SetDipoleMoment ();
 	  void SetPolarizability ();
 
@@ -35,14 +36,6 @@ namespace morita {
   typedef std::vector<MoritaH2O_ptr> Morita_ptr_vec;
   typedef Morita_ptr_vec::const_iterator Morita_it;
 
-
-
-  // dipole field tensor 'T' as used in the morita&hynes paper
-  // it's a square 3Nx3N matrix, where N = number of particles
-  class DipoleFieldTensor : public MatR {
-	public:
-	  DipoleFieldTensor (const MoritaH2O_ptr wat1, const MoritaH2O_ptr wat2);
-  }; // Dipole field tensor
 
 
 }	// namespace morita

@@ -7,8 +7,6 @@ from Utility import *
 
 class ColumnPairFile (CDF):
 
-
-class ColumnPairFile:
   	def __init__(self,file):
 	  	self.filename = file
 		

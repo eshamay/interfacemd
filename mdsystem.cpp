@@ -4,7 +4,7 @@
 VecR MDSystem::_dimensions = VecR ();
 
 MDSystem::~MDSystem () {
-  return;
+	return;
 }
 
 // Find the smallest vector between two locations in a periodic system defined by the dimensions.
@@ -37,7 +37,7 @@ VecR MDSystem::Distance (const VecR& v1, const VecR& v2) {
 		else 		 az -= _dimensions[z];
 	}
 
-return (VecR(bx - ax, by - ay, bz - az));
+	return (VecR(bx - ax, by - ay, bz - az));
 }
 
 // A useful method for finding the distances between pairs of atoms in a periodic system
@@ -47,45 +47,48 @@ VecR MDSystem::Distance (const AtomPtr atom1, const AtomPtr atom2) {
 
 double MDSystem::Distance (const MolPtr mol1, const MolPtr mol2) const {
 
-  std::vector <double> distances;
-  for (Atom_it ai = mol1->begin(); ai != mol1->end(); ai++) {
-	for (Atom_it aj = mol2->begin(); aj != mol2->end(); aj++) {
-	  distances.push_back (this->Distance(*ai,*aj).Magnitude());
+	std::vector <double> distances;
+	for (Atom_it ai = mol1->begin(); ai != mol1->end(); ai++) {
+		for (Atom_it aj = mol2->begin(); aj != mol2->end(); aj++) {
+			distances.push_back (this->Distance(*ai,*aj).Magnitude());
+		}
 	}
-  }
-  std::sort(distances.begin(), distances.end());
-  return distances[0];
+	std::sort(distances.begin(), distances.end());
+	return distances[0];
 }
 
 VecR MDSystem::CalcClassicDipole (MolPtr mol) {
-  VecR com = mol->UpdateCenterOfMass();
-  VecR dipole;
+	VecR com = mol->UpdateCenterOfMass();
+	VecR dipole = VecR::Zero();
 
-  // the dipole is just a sum of the position vectors multiplied by the charges (classical treatment)
-  for (Atom_it it = mol->begin(); it != mol->end(); it++) {
-	VecR r (MDSystem::Distance(com, (*it)->Position()));
-	dipole += r * (*it)->Charge();
-  }
+	// the dipole is just a sum of the position vectors multiplied by the charges (classical treatment)
+	for (Atom_it it = mol->begin(); it != mol->end(); it++) {
+		VecR r (MDSystem::Distance(com, (*it)->Position()));
+		r *= (*it)->Charge();
+		//printf ("%4.3f  % 4.3f ", r.Magnitude(), (*it)->Charge()); r.Print();
+		dipole += r;
+	}
 
-  mol->Dipole(dipole);
+	mol->Dipole(dipole);
 
-  return (dipole);
+	return (dipole);
 }
 
 VecR MDSystem::CalcWannierDipole (MolPtr mol) {
 
-  VecR dipole = CalcClassicDipole(mol);
-  VecR com = mol->CenterOfMass();
+	VecR dipole = CalcClassicDipole(mol);
+	VecR com = mol->CenterOfMass();
 
-  // wannier centers have a charge of -2
-  for (VecR_it vt = mol->wanniers_begin(); vt != mol->wanniers_end(); vt++) {
-	VecR r (MDSystem::Distance(com, *vt));
-	dipole -= (r * 2.0);
-  }
+	// wannier centers have a charge of -2
+	for (VecR_it vt = mol->wanniers_begin(); vt != mol->wanniers_end(); vt++) {
+		VecR r (MDSystem::Distance(com, *vt));
+		r *= 2.0;
+		dipole -= r;
+	}
 
-  mol->Dipole(dipole);
+	mol->Dipole(dipole);
 
-  return (dipole);
+	return (dipole);
 }
 
 
