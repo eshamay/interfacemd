@@ -349,6 +349,7 @@ void Morita2002Analysis<U>::CalculateTotalDipole () {
 	// p_corrected = trans(g) * p
 	// where p_corrected is p corrected for the local field effect of the neighboring waters
 
+	/*
 	int N = 3*analysis_wats.size();
 
 	int n = 1;
@@ -359,6 +360,8 @@ void Morita2002Analysis<U>::CalculateTotalDipole () {
 
 	dgemm (&transa, &transb, &N, &n, &N, &scalea, &_g(0,0), &N, &_p(0,0), &N, &scaleb, &_p(0,0), &N);
 	// _p now holds the local-field corrected dipole moments
+	*/
+	_p = _g.transpose() * _p;
 
 	// perform the summation of the total system dipole moment
 	_M.setZero(3,1);
@@ -391,16 +394,19 @@ void Morita2002Analysis<U>::CalculateLocalFieldCorrection () {
 	int N = 3*analysis_wats.size();
 
 	// first step: g = I
-	_g.setIdentity(N,N);
 
-	char trans = 'N';
-	double scale = 1.0;
+	//char trans = 'N';
+	//double scale = 1.0;
 
 	//boost::timer t;
 	//t.restart();
 	// set g = T*alpha + I,
 	// though the blas routine is really doing a g = T*alpha + g, since g already = I
-	dgemm (&trans, &trans, &N, &N, &N, &scale, &_T(0,0), &N, &_alpha(0,0), &N, &scale, &_g(0,0), &N);
+	//dgemm (&trans, &trans, &N, &N, &N, &scale, &_T(0,0), &N, &_alpha(0,0), &N, &scale, &_g(0,0), &N);
+	_g = _T;
+	_g *= _alpha;
+	_IDENT.setIdentity(N,N);
+	_g += _IDENT;
 	//std::cout << "blas matrix mult. " << t.elapsed() << std::endl;
 	//
 	// now g = T*alpha + I
@@ -432,7 +438,7 @@ void Morita2002Analysis<U>::CalculateLocalFieldCorrection () {
 	//std::cout << "DSGESV (iterative) system solve:  " << t.elapsed() << std::endl;
 	*/
 
-	_f = _g;
+	//_f = _g;
 	/******** Solve for the inverse of _g through LU decomposition and direct application of the lapack _getri routine *******/
 	int ipiv[N];
 	int info = 0;
@@ -453,6 +459,8 @@ void Morita2002Analysis<U>::CalculateLocalFieldCorrection () {
 	// now _g is as expected - the inverse of (1+T*alpha) - the value of Eq. 19 - 2008 Morita/Ishiyama
 
 
+	//_f *= _g;
+	/*
 	double scaleb = 0.0;
 	dgemm (&trans, &trans, &N, &N, &N, &scale, &_g(0,0), &N, &_f(0,0), &N, &scaleb, &_f(0,0), &N);
 	std::cout << "------" << std::endl;
@@ -463,6 +471,7 @@ void Morita2002Analysis<U>::CalculateLocalFieldCorrection () {
 	std::cout << "------" << std::endl;
 	std::cout << _f << std::endl;
 	std::cout << "------" << std::endl;
+	*/
 	//t.restart();
 	//dgesv (&N, &nrhs, &_g(0,0), &N, ipiv, &_f(0,0), &N, &info);
 	//std::cout << "DGESV system solve:  " << t.elapsed() << std::endl;
@@ -489,12 +498,14 @@ void Morita2002Analysis<U>::CalculateTotalPolarizability () {
 	double scale = 1.0;
 	double scaleb = 0.0;
 
+	_alpha = _g.transpose() * _alpha;
+	_alpha *= _g;
 	// alpha_1 = trans(g)*alpha_0
-	dgemm (&transa, &transb, &N, &N, &N, &scale, &_g(0,0), &N, &_alpha(0,0), &N, &scaleb, &_alpha(0,0), &N);
+	//dgemm (&transa, &transb, &N, &N, &N, &scale, &_g(0,0), &N, &_alpha(0,0), &N, &scaleb, &_alpha(0,0), &N);
 	// alpha_2 = alpha_1*g
-	transa = 'N';
-	transb = 'N';
-	dgemm (&transa, &transb, &N, &N, &N, &scale, &_alpha(0,0), &N, &_g(0,0), &N, &scaleb, &_alpha(0,0), &N);
+	//transa = 'N';
+	//transb = 'N';
+	//dgemm (&transa, &transb, &N, &N, &N, &scale, &_alpha(0,0), &N, &_g(0,0), &N, &scaleb, &_alpha(0,0), &N);
 	// _alpha now contains the polarizabilities with the local-field correction accounted for
 
 	// determine 'A', the summed (total) system polarizability.
