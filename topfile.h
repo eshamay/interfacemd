@@ -2,6 +2,7 @@
 #ifndef TOPFILE_H_
 #define TOPFILE_H_
 
+#include <cstdlib>
 #include <string>
 #include <stdio.h>
 #include <string.h>

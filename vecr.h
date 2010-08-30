@@ -2,7 +2,9 @@
 #ifndef VECR_H_
 #define VECR_H_
 
-#define EIGEN_MATRIXBASE_PLUGIN "/home/eshamay/md/src/EigenMatrixAddon.h"
+#ifndef EIGEN_MATRIXBASE_PLUGIN 
+#define EIGEN_MATRIXBASE_PLUGIN "EigenMatrixAddon.h"
+#endif
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>

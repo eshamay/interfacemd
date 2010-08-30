@@ -8,6 +8,7 @@
  * A derived Morita2002 analysis routine. This performs the SFG spectral analysis (J. Phys. Chem. B 2002, 106, 673-685) on an MD data set produced by the CP2K (Quickstep) ab initio (DFT) molecular dynamics suite (http://cp2k.berlios.de/). This analysis assumes that the input MD data has been calculated along with the corresponding wannier localization centers in order to reproduce molecular and system dipole moments.
  */
 namespace morita {
+
   class CP2KMorita2002Analysis : public Morita2002Analysis<XYZSystem> {
 	public:
 

@@ -5,7 +5,7 @@
 #include "vecr.h"
 #include <list>
 
-#define EIGEN_MATRIXBASE_PLUGIN "/home/eshamay/md/src/EigenMatrixAddon.h"
+//#define EIGEN_MATRIXBASE_PLUGIN "/home/eshamay/md/src/EigenMatrixAddon.h"
 #include <Eigen/Core>
 USING_PART_OF_NAMESPACE_EIGEN
 

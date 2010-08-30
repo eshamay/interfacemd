@@ -4,7 +4,7 @@
 #include "../analysis.h"
 #include "sfgunits.h"
 #include "moritah2o.h"
-#include "../tensor.h"
+//#include "../tensor.h"
 #include <Eigen/LU>
 #include <iostream>
 //#include <fftw3.h>
@@ -118,12 +118,15 @@ namespace morita {
 	template <class U>
 		void Morita2002Analysis<U>::SetupSystemWaters (system_t& t) {
 
+			// load all the waters into the int_wats container
 			t.LoadWaters();
+
 			for (Morita_it it = all_wats.begin(); it != all_wats.end(); it++) {
 				delete *it;
 			}
 			all_wats.clear();
 
+			// load up the all_wats with new derived Morita waters that have some extra functionality
 			for (Mol_it it = t.int_wats.begin(); it != t.int_wats.end(); it++) {
 				MoritaH2O_ptr ptr (new MoritaH2O (*it));
 				all_wats.push_back(ptr);
@@ -446,7 +449,7 @@ void Morita2002Analysis<U>::CalculateLocalFieldCorrection () {
 	dgetrf (&N, &N, &_g(0,0), &N, ipiv, &info);
 	// before continuing, find out the best working memory chunk size
 	double lwork_query[10];
-	int lwork = -1;
+	int lwork = -1;	// tell dgetri to perform a query of the optimal workspace size, instead of performing the inversion
 	// perform the work-size query
 	dgetri (&N, &_g(0,0), &N, ipiv, lwork_query, &lwork, &info);
 	lwork = (int)lwork_query[0];
@@ -489,6 +492,7 @@ template <class U>
 void Morita2002Analysis<U>::CalculateTotalPolarizability () {
 
 	int N = 3*analysis_wats.size();
+	/*
 
 	// The alpha tensor is calculated as: alpha_corrected = trans(g) * alpha * g
 	// thus, matrix multiplication twice 
@@ -497,9 +501,11 @@ void Morita2002Analysis<U>::CalculateTotalPolarizability () {
 	char transb = 'N';
 	double scale = 1.0;
 	double scaleb = 0.0;
+	*/
 
 	_alpha = _g.transpose() * _alpha;
 	_alpha *= _g;
+
 	// alpha_1 = trans(g)*alpha_0
 	//dgemm (&transa, &transb, &N, &N, &N, &scale, &_g(0,0), &N, &_alpha(0,0), &N, &scaleb, &_alpha(0,0), &N);
 	// alpha_2 = alpha_1*g

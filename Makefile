@@ -1,42 +1,39 @@
-SRCLIB	 	= $(HOME)/md/src
+#MDSRC	 	= $(HOME)/md/src
 
-CXX			= icpc  -I$(HOME)/md/src -I$(HOME)/src/eigen -wd981,444,383,177,1418,1782
+CXX			= g++  -I$(EIGEN) -I$(BOOST) -I.. #-wd981,444,383,177,1418,1782
 
 DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated -DNDEBUG #-debug #-wd981,1599,1572,383
-OPTIMIZE 	= -finline-functions -finline -funroll-all-loops -m64 -O3 -DNDEBUG -fast -restrict
+OPTIMIZE 	= -finline-functions -finline -funroll-all-loops -O3 -DNDEBUG #-m64 -fast -restrict
 #CPPFLAGS    = -Wall -Drestrict= -ftemplate-depth-100 $(DEBUG) -L$(HOME)/share/lib
 CPPFLAGS    = -Wall -ftemplate-depth-100 $(OPTIMIZE)
 
 LIBS		= -L$(HOME)/share/lib -lconfig++ #-L$(MPI_HOME)/lib -L$(ATLAS)/lib 
 
-ATLAS		= $(HOME)/share/atlas
-BOOST		= $(HOME)/src/boost_1_43_0
-LAPACK		= $(HOME)/src/lapack-3.2.1
-EIGEN		= $(HOME)/src/eigen
 LAPACKLIBS	= -lmkl_lapack -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread
+LAPACKLIBS32 = -lmkl_lapack -lmkl_intel -lmkl_intel_thread -lmkl_core -liomp5 -lpthread
 SCALAPACK	= -openmp -Wl,--start-group -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_intel_thread -Wl,--end-group -lpthread -lmpi -lm
 
 XDRLIB		= $(XDRDIR)/lib
 XDRINC		= $(XDRDIR)/include
 
-#CPATH		= :$(SRCLIB):$(HOME)/share/include:$(ATLAS)/include:$(BOOST)#:$(XDRINC)
+#CPATH		= :$(MDSRC):$(HOME)/share/include:$(ATLAS)/include:$(BOOST)#:$(XDRINC)
 
 
-MDSYSTEM = $(SRCLIB)/atom.o $(SRCLIB)/molecule.o $(SRCLIB)/mdsystem.o
+MDSYSTEM = $(MDSRC)/atom.o $(MDSRC)/molecule.o $(MDSRC)/mdsystem.o
 
-WATER	= $(SRCLIB)/h2o.o 
+WATER	= $(MDSRC)/h2o.o 
 
-IONS	= $(SRCLIB)/hno3.o $(SRCLIB)/h3o.o $(SRCLIB)/oh.o $(SRCLIB)/so2.o $(SRCLIB)/h.o
+IONS	= $(MDSRC)/hno3.o $(MDSRC)/h3o.o $(MDSRC)/oh.o $(MDSRC)/so2.o $(MDSRC)/h.o
 
-ORGANIC = $(SRCLIB)/alkane.o $(SRCLIB)/decane.o 
+ORGANIC = $(MDSRC)/alkane.o $(MDSRC)/decane.o 
 
-XYZSYSTEM = $(SRCLIB)/xyzsystem.o $(SRCLIB)/xyzfile.o $(SRCLIB)/wannier.o 
+XYZSYSTEM = $(MDSRC)/xyzsystem.o $(MDSRC)/xyzfile.o $(MDSRC)/wannier.o 
 
-AMBERSYSTEM	= $(SRCLIB)/ambersystem.o $(SRCLIB)/crdfile.o $(SRCLIB)/forcefile.o $(SRCLIB)/topfile.o
+AMBERSYSTEM	= $(MDSRC)/ambersystem.o $(MDSRC)/crdfile.o $(MDSRC)/forcefile.o $(MDSRC)/topfile.o
 
-GMXSYS	= $(SRCLIB)/trrfile.o $(SRCLIB)/grofile.o $(SRCLIB)/gmxsystem.o
+GMXSYS	= $(MDSRC)/trrfile.o $(MDSRC)/grofile.o $(MDSRC)/gmxsystem.o
 
-WATERSYSTEM = $(MDSYSTEM) $(AMBERSYSTEM) $(XYZSYSTEM) $(SRCLIB)/graph.o
+WATERSYSTEM = $(MDSYSTEM) $(AMBERSYSTEM) $(XYZSYSTEM) $(MDSRC)/graph.o
 
 ANALYSIS = $(WATERSYSTEM)
 
