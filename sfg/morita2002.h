@@ -46,18 +46,13 @@ namespace morita {
 				MatrixXd		 _T;	
 				//! Identity matrix used in calculation of eq.23 of the Morita/Hynes 2002 method
 				MatrixXd	 	_IDENT;	
-				MatrixXd		_g;	
 				//! Local field correction tensor
-				MatrixXd		_f;	
-				//! Block-identity matrix
-				//MatrixXd		_h;
+				MatrixXd		_g;	
 
 				//! total system polarizability
 				MatR			_A;		
 				//! total system dipole moment (at time zero)
 				VecR			_M;		
-
-				bool	time_zero;
 
 				/*!
 				 * Copies all the waters in the system into a separate container in order to differentiate between those that will be analyzed and the rest. Also, the waters and converted into a special Morita water class that makes it cleaner to calculate the dipole and polarizability tensors
@@ -94,26 +89,17 @@ namespace morita {
 		Morita2002Analysis<U>::Morita2002Analysis (std::string desc, std::string fn)
 		: 
 			AnalysisSet< Analyzer<U> > (desc, fn),
-			_p(0), _alpha(0,0), _IDENT(0,0), _g(0,0), _f(0,0), time_zero(true) 
+			_p(0), _alpha(0,0), _IDENT(0,0), _g(0,0)
 	{ return; }
 
 
 
 	template <class U> Morita2002Analysis<U>::~Morita2002Analysis () {
-			for (Morita_it it = all_wats.begin(); it != all_wats.end(); it++) {
-				delete *it;
-			}
+		for (Morita_it it = all_wats.begin(); it != all_wats.end(); it++) {
+			delete *it;
+		}
 	}
 
-
-	/*
-		 template <class U>
-		 void Morita2002Analysis<U>::Setup (system_t& t) {
-
-		 AnalysisSet < Analyzer<U> >::Setup(t);
-
-		 } // Setup
-		 */
 
 	template <class U>
 		void Morita2002Analysis<U>::SetupSystemWaters (system_t& t) {
@@ -292,28 +278,23 @@ void Morita2002Analysis<U>::CalculateTensors() {
 
 	/*
 		 for (Morita_it it = analysis_wats.begin(); it != analysis_wats.end(); it++) {
-		 (*it)->Dipole().Print();
+		 	(*it)->Dipole().Print();
 		 }
-		 */
+	 */
 
 	_T.setZero();
 	for (unsigned int i = 0; i < analysis_wats.size(); i++) {
 
-		//if (time_zero) {
 		_p.block(3*i,0,3,1) = analysis_wats[i]->Dipole();
-		time_zero = false;
-		//}
 
 		_alpha.block(3*i,3*i,3,3) = analysis_wats[i]->Polarizability();
 		//std::cout << _alpha.block(3*i,3*i,3,3) << std::endl;
 
 		for (unsigned int j = i+1; j < analysis_wats.size(); j++) {
-
 			// Calculate the tensor 'T' which is formed of 3x3 matrix elements
 			MatR dft (DipoleFieldTensor(analysis_wats[i], analysis_wats[j]));
 			_T.block(3*i,3*j,3,3) = dft;
 			_T.block(3*j,3*i,3,3) = dft;
-		}
 	}
 
 }	// Calculate Tensors
@@ -322,7 +303,6 @@ void Morita2002Analysis<U>::CalculateTensors() {
 	template <class U>
 MatR Morita2002Analysis<U>::DipoleFieldTensor (const MoritaH2O_ptr wat1, const MoritaH2O_ptr wat2)
 {
-	MatR dft;
 	VecR r = MDSystem::Distance(wat1->GetAtom(Atom::O), wat2->GetAtom(Atom::O));
 	// work in atomic units (au)
 	double distance = pow(r.Magnitude() * sfg_units::ANG2BOHR, 3.0);
@@ -330,13 +310,11 @@ MatR Morita2002Analysis<U>::DipoleFieldTensor (const MoritaH2O_ptr wat1, const M
 	//double ir5 = 3.0/pow(distance,5.0);
 
 	// calculate T as in eq. 10 of the Morita/Hynes 2002 paper
+	MatR dft = Matrix3d::Identity();
+
 	for (unsigned i = 0; i < 3; i++) {
 		for (unsigned j = 0; j < 3; j++) {
-			if (i == j) 
-				dft(i,j) = (1.0 - 3.0*r[i]*r[j]) * ir3;
-			else
-				dft(i,j) = -3.0*r[i]*r[j] * ir3;
-			//this->operator()(i,j) = ir3 - ir5*r[i]*r[j];
+			dft(i,j) = ( dft(i,j) - 3.0*r[i]*r[j] ) * ir3;
 		}
 	}
 
@@ -353,15 +331,15 @@ void Morita2002Analysis<U>::CalculateTotalDipole () {
 	// where p_corrected is p corrected for the local field effect of the neighboring waters
 
 	/*
-	int N = 3*analysis_wats.size();
+		 int N = 3*analysis_wats.size();
 
-	int n = 1;
-	char transa = 'T';
-	char transb = 'N';
-	double scalea = 1.0;
-	double scaleb = 0.0;
+		 int n = 1;
+		 char transa = 'T';
+		 char transb = 'N';
+		 double scalea = 1.0;
+		 double scaleb = 0.0;
 
-	dgemm (&transa, &transb, &N, &n, &N, &scalea, &_g(0,0), &N, &_p(0,0), &N, &scaleb, &_p(0,0), &N);
+		 dgemm (&transa, &transb, &N, &n, &N, &scalea, &_g(0,0), &N, &_p(0,0), &N, &scaleb, &_p(0,0), &N);
 	// _p now holds the local-field corrected dipole moments
 	*/
 	_p = _g.transpose() * _p;
@@ -406,10 +384,14 @@ void Morita2002Analysis<U>::CalculateLocalFieldCorrection () {
 	// set g = T*alpha + I,
 	// though the blas routine is really doing a g = T*alpha + g, since g already = I
 	//dgemm (&trans, &trans, &N, &N, &N, &scale, &_T(0,0), &N, &_alpha(0,0), &N, &scale, &_g(0,0), &N);
-	_g = _T;
-	_g *= _alpha;
+	
 	_IDENT.setIdentity(N,N);
-	_g += _IDENT;
+	//_g = _T;
+	//_g *= _alpha;
+	//_g += _IDENT;
+	
+	_g = _IDENT + _T*_alpha;
+
 	//std::cout << "blas matrix mult. " << t.elapsed() << std::endl;
 	//
 	// now g = T*alpha + I
@@ -464,17 +446,17 @@ void Morita2002Analysis<U>::CalculateLocalFieldCorrection () {
 
 	//_f *= _g;
 	/*
-	double scaleb = 0.0;
-	dgemm (&trans, &trans, &N, &N, &N, &scale, &_g(0,0), &N, &_f(0,0), &N, &scaleb, &_f(0,0), &N);
-	std::cout << "------" << std::endl;
-	std::cout << _g << std::endl;
-	std::cout << "------" << std::endl;
-	std::cout << "------" << std::endl;
-	std::cout << "------" << std::endl;
-	std::cout << "------" << std::endl;
-	std::cout << _f << std::endl;
-	std::cout << "------" << std::endl;
-	*/
+		 double scaleb = 0.0;
+		 dgemm (&trans, &trans, &N, &N, &N, &scale, &_g(0,0), &N, &_f(0,0), &N, &scaleb, &_f(0,0), &N);
+		 std::cout << "------" << std::endl;
+		 std::cout << _g << std::endl;
+		 std::cout << "------" << std::endl;
+		 std::cout << "------" << std::endl;
+		 std::cout << "------" << std::endl;
+		 std::cout << "------" << std::endl;
+		 std::cout << _f << std::endl;
+		 std::cout << "------" << std::endl;
+		 */
 	//t.restart();
 	//dgesv (&N, &nrhs, &_g(0,0), &N, ipiv, &_f(0,0), &N, &info);
 	//std::cout << "DGESV system solve:  " << t.elapsed() << std::endl;
@@ -503,8 +485,8 @@ void Morita2002Analysis<U>::CalculateTotalPolarizability () {
 	double scaleb = 0.0;
 	*/
 
-	_alpha = _g.transpose() * _alpha;
-	_alpha *= _g;
+	_alpha = _g.transpose() * _alpha * _g;
+	//_alpha *= _g;
 
 	// alpha_1 = trans(g)*alpha_0
 	//dgemm (&transa, &transb, &N, &N, &N, &scale, &_g(0,0), &N, &_alpha(0,0), &N, &scaleb, &_alpha(0,0), &N);

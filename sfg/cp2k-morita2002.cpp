@@ -9,11 +9,6 @@ namespace morita {
 
 	void CP2KMorita2002Analysis::SetAnalysisWaterDipoleMoments () {
 		std::for_each (analysis_wats.begin(), analysis_wats.end(), MDSystem::CalcWannierDipole);
-		/*
-		for (unsigned int i = 0; i < analysis_wats.size(); i++) {
-			printf ("% 6.3f\n", analysis_wats[i]->Dipole().Magnitude());
-		}
-		*/
 		return;
 	}
 
