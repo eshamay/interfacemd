@@ -77,6 +77,7 @@ VecR MDSystem::CalcClassicDipole (MolPtr mol) {
 VecR MDSystem::CalcWannierDipole (MolPtr mol) {
 
 	VecR dipole = CalcClassicDipole(mol);
+
 	VecR com = mol->CenterOfMass();
 
 	// wannier centers have a charge of -2
@@ -86,6 +87,8 @@ VecR MDSystem::CalcWannierDipole (MolPtr mol) {
 		dipole -= r;
 	}
 
+	mol->Print();
+	printf ("% 8.3f ) ", dipole.Magnitude()); dipole.Print();
 	mol->Dipole(dipole);
 
 	return (dipole);

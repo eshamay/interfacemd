@@ -295,6 +295,7 @@ void Morita2002Analysis<U>::CalculateTensors() {
 			MatR dft (DipoleFieldTensor(analysis_wats[i], analysis_wats[j]));
 			_T.block(3*i,3*j,3,3) = dft;
 			_T.block(3*j,3*i,3,3) = dft;
+		}
 	}
 
 }	// Calculate Tensors
@@ -384,12 +385,12 @@ void Morita2002Analysis<U>::CalculateLocalFieldCorrection () {
 	// set g = T*alpha + I,
 	// though the blas routine is really doing a g = T*alpha + g, since g already = I
 	//dgemm (&trans, &trans, &N, &N, &N, &scale, &_T(0,0), &N, &_alpha(0,0), &N, &scale, &_g(0,0), &N);
-	
+
 	_IDENT.setIdentity(N,N);
 	//_g = _T;
 	//_g *= _alpha;
 	//_g += _IDENT;
-	
+
 	_g = _IDENT + _T*_alpha;
 
 	//std::cout << "blas matrix mult. " << t.elapsed() << std::endl;
