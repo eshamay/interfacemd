@@ -124,6 +124,7 @@ namespace morita {
 			// here filter out the waters to use for analysis
 			this->SelectAnalysisWaters ();
 
+
 			return;
 		}
 
@@ -132,7 +133,7 @@ namespace morita {
 
 			this->SetupSystemWaters (t);
 
-			int N = 3*t.int_wats.size();
+			int N = 3*analysis_wats.size();
 			_T.setZero(N,N);
 			_p.setZero(N);
 			_alpha.setZero(N,N);
@@ -332,7 +333,6 @@ void Morita2002Analysis<U>::CalculateTotalDipole () {
 	// where p_corrected is p corrected for the local field effect of the neighboring waters
 
 	/*
-		 int N = 3*analysis_wats.size();
 
 		 int n = 1;
 		 char transa = 'T';
@@ -346,8 +346,9 @@ void Morita2002Analysis<U>::CalculateTotalDipole () {
 	_p = _g.transpose() * _p;
 
 	// perform the summation of the total system dipole moment
-	_M.setZero(3,1);
-	for (int i = 0; i < _p.rows()/3; i++) {
+	_M.setZero();
+	int N = analysis_wats.size();
+	for (int i = 0; i < N; i++) {
 		_M += _p.block(3*i,0,3,1);
 	}
 
@@ -474,7 +475,7 @@ void Morita2002Analysis<U>::CalculateLocalFieldCorrection () {
 template <class U>
 void Morita2002Analysis<U>::CalculateTotalPolarizability () {
 
-	int N = 3*analysis_wats.size();
+	int N = analysis_wats.size();
 	/*
 
 	// The alpha tensor is calculated as: alpha_corrected = trans(g) * alpha * g
@@ -498,7 +499,7 @@ void Morita2002Analysis<U>::CalculateTotalPolarizability () {
 	// _alpha now contains the polarizabilities with the local-field correction accounted for
 
 	// determine 'A', the summed (total) system polarizability.
-	_A.setZero(3,3);
+	_A.setZero();
 	for (int i = 0; i < N; i++) {
 		// grab the piece of the local field tensor and find the inner product with alpha
 		_A += _alpha.block(3*i,3*i,3,3);

@@ -16,6 +16,8 @@ namespace morita {
 	  MoritaH2O (const Molecule * molecule) 
 		: Water(*molecule) { return; }
 
+		~MoritaH2O () { }
+
 		void SetBondAngleVars ();
 	  void SetDipoleMoment ();
 	  void SetPolarizability ();

@@ -147,6 +147,7 @@ void Analyzer<T>::_OutputHeader () const {
 
 template <class T> 
 Analyzer<T>::~Analyzer () {
+
 	delete this->sys;
 	if (output != (FILE *)NULL)
 		fclose(output);

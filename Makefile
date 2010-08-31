@@ -1,9 +1,10 @@
 #MDSRC	 	= $(HOME)/md/src
 
-CXX			= g++  -I$(EIGEN) -I$(BOOST) -I.. #-wd981,444,383,177,1418,1782
 
-DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated -DNDEBUG #-debug #-wd981,1599,1572,383
-OPTIMIZE 	= -finline-functions -finline -funroll-all-loops -O3 -DNDEBUG #-m64 -fast -restrict
+CXX			= icpc  -I$(EIGEN) -I$(BOOST) -I.. -wd981,444,383,177,1418,1782
+
+DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated -DNDEBUG -debug #-wd981,1599,1572,383
+OPTIMIZE 	= -finline-functions -finline -funroll-all-loops -O3 -DNDEBUG -m64 -fast -restrict
 #CPPFLAGS    = -Wall -Drestrict= -ftemplate-depth-100 $(DEBUG) -L$(HOME)/share/lib
 CPPFLAGS    = -Wall -ftemplate-depth-100 $(OPTIMIZE)
 

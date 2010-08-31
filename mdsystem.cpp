@@ -87,8 +87,8 @@ VecR MDSystem::CalcWannierDipole (MolPtr mol) {
 		dipole -= r;
 	}
 
-	mol->Print();
-	printf ("% 8.3f ) ", dipole.Magnitude()); dipole.Print();
+	//mol->Print();
+	//printf ("% 8.3f ) ", dipole.Magnitude()); dipole.Print();
 	mol->Dipole(dipole);
 
 	return (dipole);

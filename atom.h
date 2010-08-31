@@ -32,7 +32,7 @@ class Atom {
 	Atom (const std::string& name, const VecR& position, const VecR& force);
 	Atom (const VecR& position);
 	Atom (const Atom& oldAtom);				// copy constructor for deep copies
-	~Atom ();
+	virtual ~Atom ();
 
 	typedef Atom* AtomPtr;
 	typedef std::vector<AtomPtr> Atom_ptr_vec;

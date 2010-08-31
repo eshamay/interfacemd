@@ -18,7 +18,7 @@ protected:
 
 public:
 	Water ();	// a default constructor
-	~Water ();	// a destructor
+	virtual ~Water ();	// a destructor
 	Water (const Molecule& molecule);	// copy constructor for casting from a molecule
 	Water (const MolPtr& mol);
 
