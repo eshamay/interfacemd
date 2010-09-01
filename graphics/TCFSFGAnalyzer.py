@@ -11,7 +11,7 @@ scaling_factor = 0.9981	# a vibrational scaling factor for frequencies taken fro
 class TCFSFGAnalyzer:
 
   	def __init__(self,data):
-	  	self.data = data	# incoming data should be a single array of floats
+		self.data = data	# incoming data should be a single array of floats
 		self.numDataPoints = len(data)
 
 	def CalcFFT(self,dt):	# dt = timestep length in seconds
@@ -34,13 +34,15 @@ class TCFSFGAnalyzer:
 		beta = 1.0/temp/k
 		self.CalcFFT(dt)
 
-		self.C = [(1-numpy.exp(-beta*hbar*f))/3.0/hbar/c for f in self.freq]
-		chi = map(lambda const, f, val: const*f*abs(val)**2, self.C, self.freq, self.fft)
+		#self.C = [(1-numpy.exp(-beta*hbar*f))/3.0/hbar/c for f in self.freq]
+		self.C = [1.0j*beta*f for f in self.freq]
+		#chi = map(lambda const, f, val: const*f*abs(val)**2, self.C, self.freq, self.fft)
+		self.chi = map(lambda x,c: x*c, self.fft, self.C)	# multiply by the pre-factor
 		#chi = map(lambda x: x*1j, self.fft)
 
   		# normalization to unity
-		max_chi = max(chi)
-		self.chi = [i/max_chi for i in chi]
+		#max_chi = max(chi)
+		#self.chi = [i/max_chi for i in chi]
 
 		return
 
@@ -60,7 +62,9 @@ class TCFSFGAnalyzer:
 	  	return self.fft_re		# just the real portion
 	def FFTImag(self):
 	  	return self.fft_imag	# the imaginary fft data
+	def Chi(self):
+		return self.chi			# the Chi(2) from SFG data
 	def ChiSquared(self):
-		return self.chi			# the Chi(2)^2 from SFG data
+		return [abs(x)*abs(x) for x in self.chi]			# Chi(2)^2 from SFG data
 
 # vim: tabstop=4 shiftwidth=4 softtabstop=4

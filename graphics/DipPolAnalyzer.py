@@ -11,9 +11,17 @@ class DipPolAnalyzer:
 		#print self.rho[:10]
 		self.alpha = [apply(mat,[group(a,3)]) for a in alpha]
 
+	def Rho(self):
+		return self.rho
+	def Alpha(self):
+		return self.alpha
+
 	def IR_TCF (self):
 		return [dot(i,self.rho[0]) for i in self.rho]
 
-	def SFG_TCF(self,p,q,r):
-		return [dot(a[p,q],self.rho[0][r]) for a in self.alpha]
+	def SFG_TCF(self,s1,s2,p):
+		alpha = [(a[s1,s1] + a[s2,s2])/2.0 for a in self.alpha]
+		rho = self.rho[0][p]
+		return [a*rho for a in alpha]
+		#return [dot(a,self.rho[0][r]) for a in self.alpha]
 
