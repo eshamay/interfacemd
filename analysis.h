@@ -1,4 +1,3 @@
-#pragma once
 #ifndef ANALYSIS_H_
 #define ANALYSIS_H_
 
@@ -11,7 +10,6 @@
 // An analysis that will be performed on a system by an analyzer
 template <typename T>
 class AnalysisSet {
-
 	public:
 		typedef T system_t;
 
@@ -19,17 +17,17 @@ class AnalysisSet {
 		AnalysisSet (std::string desc, std::string fn) : description (desc), filename(fn) { }
 
 		// default setup
-		virtual void Setup (T& t) {
+		virtual void Setup (system_t& t) {
 			rewind(t.Output());
 			t.LoadAll();
 			return;
 		}
 
 		// each analyzer has to have an analysis function to do some number crunching
-		virtual void Analysis (T&) = 0;
+		virtual void Analysis (system_t&) = 0;
 		// normally this can be done in the analysis section, but just for style we can have something different defined here
-		virtual void DataOutput (T&) { }
-		virtual void PostAnalysis (T&) { }
+		virtual void DataOutput (system_t&) { }
+		virtual void PostAnalysis (system_t&) { }
 
 		std::string& Description () { return description; }
 		std::string& Filename () { return filename; }
@@ -184,14 +182,14 @@ void Analyzer<T>::_OutputStatus (const int timestep)
 
 
 template <>
-void Analyzer<XYZSystem>::LoadNext () {
+extern void Analyzer<XYZSystem>::LoadNext () {
 	this->sys->LoadNext();
 	this->LoadAll();
 	return;
 }
 
 template <>
-void Analyzer<AmberSystem>::LoadNext () {
+extern void Analyzer<AmberSystem>::LoadNext () {
 	this->sys->LoadNext();
 	return;
 }
@@ -281,13 +279,20 @@ VecR Analyzer<T>::CenterOfMass (Iter first, Iter last)
 }
 
 
-//class AmberAnalysisSet : public AnalysisSet<Analyzer<AmberSystem> > { };
 class XYZAnalysisSet : public AnalysisSet< Analyzer<XYZSystem> > { 
 	public:
+		typedef Analyzer<XYZSystem> system_t;
 		XYZAnalysisSet (std::string desc, std::string fn) :
-			AnalysisSet< Analyzer<XYZSystem> > (desc, fn) { }
+			AnalysisSet<system_t> (desc, fn) { }
 		virtual ~XYZAnalysisSet () { }
 };
 
+class AmberAnalysisSet : public AnalysisSet< Analyzer<AmberSystem> > { 
+	public:
+		typedef Analyzer<AmberSystem> system_t;
+		AmberAnalysisSet (std::string desc, std::string fn) :
+			AnalysisSet< system_t > (desc, fn) { }
+		virtual ~AmberAnalysisSet () { }
+};
 
 #endif

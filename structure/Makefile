@@ -1,13 +1,13 @@
 include ../Makefile
 
 STRUCTURE				= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) 
-SYSTEMANALYSES			= $(STRUCTURE) so2-structure-analysis.o
+SYSTEMANALYSES			= $(STRUCTURE) angle-bond-analysis.o neighbor-analysis.o structure-analyzer.o 
 
 test : $(TEST) 
 	icpc $(TEST) $(LIBS) $(LAPACKLIBS) -o test
 
-so2-structure-analyses : $(SYSTEMANALYSES)
-	icpc $(SYSTEMANALYSES) $(LIBS) -o ../bin/so2-structure-analyses
+structure-analyzer : $(SYSTEMANALYSES)
+	icpc $(SYSTEMANALYSES) $(LIBS) -o ../bin/structure-analyzer
 
 
 cleanstructure :

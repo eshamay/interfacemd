@@ -15,7 +15,8 @@ namespace bondgraph {
 
 	BondGraph::BondGraph () :
 		_sys_type("xyz") { 
-			return; }
+			return; 
+		}
 
 
 	BondGraph::BondGraph (const Atom_ptr_vec& atoms, const std::string& sys)

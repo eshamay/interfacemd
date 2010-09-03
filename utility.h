@@ -75,6 +75,42 @@ namespace pair_utility {
 		};
 
 
+	// function object comparator for pairs to test the 1st element against a set value
+	template <typename T, typename U>
+		class first_less_than : public std::unary_function<T,bool> {
+			private:
+				U _u;
+			public:
+				first_less_than (const U u) : _u(u) { }
+				bool operator()(const T& t) const {
+					return t.first < _u;
+				}
+		};
+
+	// function object comparator for pairs to test the 1st element against a set value
+	template <typename T, typename U>
+		class first_greater_than : public std::unary_function<T,bool> {
+			private:
+				U _u;
+			public:
+				first_greater_than (const U u) : _u(u) { }
+				bool operator()(const T& t) const {
+					return t.first > _u;
+				}
+		};
+
+	// function object comparator for pairs to test the 2nd element against a set value
+	template <typename T, typename U>
+		class second_less_than : public std::unary_function<T,bool> {
+			private:
+				U _u;
+			public:
+				second_less_than (const U u) : _u(u) { }
+				bool operator()(const T& t) const {
+					return t.second < _u;
+				}
+		};
+
 
 	// sorts a container of pairs by the first element of the pairs
 	template <typename Iter>
