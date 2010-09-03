@@ -1,6 +1,6 @@
 #pragma once
-#ifndef AMBER_MORITA2002_H_
-#define AMBER_MORITA2002_H_
+#ifndef CP2K_MORITA2002_H_
+#define CP2K_MORITA2002_H_
 
 #include "morita2002.h"
 

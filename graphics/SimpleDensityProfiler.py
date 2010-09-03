@@ -54,7 +54,7 @@ class DensityProfiler:
 			name = key.strip('0123456789')
 			ind = self.keys.index(key)
   			if name in molecular_weight:
-				self.data[ind] = map(lambda x: x * molecular_weight[name] * scale[name] * conversion, self.data[ind])
+					self.data[ind] = map(lambda x: x * molecular_weight[name] * scale[name] * conversion, self.data[ind])
 
 		return
 

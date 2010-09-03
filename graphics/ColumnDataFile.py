@@ -12,8 +12,8 @@ def is_number(s):
 
 class ColumnDataFile:
 	# need to supply which columns contain float data
-  	def __init__(self,file,header=None):
-	  	self.filename = file
+	def __init__(self,file,header=None):
+		self.filename = file
 		fp = open(file)
 
 		self.ParseHeader(fp,header)
@@ -41,7 +41,7 @@ class ColumnDataFile:
 		self.data = zip(*self.data)
 
 		for col in range(len(self.data)):
-		  	try:
+			try:
 				self.data[col] = [float(i) for i in self.data[col]]
 			except ValueError:
 				continue

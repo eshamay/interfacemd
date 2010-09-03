@@ -29,9 +29,7 @@ namespace morita {
 
 				typedef Analyzer<U> system_t;
 
-				//virtual void Setup (system_t&);
 				virtual void Analysis (system_t&);
-				//virtual void DataOutput (system_t&);
 
 			protected:
 				//! all the waters in the MD system
@@ -106,6 +104,7 @@ namespace morita {
 
 			// load all the waters into the int_wats container
 			t.LoadWaters();
+			//std::for_each(t.int_wats.begin(), t.int_wats.end(), std::mem_fun(&Molecule::Print));
 
 			for (Morita_it it = all_wats.begin(); it != all_wats.end(); it++) {
 				delete *it;

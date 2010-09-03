@@ -22,7 +22,6 @@ class AnalysisSet {
 		virtual void Setup (T& t) {
 			rewind(t.Output());
 			t.LoadAll();
-			t.System()->SetReparseLimit(1);
 			return;
 		}
 
@@ -71,7 +70,7 @@ class Analyzer : public WaterSystem<T> {
 		static int		posbins;
 		static double 	angmin, angmax, angres;
 		static int		angbins;
-		int 			timestep;
+		int						timestep;
 		static int 		timesteps;
 		static unsigned int restart;
 
@@ -89,8 +88,7 @@ class Analyzer : public WaterSystem<T> {
 		Water_ptr_vec& Waters () { return WaterSystem<T>::int_wats; }
 
 		// calculate the system's center of mass
-		VecR CenterOfMass (const Mol_ptr_vec&) const;
-		template <typename U> VecR CenterOfMass (const std::vector<U>&) const;
+		template <typename Iter> static VecR CenterOfMass (Iter first, Iter last);
 
 };	// Analyzer
 
@@ -151,6 +149,7 @@ Analyzer<T>::~Analyzer () {
 	delete this->sys;
 	if (output != (FILE *)NULL)
 		fclose(output);
+
 	return;
 }
 
@@ -227,7 +226,6 @@ void Analyzer<T>::SystemAnalysis (analysis_t& an) {
 			// load the next timestep
 			this->LoadNext();
 		} catch (std::exception& ex) {
-			std::cout << "Caught an exception while loading the next timestep after step " << timestep << "." << std::endl;
 			throw;
 		}
 	}
@@ -263,15 +261,16 @@ double Analyzer<T>::Position (const double d) {
 
 
 template <class T>
-template <class U>
-VecR Analyzer<T>::CenterOfMass (const std::vector<U>& mols) const 
+template <class Iter>	// Has to be iterators to a container of molecules
+VecR Analyzer<T>::CenterOfMass (Iter first, Iter last)
 {
 	double mass = 0.0;
 	VecR com;
+	com.setZero();
 
-	typedef typename std::vector<U>::const_iterator u_it;
+	typedef typename std::iterator_traits<Iter>::value_type val_t;
 
-	for (u_it it = mols.begin(); it != mols.end(); it++) {
+	for (Iter it = first; it != last; it++) {
 		for (Atom_it jt = (*it)->begin(); jt != (*it)->end(); jt++) {
 			mass += (*jt)->Mass();
 			com += (*jt)->Position() * (*jt)->Mass();
@@ -280,8 +279,6 @@ VecR Analyzer<T>::CenterOfMass (const std::vector<U>& mols) const
 	com /= mass;
 	return com;
 }
-
-
 
 
 //class AmberAnalysisSet : public AnalysisSet<Analyzer<AmberSystem> > { };

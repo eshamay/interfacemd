@@ -27,11 +27,11 @@ class XYZSystem : public MDSystem {
 
 		void _ParseMolecules ();		// take the atoms we have and stick them into molecules - general umbrella routine
 
-		// Parses a simple molecule that is composed of a central atom, and all other atoms are connected to it - i.e. h2o, no3, ccl4, etc
+		//! Parses a simple molecule that is composed of a central atom, and all other atoms are connected to it - i.e. h2o, no3, ccl4, etc
 		template <typename T>
 			void _ParseSimpleMolecule (const Atom::Element_t central_elmt, const Atom::Element_t outer_elmt, const unsigned numOuter);
 
-		/* mor specialized parsing routines */
+		/* more specialized parsing routines that don't fall under "simple molecules" */
 
 		void _ParseNitricAcids ();
 		void _ParseProtons ();

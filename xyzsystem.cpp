@@ -75,7 +75,8 @@ void XYZSystem::_ParseMolecules () {
 
 
 
-void XYZSystem::_ParseNitricAcids () {
+void XYZSystem::_ParseNitricAcids () { }
+/*
 
 	for (Mol_it mol = _mols.begin(); mol != _mols.end(); mol++) {
 		if ((*mol)->MolType() != Molecule::NO3) continue;
@@ -96,7 +97,7 @@ void XYZSystem::_ParseNitricAcids () {
 		}
 
 		if (Hs.size() == 1)
-			(*mol)->AddHydrogen (Hs[0]);
+			(*mol)->AddAtom (Hs[0]);
 		else if (Hs.size() > 1) {
 			printf ("This nitric acid has %zu covalently bound hydrogens!\n", Hs.size());
 			(*mol)->Print();
@@ -107,6 +108,7 @@ void XYZSystem::_ParseNitricAcids () {
 	}
 	return;
 }	// Parse Nitric acids
+*/
 
 
 void XYZSystem::_UpdateUnparsedList (Atom_ptr_vec& parsed) {

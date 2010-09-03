@@ -130,52 +130,7 @@ void Molecule::FixAtoms () {
 	this->SetAtoms();
 }
 
-void Molecule::AddHydrogen (AtomPtr const atom) {
 
-	this->AddAtom (atom);
-
-	if (atom->Element() != Atom::H) {
-		std::cout << "Molecule::AddHydrogen() - Tried adding a hydrogen with a non-hydrogen atom:" << std::endl;
-		atom->Print();
-		std::cout << "To the following molecule" << std::endl;
-		this->Print();
-		exit(1);
-	}
-
-	// now rename the molecule accordingly
-	if (_moltype == Molecule::NO3) { _name = "hno3"; _moltype = Molecule::HNO3; }
-	else if (_moltype == Molecule::H2O) { _name = "h3o"; _moltype = Molecule::H3O; }
-	else if (_moltype == Molecule::OH) { _name = "h2o"; _moltype = Molecule::H2O; }
-
-	Unset();
-
-	this->FixAtoms();
-
-	return;
-}
-
-void Molecule::RemoveAtom (AtomPtr const atom) {
-
-	_atoms.erase(std::find(_atoms.begin(), _atoms.end(), atom));
-
-	//this->UpdateCenterOfMass();
-
-	// note on the atom that it is no longer part of a molecule
-	atom->ParentMolecule ((MolPtr) NULL);
-	atom->Residue ("");
-	atom->MolID (-1);
-
-	// if we happen to be taking off a hydrogen from a molecule... rename it accordingly
-	if (atom->Element() == Atom::H) {
-		if (_moltype == Molecule::HNO3) { _name = "no3"; _moltype = Molecule::NO3; }
-		else if (_moltype == Molecule::H3O) { _name = "h2o"; _moltype = Molecule::H2O; }
-		else if (_moltype == Molecule::H2O) { _name = "oh"; _moltype = Molecule::OH; }
-
-		this->FixAtoms();
-	}
-
-	return;
-}
 
 // rename the molecule, and its atoms.
 void Molecule::Rename (const std::string& name) {
@@ -192,7 +147,7 @@ void Molecule::Rename (const std::string& name) {
 // recalculate the center of mass if coordinates are updated
 VecR Molecule::UpdateCenterOfMass () {
 	// first zero it out
-	_centerofmass.Zero();
+	_centerofmass.setZero();
 	_mass = 0.0;
 
 	// then run through each atom's coords and add in its contribution.
@@ -298,8 +253,8 @@ void Molecule::clear () {
 	_atoms.clear();
 	_wanniers.clear();
 	_mass = 0.0;
-	_centerofmass.Zero();
-	//_dipole.Zero();
+	_centerofmass.setZero();
+	//_dipole.setZero();
 	_name = "";
 	_ID = 0;
 	_moltype = Molecule::NO_MOLECULE;

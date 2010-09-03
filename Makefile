@@ -1,7 +1,7 @@
 #MDSRC	 	= $(HOME)/md/src
 
 
-CXX			= icpc  -I$(EIGEN) -I$(BOOST) -I.. -wd981,444,383,177,1418,1782
+CXX			= icpc  -I$(EIGEN) -I$(BOOST) -I.. -wd981,444,383,177,1418,1782,869
 
 DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated -DNDEBUG -debug #-wd981,1599,1572,383
 OPTIMIZE 	= -finline-functions -finline -funroll-all-loops -O3 -DNDEBUG -m64 -fast -restrict

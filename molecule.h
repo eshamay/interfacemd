@@ -90,6 +90,7 @@ class Molecule {
 		virtual void Dipole (VecR& dip) { _dipole = dip; Unset(); }
 		virtual VecR Dipole () const { return _dipole; }		// return the dipole of the molecule
 
+		virtual void Flip (const coord axis) { }
 		virtual VecR MolecularAxis () { return _z; }
 
 		// Operators
@@ -101,9 +102,6 @@ class Molecule {
 		//int operator+= (Atom * newAtom);					// adds an atom into the molecule
 
 		void AddAtom (AtomPtr const newAtom);					// same as the operator
-		void AddHydrogen (AtomPtr const atom);					// same as adding an atom but renames accordingly
-		void RemoveAtom (AtomPtr const atom);
-
 
 		virtual void SetAtoms () = 0;
 		void FixAtom (AtomPtr atom);
