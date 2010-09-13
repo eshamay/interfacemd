@@ -1,8 +1,10 @@
-#ifndef ANALYSIS_H_
+#if !defined(ANALYSIS_H_)
 #define ANALYSIS_H_
 
 #include "watersystem.h"
 #include "utility.h"
+#include "patterns.h"
+#include "dataoutput.h"
 
 
 
@@ -36,13 +38,13 @@ class AnalysisSet {
 
 		std::string description;	// describes the analysis that is performed
 		std::string filename;		// filename to use for data output
+
 };  // class AnalysisSet
 
 
 
-
 template <class T>
-class Analyzer : public WaterSystem<T> {
+class Analyzer : public WaterSystem<T>, public patterns::observer::observable {
 
 	protected:
 
@@ -51,8 +53,8 @@ class Analyzer : public WaterSystem<T> {
 		int	output_freq;
 
 		void _OutputHeader () const;
-		void _OutputStatus (const int);
-
+		void _OutputStatus ();
+		md_analysis::StarStatusBarUpdater	status_updater;
 
 	public:
 		Analyzer (const std::string = std::string("system.cfg"));
@@ -66,9 +68,10 @@ class Analyzer : public WaterSystem<T> {
 		// position boundaries and bin widths for gathering histogram data
 		static double	posres;
 		static int		posbins;
-		static double 	angmin, angmax, angres;
+		static double angmin, angmax, angres;
 		static int		angbins;
 		int						timestep;
+		int						Timestep () const { return timestep; }
 		static int 		timesteps;
 		static unsigned int restart;
 
@@ -87,6 +90,9 @@ class Analyzer : public WaterSystem<T> {
 
 		// calculate the system's center of mass
 		template <typename Iter> static VecR CenterOfMass (Iter first, Iter last);
+
+		//! Predicate for sorting a container of molecules based on position along the main axis of the system, and using a specific element type to determine molecular position. i.e. sort a container of waters based on the O position, or sort a container of NO3s based on the N position, etc.
+		class molecule_position_pred; 		
 
 };	// Analyzer
 
@@ -109,7 +115,8 @@ Analyzer<T>::Analyzer (const std::string ConfigurationFilename) :
 	WaterSystem<T>(ConfigurationFilename),
 	output_filename(""), output((FILE *)NULL),
 	output_freq(WaterSystem<T>::SystemParameters()->output_freq),
-	timestep (0)
+	timestep (0),
+	status_updater (output_freq, timestep, WaterSystem<T>::SystemParameters()->timesteps)
 { 
 	Analyzer<T>::posres = WaterSystem<T>::SystemParameters()->posres;
 	Analyzer<T>::posbins = int((WaterSystem<T>::SystemParameters()->posmax - WaterSystem<T>::SystemParameters()->posmin)/WaterSystem<T>::SystemParameters()->posres);
@@ -123,6 +130,8 @@ Analyzer<T>::Analyzer (const std::string ConfigurationFilename) :
 	Analyzer<T>::restart = WaterSystem<T>::SystemParameters()->restart;
 
 	Analyzer<T>::ref_axis = WaterSystem<T>::SystemParameters()->ref_axis;
+
+	this->registerObserver(&status_updater);
 
 	this->_OutputHeader();
 } // Analyzer ctor
@@ -168,8 +177,10 @@ void Analyzer<T>::OpenDataOutputFile (analysis_t& an) {
 }
 
 	template <class T> 
-void Analyzer<T>::_OutputStatus (const int timestep)
+void Analyzer<T>::_OutputStatus ()
 {
+	this->notifyObservers ();
+	/*
 	if (!(timestep % (this->output_freq * 10)))
 		std::cout << std::endl << timestep << "/" << this->timesteps << " ) ";
 	if (!(timestep % this->output_freq)) {
@@ -177,6 +188,7 @@ void Analyzer<T>::_OutputStatus (const int timestep)
 	}
 
 	fflush (stdout);
+	*/
 	return;
 }
 
@@ -214,7 +226,7 @@ void Analyzer<T>::SystemAnalysis (analysis_t& an) {
 		}
 
 		// output the status of the analysis (to the screen or somewhere useful)
-		this->_OutputStatus (timestep);
+		this->_OutputStatus ();
 		// Output the actual data being collected to a file or something for processing later
 		if (!(timestep % (output_freq * 10)) && timestep)
 			an.DataOutput(*this);
@@ -241,7 +253,8 @@ void Analyzer<T>::SystemAnalysis (analysis_t& an) {
 /* Find the periodic-boundary-satistfying location of an atom, vector, or raw coordinate along the reference axis */
 template <class T> 
 double Analyzer<T>::Position (const AtomPtr patom) {
-	return Analyzer<T>::Position(patom->Position());
+	//return Analyzer<T>::Position(patom->Position());
+	return WaterSystem<T>::AxisPosition(patom);
 }
 
 template <class T> 
@@ -259,7 +272,7 @@ double Analyzer<T>::Position (const double d) {
 
 
 template <class T>
-template <class Iter>	// Has to be iterators to a container of molecules
+	template <class Iter>	// Has to be iterators to a container of molecules
 VecR Analyzer<T>::CenterOfMass (Iter first, Iter last)
 {
 	double mass = 0.0;
@@ -279,6 +292,27 @@ VecR Analyzer<T>::CenterOfMass (Iter first, Iter last)
 }
 
 
+template<class T>
+class Analyzer<T>::molecule_position_pred : public std::binary_function <Molecule*,Molecule*,bool> {
+	private:
+		Atom::Element_t _elmt;	// determines the element in a molecule to use for position comparison
+	public:
+		//! upon instantiation, the element to be used for specifying molecular position is provided
+		molecule_position_pred (const Atom::Element_t elmt) : _elmt(elmt) { }
+
+		bool operator()(const Molecule* left, const Molecule* right) const {
+			AtomPtr left_o = left->GetAtom(_elmt);
+			AtomPtr right_o = right->GetAtom(_elmt);
+			double left_pos = Analyzer<T>::Position(left_o);
+			double right_pos = Analyzer<T>::Position(right_o);
+
+			return left_pos < right_pos;
+		}
+};
+
+
+
+/***************** Analysis Sets specific to given MD systems ***************/
 class XYZAnalysisSet : public AnalysisSet< Analyzer<XYZSystem> > { 
 	public:
 		typedef Analyzer<XYZSystem> system_t;

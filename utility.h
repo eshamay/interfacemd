@@ -328,7 +328,7 @@ namespace histogram_utilities {
 
 		public:
 
-			Histogram1D (const T min, const T max, const T res) 
+			Histogram1D (const T& min, const T& max, const T& res) 
 				: _min(min), _max(max), _res(res), 
 				_size(int((max - min)/res) + 1), _access_count(0.0)
 		{ 

@@ -306,8 +306,8 @@ void WaterSystem<AmberSystem>::_InitializeSystem () {
 	try {
 		this->sys = new AmberSystem(
 				wsp->config_file->lookup("system.files.prmtop"),
-				wsp->config_file->lookup("system.files.mdcrd"),
-				wsp->config_file->lookup("system.files.mdvel"));
+				wsp->config_file->lookup("system.files.mdcrd"));
+				//wsp->config_file->lookup("system.files.mdvel"));
 	}
 	catch (const libconfig::SettingNotFoundException &snfex) {
 		std::cerr << "Couldn't find the Amber system filenames listed in the configuration file" << std::endl;

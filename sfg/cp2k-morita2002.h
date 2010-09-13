@@ -22,7 +22,8 @@ namespace morita {
 	  void SelectAnalysisWaters ();
 	  //! sets the dipole moments of all the system waters by means of the wannier localization centers calculated by CP2K
 	  void SetAnalysisWaterDipoleMoments ();
-
+		//! Calculate the polarizability of the given water molecule
+		void SetAnalysisWaterPolarizability ();
   };	// class CP2K sfg analyzer
 
 } // namespace morita

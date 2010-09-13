@@ -6,6 +6,66 @@
 
 namespace md_analysis {
 
+	template <typename T, typename U=double>
+		class histogram_analysis : public AnalysisSet< Analyzer<T> > {
+			public:
+				typedef Analyzer<T> system_t;
+
+				histogram_analysis (
+						std::string desc, std::string fn,
+						const U min, const U max, const U resolution)
+					: 
+						AnalysisSet<system_t> (desc, fn),
+						histogram (min, max, resolution) { }
+
+				virtual ~histogram_analysis() { }
+
+			protected:
+				typedef histogram_utilities::Histogram1D<U>	histogram_t;
+				histogram_t histogram;
+		};
+
+
+
+	template <typename T>
+		class double_histogram_analysis : public histogram_analysis<T> {
+			public:
+				typedef typename histogram_analysis<T>::system_t system_t;
+
+				double_histogram_analysis (
+						std::string desc, std::string fn,
+						const double min, const double max, const double resolution,
+						const double min_2, const double max_2, const double resolution_2)
+					: 
+						histogram_analysis<T> (desc, fn, min, max, resolution),
+						histogram_2 (min_2, max_2, resolution_2) { }
+
+				virtual ~double_histogram_analysis() { }
+				virtual void DataOutput (system_t&);
+
+			protected:
+				typedef typename histogram_analysis<T>::histogram_t histogram_t;
+				histogram_t histogram_2;
+
+		};
+
+
+
+	template <typename T>
+		void double_histogram_analysis<T>::DataOutput(system_t& t) {
+
+			rewind(t.Output());
+
+			for (double val_1 = this->histogram.Min(), val_2 = this->histogram_2.Min(); val_1 < this->histogram.Max(); 
+					val_1 += this->histogram.Resolution(), val_2 += this->histogram_2.Resolution()) {
+				fprintf (t.Output(), "% 8.3f % 8.3f % 8.3f % 8.3f\n", val_1, double(this->histogram.Population(val_1))/double(t.Timestep()), val_2, double(this->histogram_2.Population(val_2))/double(t.Timestep()));
+			}
+
+			fflush(t.Output());
+		}
+
+
+
 	template <typename T>
 		// an analyzer for generating a single histogram (of doubles) of a system property
 		class histogram_analyzer : public AnalysisSet< Analyzer<T> > {
@@ -15,17 +75,11 @@ namespace md_analysis {
 				histogram_analyzer (std::string desc, std::string fn) : AnalysisSet<system_t> (desc, fn) { }
 				virtual ~histogram_analyzer() { }
 
-				void DataOutput (system_t& t);
+				virtual void DataOutput (system_t& t);
 			protected:
 				typedef std::vector<double> double_vec;
 				double_vec values;
 		};	// single histogram analyzer
-
-
-	//template <>
-		//histogram_analyzer<AmberSystem>::histogram_analyzer (std::string desc, std::string fn) : AnalysisSet<system_t> (desc,fn) { }
-	//template <>
-		//histogram_analyzer<XYZSystem>::histogram_analyzer (std::string desc, std::string fn) : AnalysisSet<system_t> (desc,fn) { }
 
 
 	template <typename T>

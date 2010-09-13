@@ -10,6 +10,8 @@ USING_PART_OF_NAMESPACE_EIGEN
 #include "angle-bond-analysis.h"
 #include "dipole-analysis.h"
 #include "neighbor-analysis.h"
+#include "atomic-density-analysis.h"
+#include "sfg/amber-morita2002.h"
 
 
 typedef std::vector<double> double_vec;
@@ -54,6 +56,10 @@ namespace md_analysis {
 			analyses.push_back(a);
 			a = new h2o_dipole_magnitude_histogram_analyzer<T>();
 			analyses.push_back(a);
+			a = new atomic_density_analysis<T>();
+			analyses.push_back(a);
+			a = new morita::AmberMorita2008Analysis();
+			analyses.push_back(a);
 		}
 
 	template <>
@@ -67,6 +73,8 @@ namespace md_analysis {
 			analyses.push_back(a);
 			a = new h2o_dipole_magnitude_histogram_analyzer<T>();
 			analyses.push_back(a);
+			a = new atomic_density_analysis<T>();
+			analyses.push_back(a);
 			a = new so2_angle_bond_analyzer();
 			analyses.push_back(a);
 			a = new so2_closest_H_analyzer();
@@ -75,7 +83,6 @@ namespace md_analysis {
 			analyses.push_back(a);
 			a = new so2_hbond_factor_analyzer();
 			analyses.push_back(a);
-
 		}
 
 

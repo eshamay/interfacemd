@@ -1,3 +1,6 @@
+#ifndef DATA_FILE_PARSER_H_
+#define DATA_FILE_PARSER_H_
+
 // check out http://mybyteofcode.blogspot.com/2010/02/parse-csv-file-with-boost-tokenizer-in.html
 // info on the boost tokenizer
 #include "matrixr.h"
@@ -72,7 +75,7 @@ namespace datafile_parsers {
 
 		protected:
 			struct VertexProperties {
-				double value;
+				int value;
 				MatR matrix;
 			};
 
@@ -90,7 +93,7 @@ namespace datafile_parsers {
 
 
 			static PropertyMap<MatR,VertexProperties>::Type 		v_matrix;
-			static PropertyMap<double,VertexProperties>::Type 		v_value;
+			static PropertyMap<int,VertexProperties>::Type 		v_value;
 
 			Vertex AdjacentVertexAddValue (Vertex& start, const double value);
 			Vertex FindVertex (Vertex& start, const double value);
@@ -101,8 +104,10 @@ namespace datafile_parsers {
 
 
 	MultiKeyValueGraph::Graph MultiKeyValueGraph::_graph(0);
+
 	MultiKeyValueGraph::PropertyMap<MatR,MultiKeyValueGraph::VertexProperties>::Type MultiKeyValueGraph::v_matrix = get(&VertexProperties::matrix, _graph);
-	MultiKeyValueGraph::PropertyMap<double,MultiKeyValueGraph::VertexProperties>::Type MultiKeyValueGraph::v_value = get(&VertexProperties::value, _graph);
+
+	MultiKeyValueGraph::PropertyMap<int,MultiKeyValueGraph::VertexProperties>::Type MultiKeyValueGraph::v_value = get(&VertexProperties::value, _graph);
 
 
 	MultiKeyValueGraph::Vertex MultiKeyValueGraph::AdjacentVertexAddValue (Vertex& start, const double value) {
@@ -113,10 +118,11 @@ namespace datafile_parsers {
 		bool added;
 		Adj_it vi, vi_end, next;
 		tie(vi, vi_end) = adjacent_vertices(start, _graph);
+		int val = int(value*100.0);
 		for (next = vi; vi != vi_end; vi = next) {
 			next++;
 
-			if (v_value[*vi] == value) {
+			if (v_value[*vi] == val) {
 				//printf ("found %5.2f already connected\n", v_value[*vi]);
 				return *vi;
 			}
@@ -124,7 +130,7 @@ namespace datafile_parsers {
 		if (vi == vi_end) {
 			// if the vertex doesn't already exist, then add it and tie it to the parent
 			vd = add_vertex(_graph);
-			v_value[vd] = value;
+			v_value[vd] = int(value*100.0);
 			//printf ("now tying the two values together: %5.2f --> %5.2f\n", v_value[start], v_value[vd]);
 			tie(e,added) = add_edge(start,vd,_graph);
 			return vd;
@@ -139,16 +145,18 @@ namespace datafile_parsers {
 		//printf ("FindVertex: searching for %5.2f starting at %5.2f\n", value, v_value[start]);
 		Adj_it vi, vi_end, next;
 		tie(vi, vi_end) = adjacent_vertices(start, _graph);
+		int val = int(value*100.0);
+		//printf ("val=%d\n", val);
 		for (next = vi; vi != vi_end; vi = next) {
 			next++;
 			//printf ("found %5.2f\n", v_value[*vi]);
 
-			if (v_value[*vi] == value) {
+			if (v_value[*vi] == val) {
 				return *vi;
 			}
 		}
 		if (vi == vi_end) { 
-			std::cout << "couldn't find the vertex" << std::endl;
+			std::cout << "couldn't find the vertex for value: " << value << std::endl;
 			exit(1);
 		}
 		return *vi;
@@ -176,24 +184,28 @@ namespace datafile_parsers {
 		public:
 			PolarizabilityDataFile (const std::string filename) 
 				: 
-					DelimitedDataFile(filename, ";"), r_min(0.93), dr(0.02), theta_min(90.0), dtheta(3.0) 
+					DelimitedDataFile(filename, ";"), r_min(0.93), r_max(1.13), dr(0.02), theta_min(90.0), theta_max(120.0), dtheta(3.0) 
 			{
 				this->ParseFile();
 			}
 
-			void ParseRow (const std::vector<double>&);
-			void ParseData () { }
 
-			void Polarizability (double r1, const double r2, const double theta);
+			//! The Matrix method returns the polarizability for a given water geometry (r1, r2, theta). The returned matrix is in the reference frame designated in Morita/Hynes 2000 - the Z-axis is along one of the bonds (r1) and the other OH bond is in the positive x-axis direction, and the molecule is in the x-z plane.
 			MatR& Matrix (const double r1, const double r2, const double theta);
-			double MatchValue (const double value, const double resolution, const double min);
 
 		protected:
 			MultiKeyValueGraph _graph;
 			double r_min;	// bondlength minimum key value
+			double r_max;
 			double dr;	// resolution of data points along the bondlengths
 			double theta_min;
+			double theta_max;
 			double dtheta;
+
+			void ParseRow (const std::vector<double>&);
+			void ParseData () { }
+			//void Polarizability (double r1, const double r2, const double theta);
+			double MatchValue (const double value, const double resolution, const double min, const double max);
 	};	// polarizability data file
 
 
@@ -244,29 +256,38 @@ namespace datafile_parsers {
 
 
 	//! Take an incoming value and fix it such that it matches one of the keys in the dataset
-	double PolarizabilityDataFile::MatchValue (const double value, const double resolution, const double min) {
+	double PolarizabilityDataFile::MatchValue (const double value, const double resolution, const double min, const double max) {
 
 		int step = int((value*100.0-min*100.0)/100.0/resolution);
-		double floor = resolution*100.0*step+min*100.0;
+		int floor = resolution*100.0*step+min*100.0;
+		floor = (floor > int(max*100.0)) ? int(max*100.0) : floor;	// a bounds check
+		floor = (floor < int(min*100.0)) ? int(min*100.0) : floor;	// a bounds check
+		
 		return floor/100.0;
 	}
 
 
 	MatR& PolarizabilityDataFile::Matrix (const double r1, const double r2, const double theta) {
 		// first cast the numbers to the proper values
-		double r1_floor = MatchValue(r1, dr, r_min);
-		double r2_floor = MatchValue(r2, dr, r_min);
-		double theta_floor = MatchValue(theta, dtheta, theta_min);
+		double r1_floor = MatchValue(r1, dr, r_min, r_max);
+		double r2_floor = MatchValue(r2, dr, r_min, r_max);
+		double theta_floor = MatchValue(theta, dtheta, theta_min, theta_max);
 
-		printf ("%f %f %f\n", r1_floor, r2_floor, theta_floor);
+		//printf ("%f %f %f\n", r1, r2, theta);
+		//printf ("%f %f %f\n", r1_floor, r2_floor, theta_floor);
+		fflush(stdout);
 		return _graph.Matrix(r1_floor, r2_floor, theta_floor);
 	}
 
 
+	/*
 	void PolarizabilityDataFile::Polarizability (double r1, const double r2, const double theta) {
 		printf ("Polarizability: searching for %8.4f %8.4f %8.4f\n", r1, r2, theta);
 		MatR mat = this->Matrix(r1,r2,theta);
 		mat.Print();
 	}
+	*/
 
 }	 // namespace datafile parsers
+
+#endif

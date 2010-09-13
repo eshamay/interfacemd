@@ -15,6 +15,7 @@ class MoritaSFG2002:
 		self.datafile = ColumnDataFile(file)
 		self.dipoles = apply (zip, [self.datafile[i] for i in range(3)])
 		self.polarizabilities = apply(zip, [self.datafile[i] for i in range(3,12)])
+
 		self.dpa = DipPolAnalyzer(self.dipoles,self.polarizabilities)
 		self.dt = dt
 		self.temp = temp

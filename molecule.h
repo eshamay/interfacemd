@@ -180,32 +180,32 @@ class Molecule {
 
 
 
-	protected:
-		Atom_ptr_vec	_atoms;				// the list of the atoms in the molecule
-		VecR_vec		_wanniers;			// the wannier centers in the molecule
-		VecR			_dipole;			// the molecular dipole
-		VecR			_x, _y, _z;			// molecular frame axes
+						protected:
+						Atom_ptr_vec	_atoms;				// the list of the atoms in the molecule
+						VecR_vec		_wanniers;			// the wannier centers in the molecule
+						VecR			_dipole;			// the molecular dipole
+						VecR			_x, _y, _z;			// molecular frame axes
 
-		bool			_set;				// just a little helper to see if the atoms of the molecule have been set or for any other special purpose
+						bool			_set;				// just a little helper to see if the atoms of the molecule have been set or for any other special purpose
 
-		// this is broken last I checked - not updated with coordinate updates
-		VecR			_centerofmass;		// calculate by 1/M * Sum(m[i]*r[i])	where M = total mass, m[i] and r[i] are atom mass and pos
+						// this is broken last I checked - not updated with coordinate updates
+						VecR			_centerofmass;		// calculate by 1/M * Sum(m[i]*r[i])	where M = total mass, m[i] and r[i] are atom mass and pos
 
-		double			_mass;				// Total molecular mass
-		double			_charge;
-		std::string		_name;				// some text ID or name for the molecule
-		int				_ID;				// A numerical ID for the molecule
-		Molecule_t		_moltype;		// an enumerated way to compare different types of molecule
+						double			_mass;				// Total molecular mass
+						double			_charge;
+						std::string		_name;				// some text ID or name for the molecule
+						int				_ID;				// A numerical ID for the molecule
+						Molecule_t		_moltype;		// an enumerated way to compare different types of molecule
 
-		double			_eulerangles[3];	// the three euler angles theta, phi, chi
-		MatR			_DCM;				// the direction cosine matrix for rotating the molecule to the lab frame
-		void 			_FindEulerAngles ();// Calculates the Euler angles between the molecular axes and the fixed axes
+						double			_eulerangles[3];	// the three euler angles theta, phi, chi
+						MatR			_DCM;				// the direction cosine matrix for rotating the molecule to the lab frame
+						void 			_FindEulerAngles ();// Calculates the Euler angles between the molecular axes and the fixed axes
 
 
-};
+					};
 
-typedef Molecule::MolPtr MolPtr;
-typedef Molecule::Mol_ptr_vec Mol_ptr_vec;
-typedef Molecule::Mol_it Mol_it;
+					typedef Molecule::MolPtr MolPtr;
+					typedef Molecule::Mol_ptr_vec Mol_ptr_vec;
+					typedef Molecule::Mol_it Mol_it;
 
 #endif

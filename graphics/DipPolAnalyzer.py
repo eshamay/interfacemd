@@ -17,7 +17,13 @@ class DipPolAnalyzer:
 		return self.alpha
 
 	def IR_TCF (self):
-		return [dot(i,self.rho[0]) for i in self.rho]
+		ret = []
+		try: 
+			ret = [dot(i,self.rho[0]) for i in self.rho]
+		except ValueError:
+			print self.rho[0]
+
+		return ret
 
 	def SFG_TCF(self,s1,s2,p):
 		alpha = [(a[s1,s1] + a[s2,s2])/2.0 for a in self.alpha]

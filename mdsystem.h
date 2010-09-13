@@ -48,7 +48,7 @@ class MDSystem {
 		int NumAtoms ()	const { return (int)_atoms.size(); }
 
 		int size () const { return (int)_atoms.size(); }
-		static VecR Dimensions () { return _dimensions; }
+		static VecR Dimensions () { return MDSystem::_dimensions; }
 		static void Dimensions (const VecR& dimensions) { MDSystem::_dimensions = dimensions; }
 
 		/* Beyond simple system stats, various computations are done routinely in a molecular dynamics system: */

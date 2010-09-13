@@ -22,7 +22,7 @@ namespace morita {
 		 * A pure virtual base class for performing an SFG analysis based on the method of Morita/Hynes (J. Phys. Chem. B 2002, 106, 673-685). Depending on the specific MD system used (Amber, CP2K, etc) the pure virtual methods define the actions to be taken to alter how various components are defined, and customize the analysis.
 		 */
 		template <class U>
-		class Morita2002Analysis : public AnalysisSet< Analyzer<U> > {
+		class Morita2002Analysis : public AnalysisSet< Analyzer<U> >{
 			public:
 				Morita2002Analysis (std::string, std::string);
 				virtual ~Morita2002Analysis ();
@@ -70,6 +70,8 @@ namespace morita {
 				//! Sets the dipole moment of each water used in the analysis.
 				virtual void SetAnalysisWaterDipoleMoments () = 0;
 
+				//! Sets the polarizability matrix of each water used in the analysis (the lab-frame projection of the matrix)
+				virtual void SetAnalysisWaterPolarizability () = 0;
 
 				// dipole field tensor 'T' as used in the morita&hynes paper
 				// it's a square 3Nx3N matrix, where N = number of particles
@@ -88,7 +90,9 @@ namespace morita {
 		: 
 			AnalysisSet< Analyzer<U> > (desc, fn),
 			_p(0), _alpha(0,0), _IDENT(0,0), _g(0,0)
-	{ return; }
+	{ 
+		return; 
+	}
 
 
 
@@ -152,12 +156,12 @@ namespace morita {
 
 
 			for (unsigned int i = 0; i < 3; i++) {
-				fprintf (t.Output(), "%8.3f ", _M(i));
+				fprintf (t.Output(), "% 13.4f ", _M(i));
 			} 
 			// output in row-major order
 			for (unsigned int i = 0; i < 3; i++) {
 				for (unsigned int j = 0; j < 3; j++) {
-					fprintf (t.Output(), "% 8.3f", _A(i,j));
+					fprintf (t.Output(), "% 13.4f", _A(i,j));
 				}
 			}
 			fprintf (t.Output(),"\n");
@@ -274,7 +278,7 @@ void Morita2002Analysis<U>::CalculateTensors() {
 	this->SetAnalysisWaterDipoleMoments ();
 
 	// Calculate the polarizability of each water molecule
-	std::for_each (analysis_wats.begin(), analysis_wats.end(), std::mem_fun(&MoritaH2O::SetPolarizability));
+	this->SetAnalysisWaterPolarizability ();
 
 	/*
 		 for (Morita_it it = analysis_wats.begin(); it != analysis_wats.end(); it++) {
@@ -288,7 +292,6 @@ void Morita2002Analysis<U>::CalculateTensors() {
 		_p.block(3*i,0,3,1) = analysis_wats[i]->Dipole();
 
 		_alpha.block(3*i,3*i,3,3) = analysis_wats[i]->Polarizability();
-		//std::cout << _alpha.block(3*i,3*i,3,3) << std::endl;
 
 		for (unsigned int j = i+1; j < analysis_wats.size(); j++) {
 			// Calculate the tensor 'T' which is formed of 3x3 matrix elements

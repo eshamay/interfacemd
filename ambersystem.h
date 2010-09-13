@@ -10,6 +10,7 @@
 class AmberSystem : public MDSystem {
 
 private:
+	AmberSystem () { }
 	//Atom_ptr_vec	_atoms;
 	TOPFile		_topfile;
 	CRDFile		_coords;
@@ -21,7 +22,6 @@ private:
 
 public:
 	// constructors
-	AmberSystem () { }
 	AmberSystem (const std::string& prmtop, const std::string& mdcrd, const std::string& mdvel = "");
 	~AmberSystem ();
 

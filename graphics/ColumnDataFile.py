@@ -25,19 +25,22 @@ class ColumnDataFile:
 	def ParseHeader(self,file,header):
 		# Parse the header (1st line of the file) if there is one.
 		line1 = file.readline().strip().split()
-		if header:
+		if header != None:
 			self.header = line1
 		# Otherwise just use column indices as identifiers, and form a dict out of the data set
 		else:
 			self.header = range(len(line1))
 			self.line1 = line1
 			
-  
 
-  	def ParseData(self,file,header):
+ 	def ParseData(self,file,header):
 		self.data = [line.strip().split() for line in file.readlines()]
-		if not header:
+		if header == None:
 			self.data.insert(0,self.line1)
+
+		for i in self.data:
+			if len(i) < 11:
+				print i
 		self.data = zip(*self.data)
 
 		for col in range(len(self.data)):
@@ -47,7 +50,7 @@ class ColumnDataFile:
 				continue
 
 		self.data = dict(zip(self.header, self.data))
-
+	
 
 	def __iter__(self):
 		for data in self.data:
@@ -59,3 +62,5 @@ class ColumnDataFile:
 	def keys(self):
 		return self.data.keys()
 
+	def __len__(self):
+		return len(self.data)

@@ -12,6 +12,11 @@ namespace morita {
 		return;
 	}
 
+	void CP2KMorita2002Analysis::SetAnalysisWaterPolarizability () {
+		std::for_each (analysis_wats.begin(), analysis_wats.end(), std::mem_fun(&MoritaH2O::SetPolarizability));
+		return;
+	}
+
 } // namespace morita
 
 

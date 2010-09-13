@@ -36,7 +36,7 @@ GMXSYS	= $(MDSRC)/trrfile.o $(MDSRC)/grofile.o $(MDSRC)/gmxsystem.o
 
 WATERSYSTEM = $(MDSYSTEM) $(AMBERSYSTEM) $(XYZSYSTEM) $(MDSRC)/graph.o
 
-ANALYSIS = $(WATERSYSTEM)
+ANALYSIS = $(WATERSYSTEM) $(MDSRC)/dataoutput.o
 
 clean:
 	rm -f *.o
