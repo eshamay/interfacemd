@@ -59,7 +59,7 @@ namespace morita {
 
 			// lookup the polarizability from the data file
 			alpha = MatR::Zero();
-			alpha = pdf.Matrix(
+			alpha = pdf.Value(
 						(*it)->OH1()->Magnitude(), 
 						(*it)->OH2()->Magnitude(), 
 						acos((*it)->Angle()) * 180.0/M_PI);

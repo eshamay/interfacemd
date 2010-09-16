@@ -25,6 +25,8 @@ namespace datafile_parsers {
 
 	using namespace boost;
 
+	const double multiplier = 1000.0;
+
 	class DataFile {
 		public:
 			DataFile (const std::string filename) : _filename(filename), _input(_filename.c_str()), _numLines(0) {
@@ -46,6 +48,8 @@ namespace datafile_parsers {
 	};
 
 
+
+
 	//class DataParser : public std::unary_function <std::vector<
 	class DelimitedDataFile : public DataFile {
 		public:
@@ -64,148 +68,172 @@ namespace datafile_parsers {
 	};	// Data file parser
 
 
-	class MultiKeyValueGraph {
-		public:
-			MultiKeyValueGraph () { 
-				_root = add_vertex(_graph);
+
+
+	template <class T>
+		class MultiKeyValueGraph {
+			public:
+				MultiKeyValueGraph () { 
+					_root = add_vertex(_graph);
+				}
+
+				void Insert (const double r1, const double r2, const double theta, const T& t);
+				T& Value (const double r1, const double r2, const double theta);
+
+			protected:
+				struct VertexProperties {
+					int key;
+					T value;
+				};
+
+				typedef adjacency_list<listS, listS, directedS, VertexProperties> Graph;
+				typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
+				typedef typename graph_traits<Graph>::vertex_iterator Vertex_it;
+				typedef std::pair<Vertex_it, Vertex_it> Vertex_pair;
+				typedef typename graph_traits<Graph>::edge_descriptor Edge;
+				typedef typename graph_traits<Graph>::edge_iterator Edge_it;
+				typedef typename graph_traits<Graph>::adjacency_iterator Adj_it;
+
+				// generic property maps
+				template <class U, class Property_U> struct PropertyMap { typedef typename property_map<Graph, U Property_U::*>::type Type; };
+
+				static typename PropertyMap<T,VertexProperties>::Type 		v_value;
+				static typename PropertyMap<int,VertexProperties>::Type			v_key;
+
+				Vertex AdjacentVertexAddValue (Vertex& start, const double key);
+				Vertex FindVertex (Vertex& start, const double key);
+
+				static Graph _graph;
+				Vertex _root;
+		};
+
+
+	template <class T>
+		MultiKeyValueGraph<T>::Graph MultiKeyValueGraph<T>::_graph(0);
+
+	template <class T>
+		typename MultiKeyValueGraph<T>::PropertyMap<T,MultiKeyValueGraph<T>::VertexProperties>::Type MultiKeyValueGraph<T>::v_value = get(&VertexProperties::value, _graph);
+
+	template <class T>
+		typename MultiKeyValueGraph<T>::PropertyMap<int,MultiKeyValueGraph<T>::VertexProperties>::Type MultiKeyValueGraph<T>::v_key = get(&VertexProperties::key, _graph);
+
+	template <class T>
+		MultiKeyValueGraph<T>::Vertex MultiKeyValueGraph<T>::AdjacentVertexAddValue (Vertex& start, const double key) {
+
+			//printf ("AdjacentVertexAddValue: adding %5.2f to %5.2f\n", key, v_key[start]);
+			Vertex vd;
+			Edge e;
+			bool added;
+			Adj_it vi, vi_end, next;
+			tie(vi, vi_end) = adjacent_vertices(start, _graph);
+			int val = int(key*multiplier);
+			for (next = vi; vi != vi_end; vi = next) {
+				next++;
+
+				if (v_key[*vi] == val) {
+					//printf ("found %5.2f already connected\n", v_key[*vi]);
+					return *vi;
+				}
 			}
+			if (vi == vi_end) {
+				// if the vertex doesn't already exist, then add it and tie it to the parent
+				vd = add_vertex(_graph);
+				v_key[vd] = int(key*multiplier);
+				//printf ("now tying the two keys together: %5.2f --> %5.2f\n", v_key[start], v_key[vd]);
+				tie(e,added) = add_edge(start,vd,_graph);
+				return vd;
+			}
+			else {
+				//printf ("found key: %5.2f\n", v_key[*vi]);
+				return *vi;
+			}
+		}
 
-			void Insert (const double r1, const double r2, const double theta, const MatR& mat);
-			MatR& Matrix (const double r1, const double r2, const double theta);
+	template <class T>
+		MultiKeyValueGraph<T>::Vertex MultiKeyValueGraph<T>::FindVertex (Vertex& start, const double key) {
+			//printf ("FindVertex: searching for %5.2f starting at %5.2f\n", key, v_key[start]);
+			Adj_it vi, vi_end, next;
+			tie(vi, vi_end) = adjacent_vertices(start, _graph);
+			int val = int(key*multiplier);
+			//printf ("val=%d\n", val);
+			for (next = vi; vi != vi_end; vi = next) {
+				next++;
+				//printf ("found %5.2f\n", v_key[*vi]);
 
+				if (v_key[*vi] == val) {
+					return *vi;
+				}
+			}
+			if (vi == vi_end) { 
+				std::cout << "couldn't find the vertex for key: " << key << std::endl;
+				exit(1);
+			}
+			return *vi;
+		}
+
+	template <class T>
+		T& MultiKeyValueGraph<T>::Value (const double r1, const double r2, const double theta) {
+			Vertex vd = FindVertex (_root, r1);
+			vd = FindVertex (vd, r2);
+			vd = FindVertex (vd, theta);
+			return v_value[vd];
+		}
+
+
+	template <class T>
+		void MultiKeyValueGraph<T>::Insert (const double r1, const double r2, const double theta, const T& mat) {
+			//printf ("Insert: adding %5.2f %5.2f %6.2f\n", r1, r2, theta);
+			Vertex vd = AdjacentVertexAddValue (_root, r1);
+			vd = AdjacentVertexAddValue (vd, r2);
+			vd = AdjacentVertexAddValue (vd, theta);
+			v_value[vd] = mat;
+		}
+
+
+
+	template <class T>
+		class ElectrostaticMomentFile : public DelimitedDataFile {
+			public:
+				ElectrostaticMomentFile (const std::string filename)
+					: DelimitedDataFile(filename, ";"), r_min(0.93), r_max(1.13), dr(0.02), theta_min(90.0), theta_max(120.0), dtheta(3.0)
+					{ }
+
+				T& Value (const double r1, const double r2, const double theta);
+
+			protected:
+				MultiKeyValueGraph<T> _graph;
+				double r_min;	// bondlength minimum key key
+				double r_max;
+				double dr;	// resolution of data points along the bondlengths
+				double theta_min;
+				double theta_max;
+				double dtheta;
+
+				virtual void ParseRow (const std::vector<double>&) = 0;
+				virtual void ParseData () { }
+				//void Polarizability (double r1, const double r2, const double theta);
+				virtual double MatchValue (const double key, const double resolution, const double min, const double max);
+		};
+
+
+
+
+	class DipoleDataFile : public ElectrostaticMomentFile<VecR> {
+		public:
+			DipoleDataFile (const std::string filename) : ElectrostaticMomentFile<VecR> (filename) { this->ParseFile(); }
 		protected:
-			struct VertexProperties {
-				int value;
-				MatR matrix;
-			};
-
-			typedef adjacency_list<listS, listS, directedS, VertexProperties> Graph;
-			typedef graph_traits<Graph>::vertex_descriptor Vertex;
-			typedef graph_traits<Graph>::vertex_iterator Vertex_it;
-			typedef std::pair<Vertex_it, Vertex_it> Vertex_pair;
-			typedef graph_traits<Graph>::edge_descriptor Edge;
-			typedef graph_traits<Graph>::edge_iterator Edge_it;
-			typedef graph_traits<Graph>::adjacency_iterator Adj_it;
-
-			// generic property maps
-			template <class T, class Property_T> struct PropertyMap { 
-				typedef typename property_map<Graph, T Property_T::*>::type Type; };
-
-
-			static PropertyMap<MatR,VertexProperties>::Type 		v_matrix;
-			static PropertyMap<int,VertexProperties>::Type 		v_value;
-
-			Vertex AdjacentVertexAddValue (Vertex& start, const double value);
-			Vertex FindVertex (Vertex& start, const double value);
-
-			static Graph _graph;
-			Vertex _root;
+			void ParseRow (const std::vector<double>&);
 	};
 
 
-	MultiKeyValueGraph::Graph MultiKeyValueGraph::_graph(0);
-
-	MultiKeyValueGraph::PropertyMap<MatR,MultiKeyValueGraph::VertexProperties>::Type MultiKeyValueGraph::v_matrix = get(&VertexProperties::matrix, _graph);
-
-	MultiKeyValueGraph::PropertyMap<int,MultiKeyValueGraph::VertexProperties>::Type MultiKeyValueGraph::v_value = get(&VertexProperties::value, _graph);
 
 
-	MultiKeyValueGraph::Vertex MultiKeyValueGraph::AdjacentVertexAddValue (Vertex& start, const double value) {
-
-		//printf ("AdjacentVertexAddValue: adding %5.2f to %5.2f\n", value, v_value[start]);
-		Vertex vd;
-		Edge e;
-		bool added;
-		Adj_it vi, vi_end, next;
-		tie(vi, vi_end) = adjacent_vertices(start, _graph);
-		int val = int(value*100.0);
-		for (next = vi; vi != vi_end; vi = next) {
-			next++;
-
-			if (v_value[*vi] == val) {
-				//printf ("found %5.2f already connected\n", v_value[*vi]);
-				return *vi;
-			}
-		}
-		if (vi == vi_end) {
-			// if the vertex doesn't already exist, then add it and tie it to the parent
-			vd = add_vertex(_graph);
-			v_value[vd] = int(value*100.0);
-			//printf ("now tying the two values together: %5.2f --> %5.2f\n", v_value[start], v_value[vd]);
-			tie(e,added) = add_edge(start,vd,_graph);
-			return vd;
-		}
-		else {
-			//printf ("found value: %5.2f\n", v_value[*vi]);
-			return *vi;
-		}
-	}
-
-	MultiKeyValueGraph::Vertex MultiKeyValueGraph::FindVertex (Vertex& start, const double value) {
-		//printf ("FindVertex: searching for %5.2f starting at %5.2f\n", value, v_value[start]);
-		Adj_it vi, vi_end, next;
-		tie(vi, vi_end) = adjacent_vertices(start, _graph);
-		int val = int(value*100.0);
-		//printf ("val=%d\n", val);
-		for (next = vi; vi != vi_end; vi = next) {
-			next++;
-			//printf ("found %5.2f\n", v_value[*vi]);
-
-			if (v_value[*vi] == val) {
-				return *vi;
-			}
-		}
-		if (vi == vi_end) { 
-			std::cout << "couldn't find the vertex for value: " << value << std::endl;
-			exit(1);
-		}
-		return *vi;
-	}
-
-	MatR& MultiKeyValueGraph::Matrix (const double r1, const double r2, const double theta) {
-		Vertex vd = FindVertex (_root, r1);
-		vd = FindVertex (vd, r2);
-		vd = FindVertex (vd, theta);
-		return v_matrix[vd];
-	}
-
-
-	void MultiKeyValueGraph::Insert (const double r1, const double r2, const double theta, const MatR& mat) {
-		//printf ("Insert: adding %5.2f %5.2f %6.2f\n", r1, r2, theta);
-		Vertex vd = AdjacentVertexAddValue (_root, r1);
-		vd = AdjacentVertexAddValue (vd, r2);
-		vd = AdjacentVertexAddValue (vd, theta);
-		v_matrix[vd] = mat;
-	}
-
-
-
-	class PolarizabilityDataFile : public DelimitedDataFile {
+	class PolarizabilityDataFile : public ElectrostaticMomentFile<MatR> {
 		public:
-			PolarizabilityDataFile (const std::string filename) 
-				: 
-					DelimitedDataFile(filename, ";"), r_min(0.93), r_max(1.13), dr(0.02), theta_min(90.0), theta_max(120.0), dtheta(3.0) 
-			{
-				this->ParseFile();
-			}
-
-
-			//! The Matrix method returns the polarizability for a given water geometry (r1, r2, theta). The returned matrix is in the reference frame designated in Morita/Hynes 2000 - the Z-axis is along one of the bonds (r1) and the other OH bond is in the positive x-axis direction, and the molecule is in the x-z plane.
-			MatR& Matrix (const double r1, const double r2, const double theta);
-
+			PolarizabilityDataFile (const std::string filename) : ElectrostaticMomentFile<MatR> (filename) { this->ParseFile(); }
+			//! The Value method returns the polarizability for a given water geometry (r1, r2, theta). The returned matrix is in the reference frame designated in Morita/Hynes 2000 - the Z-axis is along one of the bonds (r1) and the other OH bond is in the positive x-axis direction, and the molecule is in the x-z plane.
 		protected:
-			MultiKeyValueGraph _graph;
-			double r_min;	// bondlength minimum key value
-			double r_max;
-			double dr;	// resolution of data points along the bondlengths
-			double theta_min;
-			double theta_max;
-			double dtheta;
-
 			void ParseRow (const std::vector<double>&);
-			void ParseData () { }
-			//void Polarizability (double r1, const double r2, const double theta);
-			double MatchValue (const double value, const double resolution, const double min, const double max);
 	};	// polarizability data file
 
 
@@ -239,6 +267,22 @@ namespace datafile_parsers {
 	}
 
 
+	void DipoleDataFile::ParseRow (const std::vector<double>& vec) {
+
+		std::vector<double>::const_iterator it = vec.begin();
+		double r1 = *it++;
+		double r2 = *it++;
+		double theta = *it++;
+
+		double m[3];
+		std::copy(it, vec.end(), m);
+		VecR v (m);	// the matrix extracted from each row
+
+		//printf ("ParseRow: adding %5.2f %5.2f %6.2f\n", r1, r2, theta);
+		_graph.Insert (r1, r2, theta, v);
+	}	// parse row
+
+
 	void PolarizabilityDataFile::ParseRow (const std::vector<double>& vec) {
 
 		double m[9];
@@ -255,20 +299,22 @@ namespace datafile_parsers {
 	}	// parse row
 
 
-	//! Take an incoming value and fix it such that it matches one of the keys in the dataset
-	double PolarizabilityDataFile::MatchValue (const double value, const double resolution, const double min, const double max) {
+	//! Take an incoming key and fix it such that it matches one of the keys in the dataset
+	template <class T>
+	double ElectrostaticMomentFile<T>::MatchValue (const double key, const double resolution, const double min, const double max) {
 
-		int step = int((value*100.0-min*100.0)/100.0/resolution);
-		int floor = resolution*100.0*step+min*100.0;
-		floor = (floor > int(max*100.0)) ? int(max*100.0) : floor;	// a bounds check
-		floor = (floor < int(min*100.0)) ? int(min*100.0) : floor;	// a bounds check
-		
-		return floor/100.0;
+		int step = int((key*multiplier-min*multiplier)/multiplier/resolution);
+		int floor = resolution*multiplier*step+min*multiplier;
+		floor = (floor > int(max*multiplier)) ? int(max*multiplier) : floor;	// a bounds check
+		floor = (floor < int(min*multiplier)) ? int(min*multiplier) : floor;	// a bounds check
+
+		return floor/multiplier;
 	}
 
 
-	MatR& PolarizabilityDataFile::Matrix (const double r1, const double r2, const double theta) {
-		// first cast the numbers to the proper values
+	template <class T>
+	T& ElectrostaticMomentFile<T>::Value (const double r1, const double r2, const double theta) {
+		// first cast the numbers to the proper keys
 		double r1_floor = MatchValue(r1, dr, r_min, r_max);
 		double r2_floor = MatchValue(r2, dr, r_min, r_max);
 		double theta_floor = MatchValue(theta, dtheta, theta_min, theta_max);
@@ -276,17 +322,10 @@ namespace datafile_parsers {
 		//printf ("%f %f %f\n", r1, r2, theta);
 		//printf ("%f %f %f\n", r1_floor, r2_floor, theta_floor);
 		fflush(stdout);
-		return _graph.Matrix(r1_floor, r2_floor, theta_floor);
+		return _graph.Value(r1_floor, r2_floor, theta_floor);
 	}
 
 
-	/*
-	void PolarizabilityDataFile::Polarizability (double r1, const double r2, const double theta) {
-		printf ("Polarizability: searching for %8.4f %8.4f %8.4f\n", r1, r2, theta);
-		MatR mat = this->Matrix(r1,r2,theta);
-		mat.Print();
-	}
-	*/
 
 }	 // namespace datafile parsers
 

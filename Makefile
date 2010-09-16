@@ -26,7 +26,9 @@ WATER	= $(MDSRC)/h2o.o
 
 IONS	= $(MDSRC)/hno3.o $(MDSRC)/h3o.o $(MDSRC)/oh.o $(MDSRC)/so2.o $(MDSRC)/h.o
 
-ORGANIC = $(MDSRC)/alkane.o $(MDSRC)/decane.o 
+ORGANIC = $(MDSRC)/alkane.o $(MDSRC)/decane.o $(MDSRC)/ctc.o
+
+ALLMOLECULES = $(WATER) $(IONS) $(ORGANIC) 
 
 XYZSYSTEM = $(MDSRC)/xyzsystem.o $(MDSRC)/xyzfile.o $(MDSRC)/wannier.o 
 

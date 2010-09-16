@@ -1,31 +1,5 @@
 #include "xyzfile.h"
 
-XYZFile::XYZFile (std::string path) 
-	: 
-		_file ((FILE *)NULL),
-		_path(path),
-		_initialized(false) 
-{
-
-	_file = fopen (path.c_str(), "r");
-	if (_file == (FILE *)NULL)
-	{
-		printf ("Couldn't load the XYZ coordinate file file:: %s\n", path.c_str());
-		exit(1);
-	}
-
-	// find the number of timesteps in the file
-	this->_FindSteps();
-	// Initialize the atoms
-	this->LoadFirst();
-}
-
-XYZFile::~XYZFile () {
-	fclose (_file);
-	for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++)
-		delete *it;
-}
-
 void XYZFile::LoadNext () {
 
 	char line[1000];
@@ -114,19 +88,4 @@ void XYZFile::_FindSteps () {
 	//	}
 
 	return;
-}
-
-void XYZFile::LoadFirst() {
-	rewind (_file);
-	_currentstep = 0;
-	this->LoadNext();
-}
-
-void XYZFile::Seek (int step) {
-
-	rewind (_file);
-
-	while (_currentstep != step) {
-		this->LoadNext();
-	}
 }

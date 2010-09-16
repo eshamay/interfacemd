@@ -1,50 +1,47 @@
 #ifndef PDBFILE_H_
 #define PDBFILE_H_
 
-#include "mdsystem.h"
-#include <string>
-#include <cstring>
-#include <vector>
-#include <iostream>
+#include "mdfiles.h"
+#include "moleculefactory.h"
 
-using namespace std;
 
-class PDBFile : public MDSystem {
+namespace md_files {
 
-	FILE *_file;				// the PDB file listing all the atom coordinates
-	string _path;
+	class PDBSystem : public MDSystem, public CoordinateFile {
 
-	int _laststep,
-		_currentstep;
+		protected: 
+			int _numAtoms;
+			bool _initialized;
 
-	int	_numAtoms;				// total number of atoms in the system
-	int _numMols;
+			void _ParseAtoms ();
+			void _ParseMolecules ();
 
-	int _loaded;				// To tell wether or not a file has been loaded
+			void CreateAtoms();
+			void CountAtoms ();
 
-	int _FindLastStep();		// run through the file and find the last frame available
-	Atom *_ParseAtom (const char *line);
-	void _ParseMolecules();
+		public:
 
-public:
+			PDBSystem (std::string path) : CoordinateFile(path) {
+				LoadFirst();
+			}
 
-	PDBFile (string path);
-	PDBFile (std::vector<Molecule *>& mols);
-	PDBFile ();
-	~PDBFile ();
+			void LoadFirst () {
+				if (!_initialized) {
+					CountAtoms();
+					CreateAtoms();
+					_initialized = true;
+				}
 
-	// Various control functions
-	void LoadNext ();
-	void LoadFirst ();
-	void LoadLast ();
-	void Seek (int step);
+				rewind (_file);
+				LoadNext();
+			}
 
-	// output functions
-	int Last () { return _laststep; }
-	int Current () { return _currentstep; }
+			// Various control functions
+			void LoadNext ();
 
-	static void WritePDB (Mol_ptr_vec& system);		// given a vector of molecules, this will print out a PDB file
+			//void WritePDB ();		// given a vector of molecules, this will print out a PDB file
+	};
 
-};
+}	// namespace md_files
 
 #endif

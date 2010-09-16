@@ -19,6 +19,7 @@ HCORIENTATION	= $(WATERSYSTEM) $(CARBONCHAIN) carbonchainsystem.o
 ANGLEPOSITIONHISTO = $(WATERSYSTEM) Angle-Position-Histogram-2D.o
 ROTATE			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o molecule-rotate.cpp
 ANGLEHISTO = $(WATERSYSTEM) angle-histogram.o
+PDBTEST	= $(MDSYSTEM) $(ALLMOLECULES) ../pdbfile.o
 
 TEST		= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) test.o
 FOO			= foo.o
@@ -30,6 +31,10 @@ foo : $(FOO)
 
 test : $(TEST) 
 	icpc $(TEST) $(LIBS) $(LAPACKLIBS) -o test
+
+pdbtest : $(PDBTEST)
+	$(CXX) $(CPPFLAGS) $(PDBTEST) -o ../bin/pdbtest pdbtest.cpp
+
 
 anglehisto: $(ANGLEHISTO)
 	$(CXX) $(CPPFLAGS) $(ANGLEHISTO) -llapack -o ../bin/anglehisto

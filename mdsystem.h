@@ -69,12 +69,6 @@ class MDSystem {
 		static VecR CalcWannierDipole (MolPtr mol);
 };
 
-#include "h2o.h"
-#include "h3o.h"
-#include "hno3.h"
-#include "decane.h"
-#include "oh.h"
-#include "so2.h"
-#include "h.h"
+#include "moleculefactory.h"
 
 #endif

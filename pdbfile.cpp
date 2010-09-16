@@ -1,187 +1,160 @@
 #include "pdbfile.h"
+#include <cstring>
 
-PDBFile::PDBFile (string path) {
-  _loaded = 0;
+namespace md_files {
 
-  _path = path;
+	void PDBSystem::CountAtoms () {
+		_numAtoms = 0;
 
-  _file = (FILE *)NULL;
-  _file = fopen (path.c_str(), "r");
-  if (_file != (FILE *)NULL)
-  {
-	_loaded = 1;
-  }
-  else
-  {
-	printf ("Couldn't load the PDB coordinate file:: %s\n", path.c_str());
-	exit(1);
-  }
+		rewind(_file);
+		char word[6];
 
-  // include here a check for the TER
-  
-  //this->_FindLastStep();
-
-  this->LoadFirst ();	// load the first frame of the file
-
-}
-
-PDBFile::PDBFile () {
-}
-
-PDBFile::PDBFile (vector<Molecule *>& mols) {
-  _mols = mols;
-}
-
-PDBFile::~PDBFile () {
-  fclose(_file);
-}
-
-void PDBFile::_ParseMolecules()
-{
-  char line[1000];
-  char word[10];
-
-  // first process the frame's header and get to the 'ATOM' entries. We need an initial 'word' to see where we are
-  fgets (line, 1000, _file);
-  sscanf (line, " %s", word);
-
-  Molecule *pmol;
-  pmol = new Molecule;
-  //Start parsing atoms until the 'END' of the frame
-  while (strcmp(word, "END")) {
-
-	// if we hit an ATOM entry, then parse it into the current working molecule
-	if (!strcmp(word, "ATOM")) {
-	  // add an atom to the current molecule
-	  pmol->AddAtom(_ParseAtom(line));
-	  _numAtoms++;
+		do {
+			ReadLine();
+			sscanf (_line, "%6s", word);
+			if (!strcmp(word, "ATOM"))
+				_numAtoms++;
+		} while (strcmp(word, "END"));
 	}
 
-	// The TER keyword separates molecules... so if encountered we need a new one
-	if (!strcmp(word, "TER")) {
-	  pmol->Name ( (*pmol)[0]->Residue());
-	  //printf ("%s\n", pmol->Name().c_str());
-	  _mols.push_back(pmol);
-	  pmol = new Molecule;
-	  _numMols++;
+	void PDBSystem::CreateAtoms () {
+		if (!_initialized) {
+			for (Atom_it it = begin(); it != end(); it++)
+				delete *it;
+
+			_atoms.clear();
+			for (int i = 0; i < _numAtoms; i++)
+				_atoms.push_back(new Atom);
+
+		}
 	}
 
-	// then get the next line for processing
-	fgets (line, 1000, _file);
-	sscanf (line, " %s", word);
-  }
 
-  return;
-}
+	void PDBSystem::_ParseAtoms() {
+		char keyword[6], atom_id[5], molid[4], X[8], Y[8], Z[8], temp[10];
 
-void PDBFile::LoadNext () {
-  _mols.clear();		// first empty out the list of molecules in the system
-  _numAtoms = 0;
-  _numMols = 0;
+		for (Atom_it it = begin(); it != end(); it++) {
+			// skip all non-ATOM lines
+			do {
+				ReadLine();
+				sscanf (_line, "%6s", keyword);
+			} while (strcmp(keyword, "ATOM"));
 
-  this->_ParseMolecules();
+			std::string atom_name, residue, location;
 
-  _currentstep++;
-}
+			// 1-6	"ATOM  "
+			strncpy (temp, &_line[0], 6);
+			// 7-11		atom id number
+			strncpy (atom_id, &_line[6], 6);
+			// 12 whitespace
+			strncpy (temp, &_line[11], 1);
+			// 13-16 atom name
+			atom_name.insert(0, &_line[12], 4);
+			//strncpy (&atom_name[0], &_line[12], 4);
+			// 17 location
+			//strncpy (&location[0], &_line[16], 1);
+			location.insert(0, &_line[16], 1);
+			// 18-20 residue name
+			//strncpy (&residue[0], &_line[17], 3);
+			residue.insert(0, &_line[17], 3);
+			// 21 whitespace
+			strncpy (temp, &_line[20], 1);
+			// 22 chain identifier
+			strncpy (temp, &_line[21], 1);
+			// 23-26 residue id
+			strncpy (molid, &_line[22], 4);
+			// 27-30	misc (?) 
+			strncpy (temp, &_line[26], 4);
+			// 31-38	x-coordinate
+			strncpy (X, &_line[30], 8);
+			// 39-48	y-coordinate
+			strncpy (Y, &_line[38], 8);
+			// 47-54	z-coordinate
+			strncpy (Z, &_line[46], 8);
 
-// Take the next line of the file, and parse the
-Atom *PDBFile::_ParseAtom (const char *atomEntry) {
 
-  double x, y, z;
-  char name[10], residue[10];
-
-  sscanf(atomEntry, "ATOM %*d %s %s %*d %lf %lf %lf", name, residue, &x, &y, &z);
-  //printf ("%s\t%s\t%f\t%f\t%f\n", name, residue, x, y, z);
-
-  VecR position (x, y, z);
-  string atomName (name);
-
-  Atom *pAtom = new Atom (atomName, position);
-  pAtom->Residue (residue);
-
-  return (pAtom);
-}
-
-// grab the number of the last time step in the file
-int PDBFile::_FindLastStep () {
-
-  rewind(_file);
-  _laststep = 0;	// reset the counter
-
-  // PDB files separate frames/timesteps with the END keyword. So running through the file and search for lines that say 'END' will
-  // give the number of frames in the file
-
-  char line[1000];
-  char word[10];
-
-  while (!feof(_file)) {
-	fgets (line, 1000, _file);
-	sscanf (line, " %s", word);
-	if (!strcmp(word, "END")) {
-	  _laststep++;
+			VecR position (atof(X), atof(Y), atof(Z));
+			(*it)->Name(atom_name);
+			(*it)->Position(position);
+			(*it)->ID(atoi(atom_id));
+			(*it)->MolID(atoi(molid));
+			(*it)->Residue (residue);
+			(*it)->SetAtomProperties();
+		}
 	}
-  }
 
-  rewind(_file);		// rewind the file back to the start to be nice
-  _currentstep = 0;
 
-  return (_laststep);
-}
+	void PDBSystem::_ParseMolecules() {
+		for (Mol_it it = begin_mols(); it != end_mols(); it++)
+			delete *it;
+		_mols.clear();
 
-void PDBFile::LoadFirst() {
-  rewind (_file);
-  _currentstep = 0;
+		MolPtr pmol = (MolPtr)NULL;
+		int _currentmol = 0;
 
-  this->LoadNext();
+		for (Atom_it it = begin(); it != end(); it++) {
 
-  _atoms.clear();
-  RUN (_mols) {
-	for (int atom = 0; atom < _mols[i]->size(); atom++) {
-	  _atoms.push_back (_mols[i]->Atoms(atom));
+			// then, if the atom's molid is different than the one we were just on, then readjust the current molecule to something else
+			if ((*it)->MolID() != _currentmol) {
+
+				MolPtr newmol;
+				newmol = molecule::MoleculeFactory ((*it)->Residue());
+
+				_currentmol = (*it)->MolID();
+				newmol->MolID (_currentmol);
+				newmol->Name ((*it)->Residue());
+
+				if (pmol != (MolPtr)NULL)
+					_mols.push_back (pmol);
+
+				pmol = newmol;
+			}
+
+			pmol->AddAtom(*it);
+		}
+	}	// Parse Molecules
+
+
+
+	void PDBSystem::LoadNext () {
+		_ParseAtoms();
+		_ParseMolecules();
 	}
-  }
-}
 
-void PDBFile::Seek (int step) {
-  rewind (_file);
-  _currentstep = 0;
 
-  while (_currentstep != step) {
-	this->LoadNext();
-  }
-}
+	//ATOM      1  H1  h2o A   1      27.538  20.316  20.655  1.00  0.00        
+	//ATOM    145  N   VAL A  25      32.433  16.336  57.540  1.00 11.92      A1   N
+	//123456789a123456789b123456789c123456789d123456789e123456789f
+	//
+	//sscanf(pdbline, "ATOM  %5d %4c%c%3c %c%4d%c%8.3lf%8.3lf%8.3lf", &atomid, name, &location, residue, temp, &molid, temp, &x, &y, &z);
+	//sscanf(pdbline, "ATOM  %5d %4c%3c %c%4d%s%8lf%8lf%8lf", &atomid, name, residue, temp, &molid, temp, &X, &Y, &Z);
 
-void PDBFile::LoadLast () {
-  rewind (_file);
-  _currentstep = 0;
+	/*
+		 void PDBSystem::WritePDB () {
 
-  while (_currentstep != _laststep) {
-	this->LoadNext();
-  }
-}
+		 int atomCount = 1;
+		 int molCount = 1;
 
-void PDBFile::WritePDB (vector<Molecule *>& sys) {
-
-  int atomCount = 1;
-  int molCount = 1;
-
-  // go through each molecule
-  for (int i = 0; i < (int)sys.size(); i++) {
+	// go through each molecule
+	for (int i = 0; i < (int)sys.size(); i++) {
 	Molecule * mol = sys[i];
 	// and print out each atom
 	for (int atom = 0; atom < mol->size(); atom++) {
 
-	  Atom *tatom = mol->Atoms(atom);
-	  printf ("ATOM  %5d  %-4s%3s %5d    % 8.3f% 8.3f% 8.3f\n",
-		  atomCount++, tatom->Name().c_str(), tatom->Residue().c_str(), molCount,
-		  tatom->X(), tatom->Y(), tatom->Z());
+	Atom *tatom = mol->Atoms(atom);
+	printf ("ATOM  %5d  %-4s%3s %5d    % 8.3f% 8.3f% 8.3f\n",
+	atomCount++, tatom->Name().c_str(), tatom->Residue().c_str(), molCount,
+	tatom->X(), tatom->Y(), tatom->Z());
 	}
 
 	printf ("TER\n");
 	molCount++;
-  }
+	}
 
-  printf ("END");
+	printf ("END");
 
-  return;
-}
+	return;
+	}
+	*/
+
+}	// namespace md_files
