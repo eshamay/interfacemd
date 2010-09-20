@@ -27,14 +27,15 @@ namespace molecule {
 			mol = new Proton;
 		else if (name == "so2")
 			mol = new SulfurDioxide;
-		else if (name == "no3")
-			mol = new Nitrate;
+		//else if (name == "no3")
+			//mol = new Nitrate;
 		else if (name == "ctc")
 			mol = new CarbonTetrachloride;
 
 		else {
-			std::cerr << "Couldn't determine the molecule using the given name: " << name << std::endl;
-			exit(1);
+			mol = new Molecule;
+			//std::cerr << "Couldn't determine the molecule using the given name: " << name << std::endl;
+			//exit(1);
 		}
 
 		return mol;

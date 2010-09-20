@@ -97,8 +97,8 @@ class WaterSystemParams {
 };
 
 
-class AmberAnalysisSet;
-class XYZAnalysisSet;
+//class AmberAnalysisSet;
+//class XYZAnalysisSet;
 
 template<class T>
 class WaterSystem {

@@ -17,7 +17,7 @@ class CRDFile {
 	bool			_eof;		// end of file marker for the coord file
 	bool			_set;
 
-public:
+	public:
 
 	CRDFile () { }
 	CRDFile (std::string const crdpath, int const c_size);

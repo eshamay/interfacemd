@@ -1,5 +1,6 @@
-#include "pdbfile.h"
+#include "pdbsystem.h"
 #include <cstring>
+#include <boost/algorithm/string.hpp>
 
 namespace md_files {
 
@@ -74,6 +75,7 @@ namespace md_files {
 
 
 			VecR position (atof(X), atof(Y), atof(Z));
+			boost::trim(atom_name);
 			(*it)->Name(atom_name);
 			(*it)->Position(position);
 			(*it)->ID(atoi(atom_id));

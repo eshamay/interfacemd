@@ -103,7 +103,7 @@ class Molecule {
 
 		void AddAtom (AtomPtr const newAtom);					// same as the operator
 
-		virtual void SetAtoms () = 0;
+		virtual void SetAtoms () { }
 		void FixAtom (AtomPtr atom);
 		void FixAtoms ();
 		void Rename (const std::string& name);

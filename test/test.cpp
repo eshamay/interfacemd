@@ -1,6 +1,7 @@
 #include "test.h"
 
 
+/*
 Tester::Tester (WaterSystemParams& wsp)
   :	
 	Analyzer<XYZSystem> (wsp)
@@ -26,6 +27,7 @@ void Tester::Setup () {
 void Tester::Analysis () {
   LoadAll();
 
+	*/
   /*
   // find out the hbond-distance factor for each O atom. 
   // The Distance Factor is a dimensionless number that represents the position of a hydrogen between two oxygens.
@@ -51,6 +53,7 @@ void Tester::Analysis () {
   fprintf (output, "% 8d % 8.4f % 8.4f\n", timestep, Q1, Q2);
   */
 
+/*
   // atoms closest to o1
   fprintf (output, "o1 -- ");
   for (bondgraph::distance_vec::const_iterator it = closest_1.begin(); it != closest_1.end(); it++) {
@@ -68,6 +71,7 @@ void Tester::Analysis () {
 }
 
 void Tester::DataOutput () {
+*/
   /*
 	 rewind(output);
 
@@ -78,14 +82,17 @@ void Tester::DataOutput () {
 
 	 return; 
    */
+/*
 }
 
 void Tester::PostAnalysis () {
   return;
 }
+*/
 
 
-int main () {
+//int main () {
+	/*
   libconfig::Config cfg;
   cfg.readFile("system.cfg");
 
@@ -100,5 +107,37 @@ int main () {
   test.SystemAnalysis ();
 
   return 0;
+	*/
+//}
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+int main () {
+	Atom a ("O", VecR(1.0,2.0,3.0));
+	Atom b ("H", VecR(2.0,3.0,1.0));
+
+	a.Print();
+	b.Print();
+
+	std::cout << a-b << std::endl;
+
+
+
+	return 0;
+
 }
 

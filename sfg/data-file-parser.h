@@ -95,7 +95,10 @@ namespace datafile_parsers {
 				typedef typename graph_traits<Graph>::adjacency_iterator Adj_it;
 
 				// generic property maps
-				template <class U, class Property_U> struct PropertyMap { typedef typename property_map<Graph, U Property_U::*>::type Type; };
+				template <class U, class Property_U> 
+					struct PropertyMap { 
+						typedef typename property_map<Graph, U Property_U::*>::type Type; 
+					};
 
 				static typename PropertyMap<T,VertexProperties>::Type 		v_value;
 				static typename PropertyMap<int,VertexProperties>::Type			v_key;
@@ -109,16 +112,24 @@ namespace datafile_parsers {
 
 
 	template <class T>
-		MultiKeyValueGraph<T>::Graph MultiKeyValueGraph<T>::_graph(0);
+		typename MultiKeyValueGraph<T>::Graph MultiKeyValueGraph<T>::_graph(0);
+
+	//template <class T>
+		//typename MultiKeyValueGraph<T>::PropertyMap<T,MultiKeyValueGraph::VertexProperties>::Type MultiKeyValueGraph<T>::v_value = get(&MultiKeyValueGraph<T>::VertexProperties::value, _graph);
+	template <>
+		MultiKeyValueGraph<MatR>::PropertyMap<MatR,MultiKeyValueGraph<MatR>::VertexProperties>::Type MultiKeyValueGraph<MatR>::v_value = get(&MultiKeyValueGraph<MatR>::VertexProperties::value, _graph);
+
+	template <>
+		MultiKeyValueGraph<VecR>::PropertyMap<VecR,MultiKeyValueGraph<VecR>::VertexProperties>::Type MultiKeyValueGraph<VecR>::v_value = get(&MultiKeyValueGraph<VecR>::VertexProperties::value, _graph);
+
+	template <>
+		MultiKeyValueGraph<MatR>::PropertyMap<int,MultiKeyValueGraph<MatR>::VertexProperties>::Type MultiKeyValueGraph<MatR>::v_key = get(&VertexProperties::key, _graph);
+
+	template <>
+		MultiKeyValueGraph<VecR>::PropertyMap<int,MultiKeyValueGraph<VecR>::VertexProperties>::Type MultiKeyValueGraph<VecR>::v_key = get(&VertexProperties::key, _graph);
 
 	template <class T>
-		typename MultiKeyValueGraph<T>::PropertyMap<T,MultiKeyValueGraph<T>::VertexProperties>::Type MultiKeyValueGraph<T>::v_value = get(&VertexProperties::value, _graph);
-
-	template <class T>
-		typename MultiKeyValueGraph<T>::PropertyMap<int,MultiKeyValueGraph<T>::VertexProperties>::Type MultiKeyValueGraph<T>::v_key = get(&VertexProperties::key, _graph);
-
-	template <class T>
-		MultiKeyValueGraph<T>::Vertex MultiKeyValueGraph<T>::AdjacentVertexAddValue (Vertex& start, const double key) {
+		typename MultiKeyValueGraph<T>::Vertex MultiKeyValueGraph<T>::AdjacentVertexAddValue (Vertex& start, const double key) {
 
 			//printf ("AdjacentVertexAddValue: adding %5.2f to %5.2f\n", key, v_key[start]);
 			Vertex vd;
@@ -150,7 +161,7 @@ namespace datafile_parsers {
 		}
 
 	template <class T>
-		MultiKeyValueGraph<T>::Vertex MultiKeyValueGraph<T>::FindVertex (Vertex& start, const double key) {
+		typename MultiKeyValueGraph<T>::Vertex MultiKeyValueGraph<T>::FindVertex (Vertex& start, const double key) {
 			//printf ("FindVertex: searching for %5.2f starting at %5.2f\n", key, v_key[start]);
 			Adj_it vi, vi_end, next;
 			tie(vi, vi_end) = adjacent_vertices(start, _graph);
@@ -304,7 +315,7 @@ namespace datafile_parsers {
 	double ElectrostaticMomentFile<T>::MatchValue (const double key, const double resolution, const double min, const double max) {
 
 		int step = int((key*multiplier-min*multiplier)/multiplier/resolution);
-		int floor = resolution*multiplier*step+min*multiplier;
+		int floor = int(resolution*multiplier*step+min*multiplier);
 		floor = (floor > int(max*multiplier)) ? int(max*multiplier) : floor;	// a bounds check
 		floor = (floor < int(min*multiplier)) ? int(min*multiplier) : floor;	// a bounds check
 

@@ -9,6 +9,7 @@ USING_PART_OF_NAMESPACE_EIGEN
 #include "../utility.h"
 
 
+/*
 class Tester : public Analyzer<XYZSystem>
 {
   public:
@@ -22,6 +23,9 @@ class Tester : public Analyzer<XYZSystem>
 
 	AtomPtr s, o1, o2;
 };
+*/
+
+
 
 #endif
 

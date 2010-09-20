@@ -28,21 +28,26 @@ namespace morita {
 		//WaterSystem<AmberSystem>::SliceWaters<MoritaH2O_ptr> (analysis_wats, slice);
 
 		//std::cout << analysis_wats.size() << " waters to be analyzed" << std::endl;
-		analysis_wats.erase (analysis_wats.begin(), analysis_wats.end() - 200);
+		int numAnalysisWaters = WaterSystem<AmberSystem>::SystemParameterLookup ("analysis.morita2002.number-of-analysis-waters");
+		analysis_wats.erase (analysis_wats.begin(), analysis_wats.end() - numAnalysisWaters);
 		//std::cout << analysis_wats.size() << " waters to be analyzed" << std::endl;
 
 		return;
 	}
 
 	void AmberMorita2008Analysis::SetAnalysisWaterDipoleMoments () {
-		std::for_each (analysis_wats.begin(), analysis_wats.end(), std::mem_fun(&MoritaH2O::SetDipoleMoment));
+		//std::for_each (analysis_wats.begin(), analysis_wats.end(), std::mem_fun(&MoritaH2O::SetDipoleMoment));
+		// see below for also setting the dipole moments
 		return;
 	}
 
+	// also sets the dipole moments
 	void AmberMorita2008Analysis::SetAnalysisWaterPolarizability () {
 
 		MatR alpha;
+		VecR mu;
 		MatR dcm;
+		double oh1, oh2, theta;
 
 		// for every water to be analyzed:
 		//		set the molecule up
@@ -57,17 +62,22 @@ namespace morita {
 			dcm = MatR::Zero();
 			dcm = (*it)->DCMToLabMorita(1);	// set up the direction cosine matrix for rotating the polarizability to the lab-frame
 
+			oh1 = (*it)->OH1()->Magnitude();
+			oh2 = (*it)->OH2()->Magnitude();
+			theta = acos((*it)->Angle()) * 180.0/M_PI;
+
 			// lookup the polarizability from the data file
 			alpha = MatR::Zero();
-			alpha = pdf.Value(
-						(*it)->OH1()->Magnitude(), 
-						(*it)->OH2()->Magnitude(), 
-						acos((*it)->Angle()) * 180.0/M_PI);
-			
+			alpha = pdf.Value(oh1, oh2, theta);
 			// rotate the polarizability tensor into the lab-frame
 			alpha = dcm * alpha;
-
 			(*it)->SetPolarizability (alpha);
+
+			mu = VecR::Zero();
+			mu = ddf.Value(oh1, oh2, theta);
+			// rotate the polarizability tensor into the lab-frame
+			mu = dcm * mu;
+			(*it)->SetDipoleMoment (mu);
 		}
 
 	}	// set polarizability

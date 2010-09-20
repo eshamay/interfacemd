@@ -101,10 +101,10 @@ namespace bondgraph {
 			typedef std::vector<AtomPtr> Atom_ptr_vec;
 
 			// generic property maps
-			template <class T, class Property_T> struct PropertyMap
-			{
-				typedef typename boost::property_map<Graph, T Property_T::*>::type Type;
-			};
+			template <class T, class Property_T> 
+				struct PropertyMap {
+					typedef typename boost::property_map<Graph, T Property_T::*>::type Type;
+				};
 
 
 			static PropertyMap<double,EdgeProperties>::Type 			b_length;

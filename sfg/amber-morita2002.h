@@ -16,7 +16,8 @@ namespace morita {
 				Morita2002Analysis<AmberSystem>(
 						std::string("Analysis of the waters in an MD system using the technique of Morita/Hynes (2008) with a system produced by the Amber package (or any compliant dataset (prmtop, mdcrd, mdvel)"),
 						std::string("amber-morita2008.dat")),
-				pdf ("h2o_polarizability.dat") { }
+				pdf ("h2o_polarizability.dat"),
+				ddf ("h2o_dipole.dat") { }
 
 		protected:
 			//! Selects the waters to be analyzed by loading the entire set of molecules above a particular cutoff location
@@ -28,6 +29,7 @@ namespace morita {
 
 			//! Data file containing pre-calculated polarizabilities of different geometries of water molecule
 			datafile_parsers::PolarizabilityDataFile pdf;	
+			datafile_parsers::DipoleDataFile ddf;	
 
 	};	// class Amber sfg analyzer
 

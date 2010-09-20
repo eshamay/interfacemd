@@ -71,6 +71,10 @@ double Atom::operator[] (const coord index) const {
 	return pos;
 }
 
+double Atom::operator- (const Atom& input) const {
+	return (_position - input.Position()).Magnitude();
+}
+
 bool Atom::operator< (const AtomPtr& rhs) const {
 	return this->_ID < rhs->ID();
 }

@@ -1,4 +1,3 @@
-#pragma once
 #ifndef ATOM_H_
 #define ATOM_H_
 
@@ -90,6 +89,7 @@ class Atom {
 	double Z () const 		{ return _position.z(); }
 	int MolID () const		{ return _molid; }
 	MolPtr ParentMolecule () const { return _pmolecule; }
+
 	void Print () const;
 
 
