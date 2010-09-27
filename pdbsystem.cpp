@@ -1,6 +1,4 @@
 #include "pdbsystem.h"
-#include <cstring>
-#include <boost/algorithm/string.hpp>
 
 namespace md_files {
 
@@ -42,6 +40,8 @@ namespace md_files {
 			} while (strcmp(keyword, "ATOM"));
 
 			std::string atom_name, residue, location;
+
+			// PDB files are fixed-width field entries as described in: http://bmerc-www.bu.edu/needle-doc/latest/atom-format.html
 
 			// 1-6	"ATOM  "
 			strncpy (temp, &_line[0], 6);
@@ -127,7 +127,7 @@ namespace md_files {
 	//ATOM      1  H1  h2o A   1      27.538  20.316  20.655  1.00  0.00        
 	//ATOM    145  N   VAL A  25      32.433  16.336  57.540  1.00 11.92      A1   N
 	//123456789a123456789b123456789c123456789d123456789e123456789f
-	//
+  //         1         2         3         4         5         6         7         8 
 	//sscanf(pdbline, "ATOM  %5d %4c%c%3c %c%4d%c%8.3lf%8.3lf%8.3lf", &atomid, name, &location, residue, temp, &molid, temp, &x, &y, &z);
 	//sscanf(pdbline, "ATOM  %5d %4c%3c %c%4d%s%8lf%8lf%8lf", &atomid, name, residue, temp, &molid, temp, &X, &Y, &Z);
 

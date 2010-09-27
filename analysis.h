@@ -206,6 +206,12 @@ extern void Analyzer<AmberSystem>::LoadNext () {
 	return;
 }
 
+template <>
+extern void Analyzer<GMXSystem>::LoadNext () {
+	this->sys->LoadNext();
+	return;
+}
+
 
 template <class T>
 void Analyzer<T>::SystemAnalysis (analysis_t& an) {

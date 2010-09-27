@@ -1,45 +1,51 @@
 #include "gmxsystem.h"
 
-GMXSystem::GMXSystem (const char * trr_filepath, const char * gro_filepath)
-:
-  _trr(const_cast<char *>(trr_filepath)), _gro(gro_filepath)
-{ 
-  this->LoadFirst();
-  return; 
-}
+	namespace gromacs {
+		GMXSystem::GMXSystem (const std::string gro_filepath, const std::string trr_filepath)
+			:
+				_gro(gro_filepath), _trr(trr_filepath)
+		{ 
+			this->_ParseMolecules();
+		}
 
-void GMXSystem::LoadFirst() {
-  _trr.LoadFirst();
-  _mols = _gro.Molecules();
-  _atoms = _gro.Atoms();
+		void GMXSystem::LoadFirst() {
+			_trr.LoadFirst();
+			this->_ParseMolecules();
+		}
 
-  this->_ParseMolecules();
+		void GMXSystem::LoadNext() {
+			_trr.LoadNext();
+			this->_ParseMolecules();
+		}
 
-  return;
-}
+		void GMXSystem::_ParseMolecules () {
 
-void GMXSystem::LoadNext() {
-  _trr.LoadNext();
-  this->_ParseMolecules();
-}
+			VecR_it coord_it = _trr.begin_coords();
+			//VecR_it vel_it = trr.begin_vels();
+			VecR_it force_it = _trr.begin_forces();
 
-void GMXSystem::_ParseMolecules () {
-  for (int i = 0; i < _gro.NumAtoms(); i++) {
-    _atoms[i]->Position(_trr.Coords(i));
-    _atoms[i]->Force(_trr.Forces(i));
-  }
-}
+			for (Atom_it it = _gro.begin(); it != _gro.end(); it++) {
+				(*it)->Position(*coord_it);
+				(*it)->Force(*force_it);
+
+				++coord_it;
+				//++vel_it;
+				++force_it;
+			}
+		}
+
+	} // namespace gromacs
 
 /*
-int main () {
+	 int main () {
 
-  GMXSystem sys ("sw_md.trr", "sw_md.gro");
-  Molecule * mol = sys.Molecules(0);
-  for (int i = 0; i < 10; i++) {
-    mol->Print();
-    sys.LoadNext();
-  }
+	 GMXSystem sys ("sw_md.trr", "sw_md.gro");
+	 Molecule * mol = sys.Molecules(0);
+	 for (int i = 0; i < 10; i++) {
+	 mol->Print();
+	 sys.LoadNext();
+	 }
 
-  return 0;
-}
-*/
+	 return 0;
+	 }
+	 */

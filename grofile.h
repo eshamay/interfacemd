@@ -1,54 +1,34 @@
-#pragma once
 #ifndef GROFILE_H_
 #define GROFILE_H_
 
 #include "atom.h"
 #include "molecule.h"
+#include "mdfiles.h"
+#include "mdsystem.h"
 #include <string>
 #include <vector>
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 
-class GROFile {
-  public:
-    GROFile (const std::string path) :
-      _file (fopen (path.c_str(), "r"))
-    { 
-      if (_file == (FILE *)NULL) {
-	std::cout << "Error opening the .gro file " << path << std::endl;
-	exit(1);
-      }
-      _ParseSystem();
-      return; 
-    }
+namespace gromacs {
 
-    ~GROFile () 
-    {
-      fclose(_file);
-      for (Atom_it it = _atoms.begin(); it != _atoms.end(); it++)
-	delete ((*it));
-      for (Mol_it it = _mols.begin(); it != _mols.end(); it++)
-	delete ((*it));
+	class GROFile : public md_files::CoordinateFile, public MDSystem {
 
-      return;
-    }
+		public:
+			GROFile (const std::string gropath);
+			~GROFile ();
 
-    void Print () const;
-    int NumAtoms () const { return _natoms; }
-    Atom_ptr_vec& Atoms() { return _atoms; }
-    Mol_ptr_vec& Molecules() { return _mols; }
+			void LoadFirst () { }
+			void LoadNext () { }
 
-    AtomPtr operator[] (const int index) { return _atoms[index]; }
+			void Print () const;
 
-  private:
-    FILE * _file;
-    std::string _title;
-    int _natoms;
-    VecR _box_size;
+		private:
+			std::string _title;
+			void _ParseSystem ();
+			void _ParseMolecules () { }
+	};
 
-    Atom_ptr_vec _atoms;
-    Mol_ptr_vec _mols;
-
-    void _ParseSystem ();
-};
+} // namespace gromacs
 
 #endif

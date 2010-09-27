@@ -36,6 +36,7 @@ class Atom {
 	typedef Atom* AtomPtr;
 	typedef std::vector<AtomPtr> Atom_ptr_vec;
 	typedef Atom_ptr_vec::const_iterator Atom_it;
+	typedef Atom_ptr_vec::iterator Atom_it_non_const;
 
 	double operator- (const Atom& input) const;		// operator usage to determine the distance between two atoms
 	double operator[] (const coord index) const;	// get the atom's position by coordinate
@@ -137,5 +138,6 @@ class Atom {
 typedef Atom::AtomPtr AtomPtr;
 typedef Atom::Atom_ptr_vec Atom_ptr_vec;
 typedef Atom::Atom_it Atom_it;
+typedef Atom::Atom_it_non_const Atom_it_non_const;
 
 #endif

@@ -19,9 +19,6 @@ XDRINC		= $(XDRDIR)/include
 
 #CPATH		= :$(MDSRC):$(HOME)/share/include:$(ATLAS)/include:$(BOOST)#:$(XDRINC)
 
-
-MDSYSTEM = $(MDSRC)/atom.o $(MDSRC)/molecule.o $(MDSRC)/mdsystem.o
-
 WATER	= $(MDSRC)/h2o.o 
 
 IONS	= $(MDSRC)/hno3.o $(MDSRC)/h3o.o $(MDSRC)/oh.o $(MDSRC)/so2.o $(MDSRC)/h.o
@@ -30,13 +27,18 @@ ORGANIC = $(MDSRC)/alkane.o $(MDSRC)/decane.o $(MDSRC)/ctc.o
 
 ALLMOLECULES = $(WATER) $(IONS) $(ORGANIC) 
 
+MOLECULEFACTORY = $(ALLMOLECULES) $(MDSRC)/moleculefactory.o
+
+MDSYSTEM = $(MDSRC)/atom.o $(MDSRC)/molecule.o $(MDSRC)/mdsystem.o $(MOLECULEFACTORY)
+
+
 XYZSYSTEM = $(MDSRC)/xyzsystem.o $(MDSRC)/xyzfile.o $(MDSRC)/wannier.o 
 
 AMBERSYSTEM	= $(MDSRC)/ambersystem.o $(MDSRC)/crdfile.o $(MDSRC)/forcefile.o $(MDSRC)/topfile.o
 
-GMXSYS	= $(MDSRC)/trrfile.o $(MDSRC)/grofile.o $(MDSRC)/gmxsystem.o
+GMXSYS	= $(MDSYSTEM) $(MDSRC)/trrfile.o $(MDSRC)/grofile.o $(MDSRC)/gmxsystem.o 
 
-WATERSYSTEM = $(MDSYSTEM) $(AMBERSYSTEM) $(XYZSYSTEM) $(MDSRC)/graph.o
+WATERSYSTEM = $(MDSYSTEM) $(AMBERSYSTEM) $(XYZSYSTEM) $(GMXSYS) $(MDSRC)/graph.o
 
 ANALYSIS = $(WATERSYSTEM) $(MDSRC)/dataoutput.o
 

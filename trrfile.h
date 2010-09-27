@@ -7,60 +7,53 @@
 #include "vecr.h"
 #include "xdrfile/xdrfile.h"
 #include "xdrfile/xdrfile_trr.h"
+#include "mdfiles.h"
+#include "mdsystem.h"
 #include <iostream>
 
-class TRRFile {
+namespace gromacs {
 
-  public:
-    TRRFile (char * path) : 
-      _path(path),
-      _file(xdrfile_open(path, "r"))
-    { 
-      read_trr_natoms(path, &_natoms);
-      _x = new rvec[_natoms];
-      _v = new rvec[_natoms];
-      _f = new rvec[_natoms];
+	class TRRFile {
 
-      _coords.resize(_natoms, VecR());
-      _vels.resize(_natoms, VecR());
-      _forces.resize(_natoms, VecR());
+		public:
 
-      this->LoadNext();
+			TRRFile (const std::string trrpath);
+			~TRRFile ();
 
-      return; 
-    }
+			int size () const { return _natoms; }
 
-    ~TRRFile () {
-      delete[] _x;
-      delete[] _v;
-      delete[] _f;
-      xdrfile_close(_file);
-      return;
-    }
+			void LoadFirst();
+			void LoadNext();
 
-    int size () const { return _natoms; }
+			void PrintInfo () const;
 
-    void LoadFirst();
-    void LoadNext();
-    void PrintInfo () const;
-    VecR_vec& Coords () { return _coords; }
-    VecR& Coords (const int index) { return _coords[index]; }
-    VecR& Velocities (const int index) { return _vels[index]; }
-    VecR& Forces (const int index) { return _forces[index]; }
+			VecR_it begin_coords () const { return _coords.begin(); }
+			VecR_it end_coords () const { return _coords.end(); }
 
-  private:
+			VecR_it begin_vels () const { return _vels.begin(); }
+			VecR_it end_vels () const { return _vels.end(); }
 
-    char * _path;
-    XDRFILE * _file;
-    int	_natoms;
-    int _frame;
-    float _time;
-    float _lambda;
-    matrix _box;
-    rvec *_x, *_v, *_f;
-    VecR_vec _coords, _vels, _forces;
+			VecR_it begin_forces () const { return _forces.begin(); }
+			VecR_it end_forces () const { return _forces.end(); }
 
-    void PrintBox () const;
-    void Print (const VecR_vec& vec) const;
-};
+		private:
+
+			std::string _path;
+			XDRFILE * _file;
+
+			int	_natoms;
+
+			int _frame;
+			float _time;
+			float _lambda;
+			matrix _box;
+			rvec *_x, *_v, *_f;	// coordinates, velocities, and forces from each timeframe
+			VecR_vec _coords, _vels, _forces;
+
+			void PrintBox () const;
+			void Print (const VecR_vec& vec) const;
+	};
+
+} // namespace gromacs
+
 #endif

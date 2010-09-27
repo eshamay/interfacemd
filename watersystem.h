@@ -6,9 +6,7 @@
 #include "ambersystem.h"
 #include "xyzsystem.h"
 
-#ifdef GROMACS_SYS
 #include "gmxsystem.h"
-#endif
 
 #include "utility.h"
 
@@ -342,15 +340,13 @@ void WaterSystem<XYZSystem>::_InitializeSystem () {
 	return;
 }
 
-#ifdef GROMACS_SYS
 template <>
 void WaterSystem<GMXSystem>::_InitializeSystem () {
-	std::string trr = wsp->config_file->lookup("system.files.gmx-trrfile");
 	std::string gro = wsp->config_file->lookup("system.files.gmx-grofile");
-	this->sys = new GMXSystem(trr.c_str(), gro.c_str());
+	std::string trr = wsp->config_file->lookup("system.files.gmx-trrfile");
+	this->sys = new GMXSystem(gro.c_str(), trr.c_str());
 	return;
 }
-#endif
 
 
 template <class T>

@@ -3,6 +3,8 @@
 
 #include "mdfiles.h"
 #include "moleculefactory.h"
+#include <cstring>
+#include <boost/algorithm/string.hpp>
 
 
 namespace md_files {

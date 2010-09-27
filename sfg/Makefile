@@ -23,6 +23,9 @@ amber-morita2002 : $(MORITA2002) amber-morita2002.o
 cp2k-morita2002 : $(MORITA2002) cp2k-morita2002.o
 	$(CXX) $(MORITA2002) cp2k-morita2002.o $(LAPACKLIBS) $(LIBS) -o ../bin/cp2k-morita2002 
 
+gmx-morita2002 : $(MORITA2002) gromacs-morita2002.o
+	$(CXX) $(MORITA2002) gromacs-morita2002.o $(LAPACKLIBS) $(LIBS) -lxdrfile -o ../bin/gromacs-morita2002 
+
 xyz-system-dipole-tcf : $(XYZDIPOLETCF)
 	$(CXX) $(XYZDIPOLETCF) $(LIBS) -o ../bin/xyz-system-dipole
 	

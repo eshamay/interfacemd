@@ -1,13 +1,13 @@
 #ifndef MORITA2002_H_
 #define MORITA2002_H_
 
-#include "../analysis.h"
+#include "analysis.h"
 #include "sfgunits.h"
 #include "moritah2o.h"
-//#include "../tensor.h"
+#include "data-file-parser.h"
+
 #include <Eigen/LU>
 #include <iostream>
-//#include <fftw3.h>
 #include <mkl_blas.h>
 #include <mkl_lapack.h>
 
@@ -81,6 +81,9 @@ namespace morita {
 				void CalculateTotalPolarizability ();
 				void CalculateLocalFieldCorrection ();
 
+				void CalcWannierDipoles ();
+				void MoritaH2OPolarizabilities ();
+				void Dipole_PolarizabilityLookupTables ();
 				// sfgdata_pair_t SSP_SPS_Result (const int s1, const int s2, const int p, const MatR& a) const;
 		};	// sfg-analyzer
 
@@ -282,9 +285,9 @@ void Morita2002Analysis<U>::CalculateTensors() {
 
 	/*
 		 for (Morita_it it = analysis_wats.begin(); it != analysis_wats.end(); it++) {
-		 	(*it)->Dipole().Print();
+		 (*it)->Dipole().Print();
 		 }
-	 */
+		 */
 
 	_T.setZero();
 	for (unsigned int i = 0; i < analysis_wats.size(); i++) {
@@ -519,6 +522,86 @@ void pdgesv_ (int *n, int *nrhs, double *A, int *ia, int *ja, int *desca, int* i
 
 } // extern
 */
+
+/************* helper class for morita analysis based on lookup tables *************/
+template <class T>
+class Morita2008LookupAnalysis : public Morita2002Analysis<T> {
+
+	public:
+		Morita2008LookupAnalysis (const std::string description, const std::string output_file) :
+			Morita2002Analysis<T>(description, output_file),
+			pdf ("h2o_polarizability.dat"),
+			ddf ("h2o_dipole.dat") { }
+
+	protected:
+		//! Selects the waters to be analyzed by loading the entire set of molecules above a particular cutoff location
+		virtual void SelectAnalysisWaters () = 0;
+		//! sets the dipole moments of all the system waters by means of the parameterized model of Morita/Hynes 2002
+		virtual void SetAnalysisWaterDipoleMoments () { };
+
+		virtual void SetAnalysisWaterPolarizability ();
+
+		//! Data file containing pre-calculated polarizabilities of different geometries of water molecule
+		datafile_parsers::PolarizabilityDataFile pdf;	
+		datafile_parsers::DipoleDataFile ddf;	
+
+};	// class lookup analysis
+
+
+template <class T>
+void Morita2008LookupAnalysis<T>::SetAnalysisWaterPolarizability () {
+
+	MatR alpha;
+	VecR mu;
+	MatR dcm;
+	double oh1, oh2, theta;
+
+	// for every water to be analyzed:
+	//		set the molecule up
+	//		calculate the direction cosine matrix from the local to lab frame rotation
+	//		find the polarizability from the lookup-table
+	//		rotate the polarizability to the lab frame
+	//		set the molecule's polarizability to the value
+	for (Morita_it it = this->analysis_wats.begin(); it != this->analysis_wats.end(); it++) {
+
+		(*it)->SetAtoms();	// first get the atoms and bonds set in the water
+
+		dcm = MatR::Zero();
+		dcm = (*it)->DCMToLabMorita(1);	// set up the direction cosine matrix for rotating the polarizability to the lab-frame
+
+		oh1 = (*it)->OH1()->Magnitude();
+		oh2 = (*it)->OH2()->Magnitude();
+		theta = acos((*it)->Angle()) * 180.0/M_PI;
+
+		// lookup the polarizability from the data file
+		alpha = MatR::Zero();
+		alpha = pdf.Value(oh1, oh2, theta);	// using the polarizability data file for lookup (pdf)
+		// rotate the polarizability tensor into the lab-frame
+		alpha = dcm * alpha;
+		(*it)->SetPolarizability (alpha);
+
+		mu = VecR::Zero();
+		mu = ddf.Value(oh1, oh2, theta);	// using the dipole data file (ddf)
+		// rotate the polarizability tensor into the lab-frame
+		mu = dcm * mu;
+		(*it)->SetDipoleMoment (mu);
+	}
+}	// lookup tables
+
+
+
+/************* Methods for calculating dipoles and polarizabilities ****************/
+
+template <class U>
+void Morita2002Analysis<U>::CalcWannierDipoles () {
+	std::for_each (analysis_wats.begin(), analysis_wats.end(), MDSystem::CalcWannierDipole);
+}
+
+template <class U>
+void Morita2002Analysis<U>::MoritaH2OPolarizabilities () {
+	std::for_each (analysis_wats.begin(), analysis_wats.end(), std::mem_fun(&MoritaH2O::SetPolarizability));
+}
+
 
 
 }	// namespace morita

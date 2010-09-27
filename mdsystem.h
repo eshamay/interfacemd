@@ -16,6 +16,9 @@ class MDSystem {
 		Mol_ptr_vec		_mols;		// the molecules in the system
 
 		static VecR		_dimensions;		// system dimensions - size
+		
+		//! Parses out molecules from the set of atoms in an MD data set. This is typically done via topology files, or some other defined routine that determines connectivity between atoms to form molecules.
+		virtual void _ParseMolecules () = 0;
 
 	public:
 
@@ -26,8 +29,6 @@ class MDSystem {
 		//! Loads the next frame of an MD simulation data set
 		virtual void LoadNext () = 0;
 
-		//! Parses out molecules from the set of atoms in an MD data set. This is typically done via topology files, or some other defined routine that determines connectivity between atoms to form molecules.
-		virtual void _ParseMolecules () = 0;
 
 		//! The set of all molecules in a system
 		Mol_ptr_vec& Molecules () { return _mols; }
@@ -60,7 +61,7 @@ class MDSystem {
 		static VecR Distance (const AtomPtr atom1, const AtomPtr atom2);
 
 		// Calculates the minimum distance between two molecules - i.e. the shortest inter-molecular atom-pair distance
-		double Distance (const MolPtr mol1, const MolPtr mol2) const;
+		static double Distance (const MolPtr mol1, const MolPtr mol2);
 
 		//! Calculates a molecular dipole moment using the "classical E&M" method - consider each atom in the molecule as a point-charge, and that the molecule has no net charge (calculation is independent of origin location). This returns a vector that is the sum of the position*charge (r*q) of each atom.
 		static VecR CalcClassicDipole (MolPtr mol);

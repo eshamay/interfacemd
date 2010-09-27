@@ -8,12 +8,12 @@ namespace morita {
 	}
 
 	void CP2KMorita2002Analysis::SetAnalysisWaterDipoleMoments () {
-		std::for_each (analysis_wats.begin(), analysis_wats.end(), MDSystem::CalcWannierDipole);
+		this->CalcWannierDipoles ();
 		return;
 	}
 
 	void CP2KMorita2002Analysis::SetAnalysisWaterPolarizability () {
-		std::for_each (analysis_wats.begin(), analysis_wats.end(), std::mem_fun(&MoritaH2O::SetPolarizability));
+		this->MoritaH2OPolarizabilities();
 		return;
 	}
 

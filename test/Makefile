@@ -25,11 +25,15 @@ PDBTEST	= $(MDSYSTEM) $(ALLMOLECULES) ../pdbfile.o
 TEST		= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) test.o
 TEMP		= $(MDSYSTEM) temp.o
 FOO			= foo.o
+GMXTEST = $(GMXSYS) gmxtest.o
 
 # $(CXX) $(CPPFLAGS) $(TEST) -lmkl_solver_ilp64 -lmkl_core -lmkl_lapack -lmkl_gnu_thread -lguide -lpthread -o test
 
 temp : $(TEMP)
 	icpc $(TEMP) -o temp
+
+gmxtest : $(GMXTEST)
+	icpc $(GMXTEST) /home/eshamay/share/lib/libxdrfile.so -o gmxtest
 
 foo : $(FOO)
 	icpc $(FOO) -o foo

@@ -45,12 +45,12 @@ VecR MDSystem::Distance (const AtomPtr atom1, const AtomPtr atom2) {
 	return MDSystem::Distance(atom1->Position(), atom2->Position());
 }
 
-double MDSystem::Distance (const MolPtr mol1, const MolPtr mol2) const {
+double MDSystem::Distance (const MolPtr mol1, const MolPtr mol2) {
 
 	std::vector <double> distances;
 	for (Atom_it ai = mol1->begin(); ai != mol1->end(); ai++) {
 		for (Atom_it aj = mol2->begin(); aj != mol2->end(); aj++) {
-			distances.push_back (this->Distance(*ai,*aj).Magnitude());
+			distances.push_back (MDSystem::Distance(*ai,*aj).Magnitude());
 		}
 	}
 	std::sort(distances.begin(), distances.end());
