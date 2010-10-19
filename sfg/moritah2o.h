@@ -32,7 +32,7 @@ namespace morita {
 			void SetBondAngleVars ();
 			void SetDipoleMoment ();
 			void SetDipoleMoment (const VecR& vec) { _dipole = vec; }
-			void SetPolarizability ();
+			void CalculateGeometricalPolarizability ();
 			void SetPolarizability (const MatR& mat) { _alpha = mat; }
 
 			MatR& Polarizability() { return _alpha; }

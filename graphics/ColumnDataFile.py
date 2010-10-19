@@ -38,9 +38,9 @@ class ColumnDataFile:
 		if header == None:
 			self.data.insert(0,self.line1)
 
-		for i in self.data:
-			if len(i) < 11:
-				print i
+		#for i in self.data:
+			#if len(i) < 11:
+				#print i
 		self.data = zip(*self.data)
 
 		for col in range(len(self.data)):

@@ -11,7 +11,7 @@ USING_PART_OF_NAMESPACE_EIGEN
 #include "dipole-analysis.h"
 #include "neighbor-analysis.h"
 #include "atomic-density-analysis.h"
-#include "sfg/amber-morita2002.h"
+//#include "sfg/amber-morita2002.h"
 
 
 typedef std::vector<double> double_vec;
@@ -25,8 +25,8 @@ namespace md_analysis {
 		public:
 			typedef Analyzer<T> system_t;
 
-			StructureAnalyzer () 
-				: system_t () 
+			StructureAnalyzer (const int choice = -1) 
+				: system_t (), _analysis_choice(choice) 
 			{
 				LoadSystemAnalyses ();
 				PromptForAnalysisFunction(); 
@@ -34,6 +34,7 @@ namespace md_analysis {
 
 		protected:
 
+			int _analysis_choice;
 			// output a bit of text to stdout and ask the user for a choice as to which type of analysis to perform - then do it.
 			void PromptForAnalysisFunction ();
 			//! Loads all the analyses that are compatible with the given system-type
@@ -58,8 +59,8 @@ namespace md_analysis {
 			analyses.push_back(a);
 			a = new atomic_density_analysis<T>();
 			analyses.push_back(a);
-			a = new morita::AmberMorita2008Analysis();
-			analyses.push_back(a);
+			//a = new morita::AmberMorita2008Analysis();
+			//analyses.push_back(a);
 		}
 
 	template <>
@@ -81,6 +82,8 @@ namespace md_analysis {
 			analyses.push_back(a);
 			a = new so2_closest_O_analyzer();
 			analyses.push_back(a);
+			a = new so2_closest_OH_analyzer();
+			analyses.push_back(a);
 			a = new so2_hbond_factor_analyzer();
 			analyses.push_back(a);
 		}
@@ -89,17 +92,19 @@ namespace md_analysis {
 	template <typename T>
 		void StructureAnalyzer<T>::PromptForAnalysisFunction () {
 
-			printf ("Choose the system analysis to perform from the list below\n\n");
-			int choice = 0;
-			for (typename analysis_vec::iterator it = analyses.begin(); it != analyses.end(); it++) {
-				printf ("\t%d) %s\n", choice+1, (*it)->Description().c_str());
-				++choice;
-			}
-			printf ("analysis choice:  ");
-			std::cin >> choice;
-			//printf ("\n\nperforming analysis (%d) using output filename \"%s\"\n", choice, analyses[choice-1]->Filename().c_str());
+			if (_analysis_choice < 0) {
+				printf ("Choose the system analysis to perform from the list below\n\n");
 
-			this->SystemAnalysis(*analyses[choice-1]);
+				int choice = 0;
+				for (typename analysis_vec::iterator it = analyses.begin(); it != analyses.end(); it++) {
+					printf ("\t%d) %s\n", choice, (*it)->Description().c_str());
+					++choice;
+				}
+				//printf ("\n\nperforming analysis (%d) using output filename \"%s\"\n", choice, analyses[choice-1]->Filename().c_str());
+				exit(1);
+			}
+
+			else this->SystemAnalysis(*analyses[_analysis_choice]);
 
 			return;
 		}

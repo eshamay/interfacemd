@@ -3,9 +3,7 @@
 namespace morita {
 
 	// for the small cp2k systems, just use all the waters
-	void CP2KMorita2002Analysis::SelectAnalysisWaters () {
-		return;
-	}
+	void CP2KMorita2002Analysis::SelectAnalysisWaters () { return; }
 
 	void CP2KMorita2002Analysis::SetAnalysisWaterDipoleMoments () {
 		this->CalcWannierDipoles ();

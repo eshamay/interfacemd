@@ -2,16 +2,14 @@ include ../Makefile
 
 STRUCTURE				= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) 
 MORITA					= ../sfg/moritah2o.o ../sfg/amber-morita2002.o 
-SYSTEMANALYSES			= $(STRUCTURE) $(MORITA) angle-bond-analysis.o neighbor-analysis.o structure-analyzer.o 
-
+SYSTEMANALYSES			= $(STRUCTURE) angle-bond-analysis.o neighbor-analysis.o structure-analyzer.o #$(MORITA) 
 
 
 test : $(TEST) 
 	icpc $(TEST) $(LIBS) $(LAPACKLIBS) -o test
 
 structure-analyzer : $(SYSTEMANALYSES)
-	icpc $(SYSTEMANALYSES) $(LIBS) -o ../bin/structure-analyzer
-
+	$(CXX) $(SYSTEMANALYSES) $(LAPACKLIBS) $(LIBS) -lxdrfile -o ../bin/structure-analyzer
 
 cleanstructure :
 	rm -f *.o 

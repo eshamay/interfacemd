@@ -67,6 +67,7 @@ namespace morita {
 
 	// Calculates the dipole moment vector of a given water molecule according to the method of Morita/Hynes 2002
 	void MoritaH2O::SetDipoleMoment () {
+		std::cout << "setting dipole moment" << std::endl;
 		this->SetBondAngleVars ();
 
 		// determine the charge from the fitting parameters
@@ -88,7 +89,7 @@ namespace morita {
 
 
 
-	void MoritaH2O::SetPolarizability () {
+	void MoritaH2O::CalculateGeometricalPolarizability () {
 		this->SetBondAngleVars ();
 
 		_alpha1.Zero();

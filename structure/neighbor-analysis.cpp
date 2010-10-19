@@ -18,6 +18,41 @@ namespace md_analysis {
 		return;
 	}
 
+	void so2_closest_OH_analyzer::Analysis (system_t& t) {
+		t.LoadAll();
+
+		MolPtr mol = Molecule::FindByType(t.sys_mols, Molecule::SO2);
+		so2 = new SulfurDioxide(mol);
+		so2->SetAtoms();
+
+		s = so2->S();
+		o1 = so2->O1();
+		o2 = so2->O2();
+
+		// Find the 2 oxygens closest to the Sulfur
+		closest = t.System()->graph.ClosestAtoms (s, 2, Atom::O, false);
+
+		// every timestep - output a row containing:
+		//		2 nearest Oxygens to the so2-S
+		//		3 nearest Hs to the so2-O1
+		//		3 nearest Hs to the so2-O2
+		for (bondgraph::distance_vec::const_iterator it = closest.begin(); it != closest.end(); it++)
+			fprintf (t.Output(), "% 12.4f", it->first);
+
+		// find the 3 hydrogens closest to each so2-oxygen and print out the information
+		closest = t.System()->graph.ClosestAtoms (o1, 3, Atom::H, false);
+		for (bondgraph::distance_vec::const_iterator it = closest.begin(); it != closest.end(); it++)
+			fprintf (t.Output(), "% 12.4f", it->first);
+
+		closest = t.System()->graph.ClosestAtoms (o2, 3, Atom::H, false);
+		for (bondgraph::distance_vec::const_iterator it = closest.begin(); it != closest.end(); it++)
+			fprintf (t.Output(), "% 12.4f", it->first);
+
+		fprintf(t.Output(),"\n");
+
+		return;
+	}
+
 
 	void so2_closest_H_analyzer::Analysis (system_t& t) {
 		t.LoadAll();

@@ -87,7 +87,7 @@ void AmberSystem::_ParseMolecules () {
 		else if (name == "h2o") {
 			_mols.push_back (new Water());
 		}
-		else if (name == "so2") {
+		else if (name == "so2" || name == "sog") {
 			_mols.push_back (new SulfurDioxide());
 		}
 		else if (name == "dec" || name == "pds") {

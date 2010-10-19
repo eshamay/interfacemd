@@ -5,11 +5,12 @@ from numpy import *
 from Utility import *
 
 class DipPolAnalyzer:
-	def __init__(self,rho,alpha):
+	def __init__(self,rho,alpha=None):
 	  	#print rho[0][0]
 		self.rho = [array(r) for r in rho]
 		#print self.rho[:10]
-		self.alpha = [apply(mat,[group(a,3)]) for a in alpha]
+		if alpha != None:
+			self.alpha = [apply(mat,[group(a,3)]) for a in alpha]
 
 	def Rho(self):
 		return self.rho

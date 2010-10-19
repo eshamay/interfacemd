@@ -12,6 +12,8 @@ namespace md_analysis {
 			virtual ~so2_closest_atoms_analyzer () { }
 		protected:
 			SulfurDioxide * so2;
+			AtomPtr s;
+			AtomPtr o1,o2;
 			bondgraph::distance_vec closest;
 	};
 
@@ -30,8 +32,6 @@ namespace md_analysis {
 				fprintf (t.Output(), "o11 o12 o13 o21 o22 o23\n");
 			}
 			void Analysis (system_t& t);
-		protected:
-			AtomPtr o1,o2;
 	};
 
 
@@ -45,10 +45,23 @@ namespace md_analysis {
 						std::string ("so2-closest-Os.dat")) { }
 
 			void Analysis (system_t& t);
-		protected:
-			AtomPtr s;
 	};
 
+
+	class so2_closest_OH_analyzer : public so2_closest_atoms_analyzer {
+		public:
+			virtual ~so2_closest_OH_analyzer () { }
+			so2_closest_OH_analyzer () :
+				so2_closest_atoms_analyzer(
+						std::string ("[CP2K] SO2 neighbor analysis to find the closest oxygens and hydrogens to the SO2. Output is 8 columns - 2x Oxygens closest to S, 3x H's closest to so2-O1, and 3x H's closest to so2-O2"),
+						std::string ("so2-closest-Os+Hs.dat")) { }
+
+			void Analysis (system_t& t);
+		protected:
+			bondgraph::distance_vec closestOs;
+			bondgraph::distance_vec closestHs_1;
+			bondgraph::distance_vec closestHs_2;
+	};
 
 
 	class so2_hbond_factor_analyzer : public XYZAnalysisSet {

@@ -1,5 +1,15 @@
 from scipy import *
 
+# some constants that are used in calculating the voigt profile from J. Electron Spectrosc. Relat. Phenom. 69 (1994) 125-132
+sqrt_ln2 = math.sqrt(math.log(2))
+sqrt_pi = math.sqrt(math.pi)
+voigt_A = [-1.2150, -1.3509, -1.2150, -1.3509]
+voigt_B = [1.2359, 0.3786, -1.2359, -0.3786]
+voigt_C = [-0.3085, 0.5906, -0.3085, 0.5906]
+voigt_D = [0.0210, -1.1858, -0.0210, 1.1858]
+
+
+
 class StatisticMachine:
 
 	def __init__(self):
@@ -86,11 +96,62 @@ class StatisticMachine:
 	def FittingFunction(self, f, **kwargs):
 		return lambda *largs: f(*largs,**kwargs)
 
+	def lorentzian(self,x,p):
+		# p[0] = center
+		# p[1] = width
+		# p[2] = amplitude
+		return p[2]*p[1]/( (x-p[0])*(x-p[0]) + p[1]*p[1])
+
+	def gaussian(self,x,p):
+		# p[0] = center
+		# p[1] = width
+		# p[2] = amplitude
+		return p[2]/sqrt(2.0*pi*p[1]*p[1]) * exp(-(x-p[0])*(x-p[0])/(2.0*p[1]*p[1]))
+
+	# The voigt profile using a lookup table from J. Electron Spectrosc. Relat. Phenom. 69 (1994) 125-132
+	def voigt(self,x,p):
+		# p[0] = center
+		# p[1] = lor. width
+		# p[2] = gauss. width
+		# p[3] = amplitude
+
+		X = (x-p[0])*2*sqrt_ln2/p[2]
+		Y = p[1]*sqrt_ln2/p[2]
+		Z = p[1]*p[3]*sqrt_pi*sqrt_ln2/p[2]
+
+		V = [0.0]*len(x)
+		for i in range(4):
+			V = V + (voigt_C[i]*(Y-voigt_A[i])+voigt_D[i]*(X-voigt_B[i])) / ((Y-voigt_A[i])*(Y-voigt_A[i]) + (X-voigt_B[i])*(X-voigt_B[i]))
+
+		return V*Z
+
+	def triple_voigt_fit(self,x,p):
+		# 0-2 = center
+		# 3-5 = width - Lorentzian
+		# 6-8 = width - Gaussian
+		# 9-11 = Amplitudes
+		return self.voigt(x,[p[0],p[3],p[6],p[9]]) + self.voigt(x,[p[1],p[4],p[7],p[10]]) + self.voigt(x,[p[2],p[5],p[8],p[11]])
+
+
+	def triple_lorentzian_fit(self,x,p):
+		# 0-2 = center
+		# 3-5 = width
+		# 6-8 = amplitude
+		return self.lorentzian(x,[p[0], p[3], p[6]]) + self.lorentzian(x,[p[1], p[4], p[7]]) + self.lorentzian(x,[p[2], p[5], p[8]])
+
+	def triple_gaussian_fit(self,x,p):
+		# 0-2 = center
+		# 3-5 = width
+		# 6-8 = amplitude
+		return self.gaussian(x,[p[0], p[3], p[6]]) + self.gaussian(x,[p[1], p[4], p[7]]) + self.gaussian(x,[p[2], p[5], p[8]])
+
+
+
+
+	def tanh_fit(self,x,p):
 	# 0,1 = rho1 & rho2
 	# 2,3 = Z0, d
-	def tanh_fit(self,x,p):
-		return 0.5*(p[0]+p[1]) - 0.5*(p[0]-p[1])*tanh((x-p[2])/p[3])
-
+	#
 	# 0 = density of side1
 	# 1 = density of side2
 	# 2,3 = density/rho sides 3 & 4
@@ -103,6 +164,9 @@ class StatisticMachine:
 		# b = offset
 		# c = width
 	# used for unaveraged (double) interfaces
+		return 0.5*(p[0]+p[1]) - 0.5*(p[0]-p[1])*tanh((x-p[2])/p[3])
+
+
 	def double_tanh_gaussian_fit(self,x,p):
 		return 0.5*(p[0]+p[1]) - 0.5*(p[0]-p[1])*tanh((x-p[4])/p[5]) - 0.5*(p[2]-p[3])*tanh((x-p[6])/p[7]) + p[8]*exp(-((x-p[9])**2)/(2.0*p[10]**2)) + p[11]*exp(-((x-p[12])**2)/(2.0*p[13]**2))
 

@@ -115,8 +115,7 @@ Analyzer<T>::Analyzer (const std::string ConfigurationFilename) :
 	WaterSystem<T>(ConfigurationFilename),
 	output_filename(""), output((FILE *)NULL),
 	output_freq(WaterSystem<T>::SystemParameters()->output_freq),
-	timestep (0),
-	status_updater (output_freq, timestep, WaterSystem<T>::SystemParameters()->timesteps)
+	timestep (0)
 { 
 	Analyzer<T>::posres = WaterSystem<T>::SystemParameters()->posres;
 	Analyzer<T>::posbins = int((WaterSystem<T>::SystemParameters()->posmax - WaterSystem<T>::SystemParameters()->posmin)/WaterSystem<T>::SystemParameters()->posres);
@@ -131,6 +130,7 @@ Analyzer<T>::Analyzer (const std::string ConfigurationFilename) :
 
 	Analyzer<T>::ref_axis = WaterSystem<T>::SystemParameters()->ref_axis;
 
+	status_updater.Set (output_freq, WaterSystem<T>::SystemParameterLookup("system.timesteps"), 0);
 	this->registerObserver(&status_updater);
 
 	this->_OutputHeader();

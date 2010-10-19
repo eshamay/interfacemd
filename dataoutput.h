@@ -14,8 +14,16 @@ namespace md_analysis {
 			long int _maxcount;
 
 		public:
+			StarStatusBarUpdater () : _frequency(0), _count(0), _maxcount(0) { }
+
 			StarStatusBarUpdater (const int frequency, const int maxcount, const int startingcount = 0) 
 				: _frequency(frequency), _count(startingcount), _maxcount(maxcount) { }
+
+			void Set (const int frequency, const int maxcount, const int startingcount = 0) {
+				_frequency = frequency;
+				_maxcount = maxcount;
+				_count = startingcount;
+			}
 
 			// every time the updater is called the count is updated, and then output is performed based on the specific frequency supplied
 			virtual void notify () {

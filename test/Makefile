@@ -19,15 +19,20 @@ HCORIENTATION	= $(WATERSYSTEM) $(CARBONCHAIN) carbonchainsystem.o
 ANGLEPOSITIONHISTO = $(WATERSYSTEM) Angle-Position-Histogram-2D.o
 ROTATE			= $(MDSYSTEM) $(XYZSYSTEM) ../pdbfile.o molecule-rotate.cpp
 ANGLEHISTO = $(WATERSYSTEM) angle-histogram.o
-PDBTEST	= $(MDSYSTEM) $(ALLMOLECULES) ../pdbfile.o
+PDBTEST	= $(MDSYSTEM) $(ALLMOLECULES)
 
 #TEST		= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) test.o
 TEST		= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) test.o
 TEMP		= $(MDSYSTEM) temp.o
 FOO			= foo.o
 GMXTEST = $(GMXSYS) gmxtest.o
+CONVERSION = $(MDSYSTEM) $(AMBERSYSTEM) amber_binary_conversion.o
 
 # $(CXX) $(CPPFLAGS) $(TEST) -lmkl_solver_ilp64 -lmkl_core -lmkl_lapack -lmkl_gnu_thread -lguide -lpthread -o test
+#
+
+convert : $(CONVERSION)
+	$(CXX) $(CONVERSION) -o amber_convert
 
 temp : $(TEMP)
 	icpc $(TEMP) -o temp

@@ -29,7 +29,8 @@ namespace morita {
 
 		//std::cout << analysis_wats.size() << " waters to be analyzed" << std::endl;
 		int numAnalysisWaters = WaterSystem<AmberSystem>::SystemParameterLookup ("analysis.morita2002.number-of-analysis-waters");
-		analysis_wats.erase (analysis_wats.begin(), analysis_wats.end() - numAnalysisWaters);
+		analysis_wats.erase (analysis_wats.begin(), analysis_wats.end() - numAnalysisWaters - 1500);
+		analysis_wats.erase (analysis_wats.begin() + 50, analysis_wats.end());
 		//std::cout << analysis_wats.size() << " waters to be analyzed" << std::endl;
 
 		return;

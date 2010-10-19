@@ -14,7 +14,7 @@ namespace molecule {
 			mol = new Hydronium;
 		else if (name == "h")
 			mol = new Proton;
-		else if (name == "so2")
+		else if (name == "so2" || name == "sog" || name == "soa")
 			mol = new SulfurDioxide;
 		//else if (name == "no3")
 		//mol = new Nitrate;

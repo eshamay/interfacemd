@@ -33,6 +33,10 @@ inline void Set (const double X, const double Y, const double Z) { *this << X,Y,
 // Output
 inline data_t Magnitude () const { return this->norm(); }
 
+template<typename OtherDerived>
+inline OtherDerived Unit () const // returns the unit vector (normalized)
+{ return this->normalized(); }
+
 inline void Print () const
 {
 	if (cols() > 1)

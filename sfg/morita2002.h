@@ -10,6 +10,7 @@
 #include <iostream>
 #include <mkl_blas.h>
 #include <mkl_lapack.h>
+#include <functional>
 
 
 namespace morita {
@@ -140,6 +141,7 @@ namespace morita {
 			this->SetupSystemWaters (t);
 
 			int N = 3*analysis_wats.size();
+			_g.setZero(N,N);
 			_T.setZero(N,N);
 			_p.setZero(N);
 			_alpha.setZero(N,N);
@@ -164,7 +166,7 @@ namespace morita {
 			// output in row-major order
 			for (unsigned int i = 0; i < 3; i++) {
 				for (unsigned int j = 0; j < 3; j++) {
-					fprintf (t.Output(), "% 13.4f", _A(i,j));
+					fprintf (t.Output(), "% 13.4f ", _A(i,j));
 				}
 			}
 			fprintf (t.Output(),"\n");
@@ -354,6 +356,8 @@ void Morita2002Analysis<U>::CalculateTotalDipole () {
 	_M.setZero();
 	int N = analysis_wats.size();
 	for (int i = 0; i < N; i++) {
+		//VecR mu = _p.block(3*i,0,3,1);
+		//_M += mu;
 		_M += _p.block(3*i,0,3,1);
 	}
 
@@ -585,6 +589,19 @@ void Morita2008LookupAnalysis<T>::SetAnalysisWaterPolarizability () {
 		// rotate the polarizability tensor into the lab-frame
 		mu = dcm * mu;
 		(*it)->SetDipoleMoment (mu);
+
+		/*
+		(*it)->Print();
+		std::cout << std::endl << "oh's" << std::endl;
+		(*it)->OH1()->normalized().Print();
+		(*it)->OH2()->normalized().Print();
+		(*it)->Bisector().Print();
+		std::cout << "mu.unit" << std::endl;
+		mu.normalized().Print();
+		//std::cout << mu.Magnitude() << std::endl; //<< ")  "; mu.Print(); std::cout << std::endl;
+		//dcm.Print();
+		//(*it)->Print();
+		*/
 	}
 }	// lookup tables
 
@@ -599,7 +616,7 @@ void Morita2002Analysis<U>::CalcWannierDipoles () {
 
 template <class U>
 void Morita2002Analysis<U>::MoritaH2OPolarizabilities () {
-	std::for_each (analysis_wats.begin(), analysis_wats.end(), std::mem_fun(&MoritaH2O::SetPolarizability));
+	std::for_each (analysis_wats.begin(), analysis_wats.end(), std::mem_fun<void,MoritaH2O>(&MoritaH2O::CalculateGeometricalPolarizability));
 }
 
 

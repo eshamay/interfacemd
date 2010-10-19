@@ -10,7 +10,7 @@ namespace morita {
 
 		public:
 			AmberMorita2008Analysis () :
-				Morita2002LookupAnalysis<AmberSystem>(
+				Morita2008LookupAnalysis<AmberSystem>(
 						std::string("Analysis of the waters in an MD system using the technique of Morita/Hynes (2008) with a system produced by the Amber package (or any compliant dataset (prmtop, mdcrd, mdvel)"),
 						std::string("amber-morita2008.dat")) { }
 

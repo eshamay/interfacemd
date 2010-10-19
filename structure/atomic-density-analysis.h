@@ -4,6 +4,27 @@
 #include "../utility.h"
 #include "../analysis.h"
 
+/*
+ * This analysis package calculates atomic densities throughout a system along the 3 different axes of the system (X,Y,Z). A system.cfg file is required in the working directory, and the input files from the system must have specific names (or links to the files with specific names). For Amber Systems there must be a files.prmtop file (or link) and a files.mdcrd file, using those names exactly as lsited in system.cfg.
+ *
+ * In the system.cfg file, aside from all the other usual (mandatory) sections, another section is required for this analysis:
+ *
+ * analysis.density.atom-names
+ *		This section is a list of the atom names (as defined in the xyz or prmtop files) that will be analyzed and output to the data file.
+ *		example: 
+ *				density:
+					{
+						atom-names = ( "O", "H1", "H2" );
+					};
+
+ * Output will be written to the file specific in system.cfg's analysis.density.filename and will overwrite previously written data if not backed up.
+ *
+ * Data in the file will be a series of columns, 3 column-pairs for x,y,z directions for each atom listed. Each column pair contains the position along the direction, and the number density of the atoms. Thus, for the example listed above, the columns would be:
+ *		X-pos, O_x_population, Y-pos, O_y_population, Z-pos, O_z_population, X-pos, H1_x_population, etc.
+ *
+ *		Analysis will use the position extents listed in system.cfg's analysis.position-range +/- 10-angstroms, with a slice resolution of analysis.resolution.position.
+ */
+
 namespace md_analysis {
 
 	template <typename T>
@@ -14,7 +35,8 @@ namespace md_analysis {
 				atomic_density_analysis () : 
 					AnalysisSet<system_t> (
 							std::string("An analysis of the density of atoms in a system based on atomic position"),
-							std::string("3d-atomic-density.dat")) { }
+							//std::string("3d-atomic-density.dat")) { }
+							WaterSystem<T>::SystemParameterLookup("analysis.density.filename")) { }
 
 				virtual ~atomic_density_analysis () { }
 
@@ -57,7 +79,7 @@ namespace md_analysis {
 				std::string atom_name = atom_names[i];
 				atom_name_list.push_back(atom_name);
 
-				histogram_set hs (3, histogram_t(-10.0, WaterSystem<T>::posmax+10.0, 0.1));
+				histogram_set hs (3, histogram_t(-10.0, WaterSystem<T>::posmax+10.0, WaterSystem<T>::SystemParameterLookup("analysis.resolution.position")));
 				histograms.insert(histogram_map_elmt(atom_name, hs));
 			}
 
