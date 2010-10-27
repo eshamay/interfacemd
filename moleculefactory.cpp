@@ -6,7 +6,7 @@ namespace molecule {
 
 		MolPtr mol;
 
-		if (name == "h2o" || name == "wat" || name == "SW") 
+		if (name == "h2o" || name == "wat" || name == "SW" || name == "SM2")
 			mol = new Water;
 		else if (name == "oh")
 			mol = new Hydroxide;
@@ -14,7 +14,7 @@ namespace molecule {
 			mol = new Hydronium;
 		else if (name == "h")
 			mol = new Proton;
-		else if (name == "so2" || name == "sog" || name == "soa")
+		else if (name == "so2" || name == "sog" || name == "soa" || name == "soq")
 			mol = new SulfurDioxide;
 		//else if (name == "no3")
 		//mol = new Nitrate;

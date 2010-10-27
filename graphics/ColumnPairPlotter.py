@@ -5,7 +5,6 @@ import PlotUtility
 
 from matplotlib import collections, axes, transforms
 from matplotlib.colors import colorConverter
-import numpy as N
 
 def PlotOffsetColumnPairs (files, column=None):
 
@@ -27,3 +26,4 @@ def PlotOffsetColumnPairs (files, column=None):
 	axs.autoscale_view()
 
 	plt.show()
+

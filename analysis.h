@@ -8,7 +8,6 @@
 
 
 
-
 // An analysis that will be performed on a system by an analyzer
 template <typename T>
 class AnalysisSet {
@@ -207,11 +206,16 @@ extern void Analyzer<AmberSystem>::LoadNext () {
 }
 
 template <>
-extern void Analyzer<GMXSystem>::LoadNext () {
+extern void Analyzer<gromacs::GMXSystem<gromacs::TRRFile> >::LoadNext () {
 	this->sys->LoadNext();
 	return;
 }
 
+template <>
+extern void Analyzer<gromacs::GMXSystem<gromacs::XTCFile> >::LoadNext () {
+	this->sys->LoadNext();
+	return;
+}
 
 template <class T>
 void Analyzer<T>::SystemAnalysis (analysis_t& an) {

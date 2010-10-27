@@ -83,7 +83,7 @@ bool Atom::operator< (const Atom& rhs) const {
 }
 
 void Atom::Print () const {
-	printf ("%s (ID:%d)\t%s (molID:%d)\t% f\t% f\t% f\n", _name.c_str(), _ID, _residue.c_str(), _molid, _position.x(), _position.y(), _position.z());
+	printf ("%5s (ID:%6d nuc:%4d)\t%4s (molID:%5d)\t% f\t% f\t% f\n", _name.c_str(), _ID, _element, _residue.c_str(), _molid, _position.x(), _position.y(), _position.z());
 }
 
 void Atom::SetAtomProperties () {

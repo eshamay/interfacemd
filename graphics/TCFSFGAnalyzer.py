@@ -23,8 +23,8 @@ class TCFSFGAnalyzer:
 		
 		# now run an fft on the real data
 		self.fft = numpy.fft.rfft(windowed)[1:-1]
-		max_fft = max(self.fft)
-		self.fft = [i/max_fft for i in self.fft]
+		#max_fft = max(self.fft)
+		#self.fft = [i/max_fft for i in self.fft]
 		self.fft_re = [i.real for i in self.fft]
 		self.fft_imag = [i.imag for i in self.fft]
 
@@ -34,15 +34,20 @@ class TCFSFGAnalyzer:
 		beta = 1.0/temp/k
 		self.CalcFFT(dt)
 
-		#self.C = [(1-numpy.exp(-beta*hbar*f))/3.0/hbar/c for f in self.freq]
-		self.C = [1.0j*beta*f for f in self.freq]
-		#chi = map(lambda const, f, val: const*f*abs(val)**2, self.C, self.freq, self.fft)
-		self.chi = map(lambda x,c: x*c, self.fft, self.C)	# multiply by the pre-factor
-		#chi = map(lambda x: x*1j, self.fft)
+		# fft is now the SFG freq in wavenumbers
+		# visible is set at 532 nm = 18796.99 cm-1
+		# sfg = IR + visible
+		# so the IR = sfg - visible
+		# the constant to multiply by is 1.0j * (sfg/ir)^2
 
-  		# normalization to unity
-		#max_chi = max(chi)
-		#self.chi = [i/max_chi for i in chi]
+		#self.C = [(1-numpy.exp(-beta*hbar*f))/3.0/hbar/c for f in self.freq]
+		#self.C = [1.0j*beta*f for f in self.freq]
+		self.C = [pow(((f+18796.99)/f),2) for f in self.freq]	# multiplicative constant
+		#chi = map(lambda const, f, val: const*f*abs(val)**2, self.C, self.freq, self.fft)
+		#self.chi = map(lambda x,c: x*c, self.fft, self.C)	# multiply by the pre-factor
+		self.chi = [1.0j*beta*f*x for f,x in zip(self.freq,self.fft)]	# chi resonant
+		#chi = map(lambda x: x*1j, self.fft)
+		self.sfg = [con*pow(abs(x),2) for con,x in zip(self.C, self.chi)]
 
 		return
 
@@ -55,7 +60,7 @@ class TCFSFGAnalyzer:
 	def FFTNorm(self):
 	  	return [abs(x) for x in self.fft]# the magnitude of the pure FFT of the TCF data
 	def FFTNormSquared(self):
-		return [(x*x.conjugate()).real for x in self.fft]
+		return [pow(abs(x),2) for x in self.fft]
 	def FFTComplex(self):
 		return self.fft			# complex data from the FFT
 	def FFTReal(self):
@@ -66,5 +71,7 @@ class TCFSFGAnalyzer:
 		return self.chi			# the Chi(2) from SFG data
 	def ChiSquared(self):
 		return [abs(x)*abs(x) for x in self.chi]			# Chi(2)^2 from SFG data
+	def SFG(self):
+		return self.sfg
 
 # vim: tabstop=4 shiftwidth=4 softtabstop=4

@@ -1,85 +1,107 @@
 #ifndef MORITA_H_
 #define MORITA_H_
 
-#include "../utility.h"
-#include "../analysis.h"
+#include "analysis.h"
+#include "sfgunits.h"
+#include "moritah2o.h"
 #include "watersfg.h"
 
-typedef std::vector< complex<double> > Complex_vec;
+#include <Eigen/LU>
+#include <iostream>
+#include <mkl_blas.h>
+#include <mkl_lapack.h>
+#include <functional>
 
-class SFGAnalyzer : public Analyzer<AmberSystem>
-{
+namespace morita {
 
-  public:
-	SFGAnalyzer (WaterSystemParams& params);
+	USING_PART_OF_NAMESPACE_EIGEN
 
-  private:
+	typedef std::vector< std::complex<double> > Complex_vec;
 
-	static SFGCalculator	sfg;
-	static Complex_vec TimestepChi;		// chi spectrum of several different molecules collected over an entire timestep
-	static Complex_vec TotalChi;		// Running total of all the data for several timesteps
+	class MoritaAnalysis : public AnalysisSet< Analyzer<AmberSystem> > {
+		public:
+			MoritaAnalysis () : 
+				AnalysisSet< Analyzer<AmberSystem> > (
+						std::string("Analysis of the waters in an MD system using the technique of Morita/Hynes (2000) with a system produced by the Amber package (or any compliant dataset (prmtop, mdcrd, mdvel)"),
+						std::string("amber-morita2000.dat")) { }
 
-	static unsigned long numMolsProcessed;
-	static bool firstMol;
-	static bool firstTimeStep;
+			~MoritaAnalysis ();
 
-	void Setup ();
-	void Analysis ();
-	void DataOutput (const unsigned int timestep);
-	void PostAnalysis ();
+			typedef Analyzer<AmberSystem> system_t;
 
-	template <typename Iter1, typename Iter2>
-	  // Build up running totals of the chi spectra
-	static void CollectChi (Iter1 pBegin, Iter1 pEnd, Iter2 pBegin2)
-	{
-	  typedef typename std::iterator_traits<Iter1>::value_type value_type;
+			virtual void Analysis (system_t&);
+			virtual void DataOutput (system_t&);
 
-	  std::transform(pBegin, pEnd, pBegin2, pBegin, std::plus<value_type>());
-	}
+		protected:
 
-	//static void CollectChi (Complex_vec& newchi, Complex_vec& totalchi);
+			static SFGCalculator	sfg;
+			static Complex_vec TimestepChi;		// chi spectrum of several different molecules collected over an entire timestep
+			static Complex_vec TotalChi;		// Running total of all the data for several timesteps
 
-	void FlipWaters (const coord axis = y);
+			static unsigned long numMolsProcessed;
+			static bool firstMol;
+			static bool firstTimeStep;
 
-	class SFGProcessor : public std::unary_function<Molecule *,bool> {
-	  private:
-		Water * water;
-		Complex_vec Molecular_Beta;			// chi for a given molecule
+			std::vector<MoritaH2O *> all_wats;
+			std::vector<MoritaH2O *> analysis_wats;
 
-	  public:
+			void SetupSystemWaters (system_t& t);
+			void SelectAnalysisWaters ();
 
-		bool operator() (Molecule * mol) {
-		  water = static_cast<Water *>(mol);
 
-		  Molecular_Beta.clear();
+			template <typename Iter1, typename Iter2>
+				// Build up running totals of the chi spectra
+				static void CollectChi (Iter1 pBegin, Iter1 pEnd, Iter2 pBegin2)
+				{
+					typedef typename std::iterator_traits<Iter1>::value_type value_type;
 
-		  // and then calculate the chi spectrum for the molecule 
-		  // 0,2,1 = SSP. S = X and Z axes, P = Y axis
-		  Molecular_Beta = SFGAnalyzer::sfg.Beta (*water, 0,2,1);
+					std::transform(pBegin, pEnd, pBegin2, pBegin, std::plus<value_type>());
+				}
 
-		  SFGAnalyzer::numMolsProcessed++;
+			//static void CollectChi (Complex_vec& newchi, Complex_vec& totalchi);
 
-		  // when starting a new timestep...
-		  if (SFGAnalyzer::firstMol) {
-			SFGAnalyzer::TimestepChi.resize (Molecular_Beta.size(), complex<double> (0.0, 0.0));
-			SFGAnalyzer::firstMol = false;
-		  }
+			void FlipWaters (const coord axis = y);
 
-		  // for the very first timestep...
-		  if (SFGAnalyzer::firstTimeStep) {
-			SFGAnalyzer::TotalChi.clear();
-			SFGAnalyzer::TotalChi.resize (Molecular_Beta.size(), complex<double> (0.0, 0.0));
-			SFGAnalyzer::firstTimeStep = false;
-		  }
+			class SFGProcessor : public std::unary_function<MoritaH2O *,bool> {
+				private:
+					Complex_vec Molecular_Beta;			// chi for a given molecule
 
-		  // perform the summation for averaging spectra over all the water molecules
-		  SFGAnalyzer::CollectChi (SFGAnalyzer::TimestepChi.begin(), SFGAnalyzer::TimestepChi.end(), Molecular_Beta.begin());
+				public:
 
-		  return true;
-		}
+					bool operator() (MoritaH2O * water) {
+
+						Molecular_Beta.clear();
+
+						// and then calculate the chi spectrum for the molecule 
+						// 0,2,1 = SSP. S = X and Z axes, P = Y axis
+						Molecular_Beta = MoritaAnalysis::sfg.Beta (*water, 0,2,1);
+
+						MoritaAnalysis::numMolsProcessed++;
+
+						// when starting a new timestep...
+						if (MoritaAnalysis::firstMol) {
+							MoritaAnalysis::TimestepChi.resize (Molecular_Beta.size(), std::complex<double> (0.0, 0.0));
+							MoritaAnalysis::firstMol = false;
+						}
+
+						// for the very first timestep...
+						if (MoritaAnalysis::firstTimeStep) {
+							MoritaAnalysis::TotalChi.clear();
+							MoritaAnalysis::TotalChi.resize (Molecular_Beta.size(), std::complex<double> (0.0, 0.0));
+							MoritaAnalysis::firstTimeStep = false;
+						}
+
+						// perform the summation for averaging spectra over all the water molecules
+						MoritaAnalysis::CollectChi (MoritaAnalysis::TimestepChi.begin(), MoritaAnalysis::TimestepChi.end(), Molecular_Beta.begin());
+
+						return true;
+					}
+			};
+
+			SFGProcessor SFGProcess;
 	};
 
-	SFGProcessor SFGProcess;
-};
+
+}	// namespace morita
 
 #endif

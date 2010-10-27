@@ -39,7 +39,7 @@ class WaterSystemParams {
 				posmin = (config_file->lookup("analysis.position-range")[0]);
 				posmax = (config_file->lookup("analysis.position-range")[1]);
 
-				avg = config_file->lookup("analysis.averaging");
+				//avg = config_file->lookup("analysis.averaging");
 				axis = (coord)((int)config_file->lookup("analysis.reference-axis"));
 				ref_axis = VecR(
 						config_file->lookup("analysis.reference-vector")[0], 
@@ -69,7 +69,7 @@ class WaterSystemParams {
 
 		libconfig::Config * config_file;	/* Configuration file */
 
-		bool avg;			/* Will averaging of two interfaces be performed? Can also be used for other functionality */
+		//bool avg;			/* Will averaging of two interfaces be performed? Can also be used for other functionality */
 
 		coord axis;			/* The reference axis (generally normal to the interface */
 		VecR ref_axis;
@@ -250,6 +250,7 @@ class WaterSystem {
 	protected:
 
 		static WaterSystemParams * wsp;
+		//libconfig::Config * config_file;	/* Configuration file */
 
 		T * sys;
 
@@ -341,13 +342,20 @@ void WaterSystem<XYZSystem>::_InitializeSystem () {
 }
 
 template <>
-void WaterSystem<GMXSystem>::_InitializeSystem () {
+void WaterSystem< gromacs::GMXSystem<gromacs::TRRFile> >::_InitializeSystem () {
 	std::string gro = wsp->config_file->lookup("system.files.gmx-grofile");
 	std::string trr = wsp->config_file->lookup("system.files.gmx-trrfile");
-	this->sys = new GMXSystem(gro.c_str(), trr.c_str());
+	this->sys = new gromacs::GMXSystem< gromacs::TRRFile >(gro.c_str(), trr.c_str());
 	return;
 }
 
+template <>
+void WaterSystem< gromacs::GMXSystem<gromacs::XTCFile> >::_InitializeSystem () {
+	std::string gro = wsp->config_file->lookup("system.files.gmx-grofile");
+	std::string xtc = wsp->config_file->lookup("system.files.gmx-xtcfile");
+	this->sys = new gromacs::GMXSystem< gromacs::XTCFile >(gro.c_str(), xtc.c_str());
+	return;
+}
 
 template <class T>
 void WaterSystem<T>::LoadAll () {

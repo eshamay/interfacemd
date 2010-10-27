@@ -6,6 +6,7 @@
 #include "crdfile.h"
 #include "forcefile.h"
 #include "topfile.h"
+#include "graph.h"
 
 class AmberSystem : public MDSystem {
 
@@ -37,6 +38,8 @@ public:
 	int 	Current ()		const 	{ return _coords.Current(); }
 
 	void PrintCRDFile () const;						// to output a frame of the system in .crd format
+
+	bondgraph::BondGraph graph;
 
 };
 

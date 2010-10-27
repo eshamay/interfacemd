@@ -70,12 +70,31 @@ void AmberSystem::_ParseAtomVectors () {
 */
 void AmberSystem::_ParseMolecules () {
 
+	MolPtr newmol;
 	// Here we run through each mol pointer, create a new molecule, and add in the appropriate atoms
 	for (int mol = 0; mol < _topfile.NumMols(); mol++) {
-
 		// At each new pointer we create a molecule and start adding in atoms
 		// if the molecule is of a specific type for which a class has been created, then let's use that!
 		std::string name = _topfile.MolNames()[mol];
+		newmol = molecule::MoleculeFactory(name);
+		newmol->Name(name);
+		//_mols[mol]->Name (name);	// set the molecule's residue name
+		newmol->MolID(mol);
+
+		// Then add all the atoms between the indices of the molpointers in the topology file
+		int molsize = _topfile.MolSizes()[mol];
+		int molpointer = _topfile.MolPointers()[mol];
+		for (int atomCount = 0; atomCount < molsize; atomCount++) {
+			// sets the index of the current atom that's being added to the molecule
+			int curAtom = molpointer + atomCount - 1;
+			// Now we're going to bless this new atom with loads of information about itself and its molecule
+			newmol->AddAtom( _atoms[curAtom] );			// add the atom into the molecule
+		}
+
+		// lastly, tack it into our running list
+		_mols.push_back(newmol);
+
+		/*
 		// a topology file doesn't give us the type, so that will be determined when creating the new molecules
 		if (name == "no3") {
 			_mols.push_back (new Nitrate());
@@ -87,7 +106,7 @@ void AmberSystem::_ParseMolecules () {
 		else if (name == "h2o") {
 			_mols.push_back (new Water());
 		}
-		else if (name == "so2" || name == "sog") {
+		else if (name == "so2" || name == "sog" || name == "soq") {
 			_mols.push_back (new SulfurDioxide());
 		}
 		else if (name == "dec" || name == "pds") {
@@ -98,21 +117,7 @@ void AmberSystem::_ParseMolecules () {
 			printf ("AmberSystem::_ParseMolecules() -- Couldn't parse the molecule with name '%s'. Don't know what to do with it\n", name.c_str());
 			exit(1);
 		}
-
-		_mols[mol]->Name (name);	// set the molecule's residue name
-
-		// Then add all the atoms between the indexes of the molpointers in the topology file
-		// MPI had a weird problem **HERE**... fixed June 2007 ~ESS
-		int molsize = _topfile.MolSizes()[mol];
-		int molpointer = _topfile.MolPointers()[mol];
-		for (int atomCount = 0; atomCount < molsize; atomCount++) {
-			// sets the index of the current atom that's being added to the molecule
-			int curAtom = molpointer + atomCount - 1;
-
-			// Now we're going to bless this new atom with loads of information about itself and its molecule
-			_mols[mol]->MolID (mol);
-			_mols[mol]->AddAtom( _atoms[curAtom] );			// First add the atom into the molecule
-		}
+		*/
 	}
 
 	return;

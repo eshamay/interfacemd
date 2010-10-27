@@ -13,9 +13,13 @@ from ColumnDataFile import ColumnDataFile
 from DipPolAnalyzer import DipPolAnalyzer
 from TCFSFGAnalyzer import TCFSFGAnalyzer
 
-from PlotUtility import *
+#from PlotUtility import *
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
+# the extents of the x-range
+xmin = 1000.0
+xmax = 15000.0
+
 
 class MoritaSFG2002:
 
@@ -30,15 +34,12 @@ class MoritaSFG2002:
 		self.temp = temp
 
 	def PrintData(self):
-		# the extents of the x-range
-		xmin = 2000.0
-		xmax = 4000.0
 
 		# plotting out IR spectra
 		ir = TCFSFGAnalyzer (self.dpa.IR_TCF())
 		ir.CalcSFGChi(self.dt,self.temp)
 		ir_x = ir.Freq()
-		ir_y = ir.ChiSquared()
+		ir_y = ir.FFTNormSquared()
 
 		sfg_data = []
 
@@ -51,20 +52,24 @@ class MoritaSFG2002:
 			sfg = TCFSFGAnalyzer (sfg_tcf)
 			sfg.CalcSFGChi(self.dt,self.temp)
 
-			sfg_data.append(sfg.ChiSquared())
+			sfg_data.append(sfg.SFG())
 
 			pol = pol[1:]+pol[:1]	# rotate to the next P polarization
 
+		# limit the output to be within the frequency extents listed above (xmin, xmax)
+		freq_min_index = ir_x.index([f for f in ir_x if f > xmin][0])
+		freq_max_index = ir_x.index([f for f in ir_x if f < xmax][-1])
 		# now get the data all set up
 		data = zip(ir_x, ir_y, sfg_data[0], sfg_data[1], sfg_data[2])
 
-		for d in data:
+		for d in data[freq_min_index:freq_max_index]:
 			for i in d:
 				print "%12.6e " % (i),
 			print
 
 
 
+'''
 	def PlotData(self):
 
 		# Set up the plot parameters (labels, size, limits, etc)
@@ -72,8 +77,8 @@ class MoritaSFG2002:
 		fig2 = plt.figure(num=2, facecolor='w', edgecolor='w', frameon=True)
 
 		# the extents of the x-range
-		xmin = 2000.0
-		xmax = 4000.0
+		xmin = 0.0
+		xmax = 10000.0
 
 		# plotting out IR spectra
 		ir = TCFSFGAnalyzer (self.dpa.IR_TCF())
@@ -82,14 +87,6 @@ class MoritaSFG2002:
 		axs.plot(ir.Freq(), ir.ChiSquared(), label='xyz IR')
 		axs.set_xlim(1000,4000)
 		ShowLegend(axs)
-
-		'''
-		sfg = TCFSFGAnalyzer (self.dpa.SFG_TCF(0,0,2))
-		sfg.CalcSFGChi(self.dt,300.0)
-		axs = fig.add_subplot(2,1,2)
-		axs.plot(sfg.Freq()[1000:], sfg.ChiSquared()[1000:], label='xyz SFG')
-		'''
-
 
 		pol = [0,1,2]	# polarization combos
 		for row in range(3):
@@ -104,13 +101,14 @@ class MoritaSFG2002:
 
 			# now average them
 
-			axs.plot(sfg.Freq(), sfg.ChiSquared(), label="P = "+str(pol[2]))
+			axs.plot(sfg.Freq(), sfg.SFG(), label="P = "+str(pol[2]))
 
 			axs.set_xlim(1000,4000)
 			ShowLegend(axs)
 
 			pol = pol[1:]+pol[:1]	# rotate to the next P polarization
 			sys.stdout.flush()
+'''
 
 
 sfg = MoritaSFG2002(sys.argv[1], 0.75e-15, 300.0)

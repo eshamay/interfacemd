@@ -11,7 +11,6 @@ USING_PART_OF_NAMESPACE_EIGEN
 #include "dipole-analysis.h"
 #include "neighbor-analysis.h"
 #include "atomic-density-analysis.h"
-//#include "sfg/amber-morita2002.h"
 
 
 typedef std::vector<double> double_vec;
@@ -59,8 +58,36 @@ namespace md_analysis {
 			analyses.push_back(a);
 			a = new atomic_density_analysis<T>();
 			analyses.push_back(a);
-			//a = new morita::AmberMorita2008Analysis();
-			//analyses.push_back(a);
+		}
+
+	template <>
+		void StructureAnalyzer<gromacs::GMXSystem< gromacs::XTCFile> >::LoadSystemAnalyses () {
+			typedef gromacs::GMXSystem<gromacs::XTCFile>  T;
+			AnalysisSet<system_t> * a;
+
+			a = new h2o_angle_bond_histogram_analyzer<T>();
+			analyses.push_back(a);
+			a = new so2_angle_bond_histogram_analyzer<T>();
+			analyses.push_back(a);
+			a = new h2o_dipole_magnitude_histogram_analyzer<T>();
+			analyses.push_back(a);
+			a = new atomic_density_analysis<T>();
+			analyses.push_back(a);
+		}
+
+	template <>
+		void StructureAnalyzer<gromacs::GMXSystem< gromacs::TRRFile> >::LoadSystemAnalyses () {
+			typedef gromacs::GMXSystem<gromacs::TRRFile>  T;
+			AnalysisSet<system_t> * a;
+
+			a = new h2o_angle_bond_histogram_analyzer<T>();
+			analyses.push_back(a);
+			a = new so2_angle_bond_histogram_analyzer<T>();
+			analyses.push_back(a);
+			a = new h2o_dipole_magnitude_histogram_analyzer<T>();
+			analyses.push_back(a);
+			a = new atomic_density_analysis<T>();
+			analyses.push_back(a);
 		}
 
 	template <>

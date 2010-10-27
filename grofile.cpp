@@ -94,7 +94,7 @@ namespace gromacs {
 
 		float bx, by, bz;
 		sscanf (_line, " %f %f %f ", &bx, &by, &bz);
-		_dimensions.Set(bx, by, bz);
+		MDSystem::_dimensions.Set(bx*10.0, by*10.0, bz*10.0);		// convert from gromacs nm units to angstroms
 
 		return;
 	}
@@ -105,9 +105,9 @@ namespace gromacs {
 		printf ("%d atoms processed\n", (int)_atoms.size());
 		printf ("Box dimensions: ");
 		_dimensions.Print();
-		for (Mol_it it = _mols.begin(); it != _mols.end(); it++) {
-			(*it)->Print();
-		}
+		//for (Mol_it it = _mols.begin(); it != _mols.end(); it++) {
+			//(*it)->Print();
+		//}
 
 		return;
 	}

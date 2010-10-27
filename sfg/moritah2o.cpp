@@ -3,18 +3,18 @@
 namespace morita {
 
 	/*	From the morita 2002 water model */
-	/*
 		 const double BONDLENGTH_EQ	= 0.9575;		// in angstroms
 		 const double ANGLE_EQ 		= 104.51*M_PI/180.0;		// in radians
 		 const double CHARGE_H_EQ		= 0.3285;		// charge units (atomic units?)
 		 const double CHARGE_O_EQ		= -0.6570;
-		 */
+		 //const double CHARGE_H_EQ		= 0.5245;		// charge units (atomic units?)
+		 //const double CHARGE_O_EQ		= -1.0490;
 
 	/* from the equilibrium values of the spcfw model */
-	const double BONDLENGTH_EQ	= 1.012 * sfg_units::ANG2BOHR;		// in atomic units
-	const double ANGLE_EQ 		= 113.24;		// in degress
-	const double CHARGE_H_EQ		= 0.41;		// charge units (atomic units?)
-	const double CHARGE_O_EQ		= -0.82;
+	//const double BONDLENGTH_EQ	= 1.012 * sfg_units::ANG2BOHR;		// in atomic units
+	//const double ANGLE_EQ 		= 113.24;		// in degress
+	//const double CHARGE_H_EQ		= 0.41;		// charge units (atomic units?)
+	//const double CHARGE_O_EQ		= -0.82;
 
 	/*
 	// using values from the actual cp2k simulations
@@ -56,7 +56,8 @@ namespace morita {
 		dR2 *= sfg_units::ANG2BOHR;
 
 		// angle displacement from the equilibrium
-		dA = (acos(this->Angle())*180.0/M_PI) - ANGLE_EQ;
+		//dA = (acos(this->Angle())*180.0/M_PI) - ANGLE_EQ;
+		dA = acos(this->Angle()) - ANGLE_EQ;
 
 		// symmetry-adapted coordinates
 		X1 = dR1 + dR2;
@@ -66,8 +67,7 @@ namespace morita {
 	}
 
 	// Calculates the dipole moment vector of a given water molecule according to the method of Morita/Hynes 2002
-	void MoritaH2O::SetDipoleMoment () {
-		std::cout << "setting dipole moment" << std::endl;
+	void MoritaH2O::CalculateGeometricalDipoleMoment () {
 		this->SetBondAngleVars ();
 
 		// determine the charge from the fitting parameters
@@ -78,12 +78,14 @@ namespace morita {
 		qH1 = (dq-qO)/2.0;
 		qH2 = (-dq-qO)/2.0;
 
+		//printf ("%.3f %.3f %.3f\n", qO, qH1, qH2);
 		// the dipole vector is thus classically determined ( sum(position_i * charge_i) )
 		this->_dipole.setZero();
 		this->_dipole += (_o->Position() * qO);
 		this->_dipole += (_h1->Position() * qH1);
 		this->_dipole += (_h2->Position() * qH2);
 
+		//std::cout << this->_dipole.Magnitude() << std::endl;
 	} // Set dipole moment
 
 
@@ -98,6 +100,7 @@ namespace morita {
 		_alpha1(1,1) = D2+D5*dR1;
 		_alpha1(2,2) = D3+D6*dR1+D7*dR1*dR1;
 
+		_alpha2.Zero();
 		_alpha2(0,0) = D1+D4*dR2;
 		_alpha2(1,1) = D2+D5*dR2;
 		_alpha2(2,2) = D3+D6*dR2+D7*dR2*dR2;
@@ -108,10 +111,10 @@ namespace morita {
 		// in the space-fixed frame (instead of the local or molecular frames
 		// as written in the paper).
 		this->DCMToLabMorita(1);
-		_alpha = _alpha + (this->_DCM.transpose() * _alpha1 * this->_DCM);
+		_alpha += (this->_DCM.transpose() * _alpha1 * this->_DCM);
 
 		this->DCMToLabMorita(2);
-		_alpha = _alpha + (this->_DCM.transpose() * _alpha2 * this->_DCM);
+		_alpha += (this->_DCM.transpose() * _alpha2 * this->_DCM);
 
 	}	// Set Polarizability
 

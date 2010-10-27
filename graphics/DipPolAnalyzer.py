@@ -28,6 +28,7 @@ class DipPolAnalyzer:
 
 	def SFG_TCF(self,s1,s2,p):
 		alpha = [(a[s1,s1] + a[s2,s2])/2.0 for a in self.alpha]
+		#alpha = [a[s1,s1] for a in self.alpha]
 		rho = self.rho[0][p]
 		return [a*rho for a in alpha]
 		#return [dot(a,self.rho[0][r]) for a in self.alpha]

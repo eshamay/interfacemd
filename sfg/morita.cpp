@@ -1,117 +1,107 @@
 #include "morita.h"
 
-SFGCalculator SFGAnalyzer::sfg;
-Complex_vec SFGAnalyzer::TimestepChi;
-Complex_vec SFGAnalyzer::TotalChi;
+namespace morita {
 
-unsigned long SFGAnalyzer::numMolsProcessed = 0;
-bool SFGAnalyzer::firstMol = true;
-bool SFGAnalyzer::firstTimeStep = true;
+	SFGCalculator MoritaAnalysis::sfg;
+	Complex_vec MoritaAnalysis::TimestepChi;
+	Complex_vec MoritaAnalysis::TotalChi;
 
+	unsigned long MoritaAnalysis::numMolsProcessed = 0;
+	bool MoritaAnalysis::firstMol = true;
+	bool MoritaAnalysis::firstTimeStep = true;
 
-SFGAnalyzer::SFGAnalyzer (WaterSystemParams& wsp)
-  :	Analyzer<AmberSystem> (wsp)
-	//sfg (SFGCalculator(&this->_graph))
-{
+	MoritaAnalysis::~MoritaAnalysis () {
+		for (Morita_it it = analysis_wats.begin(); it != analysis_wats.end(); it++) {
+			delete *it;
+		}
+	}
 
-  //this->sys = new AmberSystem("prmtop", "mdcrd", "mdvel");
+	void MoritaAnalysis::SetupSystemWaters (system_t& t) {
 
-  printf ("\n*** Performing an SFG analysis of the system ***\n");
+		// load all the waters into the int_wats container
+		t.LoadWaters();
+		//std::for_each(t.int_wats.begin(), t.int_wats.end(), std::mem_fun(&Molecule::Print));
 
-  return;
-}
+		for (Morita_it it = all_wats.begin(); it != all_wats.end(); it++) {
+			delete *it;
+		}
+		all_wats.clear();
 
-void SFGAnalyzer::Setup () {
+		// load up the all_wats with new derived Morita waters that have some extra functionality
+		for (Mol_it it = t.int_wats.begin(); it != t.int_wats.end(); it++) {
+			MoritaH2O_ptr ptr (new MoritaH2O (*it));
+			all_wats.push_back(ptr);
+		}
 
-  // Load up all the water molecules and atoms
-  this->LoadWaters();
-  int numWats = (int)int_wats.size();
-  //printf ("%d/%d molecules are waters\n", numWats, (int)sys_mols.size());
+		// analysis_wats will hold only those waters that will by analyzed
+		analysis_wats.clear();
+		std::copy(all_wats.begin(), all_wats.end(), back_inserter(analysis_wats));
+		// here filter out the waters to use for analysis
+		this->SelectAnalysisWaters ();
 
-  // keep only the waters within a given region of the slab for analysis
-  std::pair<double,double> extents = std::make_pair<double,double> (
-	  WaterSystem<AmberSystem>::posmin,
-	  WaterSystem<AmberSystem>::posmax
-	  );
-  this->SliceWaters(int_wats, extents);
-  printf ("%d/%d waters, %d/%d atoms\n", (int)int_wats.size(), numWats, (int)int_atoms.size(), (int)sys_atoms.size());
+		return;
+	}
 
-  return;
-}
+	void MoritaAnalysis::SelectAnalysisWaters () {
+		// sort by position in the slab
+		std::sort(analysis_wats.begin(), analysis_wats.end(), Analyzer<AmberSystem>::molecule_position_pred(Atom::O));
 
-void SFGAnalyzer::Analysis () {
+		// then slice the waters to keep only a certain number of them
+		int numAnalysisWaters = WaterSystem<AmberSystem>::SystemParameterLookup ("analysis.morita2002.number-of-analysis-waters");
+		analysis_wats.erase (analysis_wats.begin(), analysis_wats.end() - numAnalysisWaters);
+	}
 
-  TimestepChi.clear();	// it's a new timestep
-  firstMol = true;		// every timestep we will have to go through all the molecules again
+	void MoritaAnalysis::Analysis (system_t& t) {
 
-  // and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
-  UpdateGraph ();
+		printf ("test\n");
+		TimestepChi.clear();	// it's a new timestep
+		firstMol = true;		// every timestep we will have to go through all the molecules again
 
-  std::for_each(int_wats.begin(), int_wats.end(), this->SFGProcess);
+		this->SetupSystemWaters (t);
 
-  // we collect the data for each timestep into the running total for the end spectrum
-  CollectChi (TotalChi.begin(), TotalChi.end(), TimestepChi.begin());
+		// and then update our bond data to reflect the interfacial region and find all the hydrogen bonds
+		t.UpdateGraph ();
 
+		std::for_each(analysis_wats.begin(), analysis_wats.end(), this->SFGProcess);
 
-  return;
-}
+		// we collect the data for each timestep into the running total for the end spectrum
+		CollectChi (TotalChi.begin(), TotalChi.end(), TimestepChi.begin());
 
-// take each of the interfacial waters and flip the molecules such that they are mirrored about a plane that runs through the oxygen and is normal to the given axis.
-/*
-   void SFGAnalyzer::FlipWaters (const coord axis) {
-   RUN (int_wats) {
-   int_wats[i]->Flip(axis);
-   }
-   return;
-   }
-   */
+		return;
+	}
 
-// output data to the file
-void SFGAnalyzer::DataOutput (const unsigned int timestep) {
+	// output data to the file
+	void MoritaAnalysis::DataOutput (system_t& t) {
 
-  rewind (output);
+		rewind (t.Output());
 
-  double freq = START_FREQ * AU2WAVENUMBER;
-  double scale = (double)numMolsProcessed;
-  double r, im;
+		double freq = START_FREQ * sfg_units::AU2WAVENUMBER;
+		double scale = (double)numMolsProcessed;
+		double r, im;
 
-  for (Complex_vec::const_iterator it = TotalChi.begin(); it != TotalChi.end(); it++) {
-	r = real(*it) / scale;
-	im = imag(*it) / scale;
+		for (Complex_vec::const_iterator it = TotalChi.begin(); it != TotalChi.end(); it++) {
+			r = real(*it) / scale;
+			im = imag(*it) / scale;
 
-	fprintf (output, "% 20.4e% 20.4e% 20.4e\n", freq, r, im);
+			fprintf (t.Output(), "% 20.4e% 20.4e% 20.4e\n", freq, r, im);
 
-	freq += FREQ_STEP * AU2WAVENUMBER;
-  }
+			freq += FREQ_STEP * sfg_units::AU2WAVENUMBER;
+		}
 
-  fflush (output);
+		fflush (t.Output());
 
-  // reload the interface waters once in a while because they tend to move in and out of the interfacial region
-  this->Setup();
+		return;
+	}
 
-  return;
-}
+} // namespace morita
 
-void SFGAnalyzer::PostAnalysis ()
-{
-  return;
-}
 
 int main () {
 
-  libconfig::Config cfg;
-  cfg.readFile("system.cfg");
+	Analyzer<AmberSystem> analyzer;
+	morita::MoritaAnalysis analysis;
+	analyzer.SystemAnalysis(analysis);
 
-  std::string filename = cfg.lookup("analysis.sfg.filename");
-  libconfig::Setting &analysis = cfg.lookup("analysis");
-  analysis.add("filename", libconfig::Setting::TypeString) = filename;
-
-  WaterSystemParams wsp (cfg);
-
-  SFGAnalyzer analyzer (wsp);
-
-  analyzer.SystemAnalysis ();
-
-  return 0;
+	return 0;
 }
 

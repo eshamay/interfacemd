@@ -84,6 +84,7 @@ namespace morita {
 
 				void CalcWannierDipoles ();
 				void MoritaH2OPolarizabilities ();
+				void MoritaH2ODipoles ();
 				void Dipole_PolarizabilityLookupTables ();
 				// sfgdata_pair_t SSP_SPS_Result (const int s1, const int s2, const int p, const MatR& a) const;
 		};	// sfg-analyzer
@@ -589,6 +590,7 @@ void Morita2008LookupAnalysis<T>::SetAnalysisWaterPolarizability () {
 		// rotate the polarizability tensor into the lab-frame
 		mu = dcm * mu;
 		(*it)->SetDipoleMoment (mu);
+		std::cout << mu.Magnitude() << std::endl;
 
 		/*
 		(*it)->Print();
@@ -617,6 +619,11 @@ void Morita2002Analysis<U>::CalcWannierDipoles () {
 template <class U>
 void Morita2002Analysis<U>::MoritaH2OPolarizabilities () {
 	std::for_each (analysis_wats.begin(), analysis_wats.end(), std::mem_fun<void,MoritaH2O>(&MoritaH2O::CalculateGeometricalPolarizability));
+}
+
+template <class U>
+void Morita2002Analysis<U>::MoritaH2ODipoles () {
+	std::for_each (analysis_wats.begin(), analysis_wats.end(), std::mem_fun<void,MoritaH2O>(&MoritaH2O::CalculateGeometricalDipoleMoment));
 }
 
 

@@ -23,12 +23,12 @@ class ColumnPairFile (CDF):
 		self.data = zip(*self.data)
 		self.data = [zip(*d) for d in self.data]
 
-	def PlotData(self,axs,columnpair=0,scale1=1.0,scale2=1.0):
+	def PlotData(self,axs,columnpair=0,scale1=1.0,scale2=1.0,lbl=''):
 		try:
 			f1 = [x*scale1 for x in self.data[columnpair][0]]
 			f2 = [x*scale2 for x in self.data[columnpair][1]]
 			header = self.header[columnpair]
-			self.handle = axs.plot(f1, f2, label=self.filename)
+			self.handle = axs.plot(f1, f2, label=lbl)
 		except IndexError:
 			if columnpair >= len(self.data):
 				print "Only %d columns in the column-pair data file, but column %d was requested!" % (len(self.data), columnpair+1)

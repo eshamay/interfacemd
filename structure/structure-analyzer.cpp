@@ -2,12 +2,12 @@
 
 int main (int argc, char**argv) {
 
-	typedef enum {AMBER, XYZ} system_type;
+	typedef enum {AMBER, XYZ, TRR, XTC} system_type;
 
 	if (argc < 2) {
 		printf ("Run this program using the following syntax:\n");
 		printf ("structure-analyzer <system-type>\n\n");
-		printf ("%d) Amber System\n%d) XYZ System\n\n", AMBER, XYZ);
+		printf ("%d) Amber System\n%d) XYZ System\n%d) Gromacs - TRR\n%d) Gromacs - XTC\n\n", AMBER, XYZ, TRR, XTC);
 		exit(1);
 	}
 
@@ -21,6 +21,10 @@ int main (int argc, char**argv) {
 		md_analysis::StructureAnalyzer<AmberSystem> sa(analysis_choice);
 	else if (system_choice == XYZ)
 		md_analysis::StructureAnalyzer<XYZSystem> sa(analysis_choice);
+	else if (system_choice == TRR)
+		md_analysis::StructureAnalyzer<gromacs::GMXSystem< gromacs::TRRFile> > sa(analysis_choice);
+	else if (system_choice == XTC)
+		md_analysis::StructureAnalyzer<gromacs::GMXSystem< gromacs::XTCFile> > sa(analysis_choice);
 
 	return 0;
 }

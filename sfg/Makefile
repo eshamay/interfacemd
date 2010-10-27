@@ -2,17 +2,17 @@ include ../Makefile
 
 SYSTEM				= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) 
 
-MORITAFILES			= $(WATERSYSTEM) watersfg.o morita.o 
 TEST				= ../mdmath.o ../vecr.o ../matrixr.o test.o
 MPIMORITAFILES		= $(MORITAFILES) ../mpi/mpisys.o
 MORITA2002			= $(SYSTEM) moritah2o.o
 FOO					= $(MDSYSTEM) $(WATER) foo.o
 XYZDIPOLETCF		= $(SYSTEM) xyz-system-dipole-tcf.o
+MORITAFILES			= $(SYSTEM) moritah2o.o watersfg.o morita.o 
 
 LINKER = g++
 
 morita : $(MORITAFILES)
-	$(CXX) $(CPPFLAGS) $(MORITAFILES) -llapack -o ../bin/morita
+	$(CXX) $(MORITAFILES) $(LIBS) -lxdrfile -o ../bin/morita
 
 foo : $(FOO)
 	$(CXX) $(FOO) $(LAPACKLIBS) $(LIBS) -o foo

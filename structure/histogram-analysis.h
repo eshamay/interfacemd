@@ -34,11 +34,11 @@ namespace md_analysis {
 
 				double_histogram_analysis (
 						std::string desc, std::string fn,
-						const double min, const double max, const double resolution,
-						const double min_2, const double max_2, const double resolution_2)
+						const double min, const double max, 
+						const double min_2, const double max_2, const int number_of_bins)
 					: 
-						histogram_analysis<T> (desc, fn, min, max, resolution),
-						histogram_2 (min_2, max_2, resolution_2) { }
+						histogram_analysis<T> (desc, fn, min, max, (max-min)/double(number_of_bins)),
+						histogram_2 (min_2, max_2, (max_2-min_2)/double(number_of_bins)) { }
 
 				virtual ~double_histogram_analysis() { }
 				virtual void DataOutput (system_t&);

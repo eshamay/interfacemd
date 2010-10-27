@@ -1,7 +1,6 @@
 #ifndef __ANGLE_BOND_ANALYSIS_H_
 #define __ANGLE_BOND_ANALYSIS_H_
 
-#include "analysis.h"
 #include "histogram-analysis.h"
 
 namespace md_analysis {
@@ -20,10 +19,9 @@ namespace md_analysis {
 						std::string ("h2o-bond-angle-histograms.dat"),
 						WaterSystem<T>::SystemParameterLookup("analysis.angle-bond-histogram.bondlength-min"), 
 						WaterSystem<T>::SystemParameterLookup("analysis.angle-bond-histogram.bondlength-max"), 
-						WaterSystem<T>::SystemParameterLookup("analysis.angle-bond-histogram.bondlength-res"),
 						WaterSystem<T>::SystemParameterLookup("analysis.angle-bond-histogram.angle-min"), 
-						WaterSystem<T>::SystemParameterLookup("analysis.angle-bond-histogram.angle-max"), 
-						WaterSystem<T>::SystemParameterLookup("analysis.angle-bond-histogram.angle-res")) { }
+						WaterSystem<T>::SystemParameterLookup("analysis.angle-bond-histogram.angle-max"),
+						WaterSystem<T>::SystemParameterLookup("analysis.angle-bond-histogram.number-of-bins")) { }
 
 			virtual void Analysis (system_t&);
 

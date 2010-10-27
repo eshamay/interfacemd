@@ -5,8 +5,8 @@ CXX			= icpc  -I$(EIGEN) -I$(BOOST) -I.. -wd981,444,383,177,1418,1782,869
 
 DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated -DNDEBUG -debug #-wd981,1599,1572,383
 OPTIMIZE 	= -finline-functions -finline -funroll-all-loops -O3 -DNDEBUG -m64 -fast -restrict
-#CPPFLAGS    = -Wall -Drestrict= -ftemplate-depth-100 $(DEBUG) -L$(HOME)/share/lib
 CPPFLAGS    = -Wall -ftemplate-depth-100 $(OPTIMIZE)
+#CPPFLAGS    = -Wall -ftemplate-depth-100 $(DEBUG)
 
 LIBS		= -L$(HOME)/share/lib -lconfig++ #-L$(MPI_HOME)/lib -L$(ATLAS)/lib 
 
@@ -31,12 +31,11 @@ MOLECULEFACTORY = $(ALLMOLECULES) $(MDSRC)/moleculefactory.o
 
 MDSYSTEM = $(MDSRC)/atom.o $(MDSRC)/molecule.o $(MDSRC)/mdsystem.o $(MOLECULEFACTORY)
 
-
 XYZSYSTEM = $(MDSRC)/xyzsystem.o $(MDSRC)/xyzfile.o $(MDSRC)/wannier.o 
 
 AMBERSYSTEM	= $(MDSRC)/ambersystem.o $(MDSRC)/crdfile.o $(MDSRC)/forcefile.o $(MDSRC)/topfile.o
 
-GMXSYS	= $(MDSYSTEM) $(MDSRC)/trrfile.o $(MDSRC)/grofile.o $(MDSRC)/gmxsystem.o 
+GMXSYS	= $(MDSRC)/grofile.o 
 
 WATERSYSTEM = $(MDSYSTEM) $(AMBERSYSTEM) $(XYZSYSTEM) $(GMXSYS) $(MDSRC)/graph.o
 
