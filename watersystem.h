@@ -18,86 +18,6 @@
 #include <numeric>
 
 
-// easy way to carry around lots of config-file parameters
-class WaterSystemParams {
-	public: 
-		WaterSystemParams () { }
-
-		~WaterSystemParams () { 
-			//std::cout << "WaterSystemParams dtor" << std::endl;
-			delete config_file; 
-		}
-
-		WaterSystemParams (std::string configuration_filename)
-		{
-			try {
-
-				config_file = new libconfig::Config();
-				printf ("\nUsing configuration file: \"%s\"\n", configuration_filename.c_str());
-				config_file->readFile(configuration_filename.c_str());
-
-				posmin = (config_file->lookup("analysis.position-range")[0]);
-				posmax = (config_file->lookup("analysis.position-range")[1]);
-
-				//avg = config_file->lookup("analysis.averaging");
-				axis = (coord)((int)config_file->lookup("analysis.reference-axis"));
-				ref_axis = VecR(
-						config_file->lookup("analysis.reference-vector")[0], 
-						config_file->lookup("analysis.reference-vector")[1], 
-						config_file->lookup("analysis.reference-vector")[2]);
-				output_freq = config_file->lookup("analysis.output-frequency");
-				timesteps = config_file->lookup("system.timesteps");
-				restart = config_file->lookup("analysis.restart-time");
-				posres = config_file->lookup("analysis.resolution.position");
-				posbins  = int((posmax-posmin)/posres);
-				pbcflip = config_file->lookup("analysis.PBC-flip");
-				angmin = config_file->lookup("analysis.angle-range")[0];
-				angmax = config_file->lookup("analysis.angle-range")[1];
-				angres = config_file->lookup("analysis.resolution.angle");
-				angbins  = int((angmax-angmin)/angres);
-			}
-			catch(const libconfig::SettingTypeException &stex) {
-				std::cerr << "Something is wrong with the configuration parameters or file - check syntax\n(watersystem.h)" << std::endl;
-				exit(EXIT_FAILURE);
-			}
-			catch(const libconfig::SettingNotFoundException &snfex) {
-				std::cerr << "A setting is missing from the configuration file!" << std::endl;
-				exit(EXIT_FAILURE);
-			}
-
-		}
-
-		libconfig::Config * config_file;	/* Configuration file */
-
-		//bool avg;			/* Will averaging of two interfaces be performed? Can also be used for other functionality */
-
-		coord axis;			/* The reference axis (generally normal to the interface */
-		VecR ref_axis;
-
-		int output_freq;		/* How often data is output to disk and info is posted to the screen */
-		int timesteps, restart;	/* Number of timesteps to process, and restart = number of timesteps to skip */
-
-		double posmin, posmax, posres; /* For generating histograms position data histograms */
-		int posbins;			 /* The number of bins in the position histograms */
-		double pbcflip;
-		double angmin, angmax, angres; /* For generating histograms to bin angle data (min, max, bin width/resolution) */
-		int angbins;
-
-		void PrintParameters () {
-			//printf ("output_file = %s\naxis = %d, ref_axis = ", output_filename.c_str(), axis);
-			printf ("axis = %d, ref_axis = ", axis);
-			ref_axis.Print();
-			printf ("output_freq = %d, timesteps = %d, restart = %d\n", output_freq, timesteps, restart);
-			printf ("posmin = % 8.3f, posmax = % 8.3f, posres = % 8.3f, posbins = %d\n", posmin, posmax, posres, posbins);
-			printf ("pbcflip = % 8.3f\nangmin = % 8.3f, angmax = % 8.3f, angres = % 8.3f, angbins = %d\n",
-					pbcflip, angmin, angmax, angres, angbins);
-		}
-};
-
-
-//class AmberAnalysisSet;
-//class XYZAnalysisSet;
-
 template<class T>
 class WaterSystem {
 
@@ -106,11 +26,11 @@ class WaterSystem {
 		WaterSystem (const std::string configuration_filename);
 		virtual ~WaterSystem ();
 
-		static WaterSystemParams * SystemParameters () { return wsp; }
+		static libconfig::Config * config_file;	/* Configuration file */
 
 		static libconfig::Setting& SystemParameterLookup (std::string param) {
 			try {
-				return WaterSystem<T>::wsp->config_file->lookup(param);
+				return WaterSystem<T>::config_file->lookup(param);
 			}
 			catch(const libconfig::SettingTypeException &stex) {
 				std::cerr << "Something is wrong with the " << param << " setting in the system.cfg configuration file." << std::endl;
@@ -126,7 +46,8 @@ class WaterSystem {
 
 		static double	posmin, posmax;
 		static double	pbcflip;			// location to flip about periodic boundaries
-		static coord axis;				// axis normal to the infterface
+		static coord axis;				// axis normal to the interface
+		static VecR ref_axis;			// vector representation of the reference axis
 		static double int_low, int_high, middle;	// the positions of analysis cutoffs
 
 		static Atom_ptr_vec	sys_atoms;		// all atoms/mols in the system
@@ -249,21 +170,19 @@ class WaterSystem {
 
 	protected:
 
-		static WaterSystemParams * wsp;
-		//libconfig::Config * config_file;	/* Configuration file */
 
-		T * sys;
+		T * sys;	/* System coordinate & files */
 
 		virtual void _InitializeSystem ();
 
 };
 
-template<typename T> WaterSystemParams * WaterSystem<T>::wsp;
-
+template<typename T> libconfig::Config * WaterSystem<T>::config_file;	
 template<typename T> double WaterSystem<T>::posmin;
 template<typename T> double WaterSystem<T>::posmax;
 template<typename T> double WaterSystem<T>::pbcflip;
 template<typename T> coord WaterSystem<T>::axis;
+template<typename T> VecR WaterSystem<T>::ref_axis;
 
 template<typename T> Atom_ptr_vec WaterSystem<T>::sys_atoms;
 template<typename T> Mol_ptr_vec WaterSystem<T>::sys_mols;
@@ -275,13 +194,28 @@ template<typename T> Atom_ptr_vec WaterSystem<T>::int_atoms;
 	template <class T>
 WaterSystem<T>::WaterSystem (const std::string configuration_filename) 
 {
+	try {
+		config_file = new libconfig::Config();
+		printf ("\nUsing configuration file: \"%s\"\n", configuration_filename.c_str());
+		config_file->readFile(configuration_filename.c_str());
 
-	wsp = new WaterSystemParams(configuration_filename);
-
-	posmin = wsp->posmin;
-	posmax = wsp->posmax;
-	pbcflip = wsp->pbcflip;
-	axis = wsp->axis;
+		posmin = SystemParameterLookup("analysis.position-range")[0];
+		posmax = SystemParameterLookup("analysis.position-range")[1];
+		axis = (coord)((int)SystemParameterLookup("analysis.reference-axis"));
+		ref_axis = VecR(
+				SystemParameterLookup("analysis.reference-vector")[0], 
+				SystemParameterLookup("analysis.reference-vector")[1], 
+				SystemParameterLookup("analysis.reference-vector")[2]);
+		pbcflip = SystemParameterLookup("analysis.PBC-flip");
+	}
+	catch(const libconfig::SettingTypeException &stex) {
+		std::cerr << "Something is wrong with the configuration parameters or file - check syntax\n(watersystem.h)" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	catch(const libconfig::SettingNotFoundException &snfex) {
+		std::cerr << "A setting is missing from the configuration file!" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
 	try {
 		this->_InitializeSystem();
@@ -296,7 +230,7 @@ WaterSystem<T>::WaterSystem (const std::string configuration_filename)
 
 template <class T>
 WaterSystem<T>::~WaterSystem () {
-	delete wsp;
+	delete config_file;
 	return;
 }
 
@@ -304,9 +238,8 @@ template <>
 void WaterSystem<AmberSystem>::_InitializeSystem () {
 	try {
 		this->sys = new AmberSystem(
-				wsp->config_file->lookup("system.files.prmtop"),
-				wsp->config_file->lookup("system.files.mdcrd"));
-				//wsp->config_file->lookup("system.files.mdvel"));
+				this->SystemParameterLookup("system.files.prmtop"),
+				this->SystemParameterLookup("system.files.mdcrd"));
 	}
 	catch (const libconfig::SettingNotFoundException &snfex) {
 		std::cerr << "Couldn't find the Amber system filenames listed in the configuration file" << std::endl;
@@ -319,14 +252,14 @@ template <>
 void WaterSystem<XYZSystem>::_InitializeSystem () {
 
 	try {
-		std::string filepath = wsp->config_file->lookup("system.files.xyzfile");
+		std::string filepath = this->SystemParameterLookup("system.files.xyzfile");
 
 		double a,b,c;
-		a = wsp->config_file->lookup("system.dimensions")[0];
-		b = wsp->config_file->lookup("system.dimensions")[1];
-		c = wsp->config_file->lookup("system.dimensions")[2];
+		a = this->SystemParameterLookup("system.dimensions")[0];
+		b = this->SystemParameterLookup("system.dimensions")[1];
+		c = this->SystemParameterLookup("system.dimensions")[2];
 
-		std::string wanniers = wsp->config_file->lookup("system.files.wanniers");
+		std::string wanniers = SystemParameterLookup("system.files.wanniers");
 		VecR dims(a,b,c);
 		printf ("system dimensions are: ");
 		dims.Print();
@@ -343,16 +276,16 @@ void WaterSystem<XYZSystem>::_InitializeSystem () {
 
 template <>
 void WaterSystem< gromacs::GMXSystem<gromacs::TRRFile> >::_InitializeSystem () {
-	std::string gro = wsp->config_file->lookup("system.files.gmx-grofile");
-	std::string trr = wsp->config_file->lookup("system.files.gmx-trrfile");
+	std::string gro = this->SystemParameterLookup("system.files.gmx-grofile");
+	std::string trr = this->SystemParameterLookup("system.files.gmx-trrfile");
 	this->sys = new gromacs::GMXSystem< gromacs::TRRFile >(gro.c_str(), trr.c_str());
 	return;
 }
 
 template <>
 void WaterSystem< gromacs::GMXSystem<gromacs::XTCFile> >::_InitializeSystem () {
-	std::string gro = wsp->config_file->lookup("system.files.gmx-grofile");
-	std::string xtc = wsp->config_file->lookup("system.files.gmx-xtcfile");
+	std::string gro = this->SystemParameterLookup("system.files.gmx-grofile");
+	std::string xtc = this->SystemParameterLookup("system.files.gmx-xtcfile");
 	this->sys = new gromacs::GMXSystem< gromacs::XTCFile >(gro.c_str(), xtc.c_str());
 	return;
 }

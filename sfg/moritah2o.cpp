@@ -4,11 +4,12 @@ namespace morita {
 
 	/*	From the morita 2002 water model */
 		 const double BONDLENGTH_EQ	= 0.9575;		// in angstroms
-		 const double ANGLE_EQ 		= 104.51*M_PI/180.0;		// in radians
-		 const double CHARGE_H_EQ		= 0.3285;		// charge units (atomic units?)
-		 const double CHARGE_O_EQ		= -0.6570;
-		 //const double CHARGE_H_EQ		= 0.5245;		// charge units (atomic units?)
-		 //const double CHARGE_O_EQ		= -1.0490;
+		 //const double ANGLE_EQ 		= 104.51*M_PI/180.0;		// in radians
+		 const double ANGLE_EQ 		= 95.0*M_PI/180.0;		// in radians
+		 //const double CHARGE_H_EQ		= 0.3285;		// charge units (atomic units?)
+		 //const double CHARGE_O_EQ		= -0.6570;
+		 const double CHARGE_H_EQ		= 0.5245;		// charge units (atomic units?)
+		 const double CHARGE_O_EQ		= -1.0490;
 
 	/* from the equilibrium values of the spcfw model */
 	//const double BONDLENGTH_EQ	= 1.012 * sfg_units::ANG2BOHR;		// in atomic units
@@ -50,8 +51,8 @@ namespace morita {
 		this->SetAtoms();	// first get the bonds set in the water
 
 		// determine the bondlength displacements
-		dR1 = this->OH1()->Magnitude() - BONDLENGTH_EQ;
-		dR1 *= sfg_units::ANG2BOHR;
+		dR1 = this->OH1()->Magnitude() - BONDLENGTH_EQ;	// in angstroms
+		dR1 *= sfg_units::ANG2BOHR;	// now in atomic units
 		dR2 = this->OH2()->Magnitude() - BONDLENGTH_EQ;
 		dR2 *= sfg_units::ANG2BOHR;
 
@@ -111,10 +112,12 @@ namespace morita {
 		// in the space-fixed frame (instead of the local or molecular frames
 		// as written in the paper).
 		this->DCMToLabMorita(1);
-		_alpha += (this->_DCM.transpose() * _alpha1 * this->_DCM);
+		//_alpha += (this->_DCM.transpose() * _alpha1 * this->_DCM);
+		_alpha += (this->_DCM * _alpha1 * this->_DCM.transpose());
 
 		this->DCMToLabMorita(2);
-		_alpha += (this->_DCM.transpose() * _alpha2 * this->_DCM);
+		//_alpha += (this->_DCM.transpose() * _alpha2 * this->_DCM);
+		_alpha += (this->_DCM * _alpha2 * this->_DCM.transpose());
 
 	}	// Set Polarizability
 
@@ -138,7 +141,6 @@ namespace morita {
 			_z = _oh2.normalized();
 			_y = (_oh2 % _oh1).normalized();
 		}
-
 
 		// the X-axis is just the cross product of the other two
 		_x = (_y % _z).normalized();

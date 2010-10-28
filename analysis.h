@@ -62,8 +62,6 @@ class Analyzer : public WaterSystem<T>, public patterns::observer::observable {
 		typedef AnalysisSet<Analyzer<T> > analysis_t;
 		void SystemAnalysis (analysis_t&);
 
-		static VecR ref_axis;
-
 		// position boundaries and bin widths for gathering histogram data
 		static double	posres;
 		static int		posbins;
@@ -107,29 +105,25 @@ template <class T> int		Analyzer<T>::angbins;
 template <class T> int 		Analyzer<T>::timesteps;
 template <class T> unsigned int Analyzer<T>::restart;
 
-template <class T> VecR		Analyzer<T>::ref_axis;
-
 template <class T> 
 Analyzer<T>::Analyzer (const std::string ConfigurationFilename) : 
 	WaterSystem<T>(ConfigurationFilename),
 	output_filename(""), output((FILE *)NULL),
-	output_freq(WaterSystem<T>::SystemParameters()->output_freq),
+	output_freq(WaterSystem<T>::SystemParameterLookup("analysis.output-frequency")),
 	timestep (0)
 { 
-	Analyzer<T>::posres = WaterSystem<T>::SystemParameters()->posres;
-	Analyzer<T>::posbins = int((WaterSystem<T>::SystemParameters()->posmax - WaterSystem<T>::SystemParameters()->posmin)/WaterSystem<T>::SystemParameters()->posres);
+	Analyzer<T>::posres = WaterSystem<T>::SystemParameterLookup("analysis.resolution.position");
+	Analyzer<T>::posbins = int((WaterSystem<T>::posmax - WaterSystem<T>::posmin)/posres);
 
-	Analyzer<T>::angmin = WaterSystem<T>::SystemParameters()->angmin;
-	Analyzer<T>::angmax = WaterSystem<T>::SystemParameters()->angmax;
-	Analyzer<T>::angres = WaterSystem<T>::SystemParameters()->angres;
-	Analyzer<T>::angbins = int((WaterSystem<T>::SystemParameters()->angmax - WaterSystem<T>::SystemParameters()->angmin)/WaterSystem<T>::SystemParameters()->angres);
+	Analyzer<T>::angmin = WaterSystem<T>::SystemParameterLookup("analysis.angle-range")[0];
+	Analyzer<T>::angmax = WaterSystem<T>::SystemParameterLookup("analysis.angle-range")[1];
+	Analyzer<T>::angres = WaterSystem<T>::SystemParameterLookup("analysis.resolution.angle");
+	Analyzer<T>::angbins = int((angmax - angmin)/angres);
 
-	Analyzer<T>::timesteps = WaterSystem<T>::SystemParameters()->timesteps;
-	Analyzer<T>::restart = WaterSystem<T>::SystemParameters()->restart;
+	Analyzer<T>::timesteps = WaterSystem<T>::SystemParameterLookup("system.timesteps");
+	Analyzer<T>::restart = WaterSystem<T>::SystemParameterLookup("analysis.restart-time");
 
-	Analyzer<T>::ref_axis = WaterSystem<T>::SystemParameters()->ref_axis;
-
-	status_updater.Set (output_freq, WaterSystem<T>::SystemParameterLookup("system.timesteps"), 0);
+	status_updater.Set (output_freq, timesteps, 0);
 	this->registerObserver(&status_updater);
 
 	this->_OutputHeader();
@@ -269,14 +263,14 @@ double Analyzer<T>::Position (const AtomPtr patom) {
 
 template <class T> 
 double Analyzer<T>::Position (const VecR& v) {
-	double position = v[WaterSystem<T>::wsp.axis];
+	double position = v[WaterSystem<T>::axis];
 	return Analyzer<T>::Position(position);
 }
 
 template <class T> 
 double Analyzer<T>::Position (const double d) {
 	double pos = d;
-	if (pos < WaterSystem<T>::wsp.pbcflip) pos += MDSystem::Dimensions()[WaterSystem<T>::wsp.axis];
+	if (pos < WaterSystem<T>::pbcflip) pos += MDSystem::Dimensions()[WaterSystem<T>::axis];
 	return pos;
 }
 

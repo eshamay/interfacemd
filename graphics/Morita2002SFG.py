@@ -111,7 +111,7 @@ class MoritaSFG2002:
 '''
 
 
-sfg = MoritaSFG2002(sys.argv[1], 0.75e-15, 300.0)
+sfg = MoritaSFG2002(sys.argv[1], 1.0e-15, 300.0)
 
 sfg.PrintData()
 #sfg.PlotData()
