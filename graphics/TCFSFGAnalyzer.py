@@ -23,8 +23,8 @@ class TCFSFGAnalyzer:
 		
 		# now run an fft on the real data
 		self.fft = numpy.fft.rfft(windowed)[1:-1]
-		#max_fft = max(self.fft)
-		#self.fft = [i/max_fft for i in self.fft]
+		max_fft = max(self.fft)
+		self.fft = [i/max_fft for i in self.fft]
 		self.fft_re = [i.real for i in self.fft]
 		self.fft_imag = [i.imag for i in self.fft]
 
@@ -45,9 +45,13 @@ class TCFSFGAnalyzer:
 		self.C = [pow(((f+18796.99)/f),2) for f in self.freq]	# multiplicative constant
 		#chi = map(lambda const, f, val: const*f*abs(val)**2, self.C, self.freq, self.fft)
 		#self.chi = map(lambda x,c: x*c, self.fft, self.C)	# multiply by the pre-factor
-		self.chi = [1.0j*beta*f*x for f,x in zip(self.freq,self.fft)]	# chi resonant
+		self.chi = [1.0j*beta*x for f,x in zip(self.freq,self.fft)]	# chi resonant
+		#self.chi = self.fft
 		#chi = map(lambda x: x*1j, self.fft)
 		self.sfg = [con*pow(abs(x),2) for con,x in zip(self.C, self.chi)]
+		#self.sfg = [pow(abs(x),2) for x in self.chi]
+		max_sfg = max(self.sfg)
+		self.sfg = [i/max_sfg for i in self.sfg]
 
 		return
 

@@ -295,6 +295,7 @@ void Morita2002Analysis<U>::CalculateTensors() {
 	_T.setZero();
 	for (unsigned int i = 0; i < analysis_wats.size(); i++) {
 
+		// set the value for p_not 
 		_p.block(3*i,0,3,1) = analysis_wats[i]->Dipole();
 
 		_alpha.block(3*i,3*i,3,3) = analysis_wats[i]->Polarizability();
@@ -574,32 +575,36 @@ void Morita2008LookupAnalysis<T>::SetAnalysisWaterPolarizability () {
 		dcm = MatR::Zero();
 		dcm = (*it)->DCMToLabMorita(1);	// set up the direction cosine matrix for rotating the polarizability to the lab-frame
 
+		// bondlengths are in angstroms
 		oh1 = (*it)->OH1()->Magnitude();
 		oh2 = (*it)->OH2()->Magnitude();
+		// angle in degrees
 		theta = acos((*it)->Angle()) * 180.0/M_PI;
 
-		// lookup the polarizability from the data file
+		// lookup the molecular (frame) polarizability from the data file
 		alpha = MatR::Zero();
+		// The polarizability lookup value is given in angstrom units (not atomic units)
 		alpha = pdf.Value(oh1, oh2, theta);	// using the polarizability data file for lookup (pdf)
 		// rotate the polarizability tensor into the lab-frame
-		alpha = dcm * alpha;
+		alpha = dcm.transpose() * alpha * dcm;
 		(*it)->SetPolarizability (alpha);
 
 		mu = VecR::Zero();
+		// dipole moment is given in Debye units
 		mu = ddf.Value(oh1, oh2, theta);	// using the dipole data file (ddf)
 		// rotate the polarizability tensor into the lab-frame
 		mu = dcm * mu;
 		(*it)->SetDipoleMoment (mu);
-		std::cout << mu.Magnitude() << std::endl;
+		//std::cout << mu.Magnitude() << std::endl;
 
 		/*
-		(*it)->Print();
-		std::cout << std::endl << "oh's" << std::endl;
-		(*it)->OH1()->normalized().Print();
-		(*it)->OH2()->normalized().Print();
-		(*it)->Bisector().Print();
-		std::cout << "mu.unit" << std::endl;
-		mu.normalized().Print();
+			 (*it)->Print();
+			 std::cout << std::endl << "oh's" << std::endl;
+			 (*it)->OH1()->normalized().Print();
+			 (*it)->OH2()->normalized().Print();
+			 (*it)->Bisector().Print();
+			 std::cout << "mu.unit" << std::endl;
+			 mu.normalized().Print();
 		//std::cout << mu.Magnitude() << std::endl; //<< ")  "; mu.Print(); std::cout << std::endl;
 		//dcm.Print();
 		//(*it)->Print();

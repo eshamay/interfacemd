@@ -18,7 +18,7 @@ from TCFSFGAnalyzer import TCFSFGAnalyzer
 #import matplotlib.pyplot as plt
 # the extents of the x-range
 xmin = 1000.0
-xmax = 15000.0
+xmax = 5000.0
 
 
 class MoritaSFG2002:

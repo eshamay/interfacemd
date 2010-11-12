@@ -44,15 +44,15 @@ class LineShape:
 		residual = LineShape.sm.FittingFunction(LineShape.sm.residuals,function=self.triple_func)
 		plsq = leastsq(residual, p0, args=(self.data,self.x), maxfev=10000)
 		print len(plsq)
-		print plsq[1]
+		print plsq[0]
 
 		self.plsq = plsq[0]
 		self.fit = self.triple_func(self.x,self.plsq)
 	
 	def PlotLine(self,axs,lbl='Raw data'):
-		axs.plot(self.x, self.data, linestyle='-', linewidth=0.4, label=lbl)
+		axs.plot(self.x, self.data, linestyle=':', linewidth=2.0, label=lbl)
 	def PlotSmoothLine(self,axs,lbl='Smooth data'):
-		axs.plot(self.smoothed_x, self.smoothed, linestyle=':', color='k', linewidth=2.0, label=lbl)
+		axs.plot(self.smoothed_x, self.smoothed, linestyle='-', color='r', linewidth=4.0, label=lbl)
 	def PlotFit(self,axs,lbl=''):
 		axs.plot(self.x, self.fit, linestyle='-', color='r', linewidth=3.5, label=lbl)
 
@@ -98,23 +98,25 @@ triple_voigt_p = [3733, 3446, 3250,	# peak centers
 								 70.0, 100.0, 100.0,	# gaussian widths
 								 2.0, 0.5, 2.0]			# amplitudes
 
-triple_lorentzian_p = [3733, 3446, 3213,	# peak centers
-											70.0, 120.0, 120.0,	# lorentzian widths
-											1.0, 1.0, 1.0]			# amplitudes
+triple_lorentzian_p = [3750, 3450, 3250,	# peak centers
+											20.0, 20.0, 20.0,	# lorentzian widths
+											1.0e-15, 2.0e-16, 1.0e-18]			# amplitudes
 
 # plot the data
 fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
 axs = fig.add_subplot(1,1,1)
 
 l = LineShape(sys.argv[1])
-#l.SetFunction(LineShape.lorentzian_func)
-l.SetFunction(LineShape.voigt_func)
-l.SetParameters(triple_voigt_p)
+l.SetFunction(LineShape.lorentzian_func)
+#l.SetFunction(LineShape.voigt_func)
+#l.SetParameters(triple_voigt_p)
+l.SetParameters(triple_lorentzian_p)
 l.SmoothLine()
 l.FitLine()
+l.PlotLine(axs)
 l.PlotSmoothLine(axs)
-l.PlotFit(axs)
-l.PlotComponentPeaks(axs)
+#l.PlotFit(axs)
+#l.PlotComponentPeaks(axs)
 
 
 PlotUtility.ShowLegend(axs)

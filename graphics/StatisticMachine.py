@@ -90,7 +90,7 @@ class StatisticMachine:
 	# 	y = y, x = x,
 	# 	function = fitting function to be used
 	def residuals(self,p, y, x, function):
-		err = y - function(x,p)
+		err = y - function(array(x),p)
 		return err
 
 	def FittingFunction(self, f, **kwargs):
@@ -124,6 +124,37 @@ class StatisticMachine:
 			V = V + (voigt_C[i]*(Y-voigt_A[i])+voigt_D[i]*(X-voigt_B[i])) / ((Y-voigt_A[i])*(Y-voigt_A[i]) + (X-voigt_B[i])*(X-voigt_B[i]))
 
 		return V*Z
+
+	# y = C(1-exp(-kx)), k > 0
+	def exponential_decay_increasing(self,x,p):
+		# p[0] = amplitude
+		# p[1] = time constant
+		return p[0] * (1.0 - exp(-1.0 * p[1] * x))
+
+	def logistic(self,x,p):
+		# p[0] = initial population
+		# p[1] = rate
+		# p[2] = capacity
+		return p[2]*p[0]*exp(p[1]*x)/(p[2]+p[0]*(exp(p[1]*x)-1.0))
+
+	def steady_state(self,x,p):
+		# p[0] = initial population
+		# p[1] = rate 1
+		# p[2] = rate 2
+		return p[0]*(1+((p[1]*exp(-p[2]*x)-p[2]*exp(-p[1]*x))/(p[2]-p[1])))
+
+	def equilibrium_rxn(self,x,p):
+		# p[0] = initial population
+		# p[1] = forward rate
+		# p[2] = reverse rate
+		# p[3] = constant mult.
+		return p[3]*exp(-(p[1]+p[2])*x) + p[0]*p[1]/(p[1]+p[2])
+
+	def forward_rxn(self,x,p):
+		# p[0] = initial population
+		# p[1] = forward rate
+		# p[2] = constant mult.
+		return p[2]*exp(-p[1]*x)+p[0]
 
 	def triple_voigt_fit(self,x,p):
 		# 0-2 = center

@@ -113,11 +113,12 @@ namespace morita {
 		// as written in the paper).
 		this->DCMToLabMorita(1);
 		//_alpha += (this->_DCM.transpose() * _alpha1 * this->_DCM);
-		_alpha += (this->_DCM * _alpha1 * this->_DCM.transpose());
+		_alpha += (this->_DCM.transpose() * _alpha1 * this->_DCM);
 
 		this->DCMToLabMorita(2);
 		//_alpha += (this->_DCM.transpose() * _alpha2 * this->_DCM);
-		_alpha += (this->_DCM * _alpha2 * this->_DCM.transpose());
+		_alpha += (this->_DCM.transpose() * _alpha2 * this->_DCM);
+
 
 	}	// Set Polarizability
 

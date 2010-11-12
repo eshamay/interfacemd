@@ -58,6 +58,8 @@ namespace md_analysis {
 			analyses.push_back(a);
 			a = new atomic_density_analysis<T>();
 			analyses.push_back(a);
+			a = new so2_uptake_analysis<T>();
+			analyses.push_back(a);
 		}
 
 	template <>
@@ -72,6 +74,8 @@ namespace md_analysis {
 			a = new h2o_dipole_magnitude_histogram_analyzer<T>();
 			analyses.push_back(a);
 			a = new atomic_density_analysis<T>();
+			analyses.push_back(a);
+			a = new so2_uptake_analysis<T>();
 			analyses.push_back(a);
 		}
 

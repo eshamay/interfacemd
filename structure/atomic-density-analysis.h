@@ -133,6 +133,80 @@ namespace md_analysis {
 
 		}	// Data Output
 
+
+	/*
+	 * This analysis is for an SO2/H2O system where the SO2 starts outside of the water and then adsorbs to the surface and is absorbed into the water phase. To watch the adsorption rate, the water phase is analyzed and the topmost and lowest water (along the main axis) is determined and then all the SO2 molecules located within the water phase (and a fudge-factor if desired) are counted up and printed out.
+	 * The output will be 1 column in a datafile:
+	 *		# of SO2s in the water phase
+	 */
+	template <typename T>
+		class so2_uptake_analysis : public AnalysisSet< Analyzer<T> > {
+			public:
+				typedef Analyzer<T> system_t;
+
+				so2_uptake_analysis () : 
+					AnalysisSet<system_t> (
+							std::string("An analysis of the adsorption of SO2 into a water phase"),
+							//std::string("3d-atomic-density.dat")) { }
+							std::string("so2-adsorption.dat")) { }
+
+				virtual ~so2_uptake_analysis () { }
+
+				void Analysis (system_t& t);
+			protected:
+				MolPtr high_water, low_water;
+				double high_position, low_position;
+				int numAdsorbed;
+
+				void FindHighAndLowWaters (system_t& t);
+				void CountSO2InWater (system_t& t);
+		};
+
+	template <typename T>
+	void so2_uptake_analysis<T>::FindHighAndLowWaters (system_t& t) {
+
+		t.LoadWaters();
+
+		// sort the waters according to position in the slab
+		std::sort(t.int_wats.begin(), t.int_wats.end(), Analyzer<AmberSystem>::molecule_position_pred(Atom::O));
+		// find the highest and the lowest at the extents of the water slab
+		high_water = t.int_wats.back();
+		high_position = Analyzer<T>::Position(high_water->GetAtom(Atom::O));
+		low_water = t.int_wats.front();
+		low_position = Analyzer<T>::Position(low_water->GetAtom(Atom::O));
+
+	}
+
+	template <typename T>
+	void so2_uptake_analysis<T>::CountSO2InWater (system_t& t) {
+
+		// get the listing of the SO2s in the system
+		t.LoadAll();
+		t.int_mols.clear();
+		for (Mol_it so2 = t.sys_mols.begin(); so2 != t.sys_mols.end(); so2++) {
+			if ((*so2)->MolType() == Molecule::SO2)
+				t.int_mols.push_back(*so2);
+		}
+
+		Atom * s;
+		numAdsorbed = 0;
+		double pos;
+		for (Mol_it so2 = t.int_mols.begin(); so2 != t.int_mols.end(); so2++) {
+			pos = (*so2)->GetAtom(Atom::O)->Position()[WaterSystem<T>::axis];
+			if (pos < high_position && pos > low_position) {
+				++numAdsorbed;
+			}
+		}
+	}
+
+	template <typename T>
+	void so2_uptake_analysis<T>::Analysis (system_t& t) {
+		this->FindHighAndLowWaters(t);
+		this->CountSO2InWater(t);
+
+		fprintf (t.Output(), "%12d %8d\n", t.Timestep(), this->numAdsorbed);
+	}
+
 }	// namespace md_analysis
 
 
