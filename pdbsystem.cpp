@@ -106,8 +106,9 @@ namespace md_files {
 				newmol->MolID (_currentmol);
 				newmol->Name ((*it)->Residue());
 
-				if (pmol != (MolPtr)NULL)
+				if (pmol != (MolPtr)NULL) {
 					_mols.push_back (pmol);
+				}
 
 				pmol = newmol;
 			}
@@ -131,32 +132,29 @@ namespace md_files {
 	//sscanf(pdbline, "ATOM  %5d %4c%c%3c %c%4d%c%8.3lf%8.3lf%8.3lf", &atomid, name, &location, residue, temp, &molid, temp, &x, &y, &z);
 	//sscanf(pdbline, "ATOM  %5d %4c%3c %c%4d%s%8lf%8lf%8lf", &atomid, name, residue, temp, &molid, temp, &X, &Y, &Z);
 
-	/*
-		 void PDBSystem::WritePDB () {
+	void PDBSystem::WritePDB (const Mol_ptr_vec& mols) {
 
-		 int atomCount = 1;
-		 int molCount = 1;
+		int atomCount = 1;
+		int molCount = 1;
 
-	// go through each molecule
-	for (int i = 0; i < (int)sys.size(); i++) {
-	Molecule * mol = sys[i];
-	// and print out each atom
-	for (int atom = 0; atom < mol->size(); atom++) {
+		// go through each molecule
+		for (Mol_it it = mols.begin(); it != mols.end(); it++) {
 
-	Atom *tatom = mol->Atoms(atom);
-	printf ("ATOM  %5d  %-4s%3s %5d    % 8.3f% 8.3f% 8.3f\n",
-	atomCount++, tatom->Name().c_str(), tatom->Residue().c_str(), molCount,
-	tatom->X(), tatom->Y(), tatom->Z());
+			// and print out each atom
+			for (Atom_it jt = (*it)->begin(); jt != (*it)->end(); jt++) {
+
+				printf ("ATOM  %5d  %-4s%3s %5d    % 8.3f% 8.3f% 8.3f\n",
+						atomCount++, (*jt)->Name().c_str(), (*jt)->Residue().c_str(), molCount,
+						(*jt)->X(), (*jt)->Y(), (*jt)->Z());
+			}
+
+			printf ("TER\n");
+			molCount++;
+		}
+
+		printf ("END");
+
+		return;
 	}
-
-	printf ("TER\n");
-	molCount++;
-	}
-
-	printf ("END");
-
-	return;
-	}
-	*/
 
 }	// namespace md_files

@@ -37,8 +37,6 @@ void Water::SetBondLengths () {
 
 void Water::SetAtoms () {
 
-	if (!_set) {
-
 		// first let's grab pointers to the three atoms and give them reasonable names
 		this->_h1 = (AtomPtr)NULL; this->_h2 = (AtomPtr)NULL;
 
@@ -60,8 +58,6 @@ void Water::SetAtoms () {
 		// we can calculate the two O-H vectors
 		this->SetBondLengths ();
 
-		this->Set();
-	}
 	return;
 }
 

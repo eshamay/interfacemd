@@ -44,34 +44,33 @@ class Atom {
 	bool operator< (const Atom& rhs) const;
 
 	// Input
-	virtual void UnsetMolecule() const;
 
-	void Name (const std::string& name) { _name = name; UnsetMolecule(); }
+	void Name (const std::string& name) { _name = name; }
 
 	void Position (const VecR& position);
 	void Position (const double X, const double Y, const double Z);
 
 	void Position (coord const axis, double const value);
 
-	void Force (const VecR& force) { _force = force; UnsetMolecule(); }
-	void Force (const double X, const double Y, const double Z) { _force.Set(X, Y, Z); UnsetMolecule(); }
-	void Force (coord const axis, double const value) { _force.Set (axis, value); UnsetMolecule(); }
+	void Force (const VecR& force) { _force = force; }
+	void Force (const double X, const double Y, const double Z) { _force.Set(X, Y, Z); }
+	void Force (coord const axis, double const value) { _force.Set (axis, value); }
 
-	void ID (const int id) { _ID = id; UnsetMolecule(); }
+	void ID (const int id) { _ID = id; }
 	//void Charge (double charge) { _charge = charge; }
 	void SetAtomProperties ();
-	void Residue (const std::string& residue) { _residue = residue; UnsetMolecule(); }
+	void Residue (const std::string& residue) { _residue = residue; }
 
 	// for setting the atom's position
-	void X (double val) { _position[0] = val; UnsetMolecule(); }			
-	void Y (double val) { _position[1] = val; UnsetMolecule(); }
-	void Z (double val) { _position[2] = val; UnsetMolecule(); }
+	void X (double val) { _position[0] = val; }
+	void Y (double val) { _position[1] = val; }
+	void Z (double val) { _position[2] = val; }
 
-	void MolID (const int mol) { _molid = mol; UnsetMolecule(); }	// sets the ID of the molecule containing this atom
-	void ParentMolecule (const MolPtr mol) { _pmolecule = mol; UnsetMolecule(); }	// sets a pointer to the molecule that contains the atom
+	void MolID (const int mol) { _molid = mol; }	// sets the ID of the molecule containing this atom
+	void ParentMolecule (const MolPtr mol) { _pmolecule = mol;  }	// sets a pointer to the molecule that contains the atom
 
 	void Shift (const VecR& shift)			// shift the atom's position
-	{ _position += shift; UnsetMolecule(); }
+	{ _position += shift; }
 
 	// Output
 	const std::string& Name () const 	{ return _name; }
@@ -96,6 +95,11 @@ class Atom {
 
 	static AtomPtr FindByElement (const Atom_ptr_vec& apv, Element_t elmt) {
 		Atom_it a = std::find_if (apv.begin(), apv.end(), member_functional::mem_fun_eq(&Atom::Element,elmt));
+		return *a;
+	}
+
+	static AtomPtr FindByID (const Atom_ptr_vec& apv, int id) {
+		Atom_it a = std::find_if (apv.begin(), apv.end(), member_functional::mem_fun_eq(&Atom::ID,id));
 		return *a;
 	}
 

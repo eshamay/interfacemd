@@ -1,9 +1,9 @@
 #include "ambersystem.h"
 
-AmberSystem::AmberSystem (const std::string& prmtop, const std::string& mdcrd, const std::string& mdvel)
+AmberSystem::AmberSystem (const std::string& prmtop, const std::string& mdcrd, const bool periodic, const std::string& mdvel)
 	// some initialization needs to happen here
 : 	_topfile(prmtop),
-	_coords(mdcrd, _topfile.NumAtoms()),
+	_coords(mdcrd, _topfile.NumAtoms(), periodic),
 	_forces(mdvel, _topfile.NumAtoms())
 {
 	_atoms = Atom_ptr_vec(_topfile.NumAtoms(), (AtomPtr)NULL);
@@ -134,8 +134,6 @@ void AmberSystem::LoadNext () {
 	_coords.LoadNext ();							// load up coordinate information from the file
 	if (_forces.Loaded()) _forces.LoadNext ();		// also load the force information while we're at it
 	this->_ParseAtomVectors ();
-	for (Mol_ptr_vec::iterator it = _mols.begin(); it != _mols.end(); it++)
-		(*it)->Unset();							// this sets a particular flag on a molecule
 
 	return;
 }

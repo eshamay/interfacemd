@@ -1,15 +1,19 @@
 include ../Makefile
 
-PDBSYSTEM		= $(MDSYSTEM) ../pdbfile.o
+PDBSYSTEM		= $(MDSYSTEM) ../pdbsystem.o
 
-QUARTZ			= $(PDBSYSTEM) make-quartz-slab.cpp
+QUARTZ			= $(PDBSYSTEM) ../xyzfile.o quartz-slab.o
+ROTATEUNITCELL			= $(PDBSYSTEM) ../xyzfile.o rotate-unitcell.o
 MAKEONEMOL		= $(PDBSYSTEM) make-one-mol.cpp
 CONNECTIVITY		= $(PDBSYSTEM) connectivity.cpp
 TEMPFILES		= $(WATERSYSTEM) ../pdbfile.o temp.cpp
 MOLGRID			= $(PDBSYSTEM) molgrid.cpp
 
 quartz: $(QUARTZ)
-	$(CXX) $(CPPFLAGS) $(QUARTZ) -llapack -o ../bin/make-quartz-slab
+	$(CXX) $(QUARTZ) -o ../bin/make-quartz-slab
+
+rotateunitcell: $(ROTATEUNITCELL)
+	$(CXX) $(ROTATEUNITCELL) -o ../bin/rotateunitcell
 
 molgrid: $(MOLGRID)
 	$(CXX) $(CPPFLAGS) $(MOLGRID) -llapack -o ../bin/molgrid

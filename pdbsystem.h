@@ -23,7 +23,7 @@ namespace md_files {
 
 		public:
 
-			PDBSystem (std::string path) : CoordinateFile(path) {
+			PDBSystem (std::string path) : CoordinateFile(path), _initialized(false), _numAtoms(0) {
 				LoadFirst();
 			}
 
@@ -41,7 +41,8 @@ namespace md_files {
 			// Various control functions
 			void LoadNext ();
 
-			//void WritePDB ();		// given a vector of molecules, this will print out a PDB file
+			// given a vector of molecules, this will print out a PDB file
+			static void WritePDB (const Mol_ptr_vec& mols);
 	};
 
 }	// namespace md_files

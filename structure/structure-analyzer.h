@@ -60,6 +60,8 @@ namespace md_analysis {
 			analyses.push_back(a);
 			a = new so2_uptake_analysis<T>();
 			analyses.push_back(a);
+			a = new so2_angle_bond_analyzer<T>();
+			analyses.push_back(a);
 		}
 
 	template <>
@@ -107,7 +109,7 @@ namespace md_analysis {
 			analyses.push_back(a);
 			a = new atomic_density_analysis<T>();
 			analyses.push_back(a);
-			a = new so2_angle_bond_analyzer();
+			a = new so2_angle_bond_analyzer<T>();
 			analyses.push_back(a);
 			a = new so2_closest_H_analyzer();
 			analyses.push_back(a);

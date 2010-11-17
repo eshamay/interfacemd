@@ -19,7 +19,6 @@ void Hydroxide::SetAtoms () {
   _h = this->GetAtom("H");
 
   _oh = _h->Position() - _o->Position();
-  _set = true;
 
   return;
 }

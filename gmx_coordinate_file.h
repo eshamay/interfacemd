@@ -1,7 +1,9 @@
-#ifndef GMXCoordinateFileFILE_H_
-#define GMXCoordinateFileFILE_H_
+#ifndef GMX_COORDINATE_FILE_H_
+#define GMX_COORDINATE_FILE_H_
 
+#ifndef CPLUSCPLUS
 #define CPLUSPLUS 1
+#endif
 
 #include "vecr.h"
 #include "xdrfile/xdrfile.h"

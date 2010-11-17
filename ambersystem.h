@@ -23,7 +23,7 @@ private:
 
 public:
 	// constructors
-	AmberSystem (const std::string& prmtop, const std::string& mdcrd, const std::string& mdvel = "");
+	AmberSystem (const std::string& prmtop, const std::string& mdcrd, const bool periodic=true, const std::string& mdvel = "");
 	~AmberSystem ();
 
 	// Controller & Calculation methods

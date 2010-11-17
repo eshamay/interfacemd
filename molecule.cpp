@@ -2,26 +2,18 @@
 
 int Molecule::numMolecules = 0;
 
-void Atom::UnsetMolecule () const {
-	if (_pmolecule != (MolPtr)NULL)
-		_pmolecule->Unset();
-}
-
 // A constructor for an empty molecule
 Molecule::Molecule () :
-	_set(false),
 	_mass(0.0),
 	_name(""),
 	_moltype(Molecule::NO_MOLECULE) {
 		++numMolecules;
-		Unset();
 	}
 
 // a copy constructor to do a deep copy of a molecule instead of just referencing a pre-existing one.
 Molecule::Molecule (const Molecule& oldMol) :
 	_atoms(oldMol._atoms),
 	_wanniers(oldMol._wanniers),
-	_set(false),
 	_centerofmass(oldMol._centerofmass),
 	_mass(oldMol._mass),
 	_name(oldMol._name),
@@ -30,7 +22,6 @@ Molecule::Molecule (const Molecule& oldMol) :
 	_DCM (oldMol._DCM) {
 		this->Rename(oldMol.Name());
 		++numMolecules;
-		Unset(); 
 	}
 
 Molecule::~Molecule () {
@@ -118,7 +109,6 @@ void Molecule::FixAtom (AtomPtr atom) {
 
 	// fix the molecular properties affected by the addition of a new atom
 	this->_mass += atom->Mass();
-	Unset();
 
 	return;
 }
@@ -139,7 +129,6 @@ void Molecule::Rename (const std::string& name) {
 	for (Atom_it atom = _atoms.begin(); atom != _atoms.end(); atom++) {
 		(*atom)->Residue(name);
 	}
-	Unset();
 
 	return;
 }
@@ -173,7 +162,6 @@ void Molecule::Reflect (coord const axis, double const plane) {
 		(*atom)->Position (axis, 2.0*plane - pos[axis]);
 		(*atom)->Force (axis, -force[axis]);
 	}
-	Unset();
 }
 
 /*
@@ -224,7 +212,6 @@ void Molecule::Rotate (VecR& origin, VecR& axis, double angle) {
 		// and then relocate it back to the original origin
 		(*atom)->Shift (origin);
 	}
-	Unset();
 }
 
 void Molecule::Shift (VecR& shift) {
@@ -232,7 +219,6 @@ void Molecule::Shift (VecR& shift) {
 	for (Atom_it it = this->begin(); it != this->end(); it++) {
 		(*it)->Shift (shift);
 	}
-	Unset();
 
 	return;
 }
@@ -258,7 +244,6 @@ void Molecule::clear () {
 	_name = "";
 	_ID = 0;
 	_moltype = Molecule::NO_MOLECULE;
-	Unset();
 }
 
 double Molecule::MinDistance (Molecule& mol) {
@@ -357,6 +342,5 @@ MolPtr Molecule::Merge (MolPtr mol) {
 		this->AddAtom (*it);
 	}
 
-	Unset();
 	return (this);
 }

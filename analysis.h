@@ -1,4 +1,4 @@
-#if !defined(ANALYSIS_H_)
+#ifndef ANALYSIS_H_
 #define ANALYSIS_H_
 
 #include "watersystem.h"
@@ -90,6 +90,7 @@ class Analyzer : public WaterSystem<T>, public patterns::observer::observable {
 
 		//! Predicate for sorting a container of molecules based on position along the main axis of the system, and using a specific element type to determine molecular position. i.e. sort a container of waters based on the O position, or sort a container of NO3s based on the N position, etc.
 		class molecule_position_pred; 		
+		class molecule_distance_pred; 		
 
 };	// Analyzer
 
@@ -295,7 +296,7 @@ VecR Analyzer<T>::CenterOfMass (Iter first, Iter last)
 	return com;
 }
 
-
+//! Predicate for sorting molecules based on their positions along the system reference axis. The position of the element supplied (elmt) is used. e.g. if elmt = Atom::O, then the first oxygen of the molecule will be used
 template<class T>
 class Analyzer<T>::molecule_position_pred : public std::binary_function <Molecule*,Molecule*,bool> {
 	private:
@@ -314,6 +315,21 @@ class Analyzer<T>::molecule_position_pred : public std::binary_function <Molecul
 		}
 };
 
+
+//! Calculates the distance between two molecules using their given reference points (as defined in the Molecule::ReferencePoint
+template<class T>
+class Analyzer<T>::molecule_distance_pred : public std::binary_function <MolPtr,MolPtr,bool> {
+	private:
+		MolPtr _reference_mol;	// the molecule that will act as the reference point for the comparison
+	public:
+		molecule_distance_pred (const MolPtr refmol) : _reference_mol(refmol) { }
+		// return the distance between the two molecules and the reference mol
+		bool operator()(const MolPtr left, const MolPtr right) const {
+			double left_dist = (left->ReferencePoint() - _reference_mol->ReferencePoint()).norm();
+			double right_dist = (left->ReferencePoint() - _reference_mol->ReferencePoint()).norm();
+			return left_dist < right_dist;
+		}
+};
 
 
 /***************** Analysis Sets specific to given MD systems ***************/

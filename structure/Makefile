@@ -2,7 +2,7 @@ include ../Makefile
 
 STRUCTURE				= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) 
 MORITA					= ../sfg/moritah2o.o ../sfg/amber-morita2002.o 
-SYSTEMANALYSES			= $(STRUCTURE) angle-bond-analysis.o neighbor-analysis.o structure-analyzer.o #$(MORITA) 
+SYSTEMANALYSES			= $(STRUCTURE) neighbor-analysis.o structure-analyzer.o #$(MORITA) 
 
 
 test : $(TEST) 

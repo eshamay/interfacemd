@@ -15,6 +15,7 @@ namespace md_analysis {
 
 		public:
 			StarStatusBarUpdater () : _frequency(0), _count(0), _maxcount(0) { }
+			virtual ~StarStatusBarUpdater () { }
 
 			StarStatusBarUpdater (const int frequency, const int maxcount, const int startingcount = 0) 
 				: _frequency(frequency), _count(startingcount), _maxcount(maxcount) { }

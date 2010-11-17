@@ -19,6 +19,7 @@ class MDSystem {
 		
 		//! Parses out molecules from the set of atoms in an MD data set. This is typically done via topology files, or some other defined routine that determines connectivity between atoms to form molecules.
 		virtual void _ParseMolecules () = 0;
+		bool _parse_molecules;	// this gets set if the molecules are to be parsed to determine the specific types.
 
 	public:
 

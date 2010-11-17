@@ -35,12 +35,9 @@ class Molecule {
 		static int numMolecules;
 
 		// Input functions
-		void Name (std::string name) { _name = name; Unset(); }	// set the molecule's name
-		void MolID (int ID) { _ID = ID; Unset(); }
-		void MolType (Molecule::Molecule_t type) { _moltype = type; Unset(); }
-
-		void Set () { _set = true; }
-		void Unset () { _set = false; }
+		void Name (std::string name) { _name = name; }	// set the molecule's name
+		void MolID (int ID) { _ID = ID; }
+		void MolType (Molecule::Molecule_t type) { _moltype = type; }
 
 		// Controls
 		void Shift (VecR& shift);				// Shift the origin of the entire molecule
@@ -49,6 +46,8 @@ class Molecule {
 
 		// Output Functions
 		VecR CenterOfMass () const		{ return _centerofmass; }
+		// A reference point within the molecule for comparing positions
+		virtual VecR ReferencePoint () const { return _centerofmass; }
 
 		/* Dealing with atoms in the molecule */
 		Atom_ptr_vec Atoms () const			{ return _atoms; }
@@ -75,9 +74,9 @@ class Molecule {
 		VecR Y () const					{ return _y; }
 		VecR Z () const					{ return _z; }
 		// setting molecular axes
-		void X (VecR& x_axis) { _x = x_axis; Unset(); }
-		void Y (VecR& y_axis) { _y = y_axis; Unset(); }
-		void Z (VecR& z_axis) { _z = z_axis; Unset(); }
+		void X (VecR& x_axis) { _x = x_axis; }
+		void Y (VecR& y_axis) { _y = y_axis; }
+		void Z (VecR& z_axis) { _z = z_axis; }
 
 		// Euler angles
 		double * EulerAngles () 		{ return _eulerangles; }
@@ -87,7 +86,7 @@ class Molecule {
 		double MinDistance (Molecule& mol);	// calculates the minimum distance between this molecule and another (2 closest atoms)
 
 		//VecR CalcDipole ();	// calculate the dipole
-		virtual void Dipole (VecR& dip) { _dipole = dip; Unset(); }
+		virtual void Dipole (VecR& dip) { _dipole = dip; }
 		virtual VecR Dipole () const { return _dipole; }		// return the dipole of the molecule
 
 		virtual void Flip (const coord axis) { }
@@ -112,8 +111,8 @@ class Molecule {
 		//int operator+= (Molecule& mol);					// Joins two molecules
 
 		// Some stuff to work with wannier centers
-		void AddWannier (const VecR& wannier) { _wanniers.push_back(wannier); Unset(); } // adds a wannier center into the molecule
-		void ClearWanniers () { _wanniers.clear(); Unset(); }	// clear out the entire list
+		void AddWannier (const VecR& wannier) { _wanniers.push_back(wannier); } // adds a wannier center into the molecule
+		void ClearWanniers () { _wanniers.clear(); }	// clear out the entire list
 
 
 		// some functions to manipulate the molecule's position/orientation (symmetry operations)
@@ -178,7 +177,11 @@ class Molecule {
 				return;
 			}
 
-
+		// returns an iterator to the first occurence of a member with the given name
+		static MolPtr FindByID (const Mol_ptr_vec& mols, const int id) {
+			Mol_it it = std::find_if (mols.begin(), mols.end(), member_functional::mem_fun_eq(&Molecule::MolID,id));
+			return *it;
+		}
 
 	protected:
 		Atom_ptr_vec	_atoms;				// the list of the atoms in the molecule
@@ -186,7 +189,6 @@ class Molecule {
 		VecR			_dipole;			// the molecular dipole
 		VecR			_x, _y, _z;			// molecular frame axes
 
-		bool			_set;				// just a little helper to see if the atoms of the molecule have been set or for any other special purpose
 
 		// this is broken last I checked - not updated with coordinate updates
 		VecR			_centerofmass;		// calculate by 1/M * Sum(m[i]*r[i])	where M = total mass, m[i] and r[i] are atom mass and pos

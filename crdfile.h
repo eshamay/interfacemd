@@ -16,11 +16,12 @@ class CRDFile {
 
 	bool			_eof;		// end of file marker for the coord file
 	bool			_set;
+	bool			_periodic;	// are periodic boundaries being used
 
 	public:
 
 	CRDFile () { }
-	CRDFile (std::string const crdpath, int const c_size);
+	CRDFile (std::string const crdpath, int const c_size, const bool periodic);
 	~CRDFile ();
 
 	// Various control functions

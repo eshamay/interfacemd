@@ -16,7 +16,6 @@ Proton::~Proton () {
 void Proton::SetAtoms () {
 	_h = this->GetAtom("H");
 	this->FixAtoms();
-	_set = true;
 return;
 }
 

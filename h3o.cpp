@@ -36,7 +36,6 @@ void Hydronium::SetAtoms () {
 
   this->FixAtoms();
 
-  _set = true;
 
   return;
 }

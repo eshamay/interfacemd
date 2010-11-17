@@ -1,7 +1,7 @@
 #include "crdfile.h"
 
-CRDFile::CRDFile (std::string const crdpath, int const c_size) :
-	_file((FILE *)NULL), _size(c_size), _dims(), _frame(0), _eof(true), _set(false)
+CRDFile::CRDFile (std::string const crdpath, int const c_size, const bool periodic) :
+	_file((FILE *)NULL), _size(c_size), _dims(), _frame(0), _eof(true), _set(false), _periodic(periodic)
 {
 
 	// first load up the file given the path
@@ -42,9 +42,11 @@ void CRDFile::LoadNext () {
 		}
 	}
 
-	// process the next frame's header line (grab the box dimensions)
-	fscanf (_file, " %lf %lf %lf", &x, &y, &z);
-	_dims.Set(x,y,z);
+	if (_periodic) {
+		// process the next frame's header line (grab the box dimensions)
+		fscanf (_file, " %lf %lf %lf", &x, &y, &z);
+		_dims.Set(x,y,z);
+	}
 
 	++_frame;
 

@@ -1,6 +1,10 @@
 #ifndef GROFILE_H_
 #define GROFILE_H_
 
+#ifndef CPLUSPLUS
+#define CPLUSPLUS 1 
+#endif
+
 #include "atom.h"
 #include "molecule.h"
 #include "mdfiles.h"

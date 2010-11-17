@@ -130,3 +130,12 @@ void XYZFile::Seek (int step) {
 		this->LoadNext();
 	}
 }
+
+void XYZFile::WriteXYZ (Atom_ptr_vec& atoms) {
+	printf ("%d\n", (int)atoms.size());
+	printf ("\n");
+
+	for (Atom_it it = atoms.begin(); it != atoms.end(); it++) {
+		printf ("%s % 10.5f % 10.5f % 10.5f\n", (*it)->Name().c_str(), (*it)->Position()[x], (*it)->Position()[y], (*it)->Position()[z]);
+	}
+}

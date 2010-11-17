@@ -22,9 +22,10 @@ namespace molecule {
 			mol = new CarbonTetrachloride;
 
 		else {
+			mol = new Molecule;
 			//mol = new Molecule;
-			std::cerr << "Couldn't determine the molecule using the given name: " << name << std::endl;
-			exit(1);
+			//std::cerr << "Couldn't determine the molecule using the given name: " << name << std::endl;
+			//exit(1);
 		}
 
 		return mol;

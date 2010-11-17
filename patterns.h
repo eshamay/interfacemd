@@ -11,6 +11,7 @@ namespace patterns {
 		class observer {
 			public:
 				virtual void notify () = 0;
+				virtual ~observer() { }
 		};	// observer
 
 
@@ -20,6 +21,7 @@ namespace patterns {
 				observer_list observers;
 
 			public:
+				virtual ~observable() { }
 				virtual void registerObserver (observer * o) {
 					observers.push_back(o);
 				}

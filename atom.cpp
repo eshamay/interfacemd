@@ -46,17 +46,14 @@ Atom::~Atom () {
 
 void Atom::Position (const VecR& position) { 
 	_position = position; 
-	UnsetMolecule();
 }
 
 void Atom::Position (const double X, const double Y, const double Z) { 
 	_position.Set(X, Y, Z); 
-	UnsetMolecule();
 }
 
 void Atom::Position (coord const axis, double const value) { 
 	_position.Set (axis, value); 
-	UnsetMolecule();
 }
 
 double Atom::operator[] (const coord index) const {
@@ -67,7 +64,6 @@ double Atom::operator[] (const coord index) const {
 		case y: pos = _position.y();
 		case z: pos = _position.z();
 	}
-	UnsetMolecule();
 	return pos;
 }
 
@@ -145,7 +141,6 @@ void Atom::SetAtomProperties () {
 		_element = F;
 	}
 
-	UnsetMolecule();
 
 	return;
 }

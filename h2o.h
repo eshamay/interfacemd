@@ -39,6 +39,8 @@ public:
 	AtomPtr H1 () { return _h1; }
 	AtomPtr H2 () { return _h2; }
 
+	virtual VecR ReferencePoint () const { return _o->Position(); }
+
 	VecR const * OH1 () const { return &_oh1; }
 	VecR const * OH2 () const { return &_oh2; }
 	double Angle () const { return (_oh1 < _oh2); }	// returns the cos of the H-O-H angle
@@ -49,6 +51,7 @@ public:
 
 typedef Water::WaterPtr WaterPtr;
 typedef std::vector<WaterPtr> Water_ptr_vec;
+typedef Water_ptr_vec::iterator Wat_it;
 typedef std::vector<Water> Water_vec;
 
 

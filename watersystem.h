@@ -5,7 +5,6 @@
 #include "mdsystem.h"
 #include "ambersystem.h"
 #include "xyzsystem.h"
-
 #include "gmxsystem.h"
 
 #include "utility.h"
@@ -165,6 +164,7 @@ class WaterSystem {
 		}
 
 		void UpdateGraph () { sys->graph.UpdateGraph (int_atoms); }
+		void UpdateGraph (const Atom_ptr_vec& atoms) { sys->graph.UpdateGraph (atoms); }
 		bondgraph::BondGraph& Graph () const { return sys->graph; }
 
 
@@ -237,9 +237,12 @@ WaterSystem<T>::~WaterSystem () {
 template <>
 void WaterSystem<AmberSystem>::_InitializeSystem () {
 	try {
+		bool periodic = this->SystemParameterLookup("system.periodic");
 		this->sys = new AmberSystem(
 				this->SystemParameterLookup("system.files.prmtop"),
-				this->SystemParameterLookup("system.files.mdcrd"));
+				this->SystemParameterLookup("system.files.mdcrd"),
+				periodic);
+				
 	}
 	catch (const libconfig::SettingNotFoundException &snfex) {
 		std::cerr << "Couldn't find the Amber system filenames listed in the configuration file" << std::endl;
