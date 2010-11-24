@@ -42,7 +42,7 @@ namespace md_files {
 			void LoadNext ();
 
 			// given a vector of molecules, this will print out a PDB file
-			static void WritePDB (const Mol_ptr_vec& mols);
+			static void WritePDB (const Mol_ptr_vec& mols, FILE * file);
 	};
 
 }	// namespace md_files

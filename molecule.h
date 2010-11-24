@@ -121,6 +121,7 @@ class Molecule {
 
 		// get the rotation matrix to rotate a molecule to lab-frame coordinates
 		virtual MatR const & DCMToLab ();
+		virtual const MatR& DCM () { return _DCM; }
 
 		template <class U>
 			struct SameType : public std::binary_function<U,U,bool> {

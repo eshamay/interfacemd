@@ -73,11 +73,11 @@ class Atom {
 	{ _position += shift; }
 
 	// Output
-	const std::string& Name () const 	{ return _name; }
-	const Element_t& Element () const { return _element; }
-	const double& Mass () const 	{ return _mass; }
-	const double& Charge () const 	{ return _charge; }
-	const int& ID () const 		{ return _ID; }
+	std::string Name () const 	{ return _name; }
+	Element_t Element () const { return _element; }
+	double Mass () const 	{ return _mass; }
+	double Charge () const 	{ return _charge; }
+	int ID () const 		{ return _ID; }
 	const std::string& Residue () const { return _residue; }
 
 	const VecR& Position () const	{ return _position; }
@@ -117,7 +117,11 @@ class Atom {
 			 (ai->Element() == element_b && aj->Element() == element_a));
 	}
 
-
+	static void KeepByElement (Atom_ptr_vec& u, const Element_t& elmt) {
+		u.erase(
+				remove_if(u.begin(), u.end(), std::not1(member_functional::ptr_mem_fun_eq<Atom,Atom::Element_t>(&Atom::Element, elmt))), u.end());
+		return;
+	}
 
 	protected:
 	std::string _name, 	// human-readable identifier

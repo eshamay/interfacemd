@@ -132,7 +132,7 @@ namespace md_files {
 	//sscanf(pdbline, "ATOM  %5d %4c%c%3c %c%4d%c%8.3lf%8.3lf%8.3lf", &atomid, name, &location, residue, temp, &molid, temp, &x, &y, &z);
 	//sscanf(pdbline, "ATOM  %5d %4c%3c %c%4d%s%8lf%8lf%8lf", &atomid, name, residue, temp, &molid, temp, &X, &Y, &Z);
 
-	void PDBSystem::WritePDB (const Mol_ptr_vec& mols) {
+	void PDBSystem::WritePDB (const Mol_ptr_vec& mols, FILE * file) {
 
 		int atomCount = 1;
 		int molCount = 1;
@@ -143,16 +143,16 @@ namespace md_files {
 			// and print out each atom
 			for (Atom_it jt = (*it)->begin(); jt != (*it)->end(); jt++) {
 
-				printf ("ATOM  %5d  %-4s%3s %5d    % 8.3f% 8.3f% 8.3f\n",
+				fprintf (file, "ATOM  %5d  %-4s%3s %5d    % 8.3f% 8.3f% 8.3f\n",
 						atomCount++, (*jt)->Name().c_str(), (*jt)->Residue().c_str(), molCount,
 						(*jt)->X(), (*jt)->Y(), (*jt)->Z());
 			}
 
-			printf ("TER\n");
+			fprintf (file, "TER\n");
 			molCount++;
 		}
 
-		printf ("END");
+		fprintf (file, "END");
 
 		return;
 	}

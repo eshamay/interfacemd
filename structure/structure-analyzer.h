@@ -50,18 +50,13 @@ namespace md_analysis {
 			typedef AmberSystem T;
 			AnalysisSet<system_t> * a;
 
-			a = new h2o_angle_bond_histogram_analyzer<T>();
-			analyses.push_back(a);
-			a = new so2_angle_bond_histogram_analyzer<T>();
-			analyses.push_back(a);
-			a = new h2o_dipole_magnitude_histogram_analyzer<T>();
-			analyses.push_back(a);
-			a = new atomic_density_analysis<T>();
-			analyses.push_back(a);
-			a = new so2_uptake_analysis<T>();
-			analyses.push_back(a);
-			a = new so2_angle_bond_analyzer<T>();
-			analyses.push_back(a);
+			a = new h2o_angle_bond_histogram_analyzer<T>();				analyses.push_back(a);
+			a = new so2_angle_bond_histogram_analyzer<T>();				analyses.push_back(a);
+			a = new h2o_dipole_magnitude_histogram_analyzer<T>(); analyses.push_back(a);
+			a = new atomic_density_analysis<T>();									analyses.push_back(a);
+			a = new so2_uptake_analysis<T>();											analyses.push_back(a);
+			a = new so2_angle_bond_analyzer<T>();									analyses.push_back(a);
+			a = new so2_closest_water_map<T>();										analyses.push_back(a);
 		}
 
 	template <>

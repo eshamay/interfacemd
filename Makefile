@@ -1,7 +1,7 @@
 #MDSRC	 	= $(HOME)/md/src
 
 
-CXX			= icpc  -I$(EIGEN) -I$(BOOST) -I$(MDSRC) -wd981,444,383,177,1418,1782,869
+CXX			= icpc  -I$(EIGEN) -I$(BOOST) -I$(MDSRC) -wd981,444,383,177,1418,1782,869,1572
 #CXX			= g++  -I$(EIGEN) -I$(BOOST) -I$(MDSRC) 
 
 DEBUG		= -O0 -g3 -ggdb -D_GLIBCXX_DEBUG -Wno-deprecated -DNDEBUG -debug #-wd981,1599,1572,383
@@ -39,7 +39,7 @@ XYZSYSTEM = $(MDSRC)/xyzsystem.o $(MDSRC)/xyzfile.o $(MDSRC)/wannier.o
 
 AMBERSYSTEM	= $(MDSRC)/ambersystem.o $(MDSRC)/crdfile.o $(MDSRC)/forcefile.o $(MDSRC)/topfile.o
 
-GMXSYS	= $(MDSRC)/grofile.o 
+GMXSYS	= $(MDSRC)/grofile.o $(MDSRC)/gmx_coordinate_file.o
 
 WATERSYSTEM = $(MDSYSTEM) $(AMBERSYSTEM) $(XYZSYSTEM) $(GMXSYS) $(MDSRC)/graph.o
 

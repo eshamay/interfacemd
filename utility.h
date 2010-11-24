@@ -175,6 +175,18 @@ namespace member_functional {
 		mem_fun_eq_t<U, R, S> mem_fun_eq(R (U::*fn)() const, S val)
 		{ return mem_fun_eq_t<U, R, S>(fn, val); }
 
+	template <typename U, typename R>
+	class ptr_mem_fun_eq : public std::unary_function<U*,bool> {
+		private:
+			R _r;
+			R (U::*_fn)() const;
+		public:
+			ptr_mem_fun_eq (R (U::*fn)() const, const R& r) : _fn(fn), _r(r) { }
+			bool operator() (U* u) const {
+				return (u->*_fn)() == _r;
+			}
+	};
+
 } // class member functional
 
 

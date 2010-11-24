@@ -21,6 +21,7 @@ class SulfurDioxide : public Molecule {
 	VecR SO2 () const { return _so2; }
 
 	virtual VecR ReferencePoint () const { return _s->Position(); }
+	virtual void SetBisectorAxes ();
 
 	double Angle () const { return (_so1 < _so2); } // cos of the O-S-O angle
 	VecR Bisector ();

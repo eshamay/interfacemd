@@ -41,10 +41,12 @@ namespace md_analysis {
 						std::string("SO2 molecular angle and S-O bondlengths"),
 						std::string ("so2-angle+bonds.dat")) { }
 
-			//void Setup (system_t& t) {
+			void Setup (system_t& t) {
 				//AnalysisSet<system_t>::Setup(t);
-				//fprintf (t.Output(), "distance so1 so2 theta\n");
-			//}
+				// Ox-H-n == the distance from a given so2-O to the nth closest h2o-H
+				// S-O-n == distance from so2-S to the nth closest h2o-O
+				fprintf (t.Output(), "step SO-1 SO-2 OSO-theta Bisector-theta S-O-1 S-O-2 S-O-3 O1-H-1 O1-H-2 O1-H-3 O2-H-1 O2-H-2 O2-H-3\n");
+			}
 
 			void Analysis (system_t& t);
 
@@ -52,6 +54,9 @@ namespace md_analysis {
 			SulfurDioxide * so2;
 			double angle;
 	};
+
+
+
 
 	template <typename T>
 	void so2_angle_bond_analyzer<T>::Analysis (system_t& t) {
@@ -79,47 +84,59 @@ namespace md_analysis {
 		std::copy (all_wats.begin(), all_wats.end(), std::back_inserter(analysis_wats));
 		// now all_wats has... all the waters, and analysis wats is used to perform some analysis
 		
-		// sort the waters by distance to the so2
-		std::sort(analysis_wats.begin(), analysis_wats.end(), Analyzer<T>::molecule_distance_pred(so2));
+		// sort the waters by distance: h2o-O to the so2-S - the first waters in the vector will be closest to the SO2
+		Atom::KeepByElement(t.int_atoms, Atom::O);
 
-		// and keep only the closest handful of waters
-		analysis_wats.erase(analysis_wats.begin(), analysis_wats.end() - 100);
+		std::sort(t.int_atoms.begin(), t.int_atoms.end(), 
+				Analyzer<T>::atomic_reference_distance_pred(so2->S()));
 
-		for (Wat_it it = analysis_wats.begin(); it != analysis_wats.end(); it++) {
-			printf ("% 12.4f\n", (so2->ReferencePoint() - (*it)->ReferencePoint()).norm());
-		}
-		printf ("*****************\n");
+		// grab the distances from so2-S to closest h2o-Os
+		double so_1 = (so2->S()->Position() - t.int_atoms[0]->Position()).norm();
+		double so_2 = (so2->S()->Position() - t.int_atoms[1]->Position()).norm();
+		double so_3 = (so2->S()->Position() - t.int_atoms[2]->Position()).norm();
+
+
+		// sort the water atoms by distance h2o-H to so2-O1
+		t.LoadWaters();
+		Atom::KeepByElement(t.int_atoms, Atom::H);
+		std::sort(t.int_atoms.begin(), t.int_atoms.end(), Analyzer<T>::atomic_reference_distance_pred(so2->GetAtom("O1")));
+
+		// grab the distances from so2-S to closest h2o-Os
+		double oh1_1 = (so2->O1()->Position() - t.int_atoms[0]->Position()).norm();
+		double oh1_2 = (so2->O1()->Position() - t.int_atoms[1]->Position()).norm();
+		double oh1_3 = (so2->O1()->Position() - t.int_atoms[2]->Position()).norm();
+
+		// sort the water atoms by distance h2o-H to so2-O1
+		t.LoadWaters();
+		Atom::KeepByElement(t.int_atoms, Atom::H);
+		std::sort(t.int_atoms.begin(), t.int_atoms.end(), Analyzer<T>::atomic_reference_distance_pred(so2->GetAtom("O2")));
+
+		// grab the distances from so2-S to closest h2o-Os
+		double oh2_1 = (so2->O2()->Position() - t.int_atoms[0]->Position()).norm();
+		double oh2_2 = (so2->O2()->Position() - t.int_atoms[1]->Position()).norm();
+		double oh2_3 = (so2->O2()->Position() - t.int_atoms[2]->Position()).norm();
+
+		// find the fixed oxygen that is tethered for the steered MD
+		//AtomPtr fixed_o = Atom::FindByID(t.int_atoms, 1161);
+
+		// output the distance and the two S-O bondlengths and the SO2 oso_angle for each timestep
+		fprintf (t.Output(), "%d % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f\n", 
+				t.Timestep(),
+				so2->SO1().norm(), so2->SO2().norm(), 
+				oso_angle, 
+				system_angle,
+				so_1, so_2, so_3,
+				oh1_1, oh1_2, oh1_3,
+				oh2_1, oh2_2, oh2_3);
+
+		delete so2;
 		for (Wat_it it = all_wats.begin(); it != all_wats.end(); it++) {
 			delete *it;
 		}
 
-		/*
-		// find the fixed oxygen that is tethered for the steered MD
-		AtomPtr fixed_o = Atom::FindByID(t.int_atoms, 1161);
-
-		double distance_to_fixed = (s->Position() - fixed_o->Position()).norm();
-
-		// find the topmost water of the slab
-		double pos = 0.0;
-		for (Mol_it it = t.sys_mols.begin(); it != t.sys_mols.end(); it++) {
-			if ((*it)->Name() != "h2o")
-				continue;
-
-			AtomPtr o = (*it)->GetAtom(Atom::O);
-			if (o->Position()[y] > pos) {
-				pos = o->Position()[y];
-			}
-		}
-		double distance_to_top = s->Position()[y] - pos;
-
-		// output the distance and the two S-O bondlengths and the SO2 oso_angle for each timestep
-		//fprintf (t.Output(), "% 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f\n", distance_to_fixed, distance_to_top, so2->SO1().norm(), so2->SO2().norm(), oso_angle, system_angle);
-
-		*/
-		delete so2;
-
 		return;
 	}
+
 
 	template <typename T>
 		class so2_angle_bond_histogram_analyzer : public double_histogram_analyzer<T> {

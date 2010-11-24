@@ -50,3 +50,26 @@ VecR SulfurDioxide::Bisector () {
 
 	return bisector.normalized();
 }
+
+
+/* Setting molecular axes (useful for molecular symmetry/order parameter stuff) is as follows:
+ * z-axis = the negative of the C2V (bisector) axis
+ * y-axis = perpendicular to the plane of the molecule
+ * x-axis = y % z
+ */
+void SulfurDioxide::SetBisectorAxes () {
+
+	this->SetAtoms ();
+
+	// the z-axis is the negative of the C2V axis - so find the bisector and set the vector pointing towards the O (just like the dipole vector)
+	_z = this->Bisector();
+
+	// the y-axis points perpendicular to the plane of the molecule. This can be found from the cross product of the two OH vectors
+	_y = (_so1 % _so2).normalized();
+
+	// and the x-axis is easy
+	_x = (_y % _z).normalized();
+
+	return;
+}
+

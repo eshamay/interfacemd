@@ -57,10 +57,12 @@ void AmberSystem::_ParseAtomVectors () {
 	VecR_it force_i = _forces.begin();
 	while (atom_i != _atoms.end()) {
 		(*atom_i)->Position (*coord_i);
-		if (_forces.Loaded())
+		if (_forces.Loaded()) {
 			(*atom_i)->Force (*force_i);
+			++force_i;
+		}
 
-		++atom_i; ++coord_i; ++force_i;
+		++atom_i; ++coord_i; 
 	}
 
 	return;

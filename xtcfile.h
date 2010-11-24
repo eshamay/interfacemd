@@ -1,10 +1,9 @@
-#pragma once
 #ifndef XTCFILE_H_
 #define XTCFILE_H_
 
 #define CPLUSPLUS 1
 
-#include "gmx_coordinate_file.h"
+//#include "gmx_coordinate_file.h"
 #include "xdrfile/xdrfile_xtc.h"
 
 namespace gromacs {
