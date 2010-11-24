@@ -1,5 +1,6 @@
 #include "rdf-analysis.h"
 
+/*
 template <class T>
 void RDFAnalyzer<T>::Setup () {
   LoadAll();
@@ -56,10 +57,10 @@ int main () {
   libconfig::Config cfg;
   cfg.readFile("system.cfg");
 
-  /* 1d or 2d rdf */
+  // 1d or 2d rdf
   int rdf_type = cfg.lookup("analysis.rdf.rdf-type");
 
-  /* get the output filename */
+  // get the output filename
   std::string filename = cfg.lookup("analysis.rdf.filename");
   libconfig::Setting &analysis = cfg.lookup("analysis");
   analysis.add("filename", libconfig::Setting::TypeString) = filename;
@@ -79,3 +80,4 @@ int main () {
 
   return 0;
 }
+*/

@@ -9,7 +9,7 @@ MDSystem::~MDSystem () {
 
 // Find the smallest vector between two locations in a periodic system defined by the dimensions.
 // The resulting vector will point from the v1 to v2
-VecR MDSystem::Distance (const VecR& v1, const VecR& v2) {
+VecR MDSystem::Distance (const VecR v1, const VecR v2) {
 
 	// first we gather all our coordinates for point a (the starting point) and point b (the ending point)
 	double ax = v1[x];

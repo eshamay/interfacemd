@@ -123,6 +123,10 @@ class Atom {
 		return;
 	}
 
+	// conversion routines
+	static std::string Element2String (Element_t);
+	static Element_t String2Element (const std::string&);
+
 	protected:
 	std::string _name, 	// human-readable identifier
 		_residue; 		// name of the parent-molecule 

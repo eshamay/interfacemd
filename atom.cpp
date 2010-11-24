@@ -140,8 +140,44 @@ void Atom::SetAtomProperties () {
 		_charge = 7.0;
 		_element = F;
 	}
-
-
 	return;
 }
 
+Atom::Element_t Atom::String2Element (const std::string& name) {
+	AtomPtr atom = new Atom(name, VecR());
+	Atom::Element_t elmt = atom->Element();
+	delete atom;
+	return elmt;
+}
+
+std::string Atom::Element2String (Atom::Element_t elmt) {
+
+	std::string name;
+	switch (elmt) {
+		case(0) :	name = "NO_ELEMENT"; break;
+		case(1) :	name = "H"; break;
+		case(2) :	name = "He"; break;
+		case(5) :	name = "B"; break;
+		case(6) :	name = "C"; break;
+		case(7) :	name = "N"; break;
+		case(8) :	name = "O"; break;
+		case(9) :	name = "F"; break;
+		case(10) :	name = "Ne"; break;
+		case(11) :	name = "Na"; break;
+		case(12) :	name = "Mg"; break;
+		case(13) :	name = "Al"; break;
+		case(14) :	name = "Si"; break;
+		case(15) :	name = "P"; break;
+		case(16) :	name = "S"; break;
+		case(17) :	name = "Cl"; break;
+		case(18) :	name = "Ar"; break;
+		case(19) :	name = "L"; break;
+		case(20) :	name = "Ca"; break;
+		case(53) :	name = "I"; break;
+		case(55) :	name = "Cs"; break;
+		case(56) :	name = "Ba"; break;
+		default :	name = "NO_ELEMENT_DEFAULT"; break;
+	}
+
+	return name;
+}

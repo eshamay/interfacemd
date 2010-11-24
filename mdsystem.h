@@ -56,13 +56,13 @@ class MDSystem {
 		/* Beyond simple system stats, various computations are done routinely in a molecular dynamics system: */
 
 		// Calculate the distance between two points within a system that has periodic boundaries
-		static VecR Distance (const VecR& v1, const VecR& v2);
+		static VecR Distance (const VecR v1, const VecR v2) ;
 
 		// Calculate the distance between two atoms given the periodic boundaries of the system
-		static VecR Distance (const AtomPtr atom1, const AtomPtr atom2);
+		static VecR Distance (const AtomPtr atom1, const AtomPtr atom2) ;
 
 		// Calculates the minimum distance between two molecules - i.e. the shortest inter-molecular atom-pair distance
-		static double Distance (const MolPtr mol1, const MolPtr mol2);
+		static double Distance (const MolPtr mol1, const MolPtr mol2) ;
 
 		//! Calculates a molecular dipole moment using the "classical E&M" method - consider each atom in the molecule as a point-charge, and that the molecule has no net charge (calculation is independent of origin location). This returns a vector that is the sum of the position*charge (r*q) of each atom.
 		static VecR CalcClassicDipole (MolPtr mol);

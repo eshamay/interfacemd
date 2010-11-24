@@ -11,6 +11,7 @@ USING_PART_OF_NAMESPACE_EIGEN
 #include "dipole-analysis.h"
 #include "neighbor-analysis.h"
 #include "atomic-density-analysis.h"
+#include "rdf-analysis.h"
 
 
 typedef std::vector<double> double_vec;
@@ -57,6 +58,7 @@ namespace md_analysis {
 			a = new so2_uptake_analysis<T>();											analyses.push_back(a);
 			a = new so2_angle_bond_analyzer<T>();									analyses.push_back(a);
 			a = new so2_closest_water_map<T>();										analyses.push_back(a);
+			a = new rdf_analysis<T>();														analyses.push_back(a);
 		}
 
 	template <>
