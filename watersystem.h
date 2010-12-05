@@ -114,7 +114,8 @@ class WaterSystem {
 
 		// This slices the water molecules and leaves only those within a given location of the slab. However, it does not do any loading or unloading of the atoms from int_atoms or anything else...
 		template <typename U>
-			static void SliceWaters (std::vector<U>& mols, Double_pair& extents) {
+			//static void SliceWaters (std::vector<U>& mols, Double_pair& extents) {
+			static void SliceWaters (Mol_ptr_vec& mols, Double_pair& extents) {
 				mols.erase(
 						remove_if(mols.begin(), mols.end(), std::not1(std::bind2nd(WaterInSlice<U>(), extents))), mols.end());
 

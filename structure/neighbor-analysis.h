@@ -2,54 +2,31 @@
 #define NEIGHBOR_ANALYSIS_H_
 
 #include "analysis.h"
+#include "so2-system-analysis.h"
 
 namespace md_analysis {
 
 	template <typename T>
-	class so2_closest_water_map : public AnalysisSet< Analyzer<T> > {
+	class so2_closest_water_map : public so2_analysis::SO2SystemAnalyzer<T> {
 		public:
-			typedef Analyzer<T> system_t;
-			so2_closest_water_map () :
-				AnalysisSet<system_t> (
-						std::string("SO2 closest neighbor 3D histogram mapping analysis"),
-						std::string ("temp.dat")) { }
-				// create the histograms with distances up to 10.0 angstroms away (in both positive & negative directions)
-				//xy_histo (std::make_pair(-10.0,-10.0), std::make_pair(10.0,10.0), std::make_pair(0.1,0.1)),
-				//yz_histo (std::make_pair(-10.0,-10.0), std::make_pair(10.0,10.0), std::make_pair(0.1,0.1)),
-				//xz_histo (std::make_pair(-10.0,-10.0), std::make_pair(10.0,10.0), std::make_pair(0.1,0.1)) { }
+			typedef typename so2_analysis::SO2SystemAnalyzer<T>::system_t system_t;
 
-			void Setup (system_t& t) {
-				t.LoadAll();
+			so2_closest_water_map () :
+				so2_analysis::SO2SystemAnalyzer<T> (
+						std::string("SO2 closest neighbor 3D histogram mapping analysis"),
+						std::string ("temp.xyz")) { }
+
+			virtual ~so2_closest_water_map () { }
+
+			void FindSO2 (system_t& t) {
 				// find the so2 molecule of interest
 				_so2_mol_id = t.SystemParameterLookup ("analysis.reference-molecule-id");
 				MolPtr mol = Molecule::FindByID (t.sys_mols, _so2_mol_id);
-				so2 = new SulfurDioxide(mol);
-				so2->SetAtoms();
-
-				// gather all the system waters
-				t.LoadWaters();
-				for (Mol_it it = t.int_wats.begin(); it != t.int_wats.end(); it++) {
-					WaterPtr wat (new Water(*(*it)));
-					wat->SetAtoms();
-					all_wats.push_back(wat);
-				}
-				all_wat_atoms.clear();
-				std::copy(t.int_atoms.begin(), t.int_atoms.end(), std::back_inserter(all_wat_atoms));
-
-				/*
-				xy_file = fopen("so2-neighbormap.xy.dat", "w");
-				yz_file = fopen("so2-neighbormap.yz.dat", "w");
-				xz_file = fopen("so2-neighbormap.xz.dat", "w");
-				*/
+				this->so2 = new SulfurDioxide(mol);
 			}
 
-			virtual ~so2_closest_water_map () {
-				/*
-				fclose(xy_file);
-				fclose(yz_file);
-				fclose(xz_file);
-				*/
-				delete so2;
+			void PostSetup (system_t& t) {
+				numWatsToProcess = 5;
 			}
 
 			void Analysis (system_t& t);
@@ -57,12 +34,15 @@ namespace md_analysis {
 
 		protected:
 			int _so2_mol_id;
-			SulfurDioxide * so2;
-			// three histograms that hold atom location in the 3 different planes of the molecular_frame
-			//histogram_utilities::Histogram2D<double>	xy_histo, yz_histo, xz_histo;
-			//FILE *xy_file, *yz_file, *xz_file;
-			Water_ptr_vec all_wats, analysis_wats;
-			Atom_ptr_vec all_wat_atoms, analysis_atoms;
+			int numWatsToProcess;
+
+
+			// prints out a single line to the output file comprised of the atomic coordinates of an atom in xyz format
+			void PrintXYZLocation (system_t& t, std::string name, VecR r) {
+				fprintf (t.Output(), "%6s % .4f % .4f % .4f\n", name.c_str(), r[x], r[y], r[z]);
+			}
+
+
 	};
 
 
@@ -148,63 +128,68 @@ namespace md_analysis {
 	template <typename T>
 		void so2_closest_water_map<T>::Analysis (system_t& t) {
 			// copy back all the atom and water pointers for a new round of analysis
-			analysis_wats.clear();
-			analysis_atoms.clear();
-			std::copy (all_wats.begin(), all_wats.end(), std::back_inserter(analysis_wats));
-			std::copy (all_wat_atoms.begin(), all_wat_atoms.end(), std::back_inserter(analysis_atoms));
-
-			// This is the reference point for the origin of the mapping
-			//VecR reference_point = so2->ReferencePoint();
-			AtomPtr reference_atom = so2->S();
-			VecR reference_point = reference_atom->Position();
-			// clear all but the atoms of interest in the list
-			Atom::KeepByElement (analysis_atoms, Atom::O);
-			// Find the atoms that are closest to the so2-S
-			std::sort(analysis_atoms.begin(), analysis_atoms.end(), Analyzer<T>::atomic_reference_distance_pred (reference_atom));
+			this->ReloadAnalysisWaters();
 
 			// generate the direction cosine rotation matrix to rotate data from the system to the so2-molecular frame
-			so2->SetBisectorAxes();
-			so2->DCMToLab();
+			this->so2->SetBisectorAxes();
+			this->so2->DCMToLab();
+			MatR dcm = this->so2->DCM().transpose();
 
-			// for the closest waters, add their locations into the histograms
-			VecR r;
+
+			// This is the reference point for the origin of the mapping
+			AtomPtr reference_atom = this->s;
+			VecR reference_point = reference_atom->Position();
+			// clear all but the atoms of interest in the list
+			Atom::KeepByElement (this->analysis_atoms, Atom::O);
+			// Find the atoms that are closest to the so2-S
+			std::sort(this->analysis_atoms.begin(), this->analysis_atoms.end(), Analyzer<T>::atomic_reference_distance_pred (reference_atom));
+
+			// a list of all the nearest molecules
+			std::vector<MolPtr> NearestMols;
+			NearestMols.push_back(this->analysis_atoms[0]->ParentMolecule());
+			NearestMols.push_back(this->analysis_atoms[1]->ParentMolecule());
+
+			this->ReloadAnalysisWaters();
+			MolPtr mol;
+			Atom::KeepByElement (this->analysis_atoms, Atom::H);
+			std::sort(this->analysis_atoms.begin(), this->analysis_atoms.end(), Analyzer<T>::atomic_reference_distance_pred (this->o1));
 			for (int i = 0; i < 2; i++) {
+				mol = this->analysis_atoms[i]->ParentMolecule();
+				NearestMols.push_back(mol);
+			}
+			std::sort(this->analysis_atoms.begin(), this->analysis_atoms.end(), Analyzer<T>::atomic_reference_distance_pred (this->o2));
+			for (int i = 0; i < 2; i++) {
+				mol = this->analysis_atoms[i]->ParentMolecule();
+				NearestMols.push_back(mol);
+			}
 
-				r = MDSystem::Distance (reference_point, analysis_atoms[i]->Position());
-				//
-				// find out what r looks like in the molecular frame;
-				r = so2->DCM().transpose() * r;
-				//if (r.norm() < 6.0)
-				//fprintf (xy_file, "% .3f % .3f % .3f\n", r[x], r[y], r[z]);
-				// now bin the position in each histogram
-				//xy_histo (r[x], r[y]);
-				//yz_histo (r[y], r[z]);
-				//xz_histo (r[x], r[z]);
+			fprintf (t.Output(), "%d\n\n", NearestMols.size()*3+3);
+			VecR r (0.0,0.0,0.0);
+			PrintXYZLocation (t, "S", r);
+			r = dcm * this->so2->SO1();
+			PrintXYZLocation (t, "O", r);
+			r = dcm * this->so2->SO2();
+			PrintXYZLocation (t, "O", r);
 
-				// print out the vector components of the nearest atom
-				fprintf (t.Output(), "% .3f % .3f % .3f\n", r[x], r[y], r[z]);
-
-				/*
-				r = analysis_wats[i]->H2()->Position() - so2->ReferencePoint();
-				// find out what r looks like in the molecular frame;
-				r = so2->DCM().transpose() * r;
-				//if (r.norm() < 6.0)
-
-				// now bin the position in each histogram
-				xy_histo (r[x], r[y]);
-				yz_histo (r[y], r[z]);
-				xz_histo (r[x], r[z]);
-				*/
+			for (int i = 0; i < NearestMols.size(); i++) {
+				mol = NearestMols[i];
+				// print out every atom in the water molecule associated with the closest O
+				for (Atom_it it = mol->begin(); it != mol->end(); it++) {
+					r = MDSystem::Distance (reference_point, (*it)->Position());
+					// find out what r looks like in the molecular frame;
+					r = dcm * r;
+					PrintXYZLocation (t, Atom::Element2String((*it)->Element()), r);
+				}
 			}
 			/*
-			reference_atom = so2->O2();
-			reference_point = reference_atom->Position();
+				 reference_atom = so2->O2();
+				 reference_point = reference_atom->Position();
 			// Find the atoms that are closest to the so2-S
 			std::sort(analysis_atoms.begin(), analysis_atoms.end(), Analyzer<T>::atomic_reference_distance_pred (reference_atom));
 			for (int i = 0; i < 2; i++) {
-				r = MDSystem::Distance(reference_point, analysis_atoms[i]->Position());
-				r = so2->DCM().transpose() * r;
-				fprintf (t.Output(), "% .3f % .3f % .3f\n", r[x], r[y], r[z]);
+			r = MDSystem::Distance(reference_point, analysis_atoms[i]->Position());
+			r = so2->DCM().transpose() * r;
+			fprintf (t.Output(), "% .3f % .3f % .3f\n", r[x], r[y], r[z]);
 			}
 			*/
 		}

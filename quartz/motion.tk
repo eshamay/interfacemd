@@ -1,0 +1,9 @@
+mol load pdb beta_cristobalite.unitcell.pdb
+display projection orthographic
+set sel [atomselect top all]
+set M [transvecinv {1 1 1}]
+$sel move $M
+#set M [transaxis y -90]
+#$sel move $M
+
+#$sel writepdb temp1.pdb
