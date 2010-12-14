@@ -53,7 +53,7 @@ VecR SulfurDioxide::Bisector () {
 
 
 /* Setting molecular axes (useful for molecular symmetry/order parameter stuff) is as follows:
- * z-axis = the negative of the C2V (bisector) axis
+ * z-axis = the C2V (bisector) axis - points from the S to the Os
  * y-axis = perpendicular to the plane of the molecule
  * x-axis = y % z
  */

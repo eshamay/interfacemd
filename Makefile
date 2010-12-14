@@ -33,7 +33,7 @@ ALLMOLECULES = $(WATER) $(IONS) $(ORGANIC)
 
 MOLECULEFACTORY = $(ALLMOLECULES) $(MDSRC)/moleculefactory.o
 
-MDSYSTEM = $(MDSRC)/atom.o $(MDSRC)/molecule.o $(MDSRC)/mdsystem.o $(MOLECULEFACTORY)
+MDSYSTEM = $(MDSRC)/atom.o $(MDSRC)/molecule.o $(MDSRC)/mdsystem.o $(MOLECULEFACTORY) $(MDSRC)/utility.o
 
 XYZSYSTEM = $(MDSRC)/xyzsystem.o $(MDSRC)/xyzfile.o $(MDSRC)/wannier.o 
 

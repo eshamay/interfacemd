@@ -5,8 +5,8 @@
 #include <Eigen/Core>
 USING_PART_OF_NAMESPACE_EIGEN
 
-#include "../analysis.h"
-#include "../utility.h"
+#include "analysis.h"
+#include "utility.h"
 #include "angle-bond-analysis.h"
 #include "dipole-analysis.h"
 #include "neighbor-analysis.h"
@@ -58,6 +58,7 @@ namespace md_analysis {
 			a = new so2_uptake_analysis<T>();											analyses.push_back(a);
 			a = new so2_angle_bond_analyzer<T>();									analyses.push_back(a);
 			a = new so2_closest_water_map<T>();										analyses.push_back(a);
+			a = new so2_closest_water_spherical_map<T>();					analyses.push_back(a);
 			a = new rdf_analysis<T>();														analyses.push_back(a);
 		}
 

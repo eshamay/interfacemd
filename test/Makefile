@@ -22,7 +22,7 @@ ANGLEHISTO = $(WATERSYSTEM) angle-histogram.o
 PDBTEST	= $(MDSYSTEM) $(ALLMOLECULES)
 
 #TEST		= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) test.o
-TEST		= $(ANALYSIS) $(WATER) $(IONS) $(ORGANIC) test.o
+TEST		= $(MDSRC)/crdfile.o crdtest.o
 TEMP		= $(MDSYSTEM) temp.o
 FOO			= foo.o
 GMXTEST = $(GMXSYS) gmxtest.o

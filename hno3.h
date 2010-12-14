@@ -4,6 +4,7 @@
 #include "vecr.h"
 #include "molecule.h"
 #include "mdsystem.h"
+#include "wannier.h"
 #include <iostream>
 
 

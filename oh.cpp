@@ -1,25 +1,26 @@
 #include "oh.h"
 
-int Hydroxide::numHydroxides = 0;
 
-Hydroxide::Hydroxide () : Molecule()
-{
-  this->Rename("oh");
-  this->_moltype = Molecule::OH;
-  ++numHydroxides;
-}
+	int Hydroxide::numHydroxides = 0;
 
-Hydroxide::~Hydroxide () {
-  --numHydroxides;
-}
+	Hydroxide::Hydroxide () : Molecule()
+	{
+		this->Rename("oh");
+		this->_moltype = Molecule::OH;
+		++numHydroxides;
+	}
 
-void Hydroxide::SetAtoms () {
-  this->FixAtoms();
-  _o = this->GetAtom("O");
-  _h = this->GetAtom("H");
+	Hydroxide::~Hydroxide () {
+		--numHydroxides;
+	}
 
-  _oh = _h->Position() - _o->Position();
+	void Hydroxide::SetAtoms () {
+		this->FixAtoms();
+		_o = this->GetAtom("O");
+		_h = this->GetAtom("H");
 
-  return;
-}
+		_oh = _h->Position() - _o->Position();
+
+		return;
+	}
 

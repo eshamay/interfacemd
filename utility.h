@@ -1,4 +1,3 @@
-#pragma once
 #ifndef __UTIL_H
 #define __UTIL_H
 
@@ -10,6 +9,7 @@
 #include <cctype>
 #include <cstdio>
 #include <vector>
+#include <cmath>
 
 
 namespace pair_utility {
@@ -187,9 +187,20 @@ namespace member_functional {
 			}
 	};
 
-} // class member functional
+} // namespace member functional
 
 
+namespace coordinate_conversion {
+
+	// converts a given coordinate (coord) from cartesian to spherical representation. This is a destructive operation!
+	// coord:	x,y,z coordinate vector (double[3])
+	// on return, coord holds the values of {rho, theta, phi}, where:
+	//		rho = distance from origin
+	//		theta = tilt from z-axis
+	//		phi = twist about the z-axis, referenced from the x-axis
+
+	void CartesianToSpherical (double *coord);
+}	// namespace coordinate conversion
 
 namespace md_name_utilities {
 

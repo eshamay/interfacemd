@@ -93,6 +93,9 @@ class Analyzer : public WaterSystem<T>, public patterns::observer::observable {
 		class molecule_reference_distance_pred; 		
 		class atomic_reference_distance_pred;
 
+		class MoleculeAbovePosition;
+		class MoleculeBelowPosition;
+
 };	// Analyzer
 
 
@@ -346,6 +349,37 @@ class Analyzer<T>::atomic_reference_distance_pred : public std::binary_function 
 			return left_dist < right_dist;
 		}
 };
+
+
+// predicate tells if a molecule's reference point along a given axis is above a given value
+template <typename T>
+class Analyzer<T>::MoleculeAbovePosition : public std::unary_function <MolPtr,bool> {
+	private:
+		double position;
+		coord axis;
+	public:
+		MoleculeAbovePosition (const double pos, const coord ax) : position(pos), axis(ax) { }
+		bool operator() (const MolPtr mol) {
+			return Analyzer<T>::Position(mol->ReferencePoint()) > position;
+		}
+};
+
+// predicate tells if a molecule's reference point along a given axis is above a given value
+template <typename T>
+class Analyzer<T>::MoleculeBelowPosition : public std::unary_function <MolPtr,bool> {
+	private:
+		double position;
+		coord axis;
+	public:
+		MoleculeBelowPosition (const double pos, const coord ax) : position(pos), axis(ax) { }
+		bool operator() (const MolPtr mol) {
+			return Analyzer<T>::Position(mol->ReferencePoint()) < position;
+		}
+};
+
+
+
+
 
 /***************** Analysis Sets specific to given MD systems ***************/
 class XYZAnalysisSet : public AnalysisSet< Analyzer<XYZSystem> > { 

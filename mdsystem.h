@@ -1,4 +1,3 @@
-#pragma once
 #ifndef MDSYSTEM_H_
 #define MDSYSTEM_H_
 
@@ -69,6 +68,9 @@ class MDSystem {
 
 		//! Calculates the dipole of a molecule using the classic E&M method, but also account for the wannier localization centers (WLC). This assumes that the wannier localization centers have also been calculated and parsed into the molecule.
 		static VecR CalcWannierDipole (MolPtr mol);
+
+
+
 };
 
 #include "moleculefactory.h"

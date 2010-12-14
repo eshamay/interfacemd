@@ -131,7 +131,6 @@ class Atom {
 	std::string _name, 	// human-readable identifier
 		_residue; 		// name of the parent-molecule 
 
-
 	int    _ID;	// some numerical identifier in case the atom is in an ordered list
 	int	   _molid;			   // the molecule that contains this atom
 

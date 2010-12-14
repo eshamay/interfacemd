@@ -50,15 +50,12 @@ namespace md_analysis {
 				// S-O-n == distance from so2-S to the nth closest h2o-O
 				fprintf (t.Output(), "step location distance SO-1 SO-2 OSO-theta Bisector-theta S-O-1 S-O-2 S-O-3 O1-H-1 O1-H-2 O1-H-3 O2-H-1 O2-H-2 O2-H-3\n");
 
-				// grab the first location of the so2 as a reference for removing all the extraneous waters above it in later analyses
-				starting_point = system_t::Position(this->s);
 			}
 
 			void Analysis (system_t& t);
 
 		protected:
 			double angle;
-			double starting_point;	// the starting location of the so2 (along the reference axis)
 	};
 
 
@@ -75,22 +72,10 @@ namespace md_analysis {
 			double system_angle = acos(bisector < Y)*180.0/M_PI;
 
 			this->ReloadAnalysisWaters ();
-
-			// get rid of everything above the so2
-			this->analysis_wats.erase(
-					remove_if(this->analysis_wats.begin(), this->analysis_wats.end(), Molecule::MoleculeAbovePosition(starting_point, t.axis)), this->analysis_wats.end());
-
-			// sort the waters by position along the reference axis - first waters are lowest, last are highest
-			std::sort (this->analysis_wats.begin(), this->analysis_wats.end(), system_t::molecule_position_pred(Atom::O));
-			int numWats = 20;				// number of waters to use for calculating the location of the "top" of the water surface
-			double location = 0.0;
-			for (Wat_it it = this->analysis_wats.end() - 1; it != this->analysis_wats.end() - numWats; it--) {
-				location += system_t::Position((*it)->O());
-			}
-			location /= numWats;
+			this->FindWaterSurfaceLocation();
 
 			// distance from the top of the water surface to the sulfur of the so2
-			double distance_to_location = system_t::Position(this->s) - location;
+			double distance_to_location = system_t::Position(this->s) - this->surfaceLocation;
 
 			// sort the waters by distance: h2o-O to the so2-S - the first waters in the vector will be closest to the SO2
 			Atom::KeepByElement(t.int_atoms, Atom::O);
@@ -129,7 +114,7 @@ namespace md_analysis {
 			// output the distance and the two S-O bondlengths and the SO2 oso_angle for each timestep
 			fprintf (t.Output(), "%d % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f % 12.4f\n", 
 					t.Timestep(),
-					location,
+					this->surfaceLocation,
 					distance_to_location,
 					this->so2->SO1().norm(), this->so2->SO2().norm(), 
 					oso_angle, 

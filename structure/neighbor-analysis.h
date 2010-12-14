@@ -6,44 +6,149 @@
 
 namespace md_analysis {
 
+
+	/******************* SPHERICAL MAPPING *********************/
+	// creates a spherical mapping (spherical coordinates) of the locations of the nearest water atoms. The origin is set as the so2 S atom, and the Z axis runs along the bisector, with the plane of the molecule in the x-z plane.
 	template <typename T>
-	class so2_closest_water_map : public so2_analysis::SO2SystemAnalyzer<T> {
+		class so2_closest_water_spherical_map : public so2_analysis::SO2SystemAnalyzer<T> {
 		public:
 			typedef typename so2_analysis::SO2SystemAnalyzer<T>::system_t system_t;
 
-			so2_closest_water_map () :
+			so2_closest_water_spherical_map () :
 				so2_analysis::SO2SystemAnalyzer<T> (
-						std::string("SO2 closest neighbor 3D histogram mapping analysis"),
-						std::string ("temp.xyz")) { }
+						std::string("SO2 spherical closest neighbor mapping analysis"),
+						std::string ("spherical-mapping.dat")) { }
 
-			virtual ~so2_closest_water_map () { }
+			virtual ~so2_closest_water_spherical_map () { }
 
-			void FindSO2 (system_t& t) {
-				// find the so2 molecule of interest
-				_so2_mol_id = t.SystemParameterLookup ("analysis.reference-molecule-id");
-				MolPtr mol = Molecule::FindByID (t.sys_mols, _so2_mol_id);
-				this->so2 = new SulfurDioxide(mol);
-			}
-
-			void PostSetup (system_t& t) {
-				numWatsToProcess = 5;
+			void PreSetup (system_t& t) {
+				// prints out a datafile header for processing
+				//fprintf (t.Output(), "step distance O1-rho O1-theta O1-phi O2-rho O2-theta O2-phi\n");
+				//fprintf (t.Output(), "step distance H11-rho H11-theta H11-phi H12-rho H12-theta H12-phi H21-rho H21-theta H21-phi H22-rho H22-theta H22-phi \n");
+				fprintf (t.Output(), "step distance SH1-rho SH1-theta SH1-phi SH2-rho SH2-theta SH2-phi\n");
 			}
 
 			void Analysis (system_t& t);
-			void DataOutput (system_t& t);
+		};
 
-		protected:
-			int _so2_mol_id;
-			int numWatsToProcess;
+	template <typename T>
+	void so2_closest_water_spherical_map<T>::Analysis(system_t& t) {
+
+		fprintf (t.Output(), "%12d ", t.Timestep());
+
+		// generate the direction cosine rotation matrix to rotate data from the system to the so2-molecular frame
+		this->so2->SetBisectorAxes();
+		this->so2->DCMToLab();
+		MatR dcm = this->so2->DCM().transpose();
+
+		AtomPtr reference_atom = this->s;
+		VecR origin = reference_atom->Position();
+
+		// copy back all the atom and water pointers for a new round of analysis
+		this->ReloadAnalysisWaters();
+		// record the distance from the so2 to the water surface
+		this->FindWaterSurfaceLocation();
+		double distance_to_location = system_t::Position(origin) - this->surfaceLocation;
+		fprintf (t.Output(), "% 12.3f ", distance_to_location);
+
+		VecR r;						// vector pointing from the s to the water atom of interest
+		double sphere[3];	// for use with calculating the spherical coordinates
 
 
-			// prints out a single line to the output file comprised of the atomic coordinates of an atom in xyz format
-			void PrintXYZLocation (system_t& t, std::string name, VecR r) {
-				fprintf (t.Output(), "%6s % .4f % .4f % .4f\n", name.c_str(), r[x], r[y], r[z]);
-			}
+
+		// sort the water atoms by distance to a specific reference atom
+		Atom::KeepByElement (this->analysis_atoms, Atom::H);
+		reference_atom = this->s;
+		std::sort(this->analysis_atoms.begin(), this->analysis_atoms.end(), Analyzer<T>::atomic_reference_distance_pred (reference_atom));
+		origin = reference_atom->Position();
+
+		// find the location of the O in the molecular frame of the so2, and then convert that location to spherical coordinates
+		for (int i = 0; i < 2; i++) {
+			r = MDSystem::Distance (origin, this->analysis_atoms[i]->Position());	// the lab-frame distance from reference atom to the target
+			r = dcm * r;	// r is now in the so2 local frame
+			sphere[0] = r[x];  
+			sphere[1] = r[y]; 
+			sphere[2] = r[z]; 
+
+			// output the spherical coordinate data
+			coordinate_conversion::CartesianToSpherical (sphere);
+			// the output is the distance rho (angstroms), cos(theta) which ranges [-1,1], and phi with range [-pi,pi]
+			fprintf (t.Output(), "% 12.3f % 12.3f % 12.3f ", sphere[0], cos(sphere[1]), sphere[2]);
+		}
 
 
-	};
+
+		/*
+		// sort the water atoms by distance to a specific reference atom
+		reference_atom = this->o2;
+		std::sort(this->analysis_atoms.begin(), this->analysis_atoms.end(), Analyzer<T>::atomic_reference_distance_pred (reference_atom));
+		origin = reference_atom->Position();
+
+		// find the location of the O in the molecular frame of the so2, and then convert that location to spherical coordinates
+		for (int i = 0; i < 2; i++) {
+			r = MDSystem::Distance (origin, this->analysis_atoms[i]->Position());	// the lab-frame distance from S to O
+			r = dcm * r;	// r is now in the so2 local frame
+			sphere[0] = r[x];  
+			sphere[1] = r[y]; 
+			sphere[2] = r[z]; 
+
+			// output the spherical coordinate data
+			coordinate_conversion::CartesianToSpherical (sphere);
+			// the output is the distance rho (angstroms), cos(theta) which ranges [-1,1], and phi with range [-pi,pi]
+			fprintf (t.Output(), "% 12.3f % 12.3f % 12.3f ", sphere[0], cos(sphere[1]), sphere[2]);
+			// for testing, print the spherical rep
+		}
+		*/
+
+
+		fprintf (t.Output(), "\n");
+
+		return;
+	}
+
+
+
+
+
+
+	/************************ NEAREST NEIGHBOR MAPPING ****************************/
+	template <typename T>
+		class so2_closest_water_map : public so2_analysis::SO2SystemAnalyzer<T> {
+			public:
+				typedef typename so2_analysis::SO2SystemAnalyzer<T>::system_t system_t;
+
+				so2_closest_water_map () :
+					so2_analysis::SO2SystemAnalyzer<T> (
+							std::string("SO2 closest neighbor 3D histogram mapping analysis"),
+							std::string ("temp.xyz")) { }
+
+				virtual ~so2_closest_water_map () { }
+
+				void FindSO2 (system_t& t) {
+					// find the so2 molecule of interest
+					_so2_mol_id = t.SystemParameterLookup ("analysis.reference-molecule-id");
+					MolPtr mol = Molecule::FindByID (t.sys_mols, _so2_mol_id);
+					this->so2 = new SulfurDioxide(mol);
+				}
+
+				void PostSetup (system_t& t) {
+					numWatsToProcess = 5;
+				}
+
+				void Analysis (system_t& t);
+				void DataOutput (system_t& t);
+
+			protected:
+				int _so2_mol_id;
+				int numWatsToProcess;
+
+
+				// prints out a single line to the output file comprised of the atomic coordinates of an atom in xyz format
+				void PrintXYZLocation (system_t& t, std::string name, VecR r) {
+					fprintf (t.Output(), "%6s % .4f % .4f % .4f\n", name.c_str(), r[x], r[y], r[z]);
+				}
+
+		};
 
 
 
@@ -135,7 +240,6 @@ namespace md_analysis {
 			this->so2->DCMToLab();
 			MatR dcm = this->so2->DCM().transpose();
 
-
 			// This is the reference point for the origin of the mapping
 			AtomPtr reference_atom = this->s;
 			VecR reference_point = reference_atom->Position();
@@ -163,11 +267,12 @@ namespace md_analysis {
 				NearestMols.push_back(mol);
 			}
 
-			fprintf (t.Output(), "%d\n\n", NearestMols.size()*3+3);
+			fprintf (t.Output(), "%d\n\n", (int)NearestMols.size()*3+3);
 			VecR r (0.0,0.0,0.0);
 			PrintXYZLocation (t, "S", r);
 			r = dcm * this->so2->SO1();
 			PrintXYZLocation (t, "O", r);
+
 			r = dcm * this->so2->SO2();
 			PrintXYZLocation (t, "O", r);
 

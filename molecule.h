@@ -184,29 +184,6 @@ class Molecule {
 			return *it;
 		}
 
-		// predicate tells if a molecule's reference point along a given axis is above a given value
-		class MoleculeAbovePosition : public std::unary_function <MolPtr,bool> {
-			private:
-				double position;
-				coord axis;
-			public:
-				MoleculeAbovePosition (const double pos, const coord ax) : position(pos), axis(ax) { }
-				bool operator() (const MolPtr mol) {
-					return mol->ReferencePoint()[axis] > position;
-				}
-		};
-		
-		// predicate tells if a molecule's reference point along a given axis is above a given value
-		class MoleculeBelowPosition : public std::unary_function <MolPtr,bool> {
-			private:
-				double position;
-				coord axis;
-			public:
-				MoleculeBelowPosition (const double pos, const coord ax) : position(pos), axis(ax) { }
-				bool operator() (const MolPtr mol) {
-					return mol->ReferencePoint()[axis] < position;
-				}
-		};
 
 	protected:
 		Atom_ptr_vec	_atoms;				// the list of the atoms in the molecule

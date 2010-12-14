@@ -17,6 +17,10 @@ namespace md_files {
 
 		public:
 
+			typedef Eigen::Map<VecR>	coord_t;
+			typedef std::vector<coord_t> coord_set_t;
+			typedef coord_set_t::const_iterator coord_it;
+
 			CoordinateFile (const std::string path) 
 				:
 					_file ((FILE *)NULL),
@@ -43,6 +47,8 @@ namespace md_files {
 			char * Line () {
 				return _line;
 			}
+
+			virtual void LoadNext () = 0;
 
 	};	// Coordinate file
 

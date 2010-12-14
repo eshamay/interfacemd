@@ -155,6 +155,7 @@ class WaterSystem {
 		}
 
 
+
 		// Sets the atom container to hold only the atoms of the set of molecules given
 		void UpdateAtoms (const Mol_ptr_vec& mols, Atom_ptr_vec& atoms) {
 			atoms.clear();

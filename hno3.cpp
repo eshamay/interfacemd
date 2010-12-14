@@ -1,4 +1,5 @@
 #include "hno3.h"
+
 int NitricAcid::numNitricAcids = 0;
 
 NitricAcid::NitricAcid () : Molecule () {
